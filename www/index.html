@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=overlays-content">
 <meta name="theme-color" content="#0b1116">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -897,59 +897,33 @@ body.lightTheme .themeBtn.active{
 </style>
 
 
-<style id="cf-v54-viewport-fix">
-:root{
-  --cf-vh:100dvh;
-  --cf-bottom-height:calc(88px + env(safe-area-inset-bottom));
-}
-html,body{
-  width:100%;
-  height:100%;
-  min-height:0;
-  overflow:hidden !important;
-  overscroll-behavior:none !important;
-}
-.app{
-  position:fixed !important;
-  inset:0 !important;
-  width:100% !important;
-  height:var(--cf-vh) !important;
-  max-width:560px !important;
-  max-height:none !important;
-  min-height:0 !important;
-  margin:0 auto !important;
-  overflow:hidden !important;
-}
-.header{
-  position:absolute !important;
-  top:0 !important;
-  left:0 !important;
-  right:0 !important;
-  width:100% !important;
-  transform:none !important;
-}
-.bottom{
-  position:absolute !important;
-  left:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  width:100% !important;
-  transform:none !important;
-  height:var(--cf-bottom-height) !important;
-  padding-bottom:env(safe-area-inset-bottom) !important;
-}
-.page{
-  padding-bottom:calc(var(--cf-bottom-height) + 12px) !important;
-}
-.form{
-  padding-bottom:calc(var(--cf-bottom-height) + 12px) !important;
-}
-.modalCard{
-  max-height:calc(var(--cf-vh) - 36px) !important;
-}
-@supports (-webkit-touch-callout:none){
-  body{-webkit-text-size-adjust:100%;}
-}
+<style id="cf-v57-inventory-styles">
+.stockCategoryGroup{display:grid;gap:8px;margin:10px 0 12px}
+.stockCategoryTitle{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;color:#e9eef2;padding:3px 2px}
+.stockCategoryTitle span{font-size:9px;color:#9da7b0;background:#1b252d;border:1px solid #37444e;border-radius:999px;padding:3px 7px}
+.pendingIncomeButton{background:var(--pendingIncome)!important;color:#111!important}
+</style>
+<style id="cf-v57-native-layout">
+:root{--cf-top-safe:env(safe-area-inset-top,0px);--cf-bottom-safe:env(safe-area-inset-bottom,0px);--cf-header-content:56px;--cf-bottom-content:68px;--cf-header-height:calc(var(--cf-header-content) + var(--cf-top-safe));--cf-bottom-height:calc(var(--cf-bottom-content) + var(--cf-bottom-safe));}
+html,body{width:100%;height:100%;min-height:0;overflow:hidden!important;overscroll-behavior:none!important;}
+html{background:var(--bg)!important;}
+body{position:fixed!important;inset:0!important;overflow:hidden!important;}
+.app{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important;max-height:none!important;margin:0!important;overflow:hidden!important;}
+.header{position:absolute!important;top:0!important;left:0!important;right:0!important;transform:none!important;width:100%!important;height:var(--cf-header-height)!important;box-sizing:border-box!important;padding:var(--cf-top-safe) 16px 8px!important;z-index:200!important;}
+#formPage>.header{position:absolute!important;}
+section:not(.hidden){height:100%!important;max-height:100%!important;min-height:0!important;}
+section:not(#home){padding-top:var(--cf-header-height)!important;}
+#formPage{padding-top:var(--cf-header-height)!important;}
+.page,#formBody{min-height:0!important;height:100%!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box!important;}
+.page{padding-bottom:calc(var(--cf-bottom-height) + 12px)!important;}
+#formBody{padding-bottom:calc(var(--cf-bottom-height) + 12px)!important;}
+.bottom{position:absolute!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;height:var(--cf-bottom-height)!important;box-sizing:border-box!important;padding:6px 6px var(--cf-bottom-safe)!important;z-index:220!important;}
+.scrollIndicator{position:absolute!important;top:var(--cf-header-height)!important;right:3px!important;bottom:var(--cf-bottom-height)!important;z-index:215!important;opacity:.8;}
+.scrollIndicator.visible{opacity:.96;}
+.scrollIndicatorThumb{background:rgba(255,255,255,.8);width:4px!important;border-radius:999px;box-shadow:0 0 2px rgba(0,0,0,.35);}
+.modal{z-index:300!important;}
+@supports not (height:100dvh){.app{height:100vh!important;}}
+@supports (-webkit-touch-callout:none){body{-webkit-text-size-adjust:100%;}}
 </style>
 </head>
 
@@ -1113,6 +1087,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <div class="field" style="margin-bottom:0"><label>BUSCAR MATERIAL</label><input id="inventorySearch" class="input" placeholder="Ej. Event 28A, cable DMX..." oninput="renderInventory()"></div>
       <button id="inventoryNewBtn" class="agendaNav" type="button">＋</button>
     </div>
+    <div class="field" style="margin-top:8px"><label>TIPO DE MATERIAL</label><select id="inventoryCategoryFilter" class="select" onchange="renderInventory()"><option value="all">Todos los tipos</option></select></div>
     <div class="stockStats">
       <div class="stockStat"><small>ARTÍCULOS</small><strong id="inventoryCount">0</strong></div>
       <div class="stockStat"><small>STOCK BAJO</small><strong id="inventoryLowCount">0</strong></div>
@@ -1144,7 +1119,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <div class="sum y"><small>Total Compras</small><b id="sc">0,00 €</b></div>
       <div class="sum p"><small>Total Facturación</small><b id="sf">0,00 €</b></div>
       <div class="sum pendingIncomeSum">
-        <small>Ingresos pendientes de factura</small>
+        <small>Facturación sin declarar</small>
         <b id="spPending">0,00 €</b>
         <span id="spPendingBenefit">Beneficio: 0,00 €</span>
       </div>
@@ -1458,15 +1433,36 @@ function isNativeApp(){
 }
 
 async function nativeJsonRequest(url, options={}){
-  const response = await fetch(url, options);
-  if(!response || !response.ok){
-    throw new Error(`HTTP ${response?.status||0} al conectar con Google Sheets`);
+  try{
+    const http = window.Capacitor?.Plugins?.CapacitorHttp;
+    if(http && typeof http.request === "function"){
+      const req={
+        url,
+        method:String(options.method||"GET").toUpperCase(),
+        headers:options.headers||{},
+        responseType:"json"
+      };
+      if(options.body!==undefined) req.data=options.body;
+      const response=await http.request(req);
+      if(!response || Number(response.status||0)<200 || Number(response.status||0)>=300){
+        throw new Error(`HTTP ${response?.status||0} al conectar con Google Sheets`);
+      }
+      let data=response.data;
+      if(typeof data === "string") data=JSON.parse(data);
+      if(data && data.ok === false) throw new Error(data.error || "Google Sheets devolvió un error");
+      return data;
+    }
+
+    const response = await fetch(url, options);
+    if(!response || !response.ok){
+      throw new Error(`HTTP ${response?.status||0} al conectar con Google Sheets`);
+    }
+    const data = await response.json();
+    if(data && data.ok === false) throw new Error(data.error || "Google Sheets devolvió un error");
+    return data;
+  }catch(e){
+    throw e instanceof Error ? e : new Error(String(e));
   }
-  const data = await response.json();
-  if(data && data.ok === false){
-    throw new Error(data.error || "Google Sheets devolvió un error");
-  }
-  return data;
 }
 
 const $=id=>document.getElementById(id);
@@ -1763,7 +1759,10 @@ function renderAutocomplete(){
   if(!input || !menu) return;
   const query=input.value.trim().toLocaleLowerCase("es");
   if(!query){ hideAutocomplete(); return; }
-  const matches=getSuppliers(formThirdPartyCategory).filter(x=>x.toLocaleLowerCase("es").includes(query)).slice(0,10);
+  const source=getSuppliers(formThirdPartyCategory);
+  const starts=source.filter(x=>x.toLocaleLowerCase("es").startsWith(query));
+  const contains=source.filter(x=>!x.toLocaleLowerCase("es").startsWith(query) && x.toLocaleLowerCase("es").includes(query));
+  const matches=[...starts,...contains].slice(0,10);
   menu.innerHTML=matches.map(x=>`<button type="button" class="autocompleteItem" data-value="${esc(x)}">${esc(x)}</button>`).join("");
   menu.querySelectorAll(".autocompleteItem").forEach(btn=>{
     btn.addEventListener("mousedown",e=>e.preventDefault());
@@ -1854,12 +1853,12 @@ function openFacturacionPage(){
     </div>
     <button class="save p" type="button" onclick="openInvoiceForm()">🧾 CREAR FACTURA</button>
     <div class="invoiceCreateText pendingIncomeBoxText">
-      <strong>¿Quieres registrar un ingreso pendiente de factura?</strong>
+      <strong>¿Quieres registrar un ingreso independiente?</strong>
       <span>Introduce la persona, el servicio, el coste del material y lo cobrado. Se calcula el beneficio por separado y no se incorpora al total de facturación con IVA.</span>
     </div>
-    <button class="save pendingIncomeButton" type="button" onclick="openPendingIncomeForm()">🟢 REGISTRAR INGRESO PENDIENTE</button>
+    <button class="save pendingIncomeButton" type="button" onclick="openPendingIncomeForm()">🟢 REGISTRAR INGRESO INDEPENDIENTE</button>
     <div class="pendingIncomeListBox">
-      <div class="pendingIncomeListHead"><strong>ÚLTIMOS INGRESOS PENDIENTES</strong><span id="pendingIncomeCount">0</span></div>
+      <div class="pendingIncomeListHead"><strong>ÚLTIMOS INGRESOS INDEPENDIENTES</strong><span id="pendingIncomeCount">0</span></div>
       <div id="pendingIncomeList"></div>
     </div>`;
   body.appendChild(wrap);
@@ -1879,7 +1878,7 @@ function renderPendingIncomeList(){
   wrap.innerHTML=arr.length ? arr.slice(0,8).map(item=>{
     const benefit=Number(item.beneficio)||0;
     return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}</span></div><div class="pendingIncomeNums"><b>${euro(item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio ${euro(benefit)}</span></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
-  }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos pendientes registrados.</div>';
+  }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos independientes registrados.</div>';
 }
 
 async function loadPendingIncome(showError=false){
@@ -1907,7 +1906,7 @@ function openPendingIncomeForm(){
   $("formHeader").innerHTML=`
     <button class="back" onclick="openFacturacionPage()">‹</button>
     <div class="headericon"><span style="font-size:27px">🟢</span></div>
-    <div><h2>INGRESO PENDIENTE</h2><p>Registra un servicio aún no facturado</p></div>`;
+    <div><h2>INGRESO INDEPENDIENTE</h2><p>Registra un ingreso independiente</p></div>`;
   $("formBody").innerHTML=`
     <div class="pendingIncomeForm">
       <div class="invoiceSection">
@@ -1924,7 +1923,7 @@ function openPendingIncomeForm(){
           <div class="box pendingBenefitBox"><small>Beneficio</small><strong id="pendingBenefitValue">0,00 €</strong></div>
         </div>
       </div>
-      <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">GUARDAR INGRESO</button>
+      <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">GUARDAR INGRESO INDEPENDIENTE</button>
       <div id="pendingIncomeMsg" class="msg"></div>
     </div>`;
   recalcPendingIncome();
@@ -1950,10 +1949,14 @@ async function savePendingIncome(){
   if(calc.charged<=0){msg.className="msg err";msg.textContent="El importe cobrado debe ser mayor que 0.";return;}
   btn.disabled=true;msg.className="msg";msg.textContent="Guardando...";
   try{
-    await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,cobrado:calc.charged,beneficio:calc.benefit})});
+    const result=await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,cobrado:calc.charged,beneficio:calc.benefit})});
+    if(!result || result.ok!==true || !result.id){
+      throw new Error("El Apps Script activo no ha confirmado el guardado. Actualiza Apps Script a la V56.");
+    }
     await loadPendingIncome(false);
-    msg.className="msg ok";msg.textContent="Ingreso guardado ✓";
-    setTimeout(()=>openFacturacionPage(),400);
+    msg.className="msg ok";msg.textContent="Ingreso independiente registrado ✓";
+    showToastMessage("Ingreso independiente registrado","Se ha guardado en Google Sheets y queda separado de la facturación con IVA.");
+    setTimeout(()=>openFacturacionPage(),700);
   }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el ingreso.";}
   finally{btn.disabled=false;}
 }
@@ -2308,8 +2311,9 @@ function openForm(tipo){
     formThirdPartyCategory="tiendas";
     const input=$("tercero");
     input.addEventListener("input",renderAutocomplete);
-    input.addEventListener("focus",renderAutocomplete);
-    input.addEventListener("blur",()=>setTimeout(hideAutocomplete,150));
+    input.addEventListener("focus",()=>{ renderAutocomplete(); loadSuppliersFromGoogle(false).finally(renderAutocomplete); });
+    input.addEventListener("blur",()=>setTimeout(hideAutocomplete,180));
+    loadSuppliersFromGoogle(false);
   }
 }
 
@@ -2555,9 +2559,24 @@ function closeRecordModal(){
 $("modalTotal").addEventListener("input",calcModal);
 $("modalIva").addEventListener("change",calcModal);
 
+const NATIVE_WRITE_ACTIONS=new Set([
+  "editar","eliminar","enviarFacturas","guardarTercero","eliminarTercero",
+  "guardarConfiguracion","crearFactura","guardarCliente","eliminarCliente",
+  "guardarInventario","eliminarInventario","guardarEvento","eliminarEvento",
+  "guardarIngresoPendiente","eliminarIngresoPendiente"
+]);
+
 function callAction(payload){
   if(isNativeApp()){
     return (async()=>{
+      const accion=String(payload.accion||"");
+      if(NATIVE_WRITE_ACTIONS.has(accion)){
+        return await nativeJsonRequest(SCRIPT_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json;charset=utf-8","Accept":"application/json"},
+          body:JSON.stringify(payload)
+        });
+      }
       const params=new URLSearchParams();
       Object.entries(payload).forEach(([k,v])=>params.set(k,String(v)));
       params.set("_",Date.now().toString());
@@ -2782,75 +2801,58 @@ async function deleteAgendaEvent(){
    ========================================================= */
 let inventoryItems=[];
 let inventoryEditingId=null;
-function openInventory(){only("inventoryPage");nav("inventory");renderInventory();loadInventory(false);}
+const INVENTORY_DEFAULT_CATEGORIES=["Audio","Iluminación","Pantallas LED","Estructuras","Cableado","Otros"];
+function getInventoryCategories(){
+  let cached=[];try{cached=JSON.parse(localStorage.getItem("cf_inventory_categories")||"[]")}catch(_){cached=[]}
+  const fromItems=inventoryItems.map(i=>String(i.categoria||"").trim()).filter(Boolean);
+  return [...new Set([...INVENTORY_DEFAULT_CATEGORIES,...cached,...fromItems])].filter(Boolean).sort((a,b)=>a.localeCompare(b,"es",{sensitivity:"base"}));
+}
+function saveInventoryCategories(list){localStorage.setItem("cf_inventory_categories",JSON.stringify([...new Set(list.map(x=>String(x).trim()).filter(Boolean))]));}
+function buildInventoryCategoryControls(selected){
+  const cats=getInventoryCategories();saveInventoryCategories(cats);
+  const filter=$("inventoryCategoryFilter");
+  if(filter){const prev=selected!==undefined?selected:(filter.value||"all");filter.innerHTML='<option value="all">Todos los tipos</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");filter.value=cats.includes(prev)?prev:"all";}
+  const sel=$("invItemCategory");
+  if(sel){const prev=selected!==undefined?selected:(sel.value||"Otros");sel.innerHTML=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("")+`<option value="__new__">＋ Crear nuevo tipo</option>`;sel.value=cats.includes(prev)?prev:"Otros";}
+}
+function inventoryCategoryChanged(){
+  const sel=$("invItemCategory");if(!sel||sel.value!=="__new__")return;
+  const value=window.prompt("Escribe el nuevo tipo de material:","");const clean=String(value||"").trim();
+  if(!clean){sel.value="Otros";return;}
+  buildInventoryCategoryControls(clean);sel.value=clean;
+}
+function openInventory(){only("inventoryPage");nav("inventory");buildInventoryCategoryControls();renderInventory();loadInventory(false);}
 async function loadInventory(showError=false){
-  try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();}
-  catch(e){try{inventoryItems=JSON.parse(localStorage.getItem("cf_inventory")||"[]")}catch(_){inventoryItems=[]}renderInventory();if(showError)showToastMessage("Sin conexión","No se pudo cargar el inventario.");}
+  try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));buildInventoryCategoryControls();renderInventory();}
+  catch(e){try{inventoryItems=JSON.parse(localStorage.getItem("cf_inventory")||"[]")}catch(_){inventoryItems=[]}buildInventoryCategoryControls();renderInventory();if(showError)showToastMessage("Sin conexión","No se pudo cargar el inventario.");}
 }
 function renderInventory(){
-  const wrap=$("inventoryList"); if(!wrap)return;
-  const q=($("inventorySearch")?.value||"").trim().toLowerCase();
-  const arr=inventoryItems.filter(i=>(String(i.articulo)+" "+String(i.categoria)+" "+String(i.ubicacion)).toLowerCase().includes(q)).sort((a,b)=>String(a.articulo).localeCompare(String(b.articulo),"es",{sensitivity:"base"}));
-  $("inventoryCount").textContent=inventoryItems.length;
-  $("inventoryLowCount").textContent=inventoryItems.filter(i=>(Number(i.cantidad)||0) <= (Number(i.minimo)||0)).length;
-  wrap.innerHTML=arr.length?arr.map(i=>{
-    const qty=Number(i.cantidad)||0,min=Number(i.minimo)||0,low=qty<=min;
-    return `<div class="stockCard"><div class="stockHead"><div><div class="stockName">${esc(i.articulo)}</div><div class="stockMeta">${esc(i.categoria||"Otros")} · ${esc(i.ubicacion||"Sin ubicación")} · ${esc(i.estado||"Disponible")}</div></div><div class="stockQty ${low?"low":"ok"}">${qty} <span style="font-size:9px;color:#9da7b0;font-weight:700">${esc(i.unidad||"unidades")}</span></div></div>${i.notas?`<div class="stockMeta" style="margin-top:8px">${esc(i.notas)}</div>`:""}<div class="stockActions"><button class="minus" type="button" data-inv-action="minus" data-inv-id="${esc(i.id)}">− 1</button><button class="plus" type="button" data-inv-action="plus" data-inv-id="${esc(i.id)}">＋ 1</button><button class="edit" type="button" data-inv-action="edit" data-inv-id="${esc(i.id)}">EDITAR</button><button class="delete" type="button" data-inv-action="delete" data-inv-id="${esc(i.id)}">ELIMINAR</button></div></div>`;
-  }).join(""):'<div style="padding:22px;text-align:center;color:#66717b">No hay material registrado.</div>';
+  const wrap=$("inventoryList");if(!wrap)return;
+  const q=($("inventorySearch")?.value||"").trim().toLowerCase();const cat=$("inventoryCategoryFilter")?.value||"all";
+  const arr=inventoryItems.filter(i=>{const text=(String(i.articulo)+" "+String(i.categoria)+" "+String(i.ubicacion)).toLowerCase();return(!q||text.includes(q))&&(cat==="all"||String(i.categoria||"Otros")===cat);}).sort((a,b)=>String(a.articulo).localeCompare(String(b.articulo),"es",{sensitivity:"base"}));
+  $("inventoryCount").textContent=inventoryItems.length;$("inventoryLowCount").textContent=inventoryItems.filter(i=>(Number(i.cantidad)||0)<=(Number(i.minimo)||0)).length;
+  if(!arr.length){wrap.innerHTML='<div style="padding:22px;text-align:center;color:#66717b">No hay material registrado con este filtro.</div>';return;}
+  const groups=new Map();arr.forEach(i=>{const key=String(i.categoria||"Otros").trim()||"Otros";if(!groups.has(key))groups.set(key,[]);groups.get(key).push(i);});
+  wrap.innerHTML=[...groups.entries()].map(([category,items])=>{const cards=items.map(i=>{const qty=Number(i.cantidad)||0,min=Number(i.minimo)||0,low=qty<=min;return `<div class="stockCard"><div class="stockHead"><div><div class="stockName">${esc(i.articulo)}</div><div class="stockMeta">${esc(i.categoria||"Otros")} · ${esc(i.ubicacion||"Sin ubicación")} · ${esc(i.estado||"Disponible")}</div></div><div class="stockQty ${low?"low":"ok"}">${qty} <span style="font-size:9px;color:#9da7b0;font-weight:700">${esc(i.unidad||"unidades")}</span></div></div>${i.notas?`<div class="stockMeta" style="margin-top:8px">${esc(i.notas)}</div>`:""}<div class="stockActions"><button class="minus" type="button" data-inv-action="minus" data-inv-id="${esc(i.id)}">− 1</button><button class="plus" type="button" data-inv-action="plus" data-inv-id="${esc(i.id)}">＋ 1</button><button class="edit" type="button" data-inv-action="edit" data-inv-id="${esc(i.id)}">EDITAR</button><button class="delete" type="button" data-inv-action="delete" data-inv-id="${esc(i.id)}">ELIMINAR</button></div></div>`;}).join("");return `<div class="stockCategoryGroup"><div class="stockCategoryTitle">${esc(category)} <span>${items.length}</span></div>${cards}</div>`;}).join("");
 }
 function openInventoryModal(id=null){
-  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;
-  $("inventoryModalTitle").textContent=e?"Editar material":"Nuevo material";
-  $("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||"Otros";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad ?? 1);$("invItemMin").value=Number(e?.minimo ?? 0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");
+  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;buildInventoryCategoryControls(e?.categoria||"Otros");
+  $("inventoryModalTitle").textContent=e?"Editar material":"Nuevo material";$("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||"Otros";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad??1);$("invItemMin").value=Number(e?.minimo??0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");
 }
 function closeInventoryModal(){$("inventoryModal")?.classList.add("hidden");inventoryEditingId=null;}
 async function saveInventoryItem(){
-  const msg=$("inventoryMsg");const obj={id:inventoryEditingId||("INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim()};
+  const msg=$("inventoryMsg");const obj={id:inventoryEditingId||( "INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim()};
+  if(obj.categoria==="__new__"){inventoryCategoryChanged();obj.categoria=$("invItemCategory").value;}
   if(!obj.articulo){msg.className="msg err";msg.textContent="Indica el nombre del material.";return;}
-  msg.className="msg";msg.textContent="Guardando...";
-  try{await callAction({accion:"guardarInventario",item:JSON.stringify(obj)});await loadInventory(false);msg.className="msg ok";msg.textContent="Material guardado ✓";setTimeout(closeInventoryModal,350);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el material.";}
+  if(!obj.categoria||obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Indica el tipo de material.";return;}
+  saveInventoryCategories([...getInventoryCategories(),obj.categoria]);msg.className="msg";msg.textContent="Guardando...";
+  try{await callAction({accion:"guardarInventario",item:JSON.stringify(obj)});await loadInventory(false);msg.className="msg ok";msg.textContent="Material guardado ✓";showToastMessage("Material guardado",`${obj.articulo} · ${obj.categoria}`);setTimeout(closeInventoryModal,350);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el material.";}
 }
 async function adjustInventory(id,delta){
-  const current=inventoryItems.find(x=>String(x.id)===String(id));
-  if(!current)return;
-  const before={...current};
-  const updated={...current,cantidad:Math.max(0,(Number(current.cantidad)||0)+Number(delta||0))};
-  const idx=inventoryItems.findIndex(x=>String(x.id)===String(id));
-  if(idx<0)return;
-  inventoryItems[idx]=updated;
-  localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
-  renderInventory();
-  showToastMessage("Actualizando inventario",`${updated.articulo}: ${updated.cantidad} ${updated.unidad||"unidades"}`);
-  try{
-    await callAction({accion:"guardarInventario",item:JSON.stringify(updated)});
-    await loadInventory(false);
-  }catch(err){
-    inventoryItems[idx]=before;
-    localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
-    renderInventory();
-    showToastMessage("Error",err.message||"No se pudo actualizar el stock.");
-  }
+  const current=inventoryItems.find(x=>String(x.id)===String(id));if(!current)return;const before={...current};const updated={...current,cantidad:Math.max(0,(Number(current.cantidad)||0)+Number(delta||0))};const idx=inventoryItems.findIndex(x=>String(x.id)===String(id));if(idx<0)return;inventoryItems[idx]=updated;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();
+  try{await callAction({accion:"guardarInventario",item:JSON.stringify(updated)});await loadInventory(false);}catch(err){inventoryItems[idx]=before;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();showToastMessage("Error",err.message||"No se pudo actualizar el stock.");}
 }
-
-async function deleteInventoryItem(id){
-  const item=inventoryItems.find(x=>String(x.id)===String(id));
-  if(!item)return;
-  if(!confirm(`¿Eliminar "${item.articulo}" del inventario?`))return;
-  const before=[...inventoryItems];
-  inventoryItems=inventoryItems.filter(x=>String(x.id)!==String(id));
-  localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
-  renderInventory();
-  try{
-    await callAction({accion:"eliminarInventario",id:String(id)});
-    showToastMessage("Material eliminado",item.articulo);
-    await loadInventory(false);
-  }catch(err){
-    inventoryItems=before;
-    localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
-    renderInventory();
-    showToastMessage("Error",err.message||"No se pudo eliminar el material.");
-  }
-}
+async function deleteInventoryItem(id){const item=inventoryItems.find(x=>String(x.id)===String(id));if(!item)return;if(!confirm(`¿Eliminar "${item.articulo}" del inventario?`))return;const before=[...inventoryItems];inventoryItems=inventoryItems.filter(x=>String(x.id)!==String(id));localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();try{await callAction({accion:"eliminarInventario",id:String(id)});showToastMessage("Material eliminado",item.articulo);await loadInventory(false);}catch(err){inventoryItems=before;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();showToastMessage("Error",err.message||"No se pudo eliminar el material.");}}
 
 function syncFromSheets(){
   if(isNativeApp()){
@@ -3116,6 +3118,7 @@ async function openSummary(){
   buildSummaryPeriods();
   setDefaultEmailMonths();
   updateSummary();
+  loadPendingIncome(false);
 
   const ok=await refreshData(false);
   if(ok){
@@ -3600,7 +3603,7 @@ securityStart();
     <div class="modalTitle">📦 <span id="inventoryModalTitle">Nuevo material</span></div>
     <div class="inventoryModalGrid">
       <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. DAS Event 28A"></div>
-      <div class="field"><label>Categoría</label><select id="invItemCategory" class="select"><option>Audio</option><option>Iluminación</option><option>Pantallas LED</option><option>Estructuras</option><option>Cableado</option><option>Otros</option></select></div>
+      <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option>Audio</option><option>Iluminación</option><option>Pantallas LED</option><option>Estructuras</option><option>Cableado</option><option>Otros</option><option value="__new__">＋ Crear nuevo tipo</option></select></div>
       <div class="field"><label>Unidad</label><select id="invItemUnit" class="select"><option>unidades</option><option>metros</option><option>pares</option><option>juegos</option><option>cajas</option></select></div>
       <div class="field"><label>Cantidad</label><input id="invItemQty" class="input" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
       <div class="field"><label>Stock mínimo</label><input id="invItemMin" class="input" type="number" min="0" step="1" inputmode="numeric" value="0"></div>
@@ -3746,20 +3749,16 @@ securityStart();
 })();
 </script>
 
-<script id="cf-v54-viewport-js">
+<script id="cf-v56-native-layout-js">
 (function(){
-  function syncViewport(){
-    var vv=window.visualViewport;
-    var h=vv ? vv.height : window.innerHeight;
-    if(!h || h < 300) h=window.innerHeight;
-    document.documentElement.style.setProperty('--cf-vh', h+'px');
+  function setStableOrientation(){
+    document.documentElement.style.setProperty('--cf-stable-screen-height',(window.screen && window.screen.height ? window.screen.height : 0)+ 'px');
+    document.documentElement.style.setProperty('--cf-stable-screen-width',(window.screen && window.screen.width ? window.screen.width : 0)+ 'px');
+    requestAnimationFrame(function(){ setTimeout(updateScrollIndicator,40); });
   }
-  syncViewport();
-  window.addEventListener('resize',syncViewport,{passive:true});
-  window.addEventListener('orientationchange',function(){ setTimeout(syncViewport,50); },{passive:true});
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',syncViewport,{passive:true});
-  }
+  setStableOrientation();
+  window.addEventListener('orientationchange',function(){ setTimeout(setStableOrientation,250); },{passive:true});
+  window.addEventListener('resize',function(){ requestAnimationFrame(updateScrollIndicator); },{passive:true});
 })();
 </script>
 </body>
