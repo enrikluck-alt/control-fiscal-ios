@@ -3,7 +3,7 @@
   "appName": "Control Fiscal",
   "webDir": "www",
   "ios": {
-    "contentInset": "automatic"
+    "contentInset": "never"
   },
   "plugins": {
     "CapacitorHttp": {
