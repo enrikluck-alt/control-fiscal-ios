@@ -1,0 +1,3218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Control Fiscal</title>
+
+<style>
+:root{
+  --bg:#080e13;--card:#121a21;--line:#3d4b56;
+  --yellow:#ffdf18;--purple:#df72ef;--white:#f6f8fa;
+  --muted:#aeb7bf;--green:#49ee9d;--red:#ff5965;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;background:var(--bg);color:var(--white);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{
+  width:100%;max-width:560px;min-height:100vh;margin:auto;
+  background:linear-gradient(180deg,#0a1015,#0a1117);
+  padding-bottom:82px;
+}
+.hero{padding:10px 15px 13px}
+.logos{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  align-items:center;
+}
+.logos .logo{
+  width:calc((100% - 16px)/2);
+  max-width:calc((100% - 16px)/2);
+  height:100px;
+  object-fit:contain;
+  flex:0 0 calc((100% - 16px)/2);
+}
+.logo{
+  width:46%;
+  height:100px;
+  object-fit:contain;
+  display:block;
+  flex:0 0 46%;
+  max-width:46%;
+}
+.title{
+  text-align:center;font-size:29px;font-weight:900;
+  line-height:1.05;margin-top:1px;
+}
+.tag{
+  text-align:center;font-size:9px;letter-spacing:2px;
+  color:#b7c0c8;margin-top:5px;
+}
+.page{padding:11px 16px}
+.homegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.home{
+  border:0;border-radius:14px;min-height:88px;padding:12px 10px;
+  display:flex;align-items:center;color:#111;cursor:pointer;
+}
+.home.full{grid-column:1/-1;min-height:78px;background:#f7f8fa}
+.home.y{background:linear-gradient(135deg,var(--yellow),color-mix(in srgb,var(--yellow),#000 8%))}
+.home.p{background:linear-gradient(135deg,var(--purple),color-mix(in srgb,var(--purple),#000 8%))}
+.home .icon{
+  width:48px;height:48px;display:grid;place-items:center;flex:none;
+}
+.home .icon svg{width:38px;height:38px}
+.home .text{flex:1;text-align:left}
+.home b{display:block;font-size:16px}
+.home small{display:block;font-size:9px;margin-top:4px}
+.chev{font-size:27px}
+.section{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:17px 2px 8px;
+}
+.section h3{margin:0;font-size:14px}
+.outline{
+  background:transparent;border:1px solid #4a5863;color:#fff;
+  border-radius:11px;padding:7px 11px;font-size:10px;
+}
+.records{
+  background:#f7f8fa;color:#111;border-radius:12px;overflow:hidden;
+}
+.record{
+  display:flex;align-items:center;gap:8px;padding:9px;
+  border-bottom:1px solid #dfe3e6;
+}
+.record:last-child{border:0}
+.ricon{
+  width:32px;height:32px;border-radius:9px;
+  display:grid;place-items:center;flex:none;
+}
+.ricon.y{background:var(--yellow)}
+.ricon.p{background:var(--purple)}
+.ricon svg{width:21px;height:21px}
+.rbody{flex:1;min-width:0}
+.rtitle{font-size:12px;font-weight:800}
+.rdesc{
+  font-size:10px;color:#555e66;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.rdate{font-size:8px;color:#777}
+.ramount{font-size:12px;font-weight:900;white-space:nowrap}
+.rarrow{font-size:18px;color:#68727b}
+.info{
+  display:flex;align-items:center;gap:10px;background:#1a232b;
+  border:1px solid #303d47;border-radius:12px;margin-top:10px;padding:10px;
+}
+.info svg{width:28px;flex:none}
+.ib{flex:1}
+.ib b{display:block;font-size:10px}
+.ib span{font-size:8px;color:#c0c7cd}
+.ibrand{
+  text-align:right;font-size:7px;letter-spacing:1px;
+  color:#aeb7bf;font-weight:800;
+}
+.bottom{
+  position:fixed;z-index:50;bottom:0;left:50%;
+  transform:translateX(-50%);width:min(560px,100%);height:76px;
+  background:#0b1217;border-top:1px solid #29343c;
+  display:grid;grid-template-columns:repeat(5,1fr);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.bottom button{
+  border:0;background:transparent;color:#aeb7bf;
+  font-size:9px;font-weight:700;
+}
+.bottom svg{display:block;width:25px;height:25px;margin:0 auto 2px}
+.bottom .ay{color:var(--yellow)}
+.bottom .ap{color:var(--purple)}
+.header{
+  display:flex;align-items:center;gap:10px;padding:18px 16px 12px;
+}
+.back{border:0;background:none;color:#fff;font-size:32px;padding:0}
+.headericon{width:30px;height:30px;flex:none}
+.headericon svg{width:30px;height:30px}
+.header h2{margin:0;font-size:21px}
+.header p{margin:4px 0 0;color:#adb7bf;font-size:10px}
+.form{padding:0 16px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+.input,.select{
+  width:100%;height:45px;background:#111a21;color:#eef1f3;
+  border:1px solid #53616d;border-radius:10px;padding:0 12px;font-size:14px;
+}
+.input::placeholder{color:#9da7b0}
+.two{display:grid;grid-template-columns:1fr 104px;gap:9px}
+.calc{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:7px;margin:3px 0 14px;
+}
+.box{
+  background:#111920;border:1px solid #3b4b57;border-radius:10px;padding:9px;
+}
+.box small{font-size:8px;color:#adb7bf}
+.box strong{display:block;font-size:15px;margin-top:5px}
+.box.y{background:var(--yellow);border-color:var(--yellow);color:#111}
+.box.p{background:var(--purple);border-color:var(--purple);color:#111}
+.save{
+  width:100%;height:48px;border:0;border-radius:10px;
+  font-size:13px;font-weight:900;
+}
+.save.y{background:var(--yellow)}
+.save.p{background:var(--purple)}
+.msg{text-align:center;min-height:18px;font-size:12px;margin-top:8px}
+.ok{color:var(--green)}
+.err{color:#ff717a}
+.sumgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum{padding:12px;border-radius:11px;color:#111}
+.sum.y{background:var(--yellow)}
+.sum.p{background:var(--purple)}
+.sum small{font-size:9px}
+.sum b{display:block;font-size:18px;margin-top:5px}
+.ivapanel{
+  margin-top:9px;background:#111a21;border:1px solid #3b4b57;
+  border-radius:12px;padding:11px;
+}
+.ivarow{
+  display:flex;justify-content:space-between;gap:10px;
+  padding:8px 0;border-bottom:1px solid #2c3942;font-size:11px;
+}
+.ivarow:last-child{border:0}
+.ivarow strong{font-size:14px;white-space:nowrap}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.counts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.count{border:1px solid #3b4b57;border-radius:11px;padding:11px}
+.count small{font-size:8px;color:#aeb7bf}
+.count b{display:block;font-size:18px;margin-top:4px}
+.search{display:flex;gap:7px;margin-bottom:9px}
+.search input{flex:1}
+.filter{
+  width:42px;border:1px solid #46545f;border-radius:10px;
+  background:#111a21;color:#fff;font-size:20px;
+}
+.toast{
+  position:fixed;z-index:100;left:50%;bottom:92px;
+  transform:translateX(-50%);width:min(350px,calc(100% - 30px));
+  background:#101920;border:1px solid #40515d;border-radius:16px;
+  padding:19px;text-align:center;box-shadow:0 18px 50px #0009;
+}
+.check{font-size:52px;color:var(--green)}
+.toast h3{margin:6px 0}
+.toast p{font-size:11px;color:#b9c1c8}
+.toast button{
+  width:100%;height:42px;border:0;border-radius:10px;font-weight:900;
+}
+.toast.y button{background:var(--yellow)}
+.toast.p button{background:var(--purple)}
+
+.invoiceForm{padding:0 16px}
+.invoiceSection{background:#111920;border:1px solid #3b4b57;border-radius:12px;padding:12px;margin-bottom:12px}
+.invoiceCreateBox{margin:14px 0 24px;padding:14px;border:1px solid #3b4b57;border-radius:12px;background:#111920}
+.invoiceCreateText{margin-bottom:11px}
+.invoiceCreateText strong{display:block;font-size:14px;margin-bottom:4px}
+.invoiceCreateText span{display:block;color:var(--muted);font-size:12px;line-height:1.4}
+.invoiceSection h3{margin:0 0 10px;font-size:13px}
+.invoiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.invoiceGrid .full{grid-column:1/-1}
+.invoiceMeta{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.invoiceMeta .metaBox{background:#111920;border:1px solid #3b4b57;border-radius:10px;padding:10px}
+.invoiceMeta small{display:block;font-size:8px;color:#adb7bf}
+.invoiceMeta strong{display:block;font-size:13px;margin-top:4px}
+.invoiceLineHead,.invoiceLine{display:grid;grid-template-columns:minmax(0,1fr) 62px 92px 92px 38px;gap:6px;align-items:center}
+.invoiceLineHead{font-size:8px;color:#adb7bf;padding:0 4px 5px}
+.invoiceLine{margin-bottom:7px}
+.invoiceLine .input{height:42px;padding:0 9px;font-size:12px}
+.invoiceLineTotal{font-size:11px;font-weight:800;text-align:right;white-space:nowrap}
+.invoiceRemove{height:42px;border:1px solid #53616d;background:#1a232b;color:#fff;border-radius:9px;font-size:17px}
+.invoiceAdd{width:100%;height:42px;border:1px dashed #667681;background:transparent;color:#fff;border-radius:9px;font-weight:800}
+.invoiceTotals{margin-top:11px;border-top:1px solid #3b4b57;padding-top:10px}
+.invoiceTotalRow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:11px}
+.invoiceTotalRow strong{font-size:13px}
+.invoiceTotalRow.final{font-size:14px;font-weight:900;border-top:1px solid #53616d;margin-top:4px;padding-top:9px}
+.invoiceTotalRow.final strong{font-size:18px}
+.settingsInvoiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.settingsInvoiceGrid .full{grid-column:1/-1}
+.settingsSave{margin-top:8px}
+.invoiceHint{font-size:9px;color:#9da7b0;margin:-4px 0 10px}
+@media(max-width:430px){
+  .invoiceGrid,.settingsInvoiceGrid{grid-template-columns:1fr}
+  .invoiceGrid .full,.settingsInvoiceGrid .full{grid-column:auto}
+  .invoiceLineHead{display:none}
+  .invoiceLine{grid-template-columns:minmax(0,1fr) 58px 82px 82px 38px}
+  .invoiceLine .input{font-size:11px}
+  .invoiceLineTotal{font-size:10px}
+}
+
+.hidden{display:none!important}
+
+
+.reshint{
+  font-size:10px;
+  color:#737d85;
+  padding:0 13px 12px;
+  text-align:right;
+}
+.resultrow strong{font-size:17px}
+
+.recordFilters{
+  display:flex;
+  gap:7px;
+  margin:8px 0 10px;
+}
+.rf{
+  flex:1;
+  border:1px solid #46535e;
+  background:#111920;
+  color:#cbd2d8;
+  border-radius:10px;
+  padding:9px 6px;
+  font-size:10px;
+  font-weight:800;
+}
+.rf.active{
+  background:#f7f8fa;
+  color:#111;
+}
+.recordInfo{
+  color:#8e99a2;
+  font-size:10px;
+  margin:0 2px 7px;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.72);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.modal.hidden{display:none}
+.modalCard{
+  width:min(520px,100%);
+  max-height:92vh;
+  overflow:auto;
+  background:#121a21;
+  border:1px solid #3d4b56;
+  border-radius:18px;
+  padding:18px;
+  position:relative;
+}
+.modalClose{
+  position:absolute;
+  right:10px;
+  top:7px;
+  width:40px;
+  height:40px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:30px;
+}
+.modalTitle{
+  font-size:18px;
+  font-weight:900;
+  margin:4px 42px 18px 0;
+}
+.modalActions{
+  display:grid;
+  gap:9px;
+  margin-top:14px;
+}
+.save,.deleteBtn{
+  border:0;
+  border-radius:11px;
+  padding:12px;
+  font-weight:800;
+}
+.save{background:#f7f8fa;color:#111}
+.deleteBtn{background:#ff5965;color:#fff}
+.record{cursor:pointer;user-select:none;-webkit-tap-highlight-color:rgba(255,223,24,.18)}
+.record:active{transform:scale(.995)}
+.optional{font-size:9px;color:#7f8991;font-weight:600}
+.fileInput{padding:10px}
+.fileHint{display:block;color:#737d85;font-size:9px;margin-top:5px;line-height:1.4}
+.attachment{margin-top:7px}
+.attachment a{color:#f7d91b;text-decoration:none;font-size:10px;font-weight:800}
+
+.emailPanel{
+  margin-top:10px;background:#111a21;border:1px solid #3b4b57;
+  border-radius:12px;padding:12px;
+}
+.emailPanel h3{margin:0 0 5px;font-size:14px}
+.emailPanel p{margin:0 0 11px;color:#aeb7bf;font-size:9px;line-height:1.45}
+.emailGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.emailBtn{
+  width:100%;height:46px;border:0;border-radius:10px;
+  background:var(--yellow);color:#111;font-weight:900;font-size:12px;
+}
+.emailBtn:disabled{opacity:.55;cursor:default}
+.emailStatus{min-height:17px;text-align:center;font-size:10px;margin-top:8px}
+.ivaResultGood{color:#35d07f!important}
+.ivaResultBad{color:#ff5965!important}
+.ivaResultNeutral{color:#f7d91b!important}
+
+
+/* =========================================================
+   BLOQUEO DE SEGURIDAD
+   ========================================================= */
+#securityLock{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  background:rgba(8,14,19,.98);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+#securityLock.hidden{display:none}
+.securityBox{
+  width:100%;max-width:420px;text-align:center;
+  padding:30px 22px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:var(--card);
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+.securityIcon{font-size:48px;margin-bottom:12px}
+.securityTitle{font-size:25px;font-weight:800;margin-bottom:8px}
+.securityText{color:var(--muted);line-height:1.45;margin-bottom:22px}
+.securityBtn{
+  width:100%;border:0;border-radius:14px;padding:15px 18px;
+  background:var(--yellow);color:#111;font-weight:800;font-size:17px;
+}
+.securitySecondary{
+  margin-top:10px;background:transparent;color:var(--white);
+  border:1px solid var(--line);
+}
+.securityStatus{min-height:22px;margin-top:14px;color:var(--muted);font-size:14px}
+.securityPin{
+  width:100%;padding:14px;text-align:center;letter-spacing:7px;
+  border:1px solid var(--line);border-radius:14px;background:#0b1116;
+  color:var(--white);outline:none;margin-bottom:10px;
+}
+
+
+/* =========================================================
+   INVENTARIO + AGENDA · V46
+   ========================================================= */
+.inventoryTop{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px}
+.stockStats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px}
+.stockStat{background:#111920;border:1px solid #3b4b57;border-radius:12px;padding:11px}
+.stockStat small{display:block;color:#aeb7bf;font-size:9px}
+.stockStat strong{display:block;font-size:19px;margin-top:5px}
+.stockLow{color:#ff717a!important}
+.stockList{display:grid;gap:8px}
+.stockCard{background:#111920;border:1px solid #3b4b57;border-radius:13px;padding:12px}
+.stockHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.stockName{font-size:14px;font-weight:900}
+.stockMeta{color:#9da7b0;font-size:9px;margin-top:3px;line-height:1.4}
+.stockQty{font-size:20px;font-weight:900;text-align:right;white-space:nowrap}
+.stockQty.low{color:#ff717a}
+.stockQty.ok{color:#35d07f}
+.stockActions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.stockActions button,.stockActions a{flex:1;min-width:84px;height:39px;border:1px solid #53616d;border-radius:9px;background:#1a232b;color:#fff;font-size:10px;font-weight:800;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.stockActions .plus{background:var(--yellow);color:#111;border-color:var(--yellow)}
+.stockActions .minus{background:#2a343d}
+.stockActions .edit{background:#1a232b}.stockActions .delete{background:#2a1619;color:#ff8a92;border-color:#6a343b}
+.agendaToolbar{display:grid;grid-template-columns:42px 1fr 42px;gap:7px;align-items:center;margin-bottom:9px}
+.agendaMonth{text-align:center;font-size:14px;font-weight:900}
+.agendaNav{height:42px;border:1px solid #46545f;background:#111a21;color:#fff;border-radius:10px;font-size:20px}
+.agendaToday{width:100%;height:42px;border:1px solid #46545f;background:#111a21;color:#fff;border-radius:10px;font-size:10px;font-weight:900;margin-bottom:9px}
+.calendar{background:#111920;border:1px solid #3b4b57;border-radius:13px;overflow:hidden}
+.calendarWeek{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #2f3c45}
+.calendarWeek div{padding:8px 2px;text-align:center;font-size:8px;color:#8f9aa2;font-weight:900}
+.calendarGrid{display:grid;grid-template-columns:repeat(7,1fr)}
+.calDay{min-height:72px;border-right:1px solid #29353e;border-bottom:1px solid #29353e;padding:5px 4px;cursor:pointer}
+.calDay:nth-child(7n){border-right:0}
+.calDay.muted{opacity:.38}
+.calDay.today{background:#18252d}
+.calNum{font-size:10px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;margin-bottom:3px}
+.calDay.today .calNum{background:var(--yellow);color:#111}
+.calEvent{display:block;background:#202c35;border-left:3px solid var(--purple);border-radius:5px;padding:3px 4px;margin-top:3px;font-size:8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calEvent.more{color:#aeb7bf;background:transparent;border-left:0;padding-left:0}
+.agendaSectionTitle{display:flex;justify-content:space-between;align-items:center;margin:12px 0 7px}
+.agendaSectionTitle h3{margin:0;font-size:13px}
+.agendaEventList{display:grid;gap:7px}
+.agendaCard{background:#111920;border:1px solid #3b4b57;border-radius:12px;padding:11px}
+.agendaCardTop{display:flex;justify-content:space-between;gap:10px}
+.agendaCardTitle{font-size:13px;font-weight:900}
+.agendaCardTime{font-size:10px;color:var(--yellow);font-weight:900;white-space:nowrap}
+.agendaCardMeta{color:#9da7b0;font-size:9px;margin-top:4px;line-height:1.45}
+.agendaCardActions{display:flex;gap:7px;margin-top:9px}
+.agendaCardActions button,.agendaCardActions a{flex:1;height:38px;border:1px solid #53616d;border-radius:9px;background:#1a232b;color:#fff;font-size:10px;font-weight:800;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.agendaAdd{width:100%;height:46px;border:0;border-radius:10px;background:var(--purple);color:#111;font-weight:900;margin-bottom:10px}
+.agendaFormGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.agendaFormGrid .full{grid-column:1/-1}
+.textarea{width:100%;min-height:88px;resize:vertical;background:#111a21;color:#eef1f3;border:1px solid #53616d;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.4}
+.inventoryModalGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.inventoryModalGrid .full{grid-column:1/-1}
+@media(max-width:430px){
+  .agendaFormGrid,.inventoryModalGrid{grid-template-columns:1fr}
+  .agendaFormGrid .full,.inventoryModalGrid .full{grid-column:auto}
+  .calDay{min-height:62px;padding:4px 3px}
+  .calEvent{font-size:7px}
+  .stockActions button,.stockActions a{min-width:72px}
+}
+.bottom{grid-template-columns:repeat(6,1fr)}
+.bottom button{font-size:8px}
+.bottom svg{width:23px;height:23px}
+
+</style>
+
+<style id="iva-result-styles">
+/* Estado visual del IVA */
+.ivaGood {
+  color: #16a34a !important;
+}
+.ivaBad {
+  color: #dc2626 !important;
+}
+.ivaNeutral {
+  color: #d97706 !important;
+}
+</style>
+
+
+<style id="pending-styles">
+.pendingPanel{
+  margin-top:14px;
+  padding:18px;
+  border:1px solid #394752;
+  border-radius:16px;
+  background:#101a21;
+}
+.pendingHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.pendingHead h3{margin:0;font-size:17px}
+.pendingHead p{margin:5px 0 0;color:#aab5bd;font-size:13px}
+.pendingTotal{
+  min-width:48px;height:48px;display:flex;align-items:center;
+  justify-content:center;border-radius:14px;background:#2a2220;
+  color:#ffcc00;font-size:22px;font-weight:800;
+}
+.pendingGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pendingItem{
+  border:1px solid #394752;border-radius:12px;padding:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.pendingItem span{color:#b9c2c8;font-size:13px}
+.pendingItem strong{font-size:20px}
+.pendingMessage{margin-top:12px;font-size:13px}
+.pendingBtn{
+  width:100%;margin-top:12px;min-height:44px;border:0;
+  border-radius:12px;font-weight:800;cursor:pointer;
+  background:#ffd719;color:#111;
+}
+@media(max-width:560px){.pendingGrid{grid-template-columns:1fr}}
+</style>
+
+
+<style id="settings-styles">
+.settingsCard{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin-top:10px;
+}
+.settingsGroup{
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
+}
+.settingsGroup:first-child{padding-top:0}
+.settingsGroup:last-child{border-bottom:0;padding-bottom:0}
+.settingsTitle{
+  font-size:14px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+.settingsHint{
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.45;
+  margin-top:5px;
+}
+.settingsRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:9px;
+}
+.settingsLabel{
+  font-size:12px;
+  font-weight:700;
+}
+.settingsValue{
+  color:var(--muted);
+  font-size:10px;
+}
+.colorControl{
+  width:58px;
+  height:40px;
+  padding:2px;
+  border-radius:9px;
+  border:1px solid var(--line);
+  background:var(--card);
+}
+.themeButtons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:10px;
+}
+.themeBtn{
+  min-height:44px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--card);
+  color:var(--white);
+  font-size:12px;
+  font-weight:800;
+}
+.themeBtn.active{
+  background:var(--white);
+  color:#111;
+  border-color:var(--white);
+}
+.resetSettings{
+  width:100%;
+  min-height:44px;
+  margin-top:10px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:transparent;
+  color:var(--white);
+  font-size:11px;
+  font-weight:800;
+}
+body.lightTheme{
+  --bg:#f3f5f7;
+  --card:#ffffff;
+  --line:#cbd3d9;
+  --white:#111820;
+  --muted:#59656e;
+}
+body.lightTheme .app{
+  background:linear-gradient(180deg,#ffffff,#f3f5f7);
+}
+body.lightTheme .bottom{
+  background:#ffffff;
+  border-top-color:#d5dce1;
+}
+body.lightTheme .bottom button{color:#59656e}
+body.lightTheme .input,
+body.lightTheme .select{
+  background:#ffffff;
+  color:#111820;
+  border-color:#aeb9c1;
+}
+body.lightTheme .box,
+body.lightTheme .ivapanel,
+body.lightTheme .count,
+body.lightTheme .emailPanel,
+body.lightTheme .pendingPanel,
+body.lightTheme .settingsCard{
+  background:#ffffff;
+}
+body.lightTheme .outline,
+body.lightTheme .rf{
+  color:#111820;
+}
+body.lightTheme .rf.active{
+  background:#111820;
+  color:#ffffff;
+}
+body.lightTheme .themeBtn.active{
+  background:#111820;
+  color:#ffffff;
+  border-color:#111820;
+}
+@media(max-width:560px){
+  .settingsRow{align-items:flex-start}
+}
+</style>
+
+
+<style id="guide-info-styles">
+.guideGrid{display:grid;gap:9px}
+.guideBtn{
+ width:100%;min-height:50px;border:1px solid var(--line);border-radius:12px;
+ background:var(--card);color:var(--white);display:flex;align-items:center;
+ gap:12px;padding:10px 13px;text-align:left;font-weight:800;font-size:12px
+}
+.guideBtn .guideIcon{font-size:21px;width:30px;text-align:center}
+.guideModal .modalCard{max-height:88vh}
+.guideStep{display:flex;gap:11px;margin:0 0 14px}
+.guideNum{
+ width:28px;height:28px;border-radius:9px;background:var(--yellow);color:#111;
+ display:grid;place-items:center;flex:none;font-weight:900
+}
+.guideStep h4{margin:1px 0 4px;font-size:13px}
+.guideStep p{margin:0;color:var(--muted);font-size:10px;line-height:1.5}
+.infoBrand{text-align:center;padding:10px 0 4px}
+.infoBrand .creator{font-size:22px;font-weight:900;margin-top:8px}
+.infoBrand .brand{font-size:15px;color:var(--yellow);font-weight:800;margin-top:5px}
+.infoBrand .year{color:var(--muted);font-size:12px;margin-top:10px}
+.modalAction{
+ width:100%;min-height:44px;margin-top:14px;border:0;border-radius:11px;
+ background:var(--yellow);color:#111;font-weight:900
+}
+</style>
+
+
+<style id="settings-color-fix">
+.home.y{background:var(--yellow)}
+.home.p{background:var(--purple)}
+.ricon.y{background:var(--yellow)}
+.ricon.p{background:var(--purple)}
+</style>
+
+
+<style id="supplier-styles">
+.supplierList{display:grid;gap:7px}
+.supplierRow{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 11px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);font-size:11px;font-weight:700;
+}
+.supplierDelete{
+  border:0;background:transparent;color:var(--red);font-size:16px;
+  padding:3px 6px;cursor:pointer;
+}
+.supplierEmpty{color:var(--muted);font-size:10px}
+.autocompleteWrap{position:relative}
+.autocompleteMenu{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:80;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 30px #0008;max-height:220px;overflow-y:auto}
+.autocompleteItem{display:block;width:100%;padding:11px 12px;border:0;border-bottom:1px solid var(--line);background:var(--card);color:var(--white);text-align:left;font-size:13px}
+.autocompleteItem:last-child{border-bottom:0}
+.autocompleteItem:active{background:var(--yellow);color:#111}
+.supplierTabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.supplierTab{min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--white);font-size:11px;font-weight:900}
+.supplierTab.active{background:var(--yellow);color:#111;border-color:var(--yellow)}
+.supplierPanel{margin-top:10px}
+</style>
+
+</head>
+
+<body>
+
+
+<!-- BLOQUEO DE SEGURIDAD -->
+<div id="securityLock">
+  <div class="securityBox">
+    <div class="securityIcon">🔐</div>
+    <div class="securityTitle">CONTROL FISCAL</div>
+    <div class="securityText" id="securityText">
+      La aplicación está bloqueada. Usa Face ID o el código de la aplicación para continuar.
+    </div>
+    <button type="button" class="securityBtn" id="securityBiometricBtn" onclick="unlockWithBiometric(); return false;">
+      Usar Face ID
+    </button>
+    <button type="button" class="securityBtn securitySecondary" id="securityPinBtn" onclick="showPinUnlock(); return false;">
+      Usar código
+    </button>
+    <div id="securityPinArea" style="display:none;margin-top:14px">
+      <input id="securityPinInput" class="securityPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      <button type="button" class="securityBtn" onclick="unlockWithPin(); return false;">Desbloquear</button>
+    </div>
+    <div class="securityStatus" id="securityStatus"></div>
+  </div>
+</div>
+
+<script>
+// El panel de seguridad no se cierra al tocar fuera de sus controles.
+document.getElementById("securityLock")?.addEventListener("click", function(e){
+  if(e.target === this) e.preventDefault();
+});
+document.querySelector("#securityLock .securityBox")?.addEventListener("click", function(e){
+  e.stopPropagation();
+});
+</script>
+
+<div class="app">
+
+<section id="home">
+  <div class="hero">
+    <div class="logos">
+      <img class="logo" src="https://raw.githubusercontent.com/enrikluck-alt/control-fiscal/main/electrochispas-logo.png?v=8" alt="ElectroChispas">
+      <img class="logo" src="https://raw.githubusercontent.com/enrikluck-alt/control-fiscal/main/chispas-sound-logo.png?v=8" alt="Chispas Sound">
+    </div>
+    <div class="title">CONTROL FISCAL</div>
+    <div class="tag">REGISTRA · CONTROLA · SIMPLIFICA</div>
+  </div>
+
+  <div class="page">
+    <div class="homegrid">
+
+      <button class="home y" onclick="openForm('Compra')">
+        <div class="icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+            <circle cx="19" cy="40" r="2"/><circle cx="37" cy="40" r="2"/>
+            <path d="M4 7h6l4 24h25l5-18H12"/><path d="M18 16h20"/>
+          </svg>
+        </div>
+        <div class="text"><b>COMPRAS</b><small>REGISTRA TUS GASTOS</small></div>
+        <div class="chev">›</div>
+      </button>
+
+      <button class="home p" onclick="openForm('Facturado')">
+        <div class="icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M12 4h20l9 9v31H12z"/>
+            <path d="M32 4v10h9M19 24h15M19 31h15M19 17h7"/>
+          </svg>
+        </div>
+        <div class="text"><b>FACTURACIÓN</b><small>REGISTRA TUS INGRESOS</small></div>
+        <div class="chev">›</div>
+      </button>
+
+      <button class="home full" onclick="openAgenda()">
+        <div class="icon"><span style="font-size:28px">📅</span></div>
+        <div class="text"><b>AGENDA</b><small>EVENTOS, HORAS, UBICACIÓN Y QUÉ LLEVAR</small></div>
+        <div class="chev">›</div>
+      </button>
+
+      <button class="home full" onclick="openInventory()">
+        <div class="icon"><span style="font-size:28px">📦</span></div>
+        <div class="text"><b>INVENTARIO</b><small>CONTROLA TU MATERIAL Y STOCK</small></div>
+        <div class="chev">›</div>
+      </button>
+
+      <button class="home full" onclick="openSummary()">
+        <div class="icon">
+          <svg viewBox="0 0 48 48" fill="currentColor">
+            <rect x="5" y="25" width="8" height="18" rx="2"/>
+            <rect x="19" y="14" width="8" height="29" rx="2"/>
+            <rect x="33" y="4" width="8" height="39" rx="2"/>
+          </svg>
+        </div>
+        <div class="text"><b>RESUMEN</b><small>VISUALIZA TUS TOTALES Y EL IVA</small></div>
+        <div class="chev">›</div>
+      </button>
+
+    </div>
+
+    <div class="section">
+      <h3>ÚLTIMOS REGISTROS</h3>
+      <button class="outline" onclick="openRecords()">Ver todos　›</button>
+    </div>
+
+    <div id="latest" class="records"></div>
+
+    <div class="info">
+      <svg viewBox="0 0 40 40" fill="currentColor">
+        <rect x="4" y="22" width="7" height="14" rx="2"/>
+        <rect x="16" y="14" width="7" height="22" rx="2"/>
+        <rect x="28" y="6" width="7" height="30" rx="2"/>
+      </svg>
+      <div class="ib">
+        <b>Pequeños registros, grandes decisiones.</b>
+        <span>Controla hoy, crece mañana.</span>
+      </div>
+      <div class="ibrand">ELECTROCHISPAS<br>&<br>CHISPAS SOUND</div>
+    </div>
+  </div>
+</section>
+
+<section id="formPage" class="hidden">
+  <div id="formHeader" class="header"></div>
+  <div id="formBody"></div>
+</section>
+
+
+<section id="agendaPage" class="hidden">
+  <div class="header">
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon"><span style="font-size:27px">📅</span></div>
+    <div><h2>AGENDA</h2><p>Eventos y planificación</p></div>
+  </div>
+  <div class="page">
+    <button class="agendaAdd" type="button" onclick="openAgendaEventModal()">＋ NUEVO EVENTO</button>
+    <div class="agendaToolbar">
+      <button class="agendaNav" type="button" onclick="changeAgendaMonth(-1)">‹</button>
+      <div id="agendaMonthLabel" class="agendaMonth"></div>
+      <button class="agendaNav" type="button" onclick="changeAgendaMonth(1)">›</button>
+    </div>
+    <button class="agendaToday" type="button" onclick="agendaGoToday()">IR A HOY</button>
+    <div class="calendar">
+      <div class="calendarWeek"><div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div></div>
+      <div id="agendaGrid" class="calendarGrid"></div>
+    </div>
+    <div class="agendaSectionTitle"><h3>PRÓXIMOS EVENTOS</h3><span id="agendaCount" class="recordInfo"></span></div>
+    <div id="agendaUpcoming" class="agendaEventList"></div>
+  </div>
+</section>
+
+<section id="inventoryPage" class="hidden">
+  <div class="header">
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon"><span style="font-size:27px">📦</span></div>
+    <div><h2>INVENTARIO</h2><p>Material disponible</p></div>
+  </div>
+  <div class="page">
+    <div class="inventoryTop">
+      <div class="field" style="margin-bottom:0"><label>BUSCAR MATERIAL</label><input id="inventorySearch" class="input" placeholder="Ej. Event 28A, cable DMX..." oninput="renderInventory()"></div>
+      <button id="inventoryNewBtn" class="agendaNav" type="button">＋</button>
+    </div>
+    <div class="stockStats">
+      <div class="stockStat"><small>ARTÍCULOS</small><strong id="inventoryCount">0</strong></div>
+      <div class="stockStat"><small>STOCK BAJO</small><strong id="inventoryLowCount">0</strong></div>
+    </div>
+    <div id="inventoryList" class="stockList"></div>
+  </div>
+</section>
+
+<section id="summaryPage" class="hidden">
+  <div class="header">
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon">
+      <svg viewBox="0 0 48 48" fill="currentColor">
+        <rect x="5" y="25" width="8" height="18" rx="2"/>
+        <rect x="19" y="14" width="8" height="29" rx="2"/>
+        <rect x="33" y="4" width="8" height="39" rx="2"/>
+      </svg>
+    </div>
+    <div><h2>RESUMEN</h2><p>Consulta tus totales y el estado del IVA</p></div>
+  </div>
+
+  <div class="page">
+    <div class="field">
+      <label>PERÍODO</label>
+      <select id="summaryPeriod" class="select"></select>
+    </div>
+
+    <div class="sumgrid">
+      <div class="sum y"><small>Total Compras</small><b id="sc">0,00 €</b></div>
+      <div class="sum p"><small>Total Facturación</small><b id="sf">0,00 €</b></div>
+    </div>
+
+    <div class="ivapanel">
+      <div class="ivarow"><span class="green">↓　IVA Soportado (Compras)</span><strong id="sis">0,00 €</strong></div>
+      <div class="ivarow"><span class="red">↑　IVA Repercutido (Facturación)</span><strong id="sir">0,00 €</strong></div>
+      <div class="ivarow resultrow"><span id="resLabel">Resultado IVA</span><strong id="res">0,00 €</strong></div>
+      <div id="resHint" class="reshint">IVA repercutido − IVA soportado</div>
+    </div>
+
+    <div class="counts">
+      <div class="count">
+        <small>Número de Compras</small><b id="nc">0</b>
+      </div>
+      <div class="count">
+        <small>Número de Facturas</small><b id="nf">0</b>
+      </div>
+    </div>
+
+    <div class="pendingPanel" id="pendingPanel">
+      <div class="pendingHead">
+        <div>
+          <h3>📋 DOCUMENTACIÓN PENDIENTE</h3>
+          <p>Controla las compras y facturas que todavía no tienen archivo adjunto.</p>
+        </div>
+        <div class="pendingTotal" id="pendingTotal">0</div>
+      </div>
+      <div class="pendingGrid">
+        <div class="pendingItem">
+          <span>Compras sin factura</span>
+          <strong id="pendingCompras">0</strong>
+        </div>
+        <div class="pendingItem">
+          <span>Facturas emitidas sin archivo</span>
+          <strong id="pendingEmitidas">0</strong>
+        </div>
+      </div>
+      <div class="pendingMessage" id="pendingMessage"></div>
+      <button id="pendingBtn" class="pendingBtn" type="button" onclick="openPendingRecords()">VER FACTURAS PENDIENTES</button>
+    </div>
+
+    <div class="emailPanel">
+      <h3>📧 ENVIAR DOCUMENTACIÓN AL GESTOR</h3>
+      <p>Envía por correo las facturas adjuntadas de compras, facturas emitidas o ambas.</p>
+      <div class="field">
+        <label>Documentación</label>
+        <select id="emailTipo" class="select">
+          <option value="todas">Todas (compras + emitidas)</option>
+          <option value="compras">Solo compras</option>
+          <option value="emitidas">Solo facturas emitidas</option>
+        </select>
+      </div>
+      <div class="emailGrid">
+        <div class="field">
+          <label>Desde</label>
+          <input id="emailDesde" class="input" type="month">
+        </div>
+        <div class="field">
+          <label>Hasta</label>
+          <input id="emailHasta" class="input" type="month">
+        </div>
+      </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input id="emailDestino" class="input" type="email" inputmode="email" autocomplete="email" placeholder="ejemplo@correo.com">
+      </div>
+      <button id="emailBtn" class="emailBtn" type="button" onclick="sendInvoicesByEmail()">ENVIAR DOCUMENTACIÓN</button>
+      <div id="emailStatus" class="emailStatus"></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="settingsPage" class="hidden">
+  <div class="header">
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+        <circle cx="24" cy="24" r="7"/>
+        <path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.9 9.9l4.2 4.2M33.9 33.9l4.2 4.2M38.1 9.9l-4.2 4.2M14.1 33.9l-4.2 4.2"/>
+      </svg>
+    </div>
+    <div><h2>AJUSTES</h2><p>Personaliza Control Fiscal</p></div>
+  </div>
+
+  <div class="page">
+    <div class="settingsCard">
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">🔔 NOTIFICACIONES</div>
+
+        <div class="settingsRow">
+          <div>
+            <div class="settingsLabel">Hora del recordatorio</div>
+            <div class="settingsHint">Hora preferida para el aviso diario de facturas pendientes.</div>
+          </div>
+          <input id="notificationTime" class="input" type="time" style="width:125px;flex:none">
+        </div>
+
+        <div class="settingsHint">
+          El aviso diario se gestiona mediante el sistema de recordatorios. Esta hora queda guardada como tu preferencia en el dispositivo.
+        </div>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">🎨 FONDO</div>
+
+        <div class="themeButtons">
+          <button id="themeDarkBtn" class="themeBtn" type="button" onclick="setAppTheme('dark')">⬛ Negro</button>
+          <button id="themeLightBtn" class="themeBtn" type="button" onclick="setAppTheme('light')">⬜ Blanco</button>
+        </div>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">🛒 COLOR DE COMPRAS</div>
+
+        <div class="settingsRow">
+          <div>
+            <div class="settingsLabel">Botones de Compras</div>
+            <div class="settingsHint">Cambia el color utilizado para compras.</div>
+          </div>
+          <input id="buyColor" class="colorControl" type="color" value="#ffdf18" aria-label="Color de Compras">
+        </div>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">📄 COLOR DE FACTURACIÓN</div>
+
+        <div class="settingsRow">
+          <div>
+            <div class="settingsLabel">Botones de Facturación</div>
+            <div class="settingsHint">Cambia el color utilizado para facturación.</div>
+          </div>
+          <input id="saleColor" class="colorControl" type="color" value="#df72ef" aria-label="Color de Facturación">
+        </div>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">🏪 TIENDAS / PROVEEDORES</div>
+        <div class="settingsHint">
+          Las tiendas y proveedores se guardan por separado. En una compra puedes escribir unas letras, por ejemplo <strong>Ma</strong>, y seleccionar directamente la coincidencia.
+        </div>
+        <div class="supplierTabs">
+          <button id="supplierTabStores" class="supplierTab active" type="button" onclick="showSupplierCategory('tiendas')">🏪 TIENDAS</button>
+          <button id="supplierTabProviders" class="supplierTab" type="button" onclick="showSupplierCategory('proveedores')">👤 PROVEEDORES</button>
+        </div>
+        <div id="supplierPanel" class="supplierPanel"></div>
+        <button class="resetSettings" type="button" onclick="clearSupplierCategory()">BORRAR LISTA MOSTRADA</button>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">🧾 DATOS DE FACTURACIÓN</div>
+        <div class="settingsHint">Configura los datos que aparecerán como emisor en tus facturas. Se guardan en Google Sheets para poder utilizarlos también desde el iPhone.</div>
+        <button class="guideBtn" type="button" onclick="openInvoiceSettings()">
+          <span class="guideIcon">🧾</span>
+          <span>EDITAR MIS DATOS DE FACTURACIÓN</span>
+        </button>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">ℹ️ INFORMACIÓN</div>
+        <div class="guideGrid">
+          <button class="guideBtn" type="button" onclick="openGuide()">
+            <span class="guideIcon">📖</span>
+            <span>GUÍA DE FUNCIONAMIENTO</span>
+          </button>
+          <button class="guideBtn" type="button" onclick="openInfo()">
+            <span class="guideIcon">ⓘ</span>
+            <span>INFO</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="settingsGroup">
+        <div class="settingsTitle">🔄 RESTABLECER</div>
+        <div class="settingsHint">Vuelve a los colores y fondo originales de Control Fiscal.</div>
+        <button class="resetSettings" type="button" onclick="resetAppSettings()">RESTABLECER AJUSTES</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="recordsPage" class="hidden">
+  <div class="header">
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+        <path d="M12 4h20l9 9v31H12z"/>
+        <path d="M32 4v10h9M19 24h15M19 31h15M19 17h7"/>
+      </svg>
+    </div>
+    <div><h2>REGISTROS</h2><p>Todos tus movimientos</p></div>
+  </div>
+
+  <div class="page">
+    <div class="search">
+      <input id="search" class="input" placeholder="Buscar cliente, proveedor o concepto..." oninput="renderAll()">
+    </div>
+
+    <div class="recordFilters">
+      <button class="rf active" data-filter="all" onclick="setRecordFilter('all')">Todos</button>
+      <button class="rf" data-filter="Compra" onclick="setRecordFilter('Compra')">Compras</button>
+      <button class="rf" data-filter="Facturado" onclick="setRecordFilter('Facturado')">Facturación</button>
+    </div>
+
+    <div class="field">
+      <select id="recordPeriod" class="select" onchange="renderAll()">
+        <option value="all">Todos los períodos</option>
+      </select>
+    </div>
+
+    <div id="recordInfo" class="recordInfo"></div>
+    <div id="all" class="records"></div>
+  </div>
+</section>
+
+<div id="recordModal" class="modal hidden" aria-hidden="true">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeRecordModal()">×</button>
+    <div class="modalTitle" id="modalTitle">Editar registro</div>
+
+    <div class="field">
+      <label id="modalThirdLabel">Cliente / Proveedor</label>
+      <input id="modalTercero" class="input">
+    </div>
+
+    <div class="field">
+      <label>Concepto</label>
+      <input id="modalConcepto" class="input">
+    </div>
+
+    <div class="two">
+      <div class="field">
+        <label id="modalAmountLabel">Importe</label>
+        <input id="modalTotal" class="input" type="number" min="0" step=".01" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label>IVA %</label>
+        <select id="modalIva" class="select">
+          <option value="21">21%</option>
+          <option value="10">10%</option>
+          <option value="4">4%</option>
+          <option value="0">0%</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="calc">
+      <div class="box"><small>Base imponible</small><strong id="modalBase">0,00 €</strong></div>
+      <div class="box"><small id="modalIvaLabel">IVA</small><strong id="modalIvaValue">0,00 €</strong></div>
+      <div class="box" id="modalTotalBox"><small>Total</small><strong id="modalTotalValue">0,00 €</strong></div>
+    </div>
+
+    <div id="modalMsg" class="msg"></div>
+
+    <div class="modalActions">
+      <button class="save" type="button" onclick="saveEditedRecord()">Guardar cambios</button>
+      <button class="deleteBtn" type="button" onclick="deleteCurrentRecord()">Eliminar registro</button>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom">
+  <button id="nh" class="ay" onclick="goHome()">🏠<span>Inicio</span></button>
+  <button id="nb" onclick="openForm('Compra')">🛒<span>Compras</span></button>
+  <button id="ns" onclick="openFacturacionPage()">🧾<span>Fact.</span></button>
+  <button id="na" onclick="openAgenda()">📅<span>Agenda</span></button>
+  <button id="ni" onclick="openInventory()">📦<span>Stock</span></button>
+  <button id="ng" onclick="openSettings()">⚙️<span>Ajustes</span></button>
+</nav>
+
+</div>
+
+<script>
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcJB5MwzcFw9Zm7WQkVhLgWCi35YMC_3XCoqvc8VAet3G8-f8hxlpuTTJUcod3Z2YJAA/exec";
+
+const $=id=>document.getElementById(id);
+let records=JSON.parse(localStorage.getItem("cf_records")||"[]");
+
+const euro=n=>new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR"}).format(Number(n)||0);
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+}[c]));
+
+const dateText=d=>{
+  const x=new Date(d);
+  return Number.isNaN(x.getTime())?"":x.toLocaleDateString("es-ES");
+};
+
+function calc(total,iva){
+  total=Number(total)||0;
+  iva=Number(iva)||0;
+  const base=iva?total/(1+iva/100):total;
+  return {total,base,iva:total-base};
+}
+
+function only(id){
+  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage"].forEach(x=>{
+    $(x).classList.toggle("hidden",x!==id);
+  });
+}
+
+function nav(x){
+  document.querySelectorAll(".bottom button").forEach(b=>b.classList.remove("ay","ap"));
+  if(x==="home") $("nh").classList.add("ay");
+  if(x==="buy") $("nb").classList.add("ay");
+  if(x==="sale") $("ns").classList.add("ap");
+  if(x==="sum") $("nr")?.classList.add("ay");
+  if(x==="agenda") $("na")?.classList.add("ay");
+  if(x==="inventory") $("ni")?.classList.add("ay");
+  if(x==="settings") $("ng")?.classList.add("ay");
+}
+
+function goHome(){
+  only("home");
+  nav("home");
+  renderLatest();
+}
+
+
+const SETTINGS_KEYS={
+  theme:"cf_theme",
+  buyColor:"cf_buy_color",
+  saleColor:"cf_sale_color",
+  notificationTime:"cf_notification_time",
+  invoiceConfig:"cf_invoice_config"
+};
+
+function applyAppSettings(){
+  const theme=localStorage.getItem(SETTINGS_KEYS.theme)||"dark";
+  const buy=localStorage.getItem(SETTINGS_KEYS.buyColor)||"#ffdf18";
+  const sale=localStorage.getItem(SETTINGS_KEYS.saleColor)||"#df72ef";
+  const time=localStorage.getItem(SETTINGS_KEYS.notificationTime)||"";
+
+  document.body.classList.toggle("lightTheme",theme==="light");
+  document.documentElement.style.setProperty("--yellow",buy);
+  document.documentElement.style.setProperty("--purple",sale);
+
+  const timeInput=$("notificationTime");
+  const buyInput=$("buyColor");
+  const saleInput=$("saleColor");
+
+  if(timeInput) timeInput.value=time;
+  if(buyInput) buyInput.value=buy;
+  if(saleInput) saleInput.value=sale;
+
+  const darkBtn=$("themeDarkBtn");
+  const lightBtn=$("themeLightBtn");
+  if(darkBtn) darkBtn.classList.toggle("active",theme==="dark");
+  if(lightBtn) lightBtn.classList.toggle("active",theme==="light");
+}
+
+function setAppTheme(theme){
+  if(theme!=="dark" && theme!=="light") return;
+  localStorage.setItem(SETTINGS_KEYS.theme,theme);
+  applyAppSettings();
+}
+
+function openSettings(){
+  only("settingsPage");
+  nav("settings");
+  applyAppSettings();
+  renderSupplierPanel();
+  loadSuppliersFromGoogle(false);
+  loadInvoiceSettings(false);
+}
+
+function saveSetting(key,value){
+  localStorage.setItem(key,value);
+  applyAppSettings();
+}
+
+function resetAppSettings(){
+  localStorage.removeItem(SETTINGS_KEYS.theme);
+  localStorage.removeItem(SETTINGS_KEYS.buyColor);
+  localStorage.removeItem(SETTINGS_KEYS.saleColor);
+  localStorage.removeItem(SETTINGS_KEYS.notificationTime);
+  applyAppSettings();
+  showToastMessage("Ajustes restablecidos","Se han recuperado los valores originales.");
+}
+
+
+function openInvoiceSettings(){
+  const modal=$("invoiceSettingsModal");
+  if(modal) modal.classList.remove("hidden");
+  loadInvoiceSettings(false);
+}
+function closeInvoiceSettings(){
+  const modal=$("invoiceSettingsModal");
+  if(modal) modal.classList.add("hidden");
+  const msg=$("issuerMsg");
+  if(msg){ msg.className="msg"; msg.textContent=""; }
+}
+
+function openGuide(){
+  const modal=$("guideModal");
+  if(modal) modal.classList.remove("hidden");
+}
+function closeGuide(){
+  const modal=$("guideModal");
+  if(modal) modal.classList.add("hidden");
+}
+function openInfo(){
+  const modal=$("infoModal");
+  if(modal) modal.classList.remove("hidden");
+}
+function closeInfo(){
+  const modal=$("infoModal");
+  if(modal) modal.classList.add("hidden");
+}
+
+
+const STORE_KEY="cf_stores";
+const PROVIDER_KEY="cf_providers";
+let supplierCategoryView="tiendas";
+let formThirdPartyCategory="tiendas";
+let supplierSyncInProgress=false;
+
+function getListKey(category){
+  return category==="proveedores" ? PROVIDER_KEY : STORE_KEY;
+}
+
+function getSuppliers(category="tiendas"){
+  try{
+    const arr=JSON.parse(localStorage.getItem(getListKey(category))||"[]");
+    return Array.isArray(arr) ? arr.filter(Boolean) : [];
+  }catch(e){ return []; }
+}
+
+function setCachedSuppliers(list,category="tiendas"){
+  const clean=[...new Set((list||[]).map(x=>String(x).trim()).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,"es",{sensitivity:"base"}));
+  localStorage.setItem(getListKey(category),JSON.stringify(clean));
+  return clean;
+}
+
+async function loadSuppliersFromGoogle(showError=false){
+  if(supplierSyncInProgress) return;
+  supplierSyncInProgress=true;
+  try{
+    const data=await callAction({accion:"listarTerceros"});
+    const tiendas=Array.isArray(data.tiendas)?data.tiendas:[];
+    const proveedores=Array.isArray(data.proveedores)?data.proveedores:[];
+    setCachedSuppliers(tiendas,"tiendas");
+    setCachedSuppliers(proveedores,"proveedores");
+    renderSupplierPanel();
+    renderAutocomplete();
+  }catch(e){
+    console.error("No se pudieron cargar las listas desde Google Sheets:",e);
+    if(showError) showToastMessage("Sin conexión","No se pudieron cargar las tiendas y proveedores desde Google Sheets.");
+  }finally{
+    supplierSyncInProgress=false;
+  }
+}
+
+async function addSupplier(name,category=formThirdPartyCategory){
+  const value=String(name||"").trim();
+  if(!value) return;
+  const categoria=category==="proveedores" ? "proveedores" : "tiendas";
+  const list=getSuppliers(categoria);
+  if(list.some(x=>x.localeCompare(value,"es",{sensitivity:"base"})===0)) return;
+
+  // Actualizamos la caché inmediatamente y guardamos también en Google Sheets.
+  setCachedSuppliers([...list,value],categoria);
+  renderSupplierPanel();
+
+  try{
+    await callAction({
+      accion:"guardarTercero",
+      categoria:categoria==="tiendas" ? "Tienda" : "Proveedor",
+      nombre:value
+    });
+    await loadSuppliersFromGoogle(false);
+  }catch(e){
+    console.error("No se pudo guardar la lista en Google Sheets:",e);
+    showToastMessage("Aviso","El registro se guardó, pero no se pudo actualizar la lista en Google Sheets.");
+  }
+}
+
+function showSupplierCategory(category){
+  supplierCategoryView=category==="proveedores" ? "proveedores" : "tiendas";
+  renderSupplierPanel();
+}
+
+function renderSupplierPanel(){
+  const box=$("supplierPanel");
+  if(!box) return;
+  $("supplierTabStores")?.classList.toggle("active",supplierCategoryView==="tiendas");
+  $("supplierTabProviders")?.classList.toggle("active",supplierCategoryView==="proveedores");
+  const list=getSuppliers(supplierCategoryView);
+  if(!list.length){
+    box.innerHTML='<div class="supplierEmpty">Todavía no hay '+(supplierCategoryView==="tiendas"?"tiendas":"proveedores")+' guardados.</div>';
+    return;
+  }
+  box.innerHTML='<div class="supplierList">'+list.map((x,i)=>`<div class="supplierRow"><span>${esc(x)}</span><button class="supplierDelete" type="button" onclick="deleteSupplier(${i},'${supplierCategoryView}')" aria-label="Eliminar">×</button></div>`).join("")+'</div>';
+}
+
+async function deleteSupplier(index,category=supplierCategoryView){
+  const categoria=category==="proveedores" ? "proveedores" : "tiendas";
+  const list=getSuppliers(categoria);
+  const value=list[index];
+  if(!value) return;
+  if(!confirm("¿Eliminar "+value+" de la lista?")) return;
+
+  setCachedSuppliers(list.filter((_,i)=>i!==index),categoria);
+  renderSupplierPanel();
+
+  try{
+    await callAction({
+      accion:"eliminarTercero",
+      categoria:categoria==="tiendas" ? "Tienda" : "Proveedor",
+      nombre:value
+    });
+    await loadSuppliersFromGoogle(false);
+  }catch(e){
+    console.error("No se pudo eliminar de Google Sheets:",e);
+    showToastMessage("Aviso","No se pudo eliminar de Google Sheets.");
+    await loadSuppliersFromGoogle(false);
+  }
+}
+
+async function clearSupplierCategory(){
+  const nombre=supplierCategoryView==="tiendas"?"tiendas":"proveedores";
+  if(!confirm("¿Borrar toda la lista de "+nombre+"?")) return;
+
+  const list=getSuppliers(supplierCategoryView);
+  try{
+    for(const value of list){
+      await callAction({
+        accion:"eliminarTercero",
+        categoria:supplierCategoryView==="tiendas" ? "Tienda" : "Proveedor",
+        nombre:value
+      });
+    }
+    setCachedSuppliers([],supplierCategoryView);
+    renderSupplierPanel();
+    await loadSuppliersFromGoogle(false);
+  }catch(e){
+    console.error(e);
+    showToastMessage("Aviso","No se pudo completar el borrado en Google Sheets.");
+    await loadSuppliersFromGoogle(false);
+  }
+}
+
+function migrateOldSuppliers(){
+  try{
+    const old=JSON.parse(localStorage.getItem("cf_suppliers")||"[]");
+    if(Array.isArray(old) && old.length && !localStorage.getItem(STORE_KEY)){
+      localStorage.setItem(STORE_KEY,JSON.stringify(old));
+    }
+  }catch(e){}
+}
+
+function hideAutocomplete(){
+  const menu=$("thirdPartyAutocomplete");
+  if(menu) menu.innerHTML="";
+}
+
+function renderAutocomplete(){
+  const input=$("tercero"), menu=$("thirdPartyAutocomplete");
+  if(!input || !menu) return;
+  const query=input.value.trim().toLocaleLowerCase("es");
+  if(!query){ hideAutocomplete(); return; }
+  const matches=getSuppliers(formThirdPartyCategory).filter(x=>x.toLocaleLowerCase("es").includes(query)).slice(0,10);
+  menu.innerHTML=matches.map(x=>`<button type="button" class="autocompleteItem" data-value="${esc(x)}">${esc(x)}</button>`).join("");
+  menu.querySelectorAll(".autocompleteItem").forEach(btn=>{
+    btn.addEventListener("mousedown",e=>e.preventDefault());
+    btn.addEventListener("click",()=>{ input.value=btn.dataset.value||""; hideAutocomplete(); });
+  });
+}
+
+function setFormThirdPartyCategory(category){
+  formThirdPartyCategory=category==="proveedores" ? "proveedores" : "tiendas";
+  $("thirdPartyStoreBtn")?.classList.toggle("active",formThirdPartyCategory==="tiendas");
+  $("thirdPartyProviderBtn")?.classList.toggle("active",formThirdPartyCategory==="proveedores");
+  hideAutocomplete();
+}
+
+
+const DEFAULT_INVOICE_CONFIG={
+  name:"",taxId:"",address:"",postalCode:"",city:"",province:"",phone:"",email:"",iban:""
+};
+let invoiceConfig={...DEFAULT_INVOICE_CONFIG};
+
+function getInvoiceConfig(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(SETTINGS_KEYS.invoiceConfig)||"{}");
+    return {...DEFAULT_INVOICE_CONFIG,...saved};
+  }catch(e){ return {...DEFAULT_INVOICE_CONFIG}; }
+}
+
+function applyInvoiceSettingsToForm(){
+  const map={
+    issuerName:"name",issuerTaxId:"taxId",issuerAddress:"address",issuerPostalCode:"postalCode",
+    issuerCity:"city",issuerProvince:"province",issuerPhone:"phone",issuerEmail:"email",issuerIban:"iban"
+  };
+  Object.entries(map).forEach(([id,key])=>{ if($(id)) $(id).value=invoiceConfig[key]||""; });
+}
+
+async function loadInvoiceSettings(showError=false){
+  invoiceConfig=getInvoiceConfig();
+  applyInvoiceSettingsToForm();
+  try{
+    const data=await callAction({accion:"obtenerConfiguracion"});
+    if(data&&data.configuracion){
+      invoiceConfig={...DEFAULT_INVOICE_CONFIG,...data.configuracion};
+      localStorage.setItem(SETTINGS_KEYS.invoiceConfig,JSON.stringify(invoiceConfig));
+      applyInvoiceSettingsToForm();
+    }
+  }catch(e){
+    if(showError) showToastMessage("Aviso","No se pudieron cargar los datos de facturación de Google Sheets.");
+  }
+}
+
+async function saveInvoiceSettings(){
+  const map={
+    issuerName:"name",issuerTaxId:"taxId",issuerAddress:"address",issuerPostalCode:"postalCode",
+    issuerCity:"city",issuerProvince:"province",issuerPhone:"phone",issuerEmail:"email",issuerIban:"iban"
+  };
+  const next={...DEFAULT_INVOICE_CONFIG};
+  Object.entries(map).forEach(([id,key])=>{ next[key]=($(id)?.value||"").trim(); });
+  if(!next.name || !next.taxId){
+    $("issuerMsg").className="msg err";
+    $("issuerMsg").textContent="Indica al menos el nombre/empresa y el CIF/NIF.";
+    return;
+  }
+  $("issuerMsg").className="msg";
+  $("issuerMsg").textContent="Guardando...";
+  try{
+    await callAction({accion:"guardarConfiguracion",configuracion:JSON.stringify(next)});
+    invoiceConfig=next;
+    localStorage.setItem(SETTINGS_KEYS.invoiceConfig,JSON.stringify(next));
+    $("issuerMsg").className="msg ok";
+    $("issuerMsg").textContent="Datos de facturación guardados ✓";
+    setTimeout(()=>closeInvoiceSettings(),500);
+  }catch(e){
+    $("issuerMsg").className="msg err";
+    $("issuerMsg").textContent=e.message||"No se pudieron guardar los datos.";
+  }
+}
+
+function openFacturacionPage(){
+  openForm("Facturado");
+  const body=$("formBody");
+  if(!body) return;
+  const wrap=document.createElement("div");
+  wrap.className="invoiceCreateBox";
+  wrap.innerHTML=`
+    <div class="invoiceCreateText">
+      <strong>¿Quieres crear una factura completa?</strong>
+      <span>Introduce los datos del cliente y varios conceptos y genera el importe final con IVA.</span>
+    </div>
+    <button class="save p" type="button" onclick="openInvoiceForm()">🧾 CREAR FACTURA</button>`;
+  body.appendChild(wrap);
+}
+
+
+let savedClients=[];
+let clientSyncInProgress=false;
+
+async function loadClients(showError=false){
+  if(clientSyncInProgress) return;
+  clientSyncInProgress=true;
+  try{
+    const data=await callAction({accion:"listarClientes"});
+    savedClients=Array.isArray(data.clientes)?data.clientes:[];
+    localStorage.setItem("cf_clients",JSON.stringify(savedClients));
+    refreshInvoiceClientSelect();
+  }catch(e){
+    try{ savedClients=JSON.parse(localStorage.getItem("cf_clients")||"[]"); }catch(_){ savedClients=[]; }
+    refreshInvoiceClientSelect();
+    if(showError) showToastMessage("Sin conexión","No se pudieron cargar los clientes guardados.");
+  }finally{ clientSyncInProgress=false; }
+}
+
+function refreshInvoiceClientSelect(){
+  const sel=$("invSavedClient");
+  if(!sel) return;
+  const current=sel.value;
+  sel.innerHTML='<option value="">Seleccionar cliente guardado...</option>'+
+    savedClients.map((c,i)=>`<option value="${i}">${esc(c.nombre||"")}${c.cif?" · "+esc(c.cif):""}</option>`).join("");
+  if(current && savedClients[current]) sel.value=current;
+}
+
+function loadSavedClient(index){
+  const c=savedClients[Number(index)];
+  if(!c) return;
+  const map={invClientName:c.nombre,invClientTaxId:c.cif,invClientAddress:c.direccion,invClientPostalCode:c.cp,invClientCity:c.ciudad,invClientProvince:c.provincia,invClientPhone:c.telefono,invClientEmail:c.email};
+  Object.entries(map).forEach(([id,v])=>{if($(id))$(id).value=v||"";});
+}
+
+async function saveCurrentClient(){
+  const client={
+    nombre:$("invClientName")?.value.trim()||"",
+    cif:$("invClientTaxId")?.value.trim()||"",
+    direccion:$("invClientAddress")?.value.trim()||"",
+    cp:$("invClientPostalCode")?.value.trim()||"",
+    ciudad:$("invClientCity")?.value.trim()||"",
+    provincia:$("invClientProvince")?.value.trim()||"",
+    telefono:$("invClientPhone")?.value.trim()||"",
+    email:$("invClientEmail")?.value.trim()||""
+  };
+  if(!client.nombre || !client.cif){ showToastMessage("Faltan datos","Indica al menos nombre/empresa y CIF/NIF del cliente."); return; }
+  try{
+    const data=await callAction({accion:"guardarCliente",cliente:JSON.stringify(client)});
+    savedClients=Array.isArray(data.clientes)?data.clientes:savedClients;
+    localStorage.setItem("cf_clients",JSON.stringify(savedClients));
+    refreshInvoiceClientSelect();
+    showToastMessage("Cliente guardado","Los datos quedan disponibles para futuras facturas.");
+  }catch(e){ showToastMessage("Error",e.message||"No se pudo guardar el cliente."); }
+}
+
+function openSimpleClientModal(){
+  const name=$("tercero")?.value.trim()||"";
+  const modal=$("clientSaveModal");
+  if(!modal) return;
+  $("savedClientName").value=name;
+  $("savedClientTaxId").value="";
+  $("savedClientAddress").value="";
+  $("savedClientPostalCode").value="";
+  $("savedClientCity").value="";
+  $("savedClientProvince").value="";
+  $("savedClientPhone").value="";
+  $("savedClientEmail").value="";
+  $("clientSaveMsg").textContent="";
+  modal.classList.remove("hidden");
+}
+function closeSimpleClientModal(){ $("clientSaveModal")?.classList.add("hidden"); }
+async function saveSimpleClient(){
+  const client={nombre:$("savedClientName")?.value.trim()||"",cif:$("savedClientTaxId")?.value.trim()||"",direccion:$("savedClientAddress")?.value.trim()||"",cp:$("savedClientPostalCode")?.value.trim()||"",ciudad:$("savedClientCity")?.value.trim()||"",provincia:$("savedClientProvince")?.value.trim()||"",telefono:$("savedClientPhone")?.value.trim()||"",email:$("savedClientEmail")?.value.trim()||""};
+  const msg=$("clientSaveMsg");
+  if(!client.nombre || !client.cif){msg.className="msg err";msg.textContent="Indica al menos nombre/empresa y CIF/NIF.";return;}
+  try{
+    const data=await callAction({accion:"guardarCliente",cliente:JSON.stringify(client)});
+    savedClients=Array.isArray(data.clientes)?data.clientes:savedClients;
+    localStorage.setItem("cf_clients",JSON.stringify(savedClients));
+    if($("tercero"))$("tercero").value=client.nombre;
+    msg.className="msg ok";msg.textContent="Cliente guardado ✓";
+    setTimeout(closeSimpleClientModal,500);
+  }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el cliente.";}
+}
+
+function openInvoiceForm(){
+  only("formPage");
+  nav("sale");
+  invoiceConfig=getInvoiceConfig();
+  $("formHeader").dataset.tipo="FacturaCompleta";
+  $("formHeader").innerHTML=`
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+        <path d="M12 4h20l9 9v31H12z"/><path d="M32 4v10h9M19 24h15M19 31h15"/>
+      </svg>
+    </div>
+    <div><h2>FACTURACIÓN</h2><p>Crea una factura con varios conceptos</p></div>`;
+
+  $("formBody").innerHTML=`
+    <div class="invoiceForm">
+      <div class="invoiceMeta">
+        <div class="metaBox"><small>NÚMERO DE FACTURA</small><strong>Automático al guardar</strong></div>
+        <div class="metaBox"><small>FECHA</small><strong>${new Date().toLocaleDateString("es-ES")}</strong></div>
+      </div>
+
+      <div class="invoiceSection">
+        <h3>👤 DATOS DEL CLIENTE</h3>
+        <div class="two" style="margin-bottom:10px">
+          <div class="field"><label>Cliente guardado</label><select id="invSavedClient" class="select" onchange="loadSavedClient(this.value)"><option value="">Seleccionar cliente guardado...</option></select></div>
+          <div class="field" style="display:flex;align-items:end"><button class="invoiceAdd" type="button" onclick="saveCurrentClient()">💾 GUARDAR CLIENTE</button></div>
+        </div>
+        <div class="invoiceGrid">
+          <div class="field"><label>Nombre / Empresa</label><input id="invClientName" class="input" placeholder="Ej. Empresa cliente"></div>
+          <div class="field"><label>CIF / NIF</label><input id="invClientTaxId" class="input" placeholder="CIF / NIF"></div>
+          <div class="field full"><label>Dirección</label><input id="invClientAddress" class="input" placeholder="Calle, número..."></div>
+          <div class="field"><label>Código postal</label><input id="invClientPostalCode" class="input" inputmode="numeric" placeholder="Ej. 28001"></div>
+          <div class="field"><label>Ciudad</label><input id="invClientCity" class="input" placeholder="Ej. Madrid"></div>
+          <div class="field"><label>Provincia</label><input id="invClientProvince" class="input" placeholder="Ej. Madrid"></div>
+          <div class="field"><label>Teléfono</label><input id="invClientPhone" class="input" inputmode="tel" placeholder="Ej. 900 000 000"></div>
+          <div class="field"><label>Email</label><input id="invClientEmail" class="input" type="email" placeholder="cliente@empresa.com"></div>
+        </div>
+      </div>
+
+      <div class="invoiceSection">
+        <h3>🧾 CONCEPTOS</h3>
+        <div class="invoiceHint">Introduce el precio unitario sin IVA. El IVA se calcula al final sobre la base total.</div>
+        <div class="invoiceLineHead"><span>Concepto</span><span>Cant.</span><span>Precio</span><span>Total</span><span></span></div>
+        <div id="invoiceLines"></div>
+        <button class="invoiceAdd" type="button" onclick="addInvoiceLine()">＋ AÑADIR CONCEPTO</button>
+        <div class="invoiceTotals">
+          <div class="invoiceTotalRow"><span>Base imponible</span><strong id="invoiceBase">0,00 €</strong></div>
+          <div class="invoiceTotalRow"><span>IVA</span><strong id="invoiceIva">0,00 €</strong></div>
+          <div class="invoiceTotalRow final"><span>TOTAL FACTURA</span><strong id="invoiceTotal">0,00 €</strong></div>
+        </div>
+      </div>
+
+      <div class="invoiceSection">
+        <div class="two">
+          <div class="field"><label>IVA %</label><select id="invoiceIvaPct" class="select" onchange="recalcInvoice()"><option value="21">21%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option></select></div>
+          <div class="field"><label>Descuento % <span class="optional">(opcional)</span></label><input id="invoiceDiscount" class="input" type="number" min="0" max="100" step="0.01" value="0" oninput="recalcInvoice()"></div>
+        </div>
+        <div class="field"><label>Observaciones <span class="optional">(opcional)</span></label><textarea id="invoiceNotes" class="input" style="height:80px;padding-top:10px;resize:vertical" placeholder="Forma de pago, referencia, presupuesto..."></textarea></div>
+      </div>
+
+      <button id="invoiceSaveBtn" class="save p" type="button" onclick="saveInvoice()">ENVIAR Y GUARDAR FACTURA</button>
+      <div id="invoiceMsg" class="msg"></div>
+    </div>`;
+  addInvoiceLine();
+  recalcInvoice();
+  loadClients(false);
+}
+
+function addInvoiceLine(){
+  const wrap=$("invoiceLines");
+  if(!wrap)return;
+  const row=document.createElement("div");
+  row.className="invoiceLine";
+  row.innerHTML=`
+    <input class="input invoiceDesc" placeholder="Ej. Servicio de sonido">
+    <input class="input invoiceQty" type="number" min="0.01" step="0.01" value="1" inputmode="decimal">
+    <input class="input invoicePrice" type="number" min="0" step="0.01" value="0" inputmode="decimal">
+    <div class="invoiceLineTotal">0,00 €</div>
+    <button class="invoiceRemove" type="button" title="Eliminar concepto">×</button>`;
+  wrap.appendChild(row);
+  row.querySelectorAll("input").forEach(i=>i.addEventListener("input",recalcInvoice));
+  row.querySelector(".invoiceRemove").addEventListener("click",()=>{
+    const rows=wrap.querySelectorAll(".invoiceLine");
+    if(rows.length>1) row.remove(); else { row.querySelector(".invoiceDesc").value=""; row.querySelector(".invoiceQty").value="1"; row.querySelector(".invoicePrice").value="0"; }
+    recalcInvoice();
+  });
+  recalcInvoice();
+}
+
+function readInvoiceLines(){
+  return Array.from(document.querySelectorAll("#invoiceLines .invoiceLine")).map(row=>({
+    concepto:row.querySelector(".invoiceDesc")?.value.trim()||"",
+    cantidad:Number(row.querySelector(".invoiceQty")?.value)||0,
+    precio:Number(row.querySelector(".invoicePrice")?.value)||0
+  })).filter(x=>x.concepto || x.precio>0);
+}
+
+function recalcInvoice(){
+  const rows=Array.from(document.querySelectorAll("#invoiceLines .invoiceLine"));
+  let base=0;
+  rows.forEach(row=>{
+    const qty=Number(row.querySelector(".invoiceQty")?.value)||0;
+    const price=Number(row.querySelector(".invoicePrice")?.value)||0;
+    const line=qty*price;
+    base+=line;
+    const out=row.querySelector(".invoiceLineTotal");
+    if(out)out.textContent=euro(line);
+  });
+  const discount=Math.min(100,Math.max(0,Number($("invoiceDiscount")?.value)||0));
+  const baseConDescuento=base*(1-discount/100);
+  const ivaPct=Number($("invoiceIvaPct")?.value)||0;
+  const iva=baseConDescuento*ivaPct/100;
+  const total=baseConDescuento+iva;
+  if($("invoiceBase"))$("invoiceBase").textContent=euro(baseConDescuento);
+  if($("invoiceIva"))$("invoiceIva").textContent=euro(iva);
+  if($("invoiceTotal"))$("invoiceTotal").textContent=euro(total);
+  return {base:baseConDescuento,iva,total,ivaPct,discount};
+}
+
+let invoiceRequestId = null;
+
+async function saveInvoice(){
+  const msg=$("invoiceMsg"),btn=$("invoiceSaveBtn");
+  const client={
+    nombre:$("invClientName")?.value.trim()||"",
+    cif:$("invClientTaxId")?.value.trim()||"",
+    direccion:$("invClientAddress")?.value.trim()||"",
+    cp:$("invClientPostalCode")?.value.trim()||"",
+    ciudad:$("invClientCity")?.value.trim()||"",
+    provincia:$("invClientProvince")?.value.trim()||"",
+    telefono:$("invClientPhone")?.value.trim()||"",
+    email:$("invClientEmail")?.value.trim()||""
+  };
+  const lineas=readInvoiceLines();
+  const calc=recalcInvoice();
+  if(!client.nombre || !client.cif){ msg.className="msg err"; msg.textContent="Indica al menos el nombre/empresa y el CIF/NIF del cliente."; return; }
+  if(!lineas.length || calc.base<=0){ msg.className="msg err"; msg.textContent="Añade al menos un concepto con importe."; return; }
+  if(lineas.some(x=>x.cantidad<=0 || x.precio<0)){ msg.className="msg err"; msg.textContent="Revisa las cantidades y precios de los conceptos."; return; }
+  if(!invoiceConfig.name || !invoiceConfig.taxId){ msg.className="msg err"; msg.textContent="Primero configura tus datos en Ajustes → Datos de facturación."; return; }
+
+  const payload={
+    accion:"crearFactura",
+    requestId:(invoiceRequestId ||= (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)))),
+    tercero:client.nombre,
+    concepto:lineas.map(x=>x.concepto).filter(Boolean).join(" · ").substring(0,500),
+    base:+calc.base.toFixed(2),
+    ivaPorcentaje:calc.ivaPct,
+    iva:+calc.iva.toFixed(2),
+    total:+calc.total.toFixed(2),
+    cliente:JSON.stringify(client),
+    lineas:JSON.stringify(lineas),
+    descuento:+calc.discount.toFixed(2),
+    observaciones:$("invoiceNotes")?.value.trim()||"",
+    emisor:JSON.stringify(invoiceConfig)
+  };
+  btn.disabled=true; msg.className="msg"; msg.textContent="Guardando factura en Google Sheets...";
+  try{
+    const result=await callAction(payload);
+    await syncFromSheets();
+    msg.className="msg ok";
+    msg.textContent=`Factura ${result.numeroFactura||""} guardada en Facturación y PDF subido a Google Drive ✓`;
+    invoiceRequestId=null;
+    setTimeout(()=>showInvoiceToast(result.numeroFactura||"Factura"),250);
+  }catch(e){
+    console.error(e); msg.className="msg err"; msg.textContent=e.message||"No se pudo guardar la factura.";
+  }finally{btn.disabled=false;}
+}
+
+function showInvoiceToast(numero){
+  const old=$("toast"); if(old)old.remove();
+  const d=document.createElement("div"); d.id="toast"; d.className="toast p";
+  d.innerHTML=`<div class="check">✓</div><h3>¡Factura ${esc(numero)} registrada!</h3><p>La factura se ha guardado en Google Sheets.</p><button onclick="document.getElementById('toast').remove()">Aceptar</button>`;
+  document.body.appendChild(d);
+}
+
+function openForm(tipo){
+  only("formPage");
+  nav(tipo==="Compra"?"buy":"sale");
+
+  const c=tipo==="Compra";
+
+  $("formHeader").dataset.tipo=tipo;
+  $("formHeader").innerHTML=`
+    <button class="back" onclick="goHome()">‹</button>
+    <div class="headericon">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+        ${c
+          ? '<circle cx="19" cy="40" r="2"/><circle cx="37" cy="40" r="2"/><path d="M4 7h6l4 24h25l5-18H12"/>'
+          : '<path d="M12 4h20l9 9v31H12z"/><path d="M32 4v10h9M19 24h15M19 31h15"/>'
+        }
+      </svg>
+    </div>
+    <div>
+      <h2>${c?"COMPRAS":"FACTURACIÓN"}</h2>
+      <p>${c?"Registra tus gastos de forma rápida":"Registra tus ingresos de forma rápida"}</p>
+    </div>`;
+
+  $("formBody").innerHTML=`
+    <div class="form">
+      <div class="field">
+        <label>${c?"Tienda / Proveedor":"Cliente"}</label>
+        ${c?`<div class="supplierTabs">
+          <button id="thirdPartyStoreBtn" class="supplierTab active" type="button" onclick="setFormThirdPartyCategory('tiendas')">🏪 TIENDA</button>
+          <button id="thirdPartyProviderBtn" class="supplierTab" type="button" onclick="setFormThirdPartyCategory('proveedores')">👤 PROVEEDOR</button>
+        </div>`:""}
+        <div class="autocompleteWrap" style="margin-top:${c?"8px":"0"}">
+          <input id="tercero" class="input" placeholder="${c?"Ej. MadridHifi":"Ej. Ayuntamiento, empresa, particular"}" autocomplete="off">
+          ${c?'<div id="thirdPartyAutocomplete" class="autocompleteMenu"></div>':""}
+        </div>
+        <button class="invoiceAdd" type="button" style="margin-top:8px" onclick="openSimpleClientModal()">💾 GUARDAR DATOS DEL CLIENTE</button>
+      </div>
+
+      <div class="field">
+        <label>Concepto</label>
+        <input id="concepto" class="input" placeholder="${c?"Ej. Cable DMX, estructura, etc.":"Ej. Sonido e iluminación, pantalla LED, etc."}">
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label>${c?"Importe total (IVA incluido)":"Base imponible (sin IVA)"}</label>
+          <input id="total" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>IVA %</label>
+          <select id="iva" class="select" onchange="recalc()">
+            <option value="21">21%</option>
+            <option value="10">10%</option>
+            <option value="4">4%</option>
+            <option value="0">0%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="calc">
+        <div class="box"><small>Base imponible</small><strong id="base">0,00 €</strong></div>
+        <div class="box"><small>IVA ${c?"soportado":"repercutido"}</small><strong id="ivaValue">0,00 €</strong></div>
+        <div class="box ${c?"y":"p"}"><small>Total</small><strong id="totalValue">0,00 €</strong></div>
+      </div>
+
+      <div class="field">
+        <label>📎 Factura / justificante <span class="optional">(opcional)</span></label>
+        <input id="facturaArchivo" class="input fileInput" type="file"
+               accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+        <small class="fileHint">PDF, JPG o PNG. Puedes guardar el registro sin adjuntar ningún archivo.</small>
+      </div>
+
+      <button id="saveBtn" class="save ${c?"y":"p"}" onclick="sendRecord('${tipo}')">
+        ${c?"GUARDAR COMPRA":"GUARDAR FACTURA"}
+      </button>
+      <div id="msg" class="msg"></div>
+    </div>`;
+
+  if(c){
+    formThirdPartyCategory="tiendas";
+    const input=$("tercero");
+    input.addEventListener("input",renderAutocomplete);
+    input.addEventListener("focus",renderAutocomplete);
+    input.addEventListener("blur",()=>setTimeout(hideAutocomplete,150));
+  }
+}
+
+function calcRecord(tipo,importe,iva){
+  importe=Number(importe)||0;
+  iva=Number(iva)||0;
+
+  if(tipo==="Compra"){
+    const base=iva?importe/(1+iva/100):importe;
+    const soportado=importe-base;
+    return {base,iva:soportado,total:importe};
+  }
+
+  const repercutido=importe*iva/100;
+  return {base:importe,iva:repercutido,total:importe+repercutido};
+}
+
+function recalc(){
+  const total=$("total"),iva=$("iva");
+  if(!total||!iva)return;
+  const tipo=$("formHeader").dataset.tipo||"Compra";
+  const c=calcRecord(tipo,total.value,iva.value);
+  $("base").textContent=euro(c.base);
+  $("ivaValue").textContent=euro(c.iva);
+  $("totalValue").textContent=euro(c.total);
+}
+
+function readFileAsBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result||"").split(",")[1]||"");
+    reader.onerror=()=>reject(new Error("No se pudo leer el archivo."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function sendRecord(tipo){
+  const tercero=$("tercero").value.trim();
+  const concepto=$("concepto").value.trim();
+  const t=Number($("total").value);
+  const i=Number($("iva").value);
+  const m=$("msg");
+  const b=$("saveBtn");
+  const fileInput=$("facturaArchivo");
+  const file=fileInput?.files?.[0]||null;
+
+  if(!tercero||!concepto||!t||t<=0){
+    m.className="msg err";
+    m.textContent="Completa todos los campos.";
+    return;
+  }
+
+  if(file){
+    const allowed=["application/pdf","image/jpeg","image/png"];
+    if(!allowed.includes(file.type)){
+      m.className="msg err";
+      m.textContent="El archivo debe ser PDF, JPG o PNG.";
+      return;
+    }
+    if(file.size>10*1024*1024){
+      m.className="msg err";
+      m.textContent="El archivo no puede superar 10 MB.";
+      return;
+    }
+  }
+
+  const c=calcRecord(tipo,t,i);
+  const payload={
+    tipo,
+    tercero,
+    concepto,
+    base:+c.base.toFixed(2),
+    ivaPorcentaje:i,
+    iva:+c.iva.toFixed(2),
+    total:+c.total.toFixed(2)
+  };
+
+  b.disabled=true;
+  m.className="msg";
+  m.textContent=file ? "Subiendo factura y guardando..." : "Guardando en Google Sheets...";
+
+  try{
+    if(file){
+      payload.archivoNombre=file.name;
+      payload.archivoMime=file.type;
+      payload.archivoBase64=await readFileAsBase64(file);
+    }
+
+    await fetch(SCRIPT_URL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(payload)
+    });
+
+    await new Promise(resolve=>setTimeout(resolve,900));
+    const data=await syncFromSheets();
+
+    const encontrado=(data.compras||[]).concat(data.facturacion||[]).some(r=>
+      r.tipo===tipo &&
+      String(r.tercero||"")===tercero &&
+      String(r.concepto||"")===concepto &&
+      Math.abs(Number(r.total||0)-Number(payload.total||0))<0.01
+    );
+
+    if(!encontrado){
+      throw new Error("El registro no aparece todavía en Google Sheets.");
+    }
+
+    // Guardar el proveedor SOLO cuando Google Sheets ha confirmado la compra.
+    if(tipo==="Compra"){
+      await addSupplier(tercero,formThirdPartyCategory);
+    }
+
+    m.className="msg ok";
+    m.textContent=file
+      ? (tipo==="Compra" ? "Compra y factura guardadas correctamente ✓" : "Factura y archivo guardados correctamente ✓")
+      : "Guardado correctamente ✓";
+    setTimeout(()=>showToast(tipo),250);
+  }catch(e){
+    m.className="msg err";
+    m.textContent=tipo==="Compra"
+      ? "No se ha podido guardar la compra."
+      : "No se ha podido guardar la factura.";
+    console.error(e);
+  }finally{
+    b.disabled=false;
+  }
+}
+
+function showToast(tipo){
+  const p=tipo==="Compra";
+  const d=document.createElement("div");
+  d.id="toast";
+  d.className="toast "+(p?"y":"p");
+  d.innerHTML=`
+    <div class="check">✓</div>
+    <h3>¡${p?"Compra":"Factura"} registrada!</h3>
+    <p>El registro se ha enviado a Google Sheets y el documento se ha guardado en Google Drive.</p>
+    <button onclick="document.getElementById('toast').remove()">Aceptar</button>`;
+  document.body.appendChild(d);
+}
+
+function row(r){
+  const compra=r.tipo==="Compra";
+  const recordIndex=records.indexOf(r);
+  return `
+    <div class="record" role="button" tabindex="0"
+         data-record-index="${recordIndex}"
+         onclick="window.openRecordByIndex(${recordIndex})"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.openRecordByIndex(${recordIndex})}">
+      <div class="ricon ${compra?"y":"p"}">
+        ${compra
+          ? '<svg viewBox="0 0 48 48" fill="none" stroke="#111" stroke-width="3"><circle cx="19" cy="40" r="2"/><circle cx="37" cy="40" r="2"/><path d="M4 7h6l4 24h25l5-18H12"/></svg>'
+          : '<svg viewBox="0 0 48 48" fill="none" stroke="#111" stroke-width="3"><path d="M12 4h20l9 9v31H12z"/><path d="M32 4v10h9M19 24h15M19 31h15"/></svg>'
+        }
+      </div>
+      <div class="rbody">
+        <div class="rtitle">${compra?"Compra":(r.numeroFactura?"Factura "+esc(r.numeroFactura):"Factura")}</div>
+        <div class="rdesc">${esc(r.tercero)} - ${esc(r.concepto)}</div>
+        <div class="rdate">${dateText(r.fecha)}</div>
+        ${r.facturaUrl ? `<div class="attachment"><a href="${esc(r.facturaUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 Ver ${compra ? "factura / justificante" : "factura emitida"}</a></div>` : ""}
+      </div>
+      <div class="ramount">${euro(r.total)}</div>
+      <div class="rarrow">›</div>
+    </div>`;
+}
+
+function openRecordByIndex(index){
+  const r=records[Number(index)];
+  if(!r)return;
+  openRecordData(r);
+}
+
+let editingRecord=null;
+
+function calcModal(){
+  if(!editingRecord)return;
+  const amount=Number($("modalTotal").value)||0;
+  const ivaPct=Number($("modalIva").value)||0;
+  const compra=editingRecord.tipo==="Compra";
+
+  if(compra){
+    const base=ivaPct?amount/(1+ivaPct/100):amount;
+    const iva=amount-base;
+    $("modalBase").textContent=euro(base);
+    $("modalIvaValue").textContent=euro(iva);
+    $("modalTotalValue").textContent=euro(amount);
+  }else{
+    const base=amount;
+    const iva=base*ivaPct/100;
+    const total=base+iva;
+    $("modalBase").textContent=euro(base);
+    $("modalIvaValue").textContent=euro(iva);
+    $("modalTotalValue").textContent=euro(total);
+  }
+}
+
+function openRecord(fila,tipo){
+  const r=records.find(x=>Number(x.fila)===Number(fila) && x.tipo===tipo);
+  if(!r)return;
+  openRecordData(r);
+}
+
+function openRecordData(r){
+  editingRecord=r;
+  const tipo=r.tipo;
+  $("modalTitle").textContent=tipo==="Compra"?"Editar compra":"Editar factura";
+  $("modalThirdLabel").textContent=tipo==="Compra"?"Tienda / Proveedor":"Cliente";
+  $("modalAmountLabel").textContent=tipo==="Compra"?"Importe total (IVA incluido)":"Base imponible (sin IVA)";
+  $("modalIvaLabel").textContent=tipo==="Compra"?"IVA soportado":"IVA repercutido";
+
+  $("modalTercero").value=r.tercero||"";
+  $("modalConcepto").value=r.concepto||"";
+  $("modalIva").value=String(Number(r.ivaPorcentaje)||0);
+  $("modalTotal").value=tipo==="Compra"
+    ?Number(r.total||0).toFixed(2)
+    :Number(r.base||0).toFixed(2);
+  $("modalMsg").className="msg";
+  $("modalMsg").textContent="";
+  $("recordModal").classList.remove("hidden");
+  $("recordModal").setAttribute("aria-hidden","false");
+  calcModal();
+}
+
+function closeRecordModal(){
+  editingRecord=null;
+  $("recordModal").classList.add("hidden");
+  $("recordModal").setAttribute("aria-hidden","true");
+}
+
+$("modalTotal").addEventListener("input",calcModal);
+$("modalIva").addEventListener("change",calcModal);
+
+function callAction(payload){
+  return new Promise((resolve,reject)=>{
+    const callback="cfAction_"+Date.now()+"_"+Math.floor(Math.random()*10000);
+    const script=document.createElement("script");
+    const params=new URLSearchParams();
+    params.set("callback",callback);
+    Object.entries(payload).forEach(([k,v])=>params.set(k,String(v)));
+    const timeout=setTimeout(()=>{cleanup();reject(new Error("La operación está tardando más de lo normal. Puedes volver a pulsar guardar; la factura no se duplicará."));},90000);
+    window[callback]=data=>{
+      cleanup();
+      if(data&&data.ok) resolve(data);
+      else reject(new Error(data?.error||"Operación no realizada"));
+    };
+    script.onerror=()=>{cleanup();reject(new Error("No se pudo conectar con Google Sheets"));};
+    function cleanup(){clearTimeout(timeout);delete window[callback];script.remove();}
+    script.src=SCRIPT_URL+"?"+params.toString()+"&_="+Date.now();
+    document.body.appendChild(script);
+  });
+}
+
+async function saveEditedRecord(){
+  if(!editingRecord)return;
+
+  const tercero=$("modalTercero").value.trim();
+  const concepto=$("modalConcepto").value.trim();
+  const amount=Number($("modalTotal").value);
+  const ivaPct=Number($("modalIva").value)||0;
+  const m=$("modalMsg");
+
+  if(!tercero||!concepto||!amount||amount<=0){
+    m.className="msg err";
+    m.textContent="Completa todos los campos.";
+    return;
+  }
+
+  const compra=editingRecord.tipo==="Compra";
+  const payload={accion:"editar",tipo:editingRecord.tipo,fila:Number(editingRecord.fila),tercero,concepto,ivaPorcentaje:ivaPct};
+  if(compra) payload.total=+amount.toFixed(2);
+  else payload.base=+amount.toFixed(2);
+
+  m.className="msg";
+  m.textContent="Guardando cambios...";
+
+  try{
+    // Apps Script confirma la edición directamente mediante JSONP.
+    // No hacemos una segunda comprobación por número de fila, porque
+    // puede provocar falsos errores aunque Google Sheets ya haya guardado.
+    await callAction(payload);
+    await syncFromSheets().catch(e=>console.warn("Actualización visual tras editar:",e));
+    closeRecordModal();
+    showToastMessage("Registro actualizado","Los cambios se han guardado en Google Sheets.");
+  }catch(e){
+    console.error(e);
+    m.className="msg err";
+    m.textContent=e.message||"No se ha podido guardar el cambio.";
+  }
+}
+
+async function deleteCurrentRecord(){
+  if(!editingRecord)return;
+  if(!confirm("¿Seguro que quieres eliminar este registro? Esta acción también lo eliminará de Google Sheets.")) return;
+
+  const m=$("modalMsg");
+  m.className="msg";
+  m.textContent="Eliminando...";
+
+  try{
+    const fila=Number(editingRecord.fila);
+    const tipo=editingRecord.tipo;
+    await callAction({accion:"eliminar",tipo,fila});
+    await syncFromSheets();
+    if(records.some(r=>Number(r.fila)===fila && r.tipo===tipo)){
+      throw new Error("No se pudo confirmar la eliminación.");
+    }
+    closeRecordModal();
+    showToastMessage("Registro eliminado","El registro se ha eliminado de Google Sheets.");
+  }catch(e){
+    console.error(e);
+    m.className="msg err";
+    m.textContent=e.message||"No se ha podido eliminar el registro.";
+  }
+}
+
+
+/* =========================================================
+   AGENDA
+   ========================================================= */
+let agendaEvents=[];
+let agendaMonthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let agendaEditingId=null;
+
+function mapsLink(location){
+  const q=String(location||"").trim();
+  return q ? "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q) : "";
+}
+function formatAgendaDate(dateStr){
+  if(!dateStr) return "";
+  const parts=String(dateStr).slice(0,10).split("-");
+  if(parts.length!==3) return dateStr;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+function agendaDayKey(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
+function agendaMonthLabel(date){
+  return date.toLocaleDateString("es-ES",{month:"long",year:"numeric"}).replace(/^./,c=>c.toUpperCase());
+}
+function openAgenda(){
+  only("agendaPage");
+  nav("agenda");
+  agendaMonthCursor=new Date(agendaMonthCursor.getFullYear(),agendaMonthCursor.getMonth(),1);
+  renderAgenda();
+  loadAgenda(false);
+}
+function agendaGoToday(){
+  const now=new Date();
+  agendaMonthCursor=new Date(now.getFullYear(),now.getMonth(),1);
+  renderAgenda();
+}
+function changeAgendaMonth(delta){
+  agendaMonthCursor=new Date(agendaMonthCursor.getFullYear(),agendaMonthCursor.getMonth()+delta,1);
+  renderAgenda();
+}
+function renderAgenda(){
+  const label=$("agendaMonthLabel");
+  const grid=$("agendaGrid");
+  if(!label||!grid)return;
+  label.textContent=agendaMonthLabel(agendaMonthCursor);
+  const y=agendaMonthCursor.getFullYear(), m=agendaMonthCursor.getMonth();
+  const first=new Date(y,m,1);
+  const last=new Date(y,m+1,0);
+  let start=(first.getDay()+6)%7;
+  const days=last.getDate();
+  const prevLast=new Date(y,m,0).getDate();
+  const cells=[];
+  for(let i=0;i<42;i++){
+    const dayNum=i-start+1;
+    const inMonth=dayNum>=1&&dayNum<=days;
+    const realDate=new Date(y,m,dayNum);
+    if(dayNum<1) realDate.setDate(dayNum);
+    if(dayNum>days) realDate.setDate(dayNum);
+    const key=agendaDayKey(realDate.getFullYear(),realDate.getMonth(),realDate.getDate());
+    const evs=agendaEvents.filter(e=>String(e.fecha||"").slice(0,10)===key).sort((a,b)=>String(a.horaInicio||"").localeCompare(String(b.horaInicio||"")));
+    const todayKey=agendaDayKey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+    const cls=(inMonth?"":" muted")+(key===todayKey?" today":"");
+    const chips=evs.slice(0,3).map(e=>`<span class="calEvent" data-event-id="${esc(e.id)}">${esc((e.horaInicio?e.horaInicio+" ":"")+e.evento)}</span>`).join("")+(evs.length>3?`<span class="calEvent more">+${evs.length-3} más</span>`:"");
+    cells.push(`<div class="calDay${cls}" data-date="${key}"><span class="calNum">${realDate.getDate()}</span>${chips}</div>`);
+  }
+  grid.innerHTML=cells.join("");
+  grid.querySelectorAll(".calDay").forEach(cell=>cell.addEventListener("click",e=>{
+    const ev=e.target.closest("[data-event-id]");
+    if(ev){openAgendaEventModal(ev.dataset.eventId);return;}
+    openAgendaEventModal(null,cell.dataset.date);
+  }));
+  renderAgendaUpcoming();
+}
+function renderAgendaUpcoming(){
+  const wrap=$("agendaUpcoming"), count=$("agendaCount");
+  if(!wrap)return;
+  const today=agendaDayKey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  const arr=agendaEvents.slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha))||String(a.horaInicio||"").localeCompare(String(b.horaInicio||""))).filter(e=>String(e.fecha).slice(0,10)>=today);
+  count.textContent=`${arr.length} evento${arr.length===1?"":"s"}`;
+  wrap.innerHTML=arr.length?arr.slice(0,12).map(e=>{
+    const map=mapsLink(e.ubicacion);
+    return `<div class="agendaCard"><div class="agendaCardTop"><div><div class="agendaCardTitle">${esc(e.evento)}</div><div class="agendaCardMeta">${formatAgendaDate(e.fecha)} · ${esc(e.horaInicio||"")}${e.horaFin?"–"+esc(e.horaFin):""}${e.ubicacion?" · "+esc(e.ubicacion):""}</div></div><div class="agendaCardTime">${esc(e.cliente||"")}</div></div>${e.llevar?`<div class="agendaCardMeta"><b>📦 Llevar:</b> ${esc(e.llevar)}</div>`:""}${e.comentarios?`<div class="agendaCardMeta"><b>📝</b> ${esc(e.comentarios)}</div>`:""}<div class="agendaCardActions"><button type="button" onclick="openAgendaEventModal('${esc(e.id)}')">EDITAR</button>${map?`<a href="${map}" target="_blank" rel="noopener">📍 MAPA</a>`:""}</div></div>`;
+  }).join(""): '<div style="padding:20px;text-align:center;color:#66717b">No hay próximos eventos.</div>';
+}
+async function loadAgenda(showError=false){
+  try{const data=await callAction({accion:"listarAgenda"});agendaEvents=Array.isArray(data.eventos)?data.eventos:[];localStorage.setItem("cf_agenda",JSON.stringify(agendaEvents));renderAgenda();}
+  catch(e){try{agendaEvents=JSON.parse(localStorage.getItem("cf_agenda")||"[]")}catch(_){agendaEvents=[]}renderAgenda();if(showError)showToastMessage("Sin conexión","No se pudo cargar la agenda.");}
+}
+function openAgendaEventModal(id=null,dateStr=null){
+  agendaEditingId=id||null;
+  const modal=$("agendaEventModal"), title=$("agendaModalTitle"), del=$("agendaDeleteBtn");
+  if(!modal)return;
+  let e=id?agendaEvents.find(x=>String(x.id)===String(id)):null;
+  title.textContent=e?"Editar evento":"Nuevo evento";
+  $("agendaEventName").value=e?.evento||"";
+  $("agendaEventDate").value=(e?.fecha||dateStr||agendaDayKey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())).slice(0,10);
+  $("agendaEventStart").value=e?.horaInicio||"";
+  $("agendaEventEnd").value=e?.horaFin||"";
+  $("agendaEventClient").value=e?.cliente||"";
+  $("agendaEventLocation").value=e?.ubicacion||"";
+  $("agendaEventBring").value=e?.llevar||"";
+  $("agendaEventComments").value=e?.comentarios||"";
+  $("agendaMsg").textContent="";
+  $("agendaMsg").className="msg";
+  del.style.display=e?"block":"none";
+  updateAgendaMapHint();
+  $("agendaEventLocation").oninput=updateAgendaMapHint;
+  modal.classList.remove("hidden");
+}
+function updateAgendaMapHint(){
+  const el=$("agendaMapPreview"); if(!el)return;
+  const loc=$("agendaEventLocation")?.value.trim()||"";
+  el.innerHTML=loc?`📍 <a href="${mapsLink(loc)}" target="_blank" rel="noopener" style="color:var(--yellow);font-weight:800;text-decoration:none">Abrir esta ubicación en Google Maps</a>`:"Añade una ubicación para disponer del acceso directo al mapa.";
+}
+function closeAgendaEventModal(){$("agendaEventModal")?.classList.add("hidden");agendaEditingId=null;}
+async function saveAgendaEvent(){
+  const msg=$("agendaMsg");
+  const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim()};
+  if(!obj.evento||!obj.fecha){msg.className="msg err";msg.textContent="Indica al menos el evento y la fecha.";return;}
+  msg.className="msg";msg.textContent="Guardando...";
+  try{await callAction({accion:"guardarEvento",evento:JSON.stringify(obj)});await loadAgenda(false);msg.className="msg ok";msg.textContent="Evento guardado ✓";setTimeout(closeAgendaEventModal,400);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el evento.";}
+}
+async function deleteAgendaEvent(){
+  if(!agendaEditingId)return;
+  if(!confirm("¿Eliminar este evento?"))return;
+  const msg=$("agendaMsg");msg.className="msg";msg.textContent="Eliminando...";
+  try{await callAction({accion:"eliminarEvento",id:agendaEditingId});await loadAgenda(false);closeAgendaEventModal();}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo eliminar el evento.";}
+}
+
+/* =========================================================
+   INVENTARIO
+   ========================================================= */
+let inventoryItems=[];
+let inventoryEditingId=null;
+function openInventory(){only("inventoryPage");nav("inventory");renderInventory();loadInventory(false);}
+async function loadInventory(showError=false){
+  try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();}
+  catch(e){try{inventoryItems=JSON.parse(localStorage.getItem("cf_inventory")||"[]")}catch(_){inventoryItems=[]}renderInventory();if(showError)showToastMessage("Sin conexión","No se pudo cargar el inventario.");}
+}
+function renderInventory(){
+  const wrap=$("inventoryList"); if(!wrap)return;
+  const q=($("inventorySearch")?.value||"").trim().toLowerCase();
+  const arr=inventoryItems.filter(i=>(String(i.articulo)+" "+String(i.categoria)+" "+String(i.ubicacion)).toLowerCase().includes(q)).sort((a,b)=>String(a.articulo).localeCompare(String(b.articulo),"es",{sensitivity:"base"}));
+  $("inventoryCount").textContent=inventoryItems.length;
+  $("inventoryLowCount").textContent=inventoryItems.filter(i=>(Number(i.cantidad)||0) <= (Number(i.minimo)||0)).length;
+  wrap.innerHTML=arr.length?arr.map(i=>{
+    const qty=Number(i.cantidad)||0,min=Number(i.minimo)||0,low=qty<=min;
+    return `<div class="stockCard"><div class="stockHead"><div><div class="stockName">${esc(i.articulo)}</div><div class="stockMeta">${esc(i.categoria||"Otros")} · ${esc(i.ubicacion||"Sin ubicación")} · ${esc(i.estado||"Disponible")}</div></div><div class="stockQty ${low?"low":"ok"}">${qty} <span style="font-size:9px;color:#9da7b0;font-weight:700">${esc(i.unidad||"unidades")}</span></div></div>${i.notas?`<div class="stockMeta" style="margin-top:8px">${esc(i.notas)}</div>`:""}<div class="stockActions"><button class="minus" type="button" data-inv-action="minus" data-inv-id="${esc(i.id)}">− 1</button><button class="plus" type="button" data-inv-action="plus" data-inv-id="${esc(i.id)}">＋ 1</button><button class="edit" type="button" data-inv-action="edit" data-inv-id="${esc(i.id)}">EDITAR</button><button class="delete" type="button" data-inv-action="delete" data-inv-id="${esc(i.id)}">ELIMINAR</button></div></div>`;
+  }).join(""):'<div style="padding:22px;text-align:center;color:#66717b">No hay material registrado.</div>';
+}
+function openInventoryModal(id=null){
+  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;
+  $("inventoryModalTitle").textContent=e?"Editar material":"Nuevo material";
+  $("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||"Otros";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad ?? 1);$("invItemMin").value=Number(e?.minimo ?? 0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");
+}
+function closeInventoryModal(){$("inventoryModal")?.classList.add("hidden");inventoryEditingId=null;}
+async function saveInventoryItem(){
+  const msg=$("inventoryMsg");const obj={id:inventoryEditingId||("INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim()};
+  if(!obj.articulo){msg.className="msg err";msg.textContent="Indica el nombre del material.";return;}
+  msg.className="msg";msg.textContent="Guardando...";
+  try{await callAction({accion:"guardarInventario",item:JSON.stringify(obj)});await loadInventory(false);msg.className="msg ok";msg.textContent="Material guardado ✓";setTimeout(closeInventoryModal,350);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el material.";}
+}
+async function adjustInventory(id,delta){
+  const current=inventoryItems.find(x=>String(x.id)===String(id));
+  if(!current)return;
+  const before={...current};
+  const updated={...current,cantidad:Math.max(0,(Number(current.cantidad)||0)+Number(delta||0))};
+  const idx=inventoryItems.findIndex(x=>String(x.id)===String(id));
+  if(idx<0)return;
+  inventoryItems[idx]=updated;
+  localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
+  renderInventory();
+  showToastMessage("Actualizando inventario",`${updated.articulo}: ${updated.cantidad} ${updated.unidad||"unidades"}`);
+  try{
+    await callAction({accion:"guardarInventario",item:JSON.stringify(updated)});
+    await loadInventory(false);
+  }catch(err){
+    inventoryItems[idx]=before;
+    localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
+    renderInventory();
+    showToastMessage("Error",err.message||"No se pudo actualizar el stock.");
+  }
+}
+
+async function deleteInventoryItem(id){
+  const item=inventoryItems.find(x=>String(x.id)===String(id));
+  if(!item)return;
+  if(!confirm(`¿Eliminar "${item.articulo}" del inventario?`))return;
+  const before=[...inventoryItems];
+  inventoryItems=inventoryItems.filter(x=>String(x.id)!==String(id));
+  localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
+  renderInventory();
+  try{
+    await callAction({accion:"eliminarInventario",id:String(id)});
+    showToastMessage("Material eliminado",item.articulo);
+    await loadInventory(false);
+  }catch(err){
+    inventoryItems=before;
+    localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));
+    renderInventory();
+    showToastMessage("Error",err.message||"No se pudo eliminar el material.");
+  }
+}
+
+function syncFromSheets(){
+  return new Promise((resolve,reject)=>{
+    const callback="cfCallback_"+Date.now();
+    const script=document.createElement("script");
+    const timeout=setTimeout(()=>{
+      cleanup();
+      reject(new Error("Tiempo de espera agotado"));
+    },12000);
+
+    window[callback]=data=>{
+      cleanup();
+      if(!data||!data.ok){
+        reject(new Error(data?.error||"Respuesta no válida"));
+        return;
+      }
+      const server=[...(data.compras||[]),...(data.facturacion||[])];
+      server.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+      records=server;
+      localStorage.setItem("cf_records",JSON.stringify(records.slice(0,200)));
+      updatePendingDocuments();
+      renderLatest();
+      if(!$('recordsPage').classList.contains('hidden')){
+        buildRecordPeriods();
+        renderAll();
+      }
+      if(!$('summaryPage').classList.contains('hidden')) updateSummary();
+      resolve(data);
+    };
+
+    script.onerror=()=>{
+      cleanup();
+      reject(new Error("No se pudo conectar con Google Sheets"));
+    };
+
+    function cleanup(){
+      clearTimeout(timeout);
+      delete window[callback];
+      script.remove();
+    }
+
+    script.src=SCRIPT_URL+"?callback="+encodeURIComponent(callback)+"&_="+Date.now();
+    document.body.appendChild(script);
+  });
+}
+
+async function refreshData(showMessage=false){
+  try{
+    await syncFromSheets();
+    if(showMessage) showToastMessage("Datos actualizados", "Los registros se han cargado desde Google Sheets.");
+    return true;
+  }catch(e){
+    console.error(e);
+    if(showMessage) showToastMessage("Sin conexión", "No se pudo leer Google Sheets. Se mantienen los últimos datos guardados.");
+    return false;
+  }
+}
+
+function showToastMessage(title,text){
+  const old=document.getElementById("toast");
+  if(old)old.remove();
+  const d=document.createElement("div");
+  d.id="toast";
+  d.className="toast y";
+  d.innerHTML=`<div class="check">✓</div><h3>${esc(title)}</h3><p>${esc(text)}</p><button onclick="document.getElementById('toast')?.remove()">Aceptar</button>`;
+  document.body.appendChild(d);
+}
+
+function renderLatest(){
+  $("latest").innerHTML=records.length
+    ?records.slice(0,4).map(row).join("")
+    :'<div style="padding:22px;text-align:center;color:#66717b">Todavía no hay registros</div>';
+}
+
+function openRecords(){
+  only("recordsPage");
+  nav("home");
+  buildRecordPeriods();
+  renderAll();
+  refreshData(false);
+}
+
+let recordFilter="all";
+let pendingOnly=false;
+
+function updatePendingDocuments(){
+  const pendingCompras = records.filter(r =>
+    r.tipo==="Compra" && !r.facturaUrl
+  ).length;
+
+  const pendingEmitidas = records.filter(r =>
+    (r.tipo==="Facturado" || r.tipo==="Facturación") && !r.facturaUrl
+  ).length;
+
+  const total = pendingCompras + pendingEmitidas;
+
+  const totalEl=$("pendingTotal");
+  const comprasEl=$("pendingCompras");
+  const emitidasEl=$("pendingEmitidas");
+  const messageEl=$("pendingMessage");
+  const btn=$("pendingBtn");
+
+  if(totalEl) totalEl.textContent=total;
+  if(comprasEl) comprasEl.textContent=pendingCompras;
+  if(emitidasEl) emitidasEl.textContent=pendingEmitidas;
+
+  if(messageEl){
+    messageEl.textContent = total
+      ? `⚠️ Tienes ${total} documento${total===1?"":"s"} pendiente${total===1?"":"s"} de subir.`
+      : "✅ No tienes facturas pendientes de subir.";
+  }
+
+  if(btn) btn.style.display=total ? "block" : "none";
+}
+
+function openPendingRecords(){
+  pendingOnly=true;
+  only("recordsPage");
+  nav("home");
+  buildRecordPeriods();
+  renderAll();
+  refreshData(false);
+}
+
+function buildRecordPeriods(){
+  const sel=$("recordPeriod");
+  const months=[
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+  ];
+  const previous=sel.value || "all";
+  const years=new Set();
+  records.forEach(r=>{
+    const d=new Date(r.fecha);
+    if(!Number.isNaN(d.getTime())) years.add(d.getFullYear());
+  });
+  if(!years.size) years.add(new Date().getFullYear());
+
+  sel.innerHTML='<option value="all">Todos los períodos</option>';
+
+  [...years].sort((a,b)=>b-a).forEach(year=>{
+    sel.innerHTML+=`<option value="${year}">Todo ${year}</option>`;
+    for(let m=1;m<=12;m++){
+      const key=year+"-"+String(m).padStart(2,"0");
+      sel.innerHTML+=`<option value="${key}">${months[m-1]} ${year}</option>`;
+    }
+  });
+
+  if([...sel.options].some(o=>o.value===previous)) sel.value=previous;
+}
+
+function setRecordFilter(filter){
+  recordFilter=filter;
+  pendingOnly=false;
+  document.querySelectorAll(".rf").forEach(b=>{
+    b.classList.toggle("active",b.dataset.filter===filter);
+  });
+  renderAll();
+}
+
+function renderAll(){
+  const q=($("search").value||"").trim().toLowerCase();
+  const period=$("recordPeriod").value;
+
+  const a=records.filter(r=>{
+    if(pendingOnly && r.facturaUrl) return false;
+    if(recordFilter!=="all" && r.tipo!==recordFilter) return false;
+
+    if(period!=="all"){
+      const d=new Date(r.fecha);
+      if(Number.isNaN(d.getTime())) return false;
+
+      if(period.length===4){
+        if(String(d.getFullYear())!==period) return false;
+      }else{
+        const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+        if(key!==period) return false;
+      }
+    }
+
+    return (r.tercero+" "+r.concepto+" "+r.tipo).toLowerCase().includes(q);
+  });
+
+  const compraCount=a.filter(r=>r.tipo==="Compra").length;
+  const facturaCount=a.filter(r=>r.tipo==="Facturado" || r.tipo==="Facturación").length;
+
+  $("recordInfo").textContent=
+    `${a.length} registro${a.length===1?"":"s"} · ${compraCount} compra${compraCount===1?"":"s"} · ${facturaCount} factura${facturaCount===1?"":"s"}`;
+
+  $("all").innerHTML=a.length
+    ?a.map(row).join("")
+    :'<div style="padding:22px;text-align:center;color:#66717b">No hay registros con estos filtros</div>';
+}
+
+
+
+function buildSummaryPeriods(){
+  const sel=$("summaryPeriod");
+  if(!sel) return;
+
+  const months=[
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+  ];
+
+  const previous=sel.value || "all";
+  const years=new Set();
+
+  records.forEach(r=>{
+    const d=new Date(r.fecha);
+    if(!Number.isNaN(d.getTime())) years.add(d.getFullYear());
+  });
+
+  const currentYear=new Date().getFullYear();
+  years.add(currentYear);
+
+  sel.innerHTML=`<option value="all">Todo el año ${currentYear}</option>`;
+
+  [...years].sort((a,b)=>b-a).forEach(year=>{
+    if(year!==currentYear){
+      sel.innerHTML+=`<option value="${year}">Todo el año ${year}</option>`;
+    }
+
+    for(let m=1;m<=12;m++){
+      const key=year+"-"+String(m).padStart(2,"0");
+      sel.innerHTML+=`<option value="${key}">${months[m-1]} ${year}</option>`;
+    }
+  });
+
+  if([...sel.options].some(o=>o.value===previous)){
+    sel.value=previous;
+  }else{
+    sel.value="all";
+  }
+}
+
+async function openSummary(){
+  only("summaryPage");
+  nav("sum");
+
+  // Mostrar inmediatamente los datos disponibles y después sincronizar con Sheets.
+  buildSummaryPeriods();
+  setDefaultEmailMonths();
+  updateSummary();
+
+  const ok=await refreshData(false);
+  if(ok){
+    buildSummaryPeriods();
+    updateSummary();
+  }
+}
+
+function setDefaultEmailMonths(){
+  const now=new Date();
+  const key=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  if($("emailDesde") && !$("emailDesde").value) $("emailDesde").value=key;
+  if($("emailHasta") && !$("emailHasta").value) $("emailHasta").value=key;
+  const saved=localStorage.getItem("cf_email_destino")||"";
+  if($("emailDestino") && !$("emailDestino").value) $("emailDestino").value=saved;
+}
+
+function validEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function sendInvoicesByEmail(){
+  const desde=$("emailDesde")?.value||"";
+  const hasta=$("emailHasta")?.value||"";
+  const correo=$("emailDestino")?.value.trim()||"";
+  const tipoEnvio=$("emailTipo")?.value||"todas";
+  const btn=$("emailBtn");
+  const status=$("emailStatus");
+
+  if(!desde || !hasta){
+    status.className="emailStatus err";
+    status.textContent="Selecciona el mes inicial y el mes final.";
+    return;
+  }
+
+  if(desde>hasta){
+    status.className="emailStatus err";
+    status.textContent="El mes 'Desde' no puede ser posterior a 'Hasta'.";
+    return;
+  }
+
+  if(!validEmail(correo)){
+    status.className="emailStatus err";
+    status.textContent="Introduce un correo electrónico válido.";
+    return;
+  }
+
+  const candidatos=records.filter(r=>{
+    const esCompra=r.tipo==="Compra";
+    const esEmitida=r.tipo==="Facturado" || r.tipo==="Facturación";
+
+    if(tipoEnvio==="compras" && !esCompra) return false;
+    if(tipoEnvio==="emitidas" && !esEmitida) return false;
+    if(tipoEnvio==="todas" && !esCompra && !esEmitida) return false;
+    if(!r.facturaUrl) return false;
+
+    const d=new Date(r.fecha);
+    if(Number.isNaN(d.getTime())) return false;
+
+    const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    return key>=desde && key<=hasta;
+  });
+
+  if(!candidatos.length){
+    status.className="emailStatus err";
+    status.textContent="No hay facturas adjuntadas de ese tipo en el período seleccionado.";
+    return;
+  }
+
+  const tipoTexto=
+    tipoEnvio==="compras" ? "compras" :
+    tipoEnvio==="emitidas" ? "facturas emitidas" :
+    "compras y facturas emitidas";
+
+  if(!confirm(`Se enviarán ${candidatos.length} documento${candidatos.length===1?"":"s"} de ${tipoTexto} a ${correo}. ¿Continuar?`)) return;
+
+  btn.disabled=true;
+  status.className="emailStatus";
+  status.textContent="Preparando y enviando documentación...";
+  localStorage.setItem("cf_email_destino",correo);
+
+  try{
+    const result=await callAction({
+      accion:"enviarFacturas",
+      correo,
+      desde,
+      hasta,
+      tipoEnvio
+    });
+
+    const cantidad=Number(result.documentos||0);
+    const correos=Number(result.correos||1);
+
+    const mensaje=
+      `Se han enviado ${cantidad} documento${cantidad===1?"":"s"} correctamente`+
+      (correos>1 ? ` en ${correos} correos.` : " en 1 correo.");
+
+    status.className="emailStatus ok";
+    status.textContent=mensaje;
+    showToastMessage("Documentación enviada",mensaje);
+
+  }catch(e){
+    console.error(e);
+    status.className="emailStatus err";
+    status.textContent=e.message||"No se pudo enviar la documentación.";
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function updateSummary(){
+  const period=$("summaryPeriod").value;
+  let c=0,f=0,ivs=0,ivr=0,nc=0,nf=0;
+
+  records.forEach(r=>{
+    const d=new Date(r.fecha);
+    if(Number.isNaN(d.getTime())) return;
+
+    let include=false;
+
+    if(period==="all"){
+      include=d.getFullYear()===new Date().getFullYear();
+    }else if(period.length===4){
+      include=String(d.getFullYear())===period;
+    }else{
+      const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+      include=key===period;
+    }
+
+    if(!include) return;
+
+    if(r.tipo==="Compra"){
+      c+=Number(r.total)||0;
+      ivs+=Number(r.iva)||0;
+      nc++;
+    }else if(r.tipo==="Facturado" || r.tipo==="Facturación"){
+      f+=Number(r.total)||0;
+      ivr+=Number(r.iva)||0;
+      nf++;
+    }
+  });
+
+  const resultado=ivs-ivr;
+  const res=$("res");
+  const label=$("resLabel");
+  const hint=$("resHint");
+
+  $("sc").textContent=euro(c);
+  $("sf").textContent=euro(f);
+  $("sis").textContent=euro(ivs);
+  $("sir").textContent=euro(ivr);
+  $("nc").textContent=nc;
+  $("nf").textContent=nf;
+
+  res.classList.remove("ivaResultGood","ivaResultBad","ivaResultNeutral");
+
+  if(resultado>0){
+    res.textContent="+"+euro(resultado);
+    res.classList.add("ivaResultGood");
+    label.textContent="IVA A TU FAVOR";
+    hint.textContent="El IVA soportado es superior al IVA repercutido";
+  }else if(resultado<0){
+    res.textContent="-"+euro(Math.abs(resultado));
+    res.classList.add("ivaResultBad");
+    label.textContent="IVA A PAGAR";
+    hint.textContent="El IVA repercutido es superior al IVA soportado";
+  }else{
+    res.textContent="0,00 €";
+    res.classList.add("ivaResultNeutral");
+    label.textContent="IVA EQUILIBRADO";
+    hint.textContent="El IVA soportado y repercutido están equilibrados";
+  }
+
+}
+
+$("summaryPeriod").addEventListener("change",updateSummary);
+
+updatePendingDocuments();
+
+applyAppSettings();
+migrateOldSuppliers();
+renderSupplierPanel();
+loadSuppliersFromGoogle(false);
+loadInvoiceSettings(false);
+
+$("notificationTime").addEventListener("change",e=>{
+  saveSetting(SETTINGS_KEYS.notificationTime,e.target.value);
+});
+$("buyColor").addEventListener("input",e=>{
+  saveSetting(SETTINGS_KEYS.buyColor,e.target.value);
+});
+$("saleColor").addEventListener("input",e=>{
+  saveSetting(SETTINGS_KEYS.saleColor,e.target.value);
+});
+
+buildSummaryPeriods();
+buildRecordPeriods();
+renderLatest();
+refreshData(false);
+
+
+/* =========================================================
+   SEGURIDAD RÁPIDA · FACE ID / CÓDIGO
+   ========================================================= */
+const SECURITY_CRED_KEY="cf_security_credential";
+const SECURITY_PIN_KEY="cf_security_pin";
+
+function securitySetStatus(text){
+  const el=$("securityStatus");
+  if(el) el.textContent=text||"";
+}
+
+function securityHasWebAuthn(){
+  return !!(window.PublicKeyCredential && navigator.credentials);
+}
+
+function securityRandomBytes(length){
+  const a=new Uint8Array(length);
+  crypto.getRandomValues(a);
+  return a;
+}
+
+function securityB64(bytes){
+  let s="";
+  bytes=new Uint8Array(bytes);
+  bytes.forEach(b=>s+=String.fromCharCode(b));
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+}
+
+function securityUnb64(value){
+  const s=value.replace(/-/g,"+").replace(/_/g,"/");
+  const pad="=".repeat((4-s.length%4)%4);
+  const raw=atob(s+pad);
+  const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i);
+  return out;
+}
+
+async function registerSecurityCredential(){
+  if(!securityHasWebAuthn()) return false;
+
+  try{
+    const credential=await navigator.credentials.create({
+      publicKey:{
+        challenge:securityRandomBytes(32),
+        rp:{name:"Control Fiscal",id:location.hostname},
+        user:{
+          id:securityRandomBytes(16),
+          name:"control-fiscal",
+          displayName:"Control Fiscal"
+        },
+        pubKeyCredParams:[
+          {type:"public-key",alg:-7},
+          {type:"public-key",alg:-257}
+        ],
+        authenticatorSelection:{
+          authenticatorAttachment:"platform",
+          userVerification:"required"
+        },
+        timeout:60000,
+        attestation:"none"
+      }
+    });
+
+    if(!credential) return false;
+
+    localStorage.setItem(SECURITY_CRED_KEY,securityB64(credential.rawId));
+    return true;
+  }catch(e){
+    console.warn("No se pudo registrar Face ID",e);
+    return false;
+  }
+}
+
+async function unlockWithBiometric(){
+  const btn=$("securityBiometricBtn");
+  btn.disabled=true;
+  securitySetStatus("Esperando autenticación…");
+
+  try{
+    let credentialId=localStorage.getItem(SECURITY_CRED_KEY);
+
+    if(!credentialId){
+      const registered=await registerSecurityCredential();
+      if(!registered){
+        securitySetStatus("No se pudo configurar Face ID. Puedes usar un código.");
+        showPinUnlock();
+        return;
+      }
+      unlockSecurity();
+      return;
+    }
+
+    const credential=await navigator.credentials.get({
+      publicKey:{
+        challenge:securityRandomBytes(32),
+        allowCredentials:[{
+          type:"public-key",
+          id:securityUnb64(credentialId)
+        }],
+        userVerification:"required",
+        timeout:60000
+      }
+    });
+
+    if(credential){
+      unlockSecurity();
+      return;
+    }
+
+    throw new Error("No se pudo autenticar");
+
+  }catch(e){
+    console.warn(e);
+    securitySetStatus("Face ID cancelado o no disponible. Puedes usar el código.");
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function showPinUnlock(){
+  const area=$("securityPinArea");
+  const input=$("securityPinInput");
+  if(!area || !input) return false;
+
+  area.style.display="block";
+  area.hidden=false;
+
+  // Evita que el primer toque abra y cierre inmediatamente el panel.
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      input.focus({preventScroll:true});
+      if(typeof input.select === "function") input.select();
+    },50);
+  });
+
+  if(!localStorage.getItem(SECURITY_PIN_KEY)){
+    $("securityText").textContent="Primero crea un código de 4 cifras para proteger la aplicación.";
+    $("securityPinInput").placeholder="Crear código";
+  }else{
+    $("securityText").textContent="Introduce tu código de 4 cifras para continuar.";
+    $("securityPinInput").placeholder="••••••";
+  }
+}
+
+function unlockWithPin(){
+  const input=$("securityPinInput");
+  const pin=String(input.value||"").trim();
+
+  if(!/^\d{4}$/.test(pin)){
+    securitySetStatus("El código debe tener 4 cifras.");
+    return;
+  }
+
+  const saved=localStorage.getItem(SECURITY_PIN_KEY);
+
+  if(!saved){
+    localStorage.setItem(SECURITY_PIN_KEY,pin);
+    securitySetStatus("Código creado.");
+    unlockSecurity();
+    return;
+  }
+
+  if(pin!==saved){
+    securitySetStatus("Código incorrecto.");
+    input.value="";
+    return;
+  }
+
+  unlockSecurity();
+}
+
+function unlockSecurity(){
+  const lock=$("securityLock");
+  if(lock) lock.classList.add("hidden");
+  securitySetStatus("");
+}
+
+function lockSecurity(){
+  const lock=$("securityLock");
+  if(!lock) return;
+  lock.classList.remove("hidden");
+  $("securityPinArea").style.display="none";
+  $("securityPinArea").hidden=true;
+  $("securityPinInput").value="";
+  securitySetStatus("");
+}
+
+function securityStart(){
+  // La app siempre arranca bloqueada.
+  lockSecurity();
+
+  // Si Face ID está disponible y ya fue registrado, dejamos el botón preparado.
+  if(!securityHasWebAuthn()){
+    $("securityBiometricBtn").style.display="none";
+  }
+
+  const input=$("securityPinInput");
+  if(input){
+    input.addEventListener("keydown",e=>{
+      if(e.key==="Enter") unlockWithPin();
+    });
+  }
+}
+
+/*
+ * Bloqueo al abrir o volver a cargar la aplicación.
+ * No usamos visibilitychange porque en iPhone puede
+ * dispararse al abrir el teclado y cerrar accidentalmente
+ * la ventana del PIN.
+ */
+loadClients(false);
+loadInventory(false);
+loadAgenda(false);
+securityStart();
+
+</script>
+
+
+
+<div id="inventoryModal" class="modal hidden" onclick="if(event.target===this)closeInventoryModal()">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeInventoryModal()">×</button>
+    <div class="modalTitle">📦 <span id="inventoryModalTitle">Nuevo material</span></div>
+    <div class="inventoryModalGrid">
+      <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. DAS Event 28A"></div>
+      <div class="field"><label>Categoría</label><select id="invItemCategory" class="select"><option>Audio</option><option>Iluminación</option><option>Pantallas LED</option><option>Estructuras</option><option>Cableado</option><option>Otros</option></select></div>
+      <div class="field"><label>Unidad</label><select id="invItemUnit" class="select"><option>unidades</option><option>metros</option><option>pares</option><option>juegos</option><option>cajas</option></select></div>
+      <div class="field"><label>Cantidad</label><input id="invItemQty" class="input" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
+      <div class="field"><label>Stock mínimo</label><input id="invItemMin" class="input" type="number" min="0" step="1" inputmode="numeric" value="0"></div>
+      <div class="field"><label>Ubicación</label><input id="invItemLocation" class="input" placeholder="Ej. Almacén 1"></div>
+      <div class="field"><label>Estado</label><select id="invItemStatus" class="select"><option>Disponible</option><option>En reparación</option><option>No disponible</option></select></div>
+      <div class="field full"><label>Notas</label><textarea id="invItemNotes" class="textarea" placeholder="Opcional"></textarea></div>
+    </div>
+    <button id="inventorySaveBtn" class="save y" type="button">GUARDAR MATERIAL</button>
+    <div id="inventoryMsg" class="msg"></div>
+  </div>
+</div>
+
+<div id="agendaEventModal" class="modal hidden" onclick="if(event.target===this)closeAgendaEventModal()">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeAgendaEventModal()">×</button>
+    <div class="modalTitle">📅 <span id="agendaModalTitle">Nuevo evento</span></div>
+    <div class="agendaFormGrid">
+      <div class="field full"><label>Evento</label><input id="agendaEventName" class="input" placeholder="Ej. Fiesta de verano"></div>
+      <div class="field"><label>Fecha</label><input id="agendaEventDate" class="input" type="date"></div>
+      <div class="field"><label>Hora de inicio</label><input id="agendaEventStart" class="input" type="time"></div>
+      <div class="field"><label>Hora de fin</label><input id="agendaEventEnd" class="input" type="time"></div>
+      <div class="field"><label>Cliente / contacto</label><input id="agendaEventClient" class="input" placeholder="Opcional"></div>
+      <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Ej. Piscina municipal, Castillejo de Iniesta"></div>
+      <div class="field full"><label>Qué tengo que llevar</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Pantalla 6x2, 2 subs, 4 cabezas, cableado..."></textarea></div>
+      <div class="field full"><label>Comentarios</label><textarea id="agendaEventComments" class="textarea" placeholder="Montaje, horario de llegada, contacto, instrucciones..."></textarea></div>
+    </div>
+    <div id="agendaMapPreview" class="settingsHint" style="margin:4px 0 10px"></div>
+    <button class="save p" type="button" onclick="saveAgendaEvent()">GUARDAR EVENTO</button>
+    <button class="deleteBtn" id="agendaDeleteBtn" type="button" style="margin-top:8px;display:none" onclick="deleteAgendaEvent()">ELIMINAR EVENTO</button>
+    <div id="agendaMsg" class="msg"></div>
+  </div>
+</div>
+
+<div id="clientSaveModal" class="modal hidden" onclick="if(event.target===this)closeSimpleClientModal()">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeSimpleClientModal()">×</button>
+    <div class="modalTitle">👤 Guardar cliente</div>
+    <div class="settingsHint" style="margin-bottom:14px">Guarda estos datos para reutilizarlos en futuras facturas.</div>
+    <div class="settingsInvoiceGrid">
+      <div class="field"><label>Nombre / Empresa</label><input id="savedClientName" class="input" placeholder="Ej. Empresa cliente"></div>
+      <div class="field"><label>CIF / NIF</label><input id="savedClientTaxId" class="input" placeholder="Ej. B00000000"></div>
+      <div class="field full"><label>Dirección</label><input id="savedClientAddress" class="input" placeholder="Ej. Calle Principal 1"></div>
+      <div class="field"><label>Código postal</label><input id="savedClientPostalCode" class="input" placeholder="Ej. 28001"></div>
+      <div class="field"><label>Ciudad</label><input id="savedClientCity" class="input" placeholder="Ej. Madrid"></div>
+      <div class="field"><label>Provincia</label><input id="savedClientProvince" class="input" placeholder="Ej. Madrid"></div>
+      <div class="field"><label>Teléfono</label><input id="savedClientPhone" class="input" placeholder="Ej. 900 000 000"></div>
+      <div class="field"><label>Email</label><input id="savedClientEmail" class="input" type="email" placeholder="cliente@empresa.com"></div>
+    </div>
+    <button class="save p settingsSave" type="button" onclick="saveSimpleClient()">GUARDAR CLIENTE</button>
+    <div id="clientSaveMsg" class="msg"></div>
+  </div>
+</div>
+
+<div id="invoiceSettingsModal" class="modal hidden" onclick="if(event.target===this)closeInvoiceSettings()">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeInvoiceSettings()">×</button>
+    <div class="modalTitle">🧾 Mis datos de facturación</div>
+    <div class="settingsHint" style="margin-bottom:14px">Estos datos se utilizarán como emisor en las nuevas facturas.</div>
+    <div class="settingsInvoiceGrid">
+      <div class="field"><label>Nombre / Empresa</label><input id="issuerName" class="input" placeholder="Ej. Empresa de servicios"></div>
+      <div class="field"><label>CIF / NIF</label><input id="issuerTaxId" class="input" placeholder="Ej. B00000000"></div>
+      <div class="field full"><label>Dirección</label><input id="issuerAddress" class="input" placeholder="Ej. Calle Principal 1"></div>
+      <div class="field"><label>Código postal</label><input id="issuerPostalCode" class="input" inputmode="numeric" placeholder="Ej. 28001"></div>
+      <div class="field"><label>Ciudad</label><input id="issuerCity" class="input" placeholder="Ej. Madrid"></div>
+      <div class="field"><label>Provincia</label><input id="issuerProvince" class="input" placeholder="Ej. Madrid"></div>
+      <div class="field"><label>Teléfono</label><input id="issuerPhone" class="input" inputmode="tel" placeholder="Ej. 900 000 000"></div>
+      <div class="field"><label>Email</label><input id="issuerEmail" class="input" type="email" placeholder="Ej. correo@empresa.com"></div>
+      <div class="field full"><label>Cuenta bancaria / IBAN</label><input id="issuerIban" class="input" placeholder="Ej. ES00 0000 0000 0000 0000 0000"></div>
+    </div>
+    <button class="save p settingsSave" type="button" onclick="saveInvoiceSettings()">GUARDAR DATOS</button>
+    <div id="issuerMsg" class="msg"></div>
+  </div>
+</div>
+
+<div id="guideModal" class="modal hidden guideModal" onclick="if(event.target===this)closeGuide()">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeGuide()">×</button>
+    <div class="modalTitle">📖 Guía de Control Fiscal</div>
+    <div class="guideStep"><div class="guideNum">1</div><div><h4>Registrar una compra</h4><p>En Compras introduce proveedor, concepto, importe total con IVA y porcentaje de IVA. Puedes adjuntar el PDF o una foto de la factura.</p></div></div>
+    <div class="guideStep"><div class="guideNum">2</div><div><h4>Crear una factura</h4><p>En Facturación introduce los datos del cliente, añade tantos conceptos como necesites y la aplicación calcula la base, el IVA y el total. Tus datos de emisor se configuran en Ajustes.</p></div></div>
+    <div class="guideStep"><div class="guideNum">3</div><div><h4>Consultar el resumen</h4><p>Resumen muestra compras, facturación, IVA soportado, IVA repercutido y el resultado del IVA. Verde significa a tu favor, rojo significa a pagar y amarillo significa equilibrado.</p></div></div>
+    <div class="guideStep"><div class="guideNum">4</div><div><h4>Revisar documentos pendientes</h4><p>La aplicación cuenta las compras y facturas emitidas que todavía no tienen un archivo adjunto y permite verlas directamente.</p></div></div>
+    <div class="guideStep"><div class="guideNum">5</div><div><h4>Enviar documentación al gestor</h4><p>Selecciona compras, facturas emitidas o ambas, elige el período y pulsa Enviar documentación. Los archivos adjuntos se envían por correo.</p></div></div>
+    <div class="guideStep"><div class="guideNum">6</div><div><h4>Ajustes</h4><p>Puedes configurar tus datos de facturación, cambiar el fondo, los colores de Compras y Facturación y guardar la hora que prefieres para el recordatorio diario.</p></div></div>
+    <div class="guideStep"><div class="guideNum">7</div><div><h4>Agenda e inventario</h4><p>Agenda guarda eventos por fecha y hora, ubicación, qué llevar y comentarios. Inventario permite controlar cantidades con botones +1 y −1, editar y eliminar material, stock mínimo y ubicación.</p></div></div>
+    <div class="guideStep"><div class="guideNum">8</div><div><h4>Seguridad</h4><p>La aplicación se protege mediante código de 4 dígitos y autenticación del dispositivo cuando está disponible.</p></div></div>
+    <button class="modalAction" type="button" onclick="closeGuide()">CERRAR</button>
+  </div>
+</div>
+
+<div id="infoModal" class="modal hidden" onclick="if(event.target===this)closeInfo()">
+  <div class="modalCard">
+    <button class="modalClose" type="button" onclick="closeInfo()">×</button>
+    <div class="modalTitle">ⓘ Información</div>
+    <div class="infoBrand">
+      <div class="creator">Enrique Lucas</div>
+      <div class="brand">Chispas Sound</div>
+      <div class="year">2026 inc.</div>
+    </div>
+    <button class="modalAction" type="button" onclick="closeInfo()">CERRAR</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  function setupInventoryControls(){
+    const newBtn=document.getElementById("inventoryNewBtn");
+    const saveBtn=document.getElementById("inventorySaveBtn");
+    const list=document.getElementById("inventoryList");
+    if(newBtn) newBtn.addEventListener("click",()=>openInventoryModal());
+    if(saveBtn) saveBtn.addEventListener("click",()=>saveInventoryItem());
+    if(list) list.addEventListener("click",function(ev){
+      const btn=ev.target.closest("button[data-inv-action]");
+      if(!btn)return;
+      const id=btn.getAttribute("data-inv-id");
+      const action=btn.getAttribute("data-inv-action");
+      if(!id)return;
+      if(action==="minus") adjustInventory(id,-1);
+      else if(action==="plus") adjustInventory(id,1);
+      else if(action==="edit") openInventoryModal(id);
+      else if(action==="delete") deleteInventoryItem(id);
+    });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",setupInventoryControls);
+  else setupInventoryControls();
+})();
+</script>
+</body>
+</html>

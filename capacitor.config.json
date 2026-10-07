@@ -1,0 +1,8 @@
+{
+  "appId": "com.chispassound.controlfiscal",
+  "appName": "Control Fiscal",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "automatic"
+  }
+}
