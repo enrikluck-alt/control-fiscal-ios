@@ -1173,6 +1173,36 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcJB5MwzcFw9Zm7WQkVhLgWCi35YMC_3XCoqvc8VAet3G8-f8hxlpuTTJUcod3Z2YJAA/exec";
 
+
+/* =========================================================
+   COMPATIBILIDAD WEB / iOS NATIVO
+   En Capacitor, CapacitorHttp puede sustituir fetch/XMLHttpRequest
+   para permitir peticiones nativas a Google Apps Script.
+   ========================================================= */
+function isNativeApp(){
+  try{
+    return !!(
+      window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === "function" &&
+      window.Capacitor.isNativePlatform()
+    );
+  }catch(e){
+    return false;
+  }
+}
+
+async function nativeJsonRequest(url, options={}){
+  const response = await fetch(url, options);
+  if(!response || !response.ok){
+    throw new Error(`HTTP ${response?.status||0} al conectar con Google Sheets`);
+  }
+  const data = await response.json();
+  if(data && data.ok === false){
+    throw new Error(data.error || "Google Sheets devolvió un error");
+  }
+  return data;
+}
+
 const $=id=>document.getElementById(id);
 let records=JSON.parse(localStorage.getItem("cf_records")||"[]");
 
@@ -1986,14 +2016,25 @@ async function sendRecord(tipo){
       payload.archivoBase64=await readFileAsBase64(file);
     }
 
-    await fetch(SCRIPT_URL,{
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(payload)
-    });
+    if(isNativeApp()){
+      const result=await nativeJsonRequest(SCRIPT_URL,{
+        method:"POST",
+        headers:{"Content-Type":"text/plain;charset=utf-8","Accept":"application/json"},
+        body:JSON.stringify(payload)
+      });
+      if(result && result.ok === false){
+        throw new Error(result.error || "Google Sheets no ha podido guardar el registro.");
+      }
+    }else{
+      await fetch(SCRIPT_URL,{
+        method:"POST",
+        mode:"no-cors",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify(payload)
+      });
+    }
 
-    await new Promise(resolve=>setTimeout(resolve,900));
+    await new Promise(resolve=>setTimeout(resolve,350));
     const data=await syncFromSheets();
 
     const encontrado=(data.compras||[]).concat(data.facturacion||[]).some(r=>
@@ -2133,6 +2174,18 @@ $("modalTotal").addEventListener("input",calcModal);
 $("modalIva").addEventListener("change",calcModal);
 
 function callAction(payload){
+  if(isNativeApp()){
+    return (async()=>{
+      const params=new URLSearchParams();
+      Object.entries(payload).forEach(([k,v])=>params.set(k,String(v)));
+      params.set("_",Date.now().toString());
+      return await nativeJsonRequest(SCRIPT_URL+"?"+params.toString(),{
+        method:"GET",
+        headers:{"Accept":"application/json"}
+      });
+    })();
+  }
+
   return new Promise((resolve,reject)=>{
     const callback="cfAction_"+Date.now()+"_"+Math.floor(Math.random()*10000);
     const script=document.createElement("script");
@@ -2418,6 +2471,27 @@ async function deleteInventoryItem(id){
 }
 
 function syncFromSheets(){
+  if(isNativeApp()){
+    return (async()=>{
+      const data=await nativeJsonRequest(SCRIPT_URL+"?_="+Date.now(),{
+        method:"GET",
+        headers:{"Accept":"application/json"}
+      });
+      const server=[...(data.compras||[]),...(data.facturacion||[])];
+      server.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+      records=server;
+      localStorage.setItem("cf_records",JSON.stringify(records.slice(0,200)));
+      updatePendingDocuments();
+      renderLatest();
+      if(!$('recordsPage').classList.contains('hidden')){
+        buildRecordPeriods();
+        renderAll();
+      }
+      if(!$('summaryPage').classList.contains('hidden')) updateSummary();
+      return data;
+    })();
+  }
+
   return new Promise((resolve,reject)=>{
     const callback="cfCallback_"+Date.now();
     const script=document.createElement("script");
