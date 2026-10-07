@@ -16,17 +16,38 @@
 }
 *{box-sizing:border-box}
 html,body{
-  margin:0;background:var(--bg);color:var(--white);
+  margin:0;background:var(--bg) !important;color:var(--white);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif;
+  min-height:100%;
+  overscroll-behavior-y:none;
+  -webkit-overflow-scrolling:touch;
+}
+html{background:var(--bg) !important;}
+body{
+  overflow-x:hidden;
+  padding:0;
 }
 button,input,select{font:inherit}
 button{cursor:pointer}
 .app{
   width:100%;max-width:560px;min-height:100vh;margin:auto;
   background:linear-gradient(180deg,#0a1015,#0a1117);
-  padding-bottom:82px;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom));
+  overflow-x:hidden;
 }
-.hero{padding:10px 15px 13px}
+.hero{
+  position:sticky;top:0;z-index:40;
+  padding:calc(10px + env(safe-area-inset-top)) 15px 13px;
+  background:rgba(10,16,21,.72);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);
+  backdrop-filter:blur(22px) saturate(160%);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.hero::after{
+  content:"";position:absolute;left:0;right:0;bottom:-18px;height:18px;
+  background:linear-gradient(180deg,rgba(10,16,21,.24),transparent);
+  pointer-events:none;
+}
 .logos{
   display:flex;
   gap:16px;
@@ -119,21 +140,43 @@ button{cursor:pointer}
   color:#aeb7bf;font-weight:800;
 }
 .bottom{
-  position:fixed;z-index:50;bottom:0;left:50%;
-  transform:translateX(-50%);width:min(560px,100%);height:76px;
-  background:#0b1217;border-top:1px solid #29343c;
-  display:grid;grid-template-columns:repeat(5,1fr);
-  padding-bottom:env(safe-area-inset-bottom);
+  position:fixed;z-index:80;bottom:0;left:50%;
+  transform:translateX(-50%);width:min(560px,100%);
+  height:calc(88px + env(safe-area-inset-bottom));
+  padding:7px 6px env(safe-area-inset-bottom);
+  background:rgba(11,18,23,.78);
+  border-top:1px solid rgba(255,255,255,.10);
+  -webkit-backdrop-filter:blur(24px) saturate(165%);
+  backdrop-filter:blur(24px) saturate(165%);
+  display:grid;grid-template-columns:repeat(6,1fr);
+  box-shadow:0 -10px 30px rgba(0,0,0,.18);
 }
 .bottom button{
-  border:0;background:transparent;color:#aeb7bf;
-  font-size:9px;font-weight:700;
+  position:relative;border:0;background:transparent;color:#aeb7bf;
+  font-size:10px;font-weight:800;letter-spacing:.1px;
+  min-width:44px;min-height:44px;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  -webkit-tap-highlight-color:transparent;
 }
-.bottom svg{display:block;width:25px;height:25px;margin:0 auto 2px}
+.bottom button span{display:block;line-height:1.05;}
+.bottom button::before{
+  content:"";position:absolute;inset:3px 5px;z-index:-1;border-radius:14px;
+  background:transparent;transition:background .18s ease,opacity .18s ease;
+}
+.bottom button.ay::before{background:rgba(255,223,24,.13);}
+.bottom button.ap::before{background:rgba(223,114,239,.14);}
+.bottom button:active{transform:scale(.96);}
+.bottom svg{display:block;width:30px;height:30px;margin:0}
 .bottom .ay{color:var(--yellow)}
 .bottom .ap{color:var(--purple)}
 .header{
-  display:flex;align-items:center;gap:10px;padding:18px 16px 12px;
+  position:sticky;top:0;z-index:35;
+  display:flex;align-items:center;gap:10px;
+  padding:calc(12px + env(safe-area-inset-top)) 16px 12px;
+  background:rgba(10,16,21,.76);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);
+  backdrop-filter:blur(22px) saturate(160%);
+  border-bottom:1px solid rgba(255,255,255,.07);
 }
 .back{border:0;background:none;color:#fff;font-size:32px;padding:0}
 .headericon{width:30px;height:30px;flex:none}
@@ -462,9 +505,17 @@ button{cursor:pointer}
   .calEvent{font-size:7px}
   .stockActions button,.stockActions a{min-width:72px}
 }
-.bottom{grid-template-columns:repeat(6,1fr)}
-.bottom button{font-size:8px}
-.bottom svg{width:23px;height:23px}
+@media(max-width:430px){
+  .bottom button{font-size:9.5px}
+  .bottom svg{width:29px;height:29px}
+}
+
+
+/* iOS native feel */
+section{min-height:1px;}
+img{ -webkit-user-drag:none; }
+*{scrollbar-width:none;}
+*::-webkit-scrollbar{width:0;height:0;}
 
 </style>
 
