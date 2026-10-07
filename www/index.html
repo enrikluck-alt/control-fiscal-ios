@@ -12,7 +12,7 @@
 :root{
   --bg:#080e13;--card:#121a21;--line:#3d4b56;
   --yellow:#ffdf18;--purple:#df72ef;--white:#f6f8fa;
-  --muted:#aeb7bf;--green:#49ee9d;--red:#ff5965;
+  --muted:#aeb7bf;--green:#49ee9d;--red:#ff5965;--pendingIncome:#49ee9d;
 }
 *{box-sizing:border-box}
 html,body{
@@ -49,6 +49,28 @@ button{cursor:pointer}
   flex-direction:column;
   position:relative;
   isolation:isolate;
+}
+.scrollIndicator{
+  position:fixed;
+  top:calc(68px + env(safe-area-inset-top));
+  right:3px;
+  bottom:calc(94px + env(safe-area-inset-bottom));
+  width:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.06);
+  z-index:115;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .15s ease;
+}
+.scrollIndicator.visible{opacity:1}
+.scrollIndicatorThumb{
+  position:absolute;
+  left:0;right:0;top:0;
+  min-height:24px;
+  border-radius:999px;
+  background:rgba(255,255,255,.46);
+  box-shadow:0 0 10px rgba(255,255,255,.08);
 }
 .hero{
   position:relative;top:auto;z-index:40;
@@ -265,6 +287,8 @@ section:not(#home){
 .sum{padding:12px;border-radius:11px;color:#111}
 .sum.y{background:var(--yellow)}
 .sum.p{background:var(--purple)}
+.sum.pendingIncomeSum{grid-column:1/-1;background:var(--pendingIncome);border-color:var(--pendingIncome);color:#111}
+.sum.pendingIncomeSum span{display:block;font-size:10px;font-weight:800;margin-top:6px;opacity:.78}
 .sum small{font-size:9px}
 .sum b{display:block;font-size:18px;margin-top:5px}
 .ivapanel{
@@ -307,6 +331,25 @@ section:not(#home){
 .invoiceForm{padding:0 16px}
 .invoiceSection{background:#111920;border:1px solid #3b4b57;border-radius:12px;padding:12px;margin-bottom:12px}
 .invoiceCreateBox{margin:14px 0 24px;padding:14px;border:1px solid #3b4b57;border-radius:12px;background:#111920}
+.pendingIncomeBoxText{margin-top:16px;padding-top:14px;border-top:1px solid #2f3b44}
+.pendingIncomeButton{background:var(--pendingIncome)!important;color:#111}
+.pendingIncomeListBox{margin-top:14px;padding-top:6px}
+.pendingIncomeListHead{display:flex;align-items:center;justify-content:space-between;font-size:10px;margin:0 0 7px}
+.pendingIncomeListHead span{min-width:22px;height:22px;border-radius:11px;background:#1b2723;color:var(--pendingIncome);display:grid;place-items:center;font-size:9px}
+.pendingIncomeRow{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #2b3740}
+.pendingIncomeRow>div:first-child{flex:1;min-width:0}
+.pendingIncomeRow strong{display:block;font-size:11px}
+.pendingIncomeRow span{display:block;color:#9da7b0;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.pendingIncomeNums{text-align:right;min-width:105px}
+.pendingIncomeNums b{display:block;font-size:11px}
+.pendingIncomeNums span{font-size:8px!important;color:#49ee9d!important;margin-top:2px!important}
+.pendingIncomeNums span.negativeBenefit{color:var(--red)!important}
+.pendingIncomeDelete{width:30px;height:30px;border:1px solid #4a5863;background:#161f26;color:#ff5965;border-radius:9px;font-size:19px;flex:none}
+.pendingIncomeEmpty{text-align:center;padding:14px;color:#66717b;font-size:9px}
+.pendingIncomeForm{padding:0 16px calc(112px + env(safe-area-inset-bottom))}
+.pendingBenefitBox{background:var(--pendingIncome)!important;border-color:var(--pendingIncome)!important;color:#111}
+.pendingBenefitBox.negativeBenefit{background:rgba(255,89,101,.18)!important;border-color:var(--red)!important;color:#fff}
+.pendingIncomeCalc{margin-top:4px}
 .invoiceCreateText{margin-bottom:11px}
 .invoiceCreateText strong{display:block;font-size:14px;margin-bottom:4px}
 .invoiceCreateText span{display:block;color:var(--muted);font-size:12px;line-height:1.4}
@@ -853,6 +896,61 @@ body.lightTheme .themeBtn.active{
 .supplierPanel{margin-top:10px}
 </style>
 
+
+<style id="cf-v54-viewport-fix">
+:root{
+  --cf-vh:100dvh;
+  --cf-bottom-height:calc(88px + env(safe-area-inset-bottom));
+}
+html,body{
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow:hidden !important;
+  overscroll-behavior:none !important;
+}
+.app{
+  position:fixed !important;
+  inset:0 !important;
+  width:100% !important;
+  height:var(--cf-vh) !important;
+  max-width:560px !important;
+  max-height:none !important;
+  min-height:0 !important;
+  margin:0 auto !important;
+  overflow:hidden !important;
+}
+.header{
+  position:absolute !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  width:100% !important;
+  transform:none !important;
+}
+.bottom{
+  position:absolute !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  width:100% !important;
+  transform:none !important;
+  height:var(--cf-bottom-height) !important;
+  padding-bottom:env(safe-area-inset-bottom) !important;
+}
+.page{
+  padding-bottom:calc(var(--cf-bottom-height) + 12px) !important;
+}
+.form{
+  padding-bottom:calc(var(--cf-bottom-height) + 12px) !important;
+}
+.modalCard{
+  max-height:calc(var(--cf-vh) - 36px) !important;
+}
+@supports (-webkit-touch-callout:none){
+  body{-webkit-text-size-adjust:100%;}
+}
+</style>
 </head>
 
 <body>
@@ -1045,6 +1143,11 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     <div class="sumgrid">
       <div class="sum y"><small>Total Compras</small><b id="sc">0,00 €</b></div>
       <div class="sum p"><small>Total Facturación</small><b id="sf">0,00 €</b></div>
+      <div class="sum pendingIncomeSum">
+        <small>Ingresos pendientes de factura</small>
+        <b id="spPending">0,00 €</b>
+        <span id="spPendingBenefit">Beneficio: 0,00 €</span>
+      </div>
     </div>
 
     <div class="ivapanel">
@@ -1182,6 +1285,17 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
       <div class="settingsGroup">
+        <div class="settingsTitle">🟢 COLOR DE INGRESOS PENDIENTES</div>
+        <div class="settingsRow">
+          <div>
+            <div class="settingsLabel">Ingresos pendientes de factura</div>
+            <div class="settingsHint">Color utilizado para el apartado separado de ingresos aún no incluidos en una factura.</div>
+          </div>
+          <input id="pendingIncomeColor" class="colorControl" type="color" value="#49ee9d" aria-label="Color de ingresos pendientes">
+        </div>
+      </div>
+
+      <div class="settingsGroup">
         <div class="settingsTitle">🏪 TIENDAS / PROVEEDORES</div>
         <div class="settingsHint">
           Las tiendas y proveedores se guardan por separado. En una compra puedes escribir unas letras, por ejemplo <strong>Ma</strong>, y seleccionar directamente la coincidencia.
@@ -1307,6 +1421,10 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
   </div>
 </div>
 
+<div id="scrollIndicator" class="scrollIndicator" aria-hidden="true">
+  <div id="scrollIndicatorThumb" class="scrollIndicatorThumb"></div>
+</div>
+
 <nav class="bottom">
   <button id="nh" class="ay" onclick="goHome()">🏠<span>Inicio</span></button>
   <button id="nb" onclick="openForm('Compra')">🛒<span>Compras</span></button>
@@ -1376,6 +1494,7 @@ function only(id){
   ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage"].forEach(x=>{
     $(x).classList.toggle("hidden",x!==id);
   });
+  setTimeout(updateScrollIndicator,0);
 }
 
 function nav(x){
@@ -1400,6 +1519,7 @@ const SETTINGS_KEYS={
   theme:"cf_theme",
   buyColor:"cf_buy_color",
   saleColor:"cf_sale_color",
+  pendingIncomeColor:"cf_pending_income_color",
   notificationTime:"cf_notification_time",
   invoiceConfig:"cf_invoice_config"
 };
@@ -1408,11 +1528,13 @@ function applyAppSettings(){
   const theme=localStorage.getItem(SETTINGS_KEYS.theme)||"dark";
   const buy=localStorage.getItem(SETTINGS_KEYS.buyColor)||"#ffdf18";
   const sale=localStorage.getItem(SETTINGS_KEYS.saleColor)||"#df72ef";
+  const pendingIncome=localStorage.getItem(SETTINGS_KEYS.pendingIncomeColor)||"#49ee9d";
   const time=localStorage.getItem(SETTINGS_KEYS.notificationTime)||"";
 
   document.body.classList.toggle("lightTheme",theme==="light");
   document.documentElement.style.setProperty("--yellow",buy);
   document.documentElement.style.setProperty("--purple",sale);
+  document.documentElement.style.setProperty("--pendingIncome",pendingIncome);
 
   const timeInput=$("notificationTime");
   const buyInput=$("buyColor");
@@ -1441,6 +1563,7 @@ function openSettings(){
   renderSupplierPanel();
   loadSuppliersFromGoogle(false);
   loadInvoiceSettings(false);
+loadPendingIncome(false);
 }
 
 function saveSetting(key,value){
@@ -1452,6 +1575,7 @@ function resetAppSettings(){
   localStorage.removeItem(SETTINGS_KEYS.theme);
   localStorage.removeItem(SETTINGS_KEYS.buyColor);
   localStorage.removeItem(SETTINGS_KEYS.saleColor);
+  localStorage.removeItem(SETTINGS_KEYS.pendingIncomeColor);
   localStorage.removeItem(SETTINGS_KEYS.notificationTime);
   applyAppSettings();
   showToastMessage("Ajustes restablecidos","Se han recuperado los valores originales.");
@@ -1728,8 +1852,118 @@ function openFacturacionPage(){
       <strong>¿Quieres crear una factura completa?</strong>
       <span>Introduce los datos del cliente y varios conceptos y genera el importe final con IVA.</span>
     </div>
-    <button class="save p" type="button" onclick="openInvoiceForm()">🧾 CREAR FACTURA</button>`;
+    <button class="save p" type="button" onclick="openInvoiceForm()">🧾 CREAR FACTURA</button>
+    <div class="invoiceCreateText pendingIncomeBoxText">
+      <strong>¿Quieres registrar un ingreso pendiente de factura?</strong>
+      <span>Introduce la persona, el servicio, el coste del material y lo cobrado. Se calcula el beneficio por separado y no se incorpora al total de facturación con IVA.</span>
+    </div>
+    <button class="save pendingIncomeButton" type="button" onclick="openPendingIncomeForm()">🟢 REGISTRAR INGRESO PENDIENTE</button>
+    <div class="pendingIncomeListBox">
+      <div class="pendingIncomeListHead"><strong>ÚLTIMOS INGRESOS PENDIENTES</strong><span id="pendingIncomeCount">0</span></div>
+      <div id="pendingIncomeList"></div>
+    </div>`;
   body.appendChild(wrap);
+  loadPendingIncome(false);
+}
+
+
+let pendingIncomeRecords=[];
+let pendingIncomeSyncInProgress=false;
+
+function renderPendingIncomeList(){
+  const wrap=$("pendingIncomeList");
+  const count=$("pendingIncomeCount");
+  if(count) count.textContent=String(pendingIncomeRecords.length);
+  if(!wrap) return;
+  const arr=pendingIncomeRecords.slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  wrap.innerHTML=arr.length ? arr.slice(0,8).map(item=>{
+    const benefit=Number(item.beneficio)||0;
+    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}</span></div><div class="pendingIncomeNums"><b>${euro(item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio ${euro(benefit)}</span></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
+  }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos pendientes registrados.</div>';
+}
+
+async function loadPendingIncome(showError=false){
+  if(pendingIncomeSyncInProgress) return;
+  pendingIncomeSyncInProgress=true;
+  try{
+    const data=await callAction({accion:"listarIngresosPendientes"});
+    pendingIncomeRecords=Array.isArray(data.ingresos)?data.ingresos:[];
+    localStorage.setItem("cf_pending_income",JSON.stringify(pendingIncomeRecords));
+    renderPendingIncomeList();
+    updateSummary();
+  }catch(e){
+    try{pendingIncomeRecords=JSON.parse(localStorage.getItem("cf_pending_income")||"[]");}catch(_){pendingIncomeRecords=[];}
+    renderPendingIncomeList();
+    updateSummary();
+    if(showError) showToastMessage("Sin conexión","No se pudieron cargar los ingresos pendientes.");
+  }finally{pendingIncomeSyncInProgress=false;}
+}
+
+function openPendingIncomeForm(){
+  only("formPage");
+  nav("sale");
+  invoiceConfig=getInvoiceConfig();
+  $("formHeader").dataset.tipo="IngresoPendiente";
+  $("formHeader").innerHTML=`
+    <button class="back" onclick="openFacturacionPage()">‹</button>
+    <div class="headericon"><span style="font-size:27px">🟢</span></div>
+    <div><h2>INGRESO PENDIENTE</h2><p>Registra un servicio aún no facturado</p></div>`;
+  $("formBody").innerHTML=`
+    <div class="pendingIncomeForm">
+      <div class="invoiceSection">
+        <h3>🟢 DATOS DEL SERVICIO</h3>
+        <div class="field"><label>Persona</label><input id="pendingPerson" class="input" placeholder="Ej. Juan Pérez"></div>
+        <div class="field"><label>Tipo de servicio</label><input id="pendingService" class="input" placeholder="Ej. Reparación de iPhone"></div>
+        <div class="two">
+          <div class="field"><label>Precio material</label><input id="pendingMaterial" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
+          <div class="field"><label>Importe cobrado</label><input id="pendingCharged" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
+        </div>
+        <div class="calc pendingIncomeCalc">
+          <div class="box"><small>Material</small><strong id="pendingMaterialValue">0,00 €</strong></div>
+          <div class="box"><small>Cobrado</small><strong id="pendingChargedValue">0,00 €</strong></div>
+          <div class="box pendingBenefitBox"><small>Beneficio</small><strong id="pendingBenefitValue">0,00 €</strong></div>
+        </div>
+      </div>
+      <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">GUARDAR INGRESO</button>
+      <div id="pendingIncomeMsg" class="msg"></div>
+    </div>`;
+  recalcPendingIncome();
+}
+
+function recalcPendingIncome(){
+  const material=Number($("pendingMaterial")?.value)||0;
+  const charged=Number($("pendingCharged")?.value)||0;
+  const benefit=charged-material;
+  if($("pendingMaterialValue"))$("pendingMaterialValue").textContent=euro(material);
+  if($("pendingChargedValue"))$("pendingChargedValue").textContent=euro(charged);
+  const b=$("pendingBenefitValue");
+  if(b){b.textContent=euro(benefit);b.parentElement.classList.toggle("negativeBenefit",benefit<0);}
+  return {material,charged,benefit};
+}
+
+async function savePendingIncome(){
+  const msg=$("pendingIncomeMsg"), btn=$("pendingIncomeSaveBtn");
+  const persona=$("pendingPerson")?.value.trim()||"";
+  const servicio=$("pendingService")?.value.trim()||"";
+  const calc=recalcPendingIncome();
+  if(!persona||!servicio){msg.className="msg err";msg.textContent="Indica la persona y el tipo de servicio.";return;}
+  if(calc.charged<=0){msg.className="msg err";msg.textContent="El importe cobrado debe ser mayor que 0.";return;}
+  btn.disabled=true;msg.className="msg";msg.textContent="Guardando...";
+  try{
+    await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,cobrado:calc.charged,beneficio:calc.benefit})});
+    await loadPendingIncome(false);
+    msg.className="msg ok";msg.textContent="Ingreso guardado ✓";
+    setTimeout(()=>openFacturacionPage(),400);
+  }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el ingreso.";}
+  finally{btn.disabled=false;}
+}
+
+async function deletePendingIncome(id){
+  const item=pendingIncomeRecords.find(x=>String(x.id)===String(id));
+  if(!item)return;
+  if(!confirm(`¿Eliminar el ingreso de ${item.persona}?`))return;
+  try{await callAction({accion:"eliminarIngresoPendiente",id:String(id)});await loadPendingIncome(false);}
+  catch(e){showToastMessage("Error",e.message||"No se pudo eliminar el ingreso.");}
 }
 
 
@@ -2995,6 +3229,7 @@ async function sendInvoicesByEmail(){
 function updateSummary(){
   const period=$("summaryPeriod").value;
   let c=0,f=0,ivs=0,ivr=0,nc=0,nf=0;
+  let pendingCollected=0,pendingMaterial=0,pendingBenefit=0;
 
   records.forEach(r=>{
     const d=new Date(r.fecha);
@@ -3024,6 +3259,23 @@ function updateSummary(){
     }
   });
 
+  pendingIncomeRecords.forEach(r=>{
+    const d=new Date(r.fecha);
+    if(Number.isNaN(d.getTime())) return;
+    let include=false;
+    if(period==="all") include=d.getFullYear()===new Date().getFullYear();
+    else if(period.length===4) include=String(d.getFullYear())===period;
+    else {
+      const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+      include=key===period;
+    }
+    if(include){
+      pendingCollected+=Number(r.cobrado)||0;
+      pendingMaterial+=Number(r.material)||0;
+      pendingBenefit+=Number(r.beneficio ?? ((Number(r.cobrado)||0)-(Number(r.material)||0)))||0;
+    }
+  });
+
   const resultado=ivs-ivr;
   const res=$("res");
   const label=$("resLabel");
@@ -3031,6 +3283,8 @@ function updateSummary(){
 
   $("sc").textContent=euro(c);
   $("sf").textContent=euro(f);
+  if($("spPending"))$("spPending").textContent=euro(pendingCollected);
+  if($("spPendingBenefit"))$("spPendingBenefit").textContent="Beneficio: "+euro(pendingBenefit)+" · Material: "+euro(pendingMaterial);
   $("sis").textContent=euro(ivs);
   $("sir").textContent=euro(ivr);
   $("nc").textContent=nc;
@@ -3057,6 +3311,40 @@ function updateSummary(){
 
 }
 
+function getActiveScrollContainer(){
+  const form=$('formPage');
+  if(form && !form.classList.contains('hidden')) return $('formBody');
+  const ids=['home','summaryPage','recordsPage','settingsPage','agendaPage','inventoryPage'];
+  for(const id of ids){
+    const sec=$(id);
+    if(sec && !sec.classList.contains('hidden')) return sec.querySelector('.page');
+  }
+  return null;
+}
+
+function updateScrollIndicator(){
+  const indicator=$('scrollIndicator'), thumb=$('scrollIndicatorThumb');
+  if(!indicator||!thumb)return;
+  const el=getActiveScrollContainer();
+  if(!el || el.scrollHeight <= el.clientHeight + 2){indicator.classList.remove('visible');return;}
+  indicator.classList.add('visible');
+  const trackH=indicator.clientHeight;
+  const thumbH=Math.max(24, trackH*(el.clientHeight/el.scrollHeight));
+  const maxTop=Math.max(0,trackH-thumbH);
+  const maxScroll=Math.max(1,el.scrollHeight-el.clientHeight);
+  thumb.style.height=thumbH+'px';
+  thumb.style.transform=`translateY(${(el.scrollTop/maxScroll)*maxTop}px)`;
+}
+
+function initScrollIndicator(){
+  document.querySelectorAll('.page').forEach(el=>el.addEventListener('scroll',updateScrollIndicator,{passive:true}));
+  $('formBody')?.addEventListener('scroll',updateScrollIndicator,{passive:true});
+  window.addEventListener('resize',updateScrollIndicator);
+  window.visualViewport?.addEventListener('resize',updateScrollIndicator);
+  window.visualViewport?.addEventListener('scroll',updateScrollIndicator);
+  setTimeout(updateScrollIndicator,50);
+}
+
 $("summaryPeriod").addEventListener("change",updateSummary);
 
 updatePendingDocuments();
@@ -3076,10 +3364,14 @@ $("buyColor").addEventListener("input",e=>{
 $("saleColor").addEventListener("input",e=>{
   saveSetting(SETTINGS_KEYS.saleColor,e.target.value);
 });
+$("pendingIncomeColor").addEventListener("input",e=>{
+  saveSetting(SETTINGS_KEYS.pendingIncomeColor,e.target.value);
+});
 
 buildSummaryPeriods();
 buildRecordPeriods();
 renderLatest();
+initScrollIndicator();
 refreshData(false);
 
 
@@ -3451,6 +3743,23 @@ securityStart();
   document.addEventListener('gesturestart', function(event){ event.preventDefault(); }, {passive:false});
   document.addEventListener('gesturechange', function(event){ event.preventDefault(); }, {passive:false});
   document.addEventListener('gestureend', function(event){ event.preventDefault(); }, {passive:false});
+})();
+</script>
+
+<script id="cf-v54-viewport-js">
+(function(){
+  function syncViewport(){
+    var vv=window.visualViewport;
+    var h=vv ? vv.height : window.innerHeight;
+    if(!h || h < 300) h=window.innerHeight;
+    document.documentElement.style.setProperty('--cf-vh', h+'px');
+  }
+  syncViewport();
+  window.addEventListener('resize',syncViewport,{passive:true});
+  window.addEventListener('orientationchange',function(){ setTimeout(syncViewport,50); },{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',syncViewport,{passive:true});
+  }
 })();
 </script>
 </body>
