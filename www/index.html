@@ -3655,14 +3655,14 @@ function nativeBiometric(){
   // Capacitor iOS injects the native bridge as window.Capacitor.
   // Register the community plugin against that same runtime instead of
   // bundling a second copy of @capacitor/core.
-  if(cap.Plugins?.BiometricAuth){
+  if(cap.Plugins?.BiometricAuthNative){
     return cap.Plugins.BiometricAuth;
   }
 
   if(typeof cap.registerPlugin === "function") {
     try{
       if(!__CF_BIOMETRIC_PLUGIN){
-        __CF_BIOMETRIC_PLUGIN = cap.registerPlugin("BiometricAuth");
+        __CF_BIOMETRIC_PLUGIN = cap.registerPlugin("BiometricAuthNative");
       }
       return __CF_BIOMETRIC_PLUGIN;
     }catch(e){
@@ -3711,7 +3711,7 @@ async function securityNativeAvailability(){
   }
   if(!auth || typeof auth.checkBiometry!=="function") {
     const registered = typeof cap.isPluginAvailable === "function"
-      ? cap.isPluginAvailable("BiometricAuth")
+      ? cap.isPluginAvailable("BiometricAuthNative")
       : false;
     return {available:false,reason:registered?"metodo_biometria_no_disponible":"plugin_ios_no_registrado"};
   }
@@ -3926,7 +3926,7 @@ async function securityStart(){
     showPinUnlock("Face ID no disponible: "+reason+". Introduce tu código.");
   }else{
     const cap = window.Capacitor;
-    const registered = !!(cap && typeof cap.isPluginAvailable === "function" && cap.isPluginAvailable("BiometricAuth"));
+    const registered = !!(cap && typeof cap.isPluginAvailable === "function" && cap.isPluginAvailable("BiometricAuthNative"));
     showPinUnlock(registered
       ? "Face ID está instalado pero iOS no lo tiene disponible. Comprueba que Face ID esté configurado en el iPhone."
       : "Face ID nativo no está registrado en la compilación iOS. Se usará el código como alternativa.");
