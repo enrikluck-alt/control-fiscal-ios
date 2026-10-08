@@ -5,54 +5,63 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-15
+    runs-on: macos-latest
 
     steps:
-      - name: Descargar repositorio
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Node 22
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: npm install
 
-      - name: Añadir plataforma iOS
+      - name: Add iOS platform
         run: npx cap add ios
 
-      - name: Sincronizar Capacitor
-        run: npx cap sync ios
+      - name: Sync Capacitor
+        run: |
+          npx cap sync ios
+          npx cap ls
 
-      - name: Configurar versión mínima de iOS
+      - name: Verify native biometric plugin
+        run: |
+          echo "Comprobando registro SPM de BiometricAuth..."
+          grep -R "AparajitaCapacitorBiometricAuth\|BiometricAuthNative" ios/App ios/Capacitor 2>/dev/null | head -40 || true
+          if ! grep -R "AparajitaCapacitorBiometricAuth\|BiometricAuthNative" ios/App ios/Capacitor 2>/dev/null; then
+            echo "BiometricAuthNative no aparece en el proyecto iOS generado por Capacitor."
+            exit 1
+          fi
+
+      - name: Configure iOS permissions
+        run: |
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p = Path('ios/App/App/Info.plist')
+          with p.open('rb') as f:
+              data = plistlib.load(f)
+          data['NSFaceIDUsageDescription'] = 'Control Fiscal utiliza Face ID para desbloquear la aplicación de forma segura.'
+          data['UIViewControllerBasedStatusBarAppearance'] = True
+          with p.open('wb') as f:
+              plistlib.dump(data, f, sort_keys=False)
+          PY
+
+      - name: Set minimum iOS deployment target to 15.0
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
-          p = Path("ios/App/App.xcodeproj/project.pbxproj")
+          p = Path('ios/App/App.xcodeproj/project.pbxproj')
           s = p.read_text()
-
-          s = s.replace(
-              "IPHONEOS_DEPLOYMENT_TARGET = 14.0;",
-              "IPHONEOS_DEPLOYMENT_TARGET = 15.0;"
-          )
-
-          s = s.replace(
-              "IPHONEOS_DEPLOYMENT_TARGET = 13.0;",
-              "IPHONEOS_DEPLOYMENT_TARGET = 15.0;"
-          )
-
-          s = s.replace(
-              "IPHONEOS_DEPLOYMENT_TARGET = 12.0;",
-              "IPHONEOS_DEPLOYMENT_TARGET = 15.0;"
-          )
-
+          for old in ('14.0','13.0','12.0'):
+              s = s.replace(f'IPHONEOS_DEPLOYMENT_TARGET = {old};', 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;')
           p.write_text(s)
           PY
 
-      - name: Compilar aplicación iOS sin firma
+      - name: Build unsigned device app
         run: |
           xcodebuild \
             -project ios/App/App.xcodeproj \
@@ -64,21 +73,17 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             DEVELOPMENT_TEAM=
 
-      - name: Crear IPA
+      - name: Package unsigned IPA
         run: |
           APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/App.app"
-
           test -d "$APP_PATH"
-
           rm -rf build/ipa
           mkdir -p build/ipa/Payload
-
           cp -R "$APP_PATH" build/ipa/Payload/ControlFiscal.app
-
           cd build/ipa
           zip -qry ../ControlFiscal-unsigned.ipa Payload
 
-      - name: Guardar IPA
+      - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
           name: ControlFiscal-unsigned-IPA
