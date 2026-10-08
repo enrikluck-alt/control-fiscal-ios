@@ -1540,6 +1540,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
 </div>
 
+<script src="biometric.bundle.js"></script>
+
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcJB5MwzcFw9Zm7WQkVhLgWCi35YMC_3XCoqvc8VAet3G8-f8hxlpuTTJUcod3Z2YJAA/exec";
 
@@ -3646,31 +3648,8 @@ function securitySetStatus(text){
   if(el) el.textContent=text||"";
 }
 
-let __CF_BIOMETRIC_PLUGIN = null;
-
 function nativeBiometric(){
-  const cap = window.Capacitor;
-  if(!cap) return null;
-
-  // El plugin oficial registra el nombre nativo como BiometricAuthNative
-  // y exporta en JS el proxy como BiometricAuth.
-  // En una aplicación Capacitor ya cargada, usamos el mismo runtime global.
-  if(cap.Plugins?.BiometricAuthNative){
-    return cap.Plugins.BiometricAuthNative;
-  }
-
-  if(typeof cap.registerPlugin === "function") {
-    try{
-      if(!__CF_BIOMETRIC_PLUGIN){
-        __CF_BIOMETRIC_PLUGIN = cap.registerPlugin("BiometricAuthNative");
-      }
-      return __CF_BIOMETRIC_PLUGIN;
-    }catch(e){
-      console.warn("No se pudo registrar BiometricAuthNative",e);
-    }
-  }
-
-  return null;
+  return window.ControlFiscalBiometricAuth || null;
 }
 
 function securityRandomHex(bytes=16){
