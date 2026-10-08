@@ -3889,6 +3889,21 @@ function lockSecurity(){
   securitySetStatus("");
 }
 
+async function securityWait(ms){
+  await new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function securityWaitForBiometry(attempts=8, interval=500){
+  let last={available:false,isAvailable:false,biometryType:"none",reason:""};
+  for(let i=0;i<attempts;i++){
+    last=await securityNativeAvailability();
+    if(last.isAvailable) return last;
+    // El bridge/plugin puede tardar en quedar disponible al arrancar la app.
+    if(i<attempts-1) await securityWait(interval);
+  }
+  return last;
+}
+
 async function securityStart(){
   lockSecurity();
   await migrateLegacyPin();
@@ -3907,33 +3922,49 @@ async function securityStart(){
     return;
   }
 
-  const info=await securityNativeAvailability();
-  const hasNativeBiometry=!!nativeBiometric();
-  const hasBiometry=!!info.isAvailable;
   const biometricButton=$("securityBiometricBtn");
-  if(biometricButton) biometricButton.style.display=hasNativeBiometry?"block":"none";
-  $("securityPinBtn").style.display="block";
+  const pinButton=$("securityPinBtn");
+  if(biometricButton){
+    biometricButton.style.display="block";
+    biometricButton.disabled=true;
+  }
+  if(pinButton) pinButton.style.display="block";
+  securitySetStatus("Comprobando Face ID…");
+
+  // Esperamos a que la escena de iOS y el bridge de Capacitor estén activos.
+  // Después hacemos varios intentos: en un arranque en frío checkBiometry()
+  // puede responder temporalmente como no disponible aunque Face ID sí esté configurado.
+  await securityWait(1500);
+
+  const info=await securityWaitForBiometry(8,500);
+  const auth=nativeBiometric();
+  const hasNativeBiometry=!!auth;
+  const hasBiometry=!!info.isAvailable;
+
+  if(biometricButton) biometricButton.disabled=false;
 
   if(hasBiometry){
-    // Esperamos a que la escena de iOS quede completamente activa.
-    // En algunas versiones, intentar autenticar demasiado pronto produce
-    // errores "notInteractive"/"systemCancel".
-    setTimeout(()=>unlockWithBiometric(),1200);
-  }else if(hasNativeBiometry){
-    const tipo = String(info.biometryType||"").toLowerCase();
-    const reason = info.reason||info.code||"";
-    if(tipo === "faceid" || tipo === "faceId" || tipo === "face_id"){
-      showPinUnlock("Face ID está configurado en el iPhone, pero iOS no lo tiene disponible para Control Fiscal. Comprueba Ajustes → Face ID y código → Otras apps y activa Control Fiscal.");
+    securitySetStatus("Esperando Face ID…");
+    setTimeout(()=>unlockWithBiometric(),150);
+    return;
+  }
+
+  if(hasNativeBiometry){
+    const tipo=String(info.biometryType||"").toLowerCase();
+    const reason=info.reason||info.code||"";
+    if(tipo==="faceid" || tipo==="faceId" || tipo==="face_id"){
+      showPinUnlock("Face ID está configurado en el iPhone, pero iOS todavía no lo tiene disponible para Control Fiscal. Comprueba Ajustes → Face ID y código → Otras apps y activa Control Fiscal.");
     }else{
       showPinUnlock("La biometría nativa no está disponible. "+(reason?reason+" ":"")+"Introduce tu código.");
     }
-  }else{
-    const cap = window.Capacitor;
-    const registered = !!(cap && typeof cap.isPluginAvailable === "function" && cap.isPluginAvailable("BiometricAuthNative"));
-    showPinUnlock(registered
-      ? "Face ID está instalado pero iOS no lo tiene disponible. Comprueba que Face ID esté configurado en el iPhone."
-      : "Face ID nativo no está registrado en la compilación iOS. Se usará el código como alternativa.");
+    return;
   }
+
+  const cap=window.Capacitor;
+  const registered=!!(cap && typeof cap.isPluginAvailable==="function" && cap.isPluginAvailable("BiometricAuthNative"));
+  showPinUnlock(registered
+    ? "Face ID está instalado pero iOS no lo tiene disponible para Control Fiscal. Comprueba que Face ID esté configurado en el iPhone."
+    : "Face ID nativo no está registrado en la compilación iOS. Se usará el código como alternativa.");
 }
 
 loadClients(false);
