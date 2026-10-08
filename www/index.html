@@ -3648,7 +3648,9 @@ function securitySetStatus(text){
 }
 
 function nativeBiometric(){
-  return window.__CF_NATIVE_SECURITY__?.BiometricAuth || null;
+  return window.__CF_NATIVE_SECURITY__?.BiometricAuth
+    || window.Capacitor?.Plugins?.BiometricAuth
+    || null;
 }
 
 function securityRandomHex(bytes=16){
@@ -3891,7 +3893,7 @@ async function securityStart(){
     const reason=info.reason||info.code||"Face ID no está disponible en este momento.";
     showPinUnlock("Face ID no disponible: "+reason+". Introduce tu código.");
   }else{
-    showPinUnlock("Face ID nativo no está disponible en esta compilación. Introduce tu código.");
+    showPinUnlock("Face ID nativo no está cargado en esta compilación. Comprueba que el workflow haya generado el bundle de biometría y sincronizado el plugin iOS.");
   }
 }
 
