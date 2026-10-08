@@ -1,11 +1,10 @@
 {
   "name": "control-fiscal-ios",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "scripts": {
     "cap:add:ios": "cap add ios",
-    "cap:sync": "cap sync ios",
-    "build:biometric": "esbuild biometric-entry.js --bundle --format=iife --outfile=www/biometric.bundle.js --global-name=ControlFiscalBiometric"
+    "cap:sync": "cap sync ios"
   },
   "dependencies": {
     "@capacitor/core": "8.5.2",

@@ -1074,7 +1074,6 @@ section:not(#home){padding-top:var(--cf-header-height)!important;}
   </div>
 </div>
 
-<script src="biometric.bundle.js"></script>
 
 <script>
 // El panel de seguridad no se cierra al tocar fuera de sus controles.
@@ -3647,10 +3646,31 @@ function securitySetStatus(text){
   if(el) el.textContent=text||"";
 }
 
+let __CF_BIOMETRIC_PLUGIN = null;
+
 function nativeBiometric(){
-  return window.__CF_NATIVE_SECURITY__?.BiometricAuth
-    || window.Capacitor?.Plugins?.BiometricAuth
-    || null;
+  const cap = window.Capacitor;
+  if(!cap) return null;
+
+  // Capacitor iOS injects the native bridge as window.Capacitor.
+  // Register the community plugin against that same runtime instead of
+  // bundling a second copy of @capacitor/core.
+  if(cap.Plugins?.BiometricAuth){
+    return cap.Plugins.BiometricAuth;
+  }
+
+  if(typeof cap.registerPlugin === "function") {
+    try{
+      if(!__CF_BIOMETRIC_PLUGIN){
+        __CF_BIOMETRIC_PLUGIN = cap.registerPlugin("BiometricAuth");
+      }
+      return __CF_BIOMETRIC_PLUGIN;
+    }catch(e){
+      console.warn("No se pudo registrar BiometricAuth",e);
+    }
+  }
+
+  return null;
 }
 
 function securityRandomHex(bytes=16){
@@ -3681,13 +3701,25 @@ function securityHasPassword(){
 }
 
 async function securityNativeAvailability(){
+  const cap = window.Capacitor;
   const auth=nativeBiometric();
-  if(!auth || typeof auth.checkBiometry!=="function") return {available:false,reason:"native_no_disponible"};
+  if(!cap){
+    return {available:false,reason:"capacitor_no_disponible"};
+  }
+  if(cap.isNativePlatform && !cap.isNativePlatform()){
+    return {available:false,reason:"no_es_iOS_nativo"};
+  }
+  if(!auth || typeof auth.checkBiometry!=="function") {
+    const registered = typeof cap.isPluginAvailable === "function"
+      ? cap.isPluginAvailable("BiometricAuth")
+      : false;
+    return {available:false,reason:registered?"metodo_biometria_no_disponible":"plugin_ios_no_registrado"};
+  }
   try{
     return await auth.checkBiometry();
   }catch(e){
     console.warn("No se pudo comprobar Face ID",e);
-    return {available:false,reason:"error"};
+    return {available:false,reason:String(e?.message||e?.code||"error")};
   }
 }
 
@@ -3893,7 +3925,11 @@ async function securityStart(){
     const reason=info.reason||info.code||"Face ID no está disponible en este momento.";
     showPinUnlock("Face ID no disponible: "+reason+". Introduce tu código.");
   }else{
-    showPinUnlock("Face ID nativo no está cargado en esta compilación. Comprueba que el workflow haya generado el bundle de biometría y sincronizado el plugin iOS.");
+    const cap = window.Capacitor;
+    const registered = !!(cap && typeof cap.isPluginAvailable === "function" && cap.isPluginAvailable("BiometricAuth"));
+    showPinUnlock(registered
+      ? "Face ID está instalado pero iOS no lo tiene disponible. Comprueba que Face ID esté configurado en el iPhone."
+      : "Face ID nativo no está registrado en la compilación iOS. Se usará el código como alternativa.");
   }
 }
 
