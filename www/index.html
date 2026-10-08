@@ -3652,11 +3652,11 @@ function nativeBiometric(){
   const cap = window.Capacitor;
   if(!cap) return null;
 
-  // Capacitor iOS injects the native bridge as window.Capacitor.
-  // Register the community plugin against that same runtime instead of
-  // bundling a second copy of @capacitor/core.
+  // El plugin oficial registra el nombre nativo como BiometricAuthNative
+  // y exporta en JS el proxy como BiometricAuth.
+  // En una aplicación Capacitor ya cargada, usamos el mismo runtime global.
   if(cap.Plugins?.BiometricAuthNative){
-    return cap.Plugins.BiometricAuth;
+    return cap.Plugins.BiometricAuthNative;
   }
 
   if(typeof cap.registerPlugin === "function") {
@@ -3666,7 +3666,7 @@ function nativeBiometric(){
       }
       return __CF_BIOMETRIC_PLUGIN;
     }catch(e){
-      console.warn("No se pudo registrar BiometricAuth",e);
+      console.warn("No se pudo registrar BiometricAuthNative",e);
     }
   }
 
@@ -3716,10 +3716,21 @@ async function securityNativeAvailability(){
     return {available:false,reason:registered?"metodo_biometria_no_disponible":"plugin_ios_no_registrado"};
   }
   try{
-    return await auth.checkBiometry();
+    const info = await auth.checkBiometry();
+    return {
+      ...(info || {}),
+      available: !!(info && info.isAvailable),
+      biometryType: info?.biometryType || "none"
+    };
   }catch(e){
     console.warn("No se pudo comprobar Face ID",e);
-    return {available:false,reason:String(e?.message||e?.code||"error")};
+    return {
+      available:false,
+      isAvailable:false,
+      biometryType:"none",
+      reason:String(e?.message||e?.code||"error"),
+      code:e?.code||""
+    };
   }
 }
 
@@ -3922,8 +3933,13 @@ async function securityStart(){
   if(hasBiometry){
     setTimeout(()=>unlockWithBiometric(),250);
   }else if(hasNativeBiometry){
-    const reason=info.reason||info.code||"Face ID no está disponible en este momento.";
-    showPinUnlock("Face ID no disponible: "+reason+". Introduce tu código.");
+    const tipo = String(info.biometryType||"").toLowerCase();
+    const reason = info.reason||info.code||"";
+    if(tipo === "faceid" || tipo === "faceId" || tipo === "face_id"){
+      showPinUnlock("Face ID está configurado en el iPhone, pero iOS no lo tiene disponible para Control Fiscal. Comprueba Ajustes → Face ID y código → Otras apps y activa Control Fiscal.");
+    }else{
+      showPinUnlock("La biometría nativa no está disponible. "+(reason?reason+" ":"")+"Introduce tu código.");
+    }
   }else{
     const cap = window.Capacitor;
     const registered = !!(cap && typeof cap.isPluginAvailable === "function" && cap.isPluginAvailable("BiometricAuthNative"));
