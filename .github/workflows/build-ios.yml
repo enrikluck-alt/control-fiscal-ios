@@ -23,18 +23,7 @@ jobs:
         run: npx cap add ios
 
       - name: Sync Capacitor
-        run: |
-          npx cap sync ios
-          npx cap ls
-
-      - name: Verify native biometric plugin
-        run: |
-          echo "Comprobando registro SPM de BiometricAuth..."
-          grep -R "AparajitaCapacitorBiometricAuth\|BiometricAuthNative" ios/App ios/Capacitor 2>/dev/null | head -40 || true
-          if ! grep -R "AparajitaCapacitorBiometricAuth\|BiometricAuthNative" ios/App ios/Capacitor 2>/dev/null; then
-            echo "BiometricAuthNative no aparece en el proyecto iOS generado por Capacitor."
-            exit 1
-          fi
+        run: npx cap sync ios
 
       - name: Configure iOS permissions
         run: |
@@ -79,7 +68,7 @@ jobs:
           test -d "$APP_PATH"
           rm -rf build/ipa
           mkdir -p build/ipa/Payload
-          cp -R "$APP_PATH" build/ipa/Payload/ControlFiscal.app
+          cp -R "$APP_PATH" build/ipa/ControlFiscal.app
           cd build/ipa
           zip -qry ../ControlFiscal-unsigned.ipa Payload
 
