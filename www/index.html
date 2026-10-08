@@ -3717,21 +3717,34 @@ async function unlockWithBiometric(){
   const btn=$("securityBiometricBtn");
   const auth=nativeBiometric();
   if(!auth){
-    showPinUnlock("No se ha podido iniciar Face ID. Usa tu código.");
+    showPinUnlock("Face ID nativo no está disponible en esta compilación. Usa tu código.");
     return false;
   }
 
   btn.disabled=true;
-  securitySetStatus("Esperando Face ID…");
+  securitySetStatus("Comprobando Face ID…");
 
   try{
     const info=await securityNativeAvailability();
-    if(!info.isAvailable){
-      const reason=info.reason||info.code||"Face ID no está disponible en este momento.";
-      securitySetStatus("Face ID no disponible: "+reason+" Usa tu código.");
-      showPinUnlock();
+    const type=String(info?.biometryType||"");
+    const available=!!info?.isAvailable;
+
+    // En iOS puede conocerse que el hardware es Face ID aunque la evaluación
+    // devuelva no disponible. En ese caso probamos igualmente la autenticación
+    // una vez para que iOS devuelva el error real o muestre el diálogo nativo.
+    const isFaceId=type.toLowerCase()==="faceid" || type.toLowerCase()==="face_id";
+    if(!available && !isFaceId){
+      const reason=info?.reason||"";
+      const code=info?.code||"";
+      const detail=[code,reason].filter(Boolean).join(" · ");
+      const msg=detail
+        ? `Face ID no está disponible (${detail}).`
+        : "Face ID no está disponible en iOS para esta app.";
+      showPinUnlock(msg+" Puedes usar tu código.");
       return false;
     }
+
+    securitySetStatus("Esperando Face ID…");
 
     await auth.authenticate({
       reason:"Desbloquear Control Fiscal",
@@ -3951,11 +3964,17 @@ async function securityStart(){
 
   if(hasNativeBiometry){
     const tipo=String(info.biometryType||"").toLowerCase();
-    const reason=info.reason||info.code||"";
-    if(tipo==="faceid" || tipo==="faceId" || tipo==="face_id"){
-      showPinUnlock("Face ID está configurado en el iPhone, pero iOS todavía no lo tiene disponible para Control Fiscal. Comprueba Ajustes → Face ID y código → Otras apps y activa Control Fiscal.");
+    const reason=String(info.reason||"");
+    const code=String(info.code||"");
+    const detail=[tipo,code,reason].filter(Boolean).join(" · ");
+    if(tipo==="faceid" || tipo==="face_id"){
+      showPinUnlock(
+        detail
+          ? `Face ID detectado, pero iOS lo devuelve como no disponible: ${detail}.`
+          : "Face ID detectado, pero iOS lo devuelve como no disponible. Puedes usar tu código."
+      );
     }else{
-      showPinUnlock("La biometría nativa no está disponible. "+(reason?reason+" ":"")+"Introduce tu código.");
+      showPinUnlock(`La biometría nativa no está disponible${detail?": "+detail:"."} Puedes usar tu código.`);
     }
     return;
   }
