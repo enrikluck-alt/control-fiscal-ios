@@ -52,6 +52,7 @@ jobs:
 
       - name: Build unsigned device app
         run: |
+          set -euo pipefail
           xcodebuild \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -63,19 +64,55 @@ jobs:
             DEVELOPMENT_TEAM=
 
       - name: Package unsigned IPA
+        shell: bash
         run: |
-          APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/App.app"
+          set -euo pipefail
+
+          APP_PATH="$PWD/build/DerivedData/Build/Products/Release-iphoneos/App.app"
+          IPA_PATH="$PWD/build/ControlFiscal.ipa"
+
+          echo "=== Comprobación de App.app ==="
           test -d "$APP_PATH"
+          test -f "$APP_PATH/Info.plist"
+          test -f "$APP_PATH/App"
+          du -sh "$APP_PATH"
+          find "$APP_PATH" -type f | wc -l
+
+          echo "=== Contenido principal de App.app ==="
+          ls -lah "$APP_PATH" | head -80
+
           rm -rf build/ipa
           mkdir -p build/ipa/Payload
-          cp -R "$APP_PATH" build/ipa/ControlFiscal.app
-          cd build/ipa
-          zip -qry ../ControlFiscal-unsigned.ipa Payload
+          cp -R "$APP_PATH" build/ipa/Payload/ControlFiscal.app
 
-      - name: Upload unsigned IPA
+          echo "=== Empaquetando IPA ==="
+          cd build/ipa
+          /usr/bin/zip -qry "$IPA_PATH" Payload
+          cd ../..
+
+          echo "=== Comprobación de IPA ==="
+          test -f "$IPA_PATH"
+          ls -lh "$IPA_PATH"
+          stat -f "%z bytes" "$IPA_PATH"
+
+          SIZE=$(stat -f "%z" "$IPA_PATH")
+          if [ "$SIZE" -lt 1000000 ]; then
+            echo "ERROR: IPA demasiado pequeña: ${SIZE} bytes"
+            exit 1
+          fi
+
+          /usr/bin/unzip -t "$IPA_PATH"
+          echo "=== Primeros archivos dentro de la IPA ==="
+          /usr/bin/unzip -l "$IPA_PATH" | head -60
+
+          printf 'IPA_SIZE_BYTES=%s\nIPA_PATH=%s\n' "$SIZE" "$IPA_PATH" > build/IPA_SIZE.txt
+
+      - name: Guardar IPA y diagnóstico
         uses: actions/upload-artifact@v4
         with:
-          name: ControlFiscal-unsigned-IPA
-          path: build/ControlFiscal-unsigned.ipa
+          name: ControlFiscal-IPA
+          path: |
+            build/ControlFiscal.ipa
+            build/IPA_SIZE.txt
           if-no-files-found: error
           retention-days: 7
