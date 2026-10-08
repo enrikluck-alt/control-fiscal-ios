@@ -903,8 +903,66 @@ body.lightTheme .themeBtn.active{
 .stockCategoryTitle span{font-size:9px;color:#9da7b0;background:#1b252d;border:1px solid #37444e;border-radius:999px;padding:3px 7px}
 .pendingIncomeButton{background:var(--pendingIncome)!important;color:#111!important}
 </style>
+<style id="cf-v59-ui-fixes">
+/* V59: navegación inferior más grande */
+.bottom button{font-size:11.5px;gap:3px;min-height:52px;border-radius:15px}
+.bottom .navIcon{display:block;font-size:31px;line-height:1;height:33px;transform:translateZ(0)}
+.bottom button span:last-child{font-size:11.5px;font-weight:850;line-height:1.05}
+
+/* V59: imagen configurable del menú principal */
+.homeBrand{display:flex;justify-content:center;align-items:center;padding:2px 0 3px;min-height:108px}
+.homeBrandImage{display:block;width:min(100%,430px);max-width:430px;height:104px;object-fit:contain;border-radius:18px}
+.homeImageSettings{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center;margin-top:10px}
+.homeImagePreview{width:110px;height:82px;border:1px solid var(--line);border-radius:12px;background:var(--card);display:grid;place-items:center;overflow:hidden}
+.homeImagePreview img{width:100%;height:100%;object-fit:contain}
+.homeImageActions{display:grid;gap:8px}
+.homeImageUploadBtn{position:relative;cursor:pointer}
+
+/* V59: tema claro completo */
+body.lightTheme .app{background:linear-gradient(180deg,#f7f9fa,#eef2f4)}
+body.lightTheme .hero{background:rgba(255,255,255,.82);border-bottom-color:rgba(38,52,62,.12)}
+body.lightTheme .hero::after{background:linear-gradient(180deg,rgba(255,255,255,.28),transparent)}
+body.lightTheme .tag{color:#59656e}
+body.lightTheme .title{color:#111820}
+body.lightTheme .header{background:rgba(255,255,255,.84);border-bottom-color:rgba(38,52,62,.12);box-shadow:0 8px 24px rgba(20,31,39,.08)}
+body.lightTheme .header h2{color:#111820}
+body.lightTheme .header p{color:#59656e}
+body.lightTheme .headericon,body.lightTheme .back{color:#111820}
+body.lightTheme .field label,
+body.lightTheme .settingsTitle,
+body.lightTheme .settingsLabel,
+body.lightTheme .modalTitle,
+body.lightTheme .section h3,
+body.lightTheme .stockCategoryTitle,
+body.lightTheme .recordInfo{color:#111820}
+body.lightTheme .bottom{background:rgba(255,255,255,.84);border-top-color:rgba(38,52,62,.12);box-shadow:0 -10px 30px rgba(20,31,39,.10)}
+body.lightTheme .bottom button{color:#59656e}
+body.lightTheme .bottom .ay{color:var(--yellow)}
+body.lightTheme .bottom .ap{color:var(--purple)}
+body.lightTheme .home.full{background:#e8edf0;color:#111820}
+body.lightTheme .outline{border-color:#aeb9c1;color:#111820}
+body.lightTheme .info{background:#fff;border-color:#cbd3d9;color:#111820}
+body.lightTheme .ib span,body.lightTheme .ibrand{color:#59656e}
+body.lightTheme .scrollIndicatorThumb{background:rgba(35,48,58,.45)}
+body.lightTheme .scrollIndicator{background:rgba(35,48,58,.08)}
+body.lightTheme .autocompleteItem{background:#fff;color:#111820}
+body.lightTheme .inventoryTop,
+body.lightTheme .agendaToolbar,
+body.lightTheme .agendaToday,
+body.lightTheme .calDay{color:#111820}
+body.lightTheme .agendaToday{background:#fff;border-color:#c2ccd3}
+body.lightTheme .stockCategoryTitle span{color:#59656e;background:#eef2f4;border-color:#cbd3d9}
+
+/* V59: evitar que el texto claro heredado desaparezca en tema blanco */
+body.lightTheme .header svg,body.lightTheme .headericon svg{stroke:currentColor}
+@media(max-width:560px){
+  .homeImageSettings{grid-template-columns:92px 1fr}
+  .homeImagePreview{width:92px;height:72px}
+  .homeBrandImage{height:94px}
+}
+</style>
 <style id="cf-v57-native-layout">
-:root{--cf-top-safe:env(safe-area-inset-top,0px);--cf-bottom-safe:env(safe-area-inset-bottom,0px);--cf-header-content:56px;--cf-bottom-content:68px;--cf-header-height:calc(var(--cf-header-content) + var(--cf-top-safe));--cf-bottom-height:calc(var(--cf-bottom-content) + var(--cf-bottom-safe));}
+:root{--cf-top-safe:env(safe-area-inset-top,0px);--cf-bottom-safe:env(safe-area-inset-bottom,0px);--cf-header-content:58px;--cf-bottom-content:78px;--cf-header-height:calc(var(--cf-header-content) + var(--cf-top-safe));--cf-bottom-height:calc(var(--cf-bottom-content) + var(--cf-bottom-safe));}
 html,body{width:100%;height:100%;min-height:0;overflow:hidden!important;overscroll-behavior:none!important;}
 html{background:var(--bg)!important;}
 body{position:fixed!important;inset:0!important;overflow:hidden!important;}
@@ -945,12 +1003,15 @@ section:not(#home){padding-top:var(--cf-header-height)!important;}
       Usar código
     </button>
     <div id="securityPinArea" style="display:none;margin-top:14px">
-      <input id="securityPinInput" class="securityPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
-      <button type="button" class="securityBtn" onclick="unlockWithPin(); return false;">Desbloquear</button>
+      <input id="securityPinInput" class="securityPin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="••••">
+      <input id="securityPinConfirmInput" class="securityPin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="Repite el código" style="display:none;margin-top:10px">
+      <button type="button" class="securityBtn" id="securityPinActionBtn" onclick="securityPinAction(); return false;">Desbloquear</button>
     </div>
     <div class="securityStatus" id="securityStatus"></div>
   </div>
 </div>
+
+<script src="biometric.bundle.js"></script>
 
 <script>
 // El panel de seguridad no se cierra al tocar fuera de sus controles.
@@ -966,9 +1027,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
 <section id="home">
   <div class="hero">
-    <div class="logos">
-      <img class="logo" src="https://raw.githubusercontent.com/enrikluck-alt/control-fiscal/main/electrochispas-logo.png?v=8" alt="ElectroChispas">
-      <img class="logo" src="https://raw.githubusercontent.com/enrikluck-alt/control-fiscal/main/chispas-sound-logo.png?v=8" alt="Chispas Sound">
+    <div class="homeBrand">
+      <img id="homeBrandImage" class="homeBrandImage" src="chispas-logo.png" alt="Logo de Control Fiscal">
     </div>
     <div class="title">CONTROL FISCAL</div>
     <div class="tag">REGISTRA · CONTROLA · SIMPLIFICA</div>
@@ -1032,18 +1092,6 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
     <div id="latest" class="records"></div>
 
-    <div class="info">
-      <svg viewBox="0 0 40 40" fill="currentColor">
-        <rect x="4" y="22" width="7" height="14" rx="2"/>
-        <rect x="16" y="14" width="7" height="22" rx="2"/>
-        <rect x="28" y="6" width="7" height="30" rx="2"/>
-      </svg>
-      <div class="ib">
-        <b>Pequeños registros, grandes decisiones.</b>
-        <span>Controla hoy, crece mañana.</span>
-      </div>
-      <div class="ibrand">ELECTROCHISPAS<br>&<br>CHISPAS SOUND</div>
-    </div>
   </div>
 </section>
 
@@ -1236,6 +1284,23 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
       <div class="settingsGroup">
+        <div class="settingsTitle">🖼️ IMAGEN DEL MENÚ PRINCIPAL</div>
+        <div class="settingsHint">Puedes elegir una imagen para mostrar arriba del menú principal. Si no subes ninguna, se utilizará la imagen predeterminada de Control Fiscal.</div>
+        <div class="homeImageSettings">
+          <div class="homeImagePreview"><img id="homeBrandPreview" src="chispas-logo.png" alt="Vista previa"></div>
+          <div class="homeImageActions">
+            <label class="guideBtn homeImageUploadBtn">
+              <span class="guideIcon">🖼️</span>
+              <span>SUBIR IMAGEN</span>
+              <input id="homeBrandImageInput" type="file" accept="image/*" hidden>
+            </label>
+            <button class="resetSettings" type="button" onclick="resetHomeBrandImage()">USAR IMAGEN PREDETERMINADA</button>
+          </div>
+        </div>
+        <div id="homeBrandImageMsg" class="msg"></div>
+      </div>
+
+      <div class="settingsGroup">
         <div class="settingsTitle">🛒 COLOR DE COMPRAS</div>
 
         <div class="settingsRow">
@@ -1401,12 +1466,12 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 </div>
 
 <nav class="bottom">
-  <button id="nh" class="ay" onclick="goHome()">🏠<span>Inicio</span></button>
-  <button id="nb" onclick="openForm('Compra')">🛒<span>Compras</span></button>
-  <button id="ns" onclick="openFacturacionPage()">🧾<span>Fact.</span></button>
-  <button id="na" onclick="openAgenda()">📅<span>Agenda</span></button>
-  <button id="ni" onclick="openInventory()">📦<span>Stock</span></button>
-  <button id="ng" onclick="openSettings()">⚙️<span>Ajustes</span></button>
+  <button id="nh" class="ay" onclick="goHome()"><span class="navIcon">🏠</span><span>Inicio</span></button>
+  <button id="nb" onclick="openForm('Compra')"><span class="navIcon">🛒</span><span>Compras</span></button>
+  <button id="ns" onclick="openFacturacionPage()"><span class="navIcon">🧾</span><span>Fact.</span></button>
+  <button id="na" onclick="openAgenda()"><span class="navIcon">📅</span><span>Agenda</span></button>
+  <button id="ni" onclick="openInventory()"><span class="navIcon">📦</span><span>Stock</span></button>
+  <button id="ng" onclick="openSettings()"><span class="navIcon">⚙️</span><span>Ajustes</span></button>
 </nav>
 
 </div>
@@ -1516,6 +1581,7 @@ const SETTINGS_KEYS={
   buyColor:"cf_buy_color",
   saleColor:"cf_sale_color",
   pendingIncomeColor:"cf_pending_income_color",
+  homeBrandImage:"cf_home_brand_image",
   notificationTime:"cf_notification_time",
   invoiceConfig:"cf_invoice_config"
 };
@@ -1544,6 +1610,55 @@ function applyAppSettings(){
   const lightBtn=$("themeLightBtn");
   if(darkBtn) darkBtn.classList.toggle("active",theme==="dark");
   if(lightBtn) lightBtn.classList.toggle("active",theme==="light");
+}
+
+function applyHomeBrandImage(){
+  const saved=localStorage.getItem(SETTINGS_KEYS.homeBrandImage)||"";
+  const src=saved || "chispas-logo.png";
+  const main=$("homeBrandImage");
+  const preview=$("homeBrandPreview");
+  if(main) main.src=src;
+  if(preview) preview.src=src;
+}
+
+function saveHomeBrandImage(input){
+  const file=input?.files?.[0];
+  if(!file) return;
+  if(!file.type.startsWith("image/")){
+    showToastMessage("Imagen no válida","Selecciona un archivo de imagen.");
+    input.value="";
+    return;
+  }
+  if(file.size>4*1024*1024){
+    showToastMessage("Imagen demasiado grande","Usa una imagen de menos de 4 MB.");
+    input.value="";
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=String(reader.result||"");
+      if(!data) throw new Error("No se pudo leer la imagen");
+      localStorage.setItem(SETTINGS_KEYS.homeBrandImage,data);
+      applyHomeBrandImage();
+      const msg=$("homeBrandImageMsg");
+      if(msg){msg.className="msg ok";msg.textContent="Imagen guardada. Se mostrará en el menú principal.";}
+      showToastMessage("Imagen guardada","La imagen del menú principal se ha actualizado.");
+    }catch(e){
+      console.error(e);
+      showToastMessage("No se pudo guardar","La imagen ocupa demasiado espacio para el almacenamiento del dispositivo.");
+    }
+    input.value="";
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetHomeBrandImage(){
+  localStorage.removeItem(SETTINGS_KEYS.homeBrandImage);
+  applyHomeBrandImage();
+  const msg=$("homeBrandImageMsg");
+  if(msg){msg.className="msg ok";msg.textContent="Se está utilizando la imagen predeterminada.";}
+  showToastMessage("Imagen restablecida","Se ha recuperado la imagen predeterminada.");
 }
 
 function setAppTheme(theme){
@@ -3353,6 +3468,10 @@ $("summaryPeriod").addEventListener("change",updateSummary);
 updatePendingDocuments();
 
 applyAppSettings();
+applyHomeBrandImage();
+
+$("homeBrandImageInput")?.addEventListener("change",e=>saveHomeBrandImage(e.target));
+
 migrateOldSuppliers();
 renderSupplierPanel();
 loadSuppliersFromGoogle(false);
@@ -3379,174 +3498,210 @@ refreshData(false);
 
 
 /* =========================================================
-   SEGURIDAD RÁPIDA · FACE ID / CÓDIGO
+   SEGURIDAD NATIVA · FACE ID + CÓDIGO DE RESPALDO
    ========================================================= */
-const SECURITY_CRED_KEY="cf_security_credential";
-const SECURITY_PIN_KEY="cf_security_pin";
+const SECURITY_HASH_KEY="cf_security_pin_hash_v58";
+const SECURITY_SALT_KEY="cf_security_pin_salt_v58";
+const SECURITY_LEGACY_KEY="cf_security_pin";
 
 function securitySetStatus(text){
   const el=$("securityStatus");
   if(el) el.textContent=text||"";
 }
 
-function securityHasWebAuthn(){
-  return !!(window.PublicKeyCredential && navigator.credentials);
+function nativeBiometric(){
+  return window.__CF_NATIVE_SECURITY__?.BiometricAuth || null;
 }
 
-function securityRandomBytes(length){
-  const a=new Uint8Array(length);
-  crypto.getRandomValues(a);
-  return a;
+function securityRandomHex(bytes=16){
+  const arr=new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return Array.from(arr,b=>b.toString(16).padStart(2,"0")).join("");
 }
 
-function securityB64(bytes){
-  let s="";
-  bytes=new Uint8Array(bytes);
-  bytes.forEach(b=>s+=String.fromCharCode(b));
-  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+async function securityHash(pin,salt){
+  const data=new TextEncoder().encode(String(salt)+"|"+String(pin));
+  const digest=await crypto.subtle.digest("SHA-256",data);
+  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");
 }
 
-function securityUnb64(value){
-  const s=value.replace(/-/g,"+").replace(/_/g,"/");
-  const pad="=".repeat((4-s.length%4)%4);
-  const raw=atob(s+pad);
-  const out=new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i);
-  return out;
+async function migrateLegacyPin(){
+  const legacy=localStorage.getItem(SECURITY_LEGACY_KEY);
+  if(!legacy || localStorage.getItem(SECURITY_HASH_KEY)) return;
+  if(!/^\d{4}$/.test(legacy)) return;
+  const salt=securityRandomHex();
+  const hash=await securityHash(legacy,salt);
+  localStorage.setItem(SECURITY_SALT_KEY,salt);
+  localStorage.setItem(SECURITY_HASH_KEY,hash);
+  localStorage.removeItem(SECURITY_LEGACY_KEY);
 }
 
-async function registerSecurityCredential(){
-  if(!securityHasWebAuthn()) return false;
+function securityHasPassword(){
+  return !!(localStorage.getItem(SECURITY_HASH_KEY) && localStorage.getItem(SECURITY_SALT_KEY));
+}
 
+async function securityNativeAvailability(){
+  const auth=nativeBiometric();
+  if(!auth || typeof auth.checkBiometry!=="function") return {available:false,reason:"native_no_disponible"};
   try{
-    const credential=await navigator.credentials.create({
-      publicKey:{
-        challenge:securityRandomBytes(32),
-        rp:{name:"Control Fiscal",id:location.hostname},
-        user:{
-          id:securityRandomBytes(16),
-          name:"control-fiscal",
-          displayName:"Control Fiscal"
-        },
-        pubKeyCredParams:[
-          {type:"public-key",alg:-7},
-          {type:"public-key",alg:-257}
-        ],
-        authenticatorSelection:{
-          authenticatorAttachment:"platform",
-          userVerification:"required"
-        },
-        timeout:60000,
-        attestation:"none"
-      }
-    });
-
-    if(!credential) return false;
-
-    localStorage.setItem(SECURITY_CRED_KEY,securityB64(credential.rawId));
-    return true;
+    return await auth.checkBiometry();
   }catch(e){
-    console.warn("No se pudo registrar Face ID",e);
-    return false;
+    console.warn("No se pudo comprobar Face ID",e);
+    return {available:false,reason:"error"};
   }
 }
 
 async function unlockWithBiometric(){
   const btn=$("securityBiometricBtn");
+  const auth=nativeBiometric();
+  if(!auth){
+    showPinUnlock("No se ha podido iniciar Face ID. Usa tu código.");
+    return false;
+  }
+
   btn.disabled=true;
-  securitySetStatus("Esperando autenticación…");
+  securitySetStatus("Esperando Face ID…");
 
   try{
-    let credentialId=localStorage.getItem(SECURITY_CRED_KEY);
-
-    if(!credentialId){
-      const registered=await registerSecurityCredential();
-      if(!registered){
-        securitySetStatus("No se pudo configurar Face ID. Puedes usar un código.");
-        showPinUnlock();
-        return;
-      }
-      unlockSecurity();
-      return;
+    const info=await securityNativeAvailability();
+    if(!info.isAvailable){
+      securitySetStatus("Face ID no está disponible. Usa tu código.");
+      showPinUnlock();
+      return false;
     }
 
-    const credential=await navigator.credentials.get({
-      publicKey:{
-        challenge:securityRandomBytes(32),
-        allowCredentials:[{
-          type:"public-key",
-          id:securityUnb64(credentialId)
-        }],
-        userVerification:"required",
-        timeout:60000
-      }
+    await auth.authenticate({
+      reason:"Desbloquear Control Fiscal",
+      cancelTitle:"Usar código",
+      allowDeviceCredential:false,
+      iosFallbackTitle:""
     });
 
-    if(credential){
-      unlockSecurity();
-      return;
-    }
-
-    throw new Error("No se pudo autenticar");
-
+    unlockSecurity();
+    return true;
   }catch(e){
-    console.warn(e);
-    securitySetStatus("Face ID cancelado o no disponible. Puedes usar el código.");
+    console.warn("Face ID no autenticado",e);
+    securitySetStatus("Face ID no verificado. Puedes usar tu código.");
+    showPinUnlock();
+    return false;
   }finally{
     btn.disabled=false;
   }
 }
 
-function showPinUnlock(){
+function showPinUnlock(message=""){
   const area=$("securityPinArea");
   const input=$("securityPinInput");
-  if(!area || !input) return false;
+  const confirmInput=$("securityPinConfirmInput");
+  const action=$("securityPinActionBtn");
+  if(!area || !input || !confirmInput || !action) return false;
 
   area.style.display="block";
   area.hidden=false;
+  confirmInput.style.display="none";
+  confirmInput.value="";
+  action.textContent="Desbloquear";
+  action.onclick=function(){ securityPinAction(); return false; };
 
-  // Evita que el primer toque abra y cierre inmediatamente el panel.
-  requestAnimationFrame(()=>{
-    setTimeout(()=>{
-      input.focus({preventScroll:true});
-      if(typeof input.select === "function") input.select();
-    },50);
-  });
+  $("securityPinBtn").style.display=securityHasPassword()?"block":"none";
+  $("securityText").textContent="Introduce tu código de 4 cifras para continuar.";
+  input.placeholder="••••";
+  input.setAttribute("autocomplete","current-password");
 
-  if(!localStorage.getItem(SECURITY_PIN_KEY)){
-    $("securityText").textContent="Primero crea un código de 4 cifras para proteger la aplicación.";
-    $("securityPinInput").placeholder="Crear código";
-  }else{
-    $("securityText").textContent="Introduce tu código de 4 cifras para continuar.";
-    $("securityPinInput").placeholder="••••••";
-  }
+  if(message) securitySetStatus(message);
+
+  requestAnimationFrame(()=>setTimeout(()=>{
+    input.focus({preventScroll:true});
+    input.select?.();
+  },50));
+
+  return true;
 }
 
-function unlockWithPin(){
+function showSecuritySetup(message=""){
+  const area=$("securityPinArea");
   const input=$("securityPinInput");
+  const confirmInput=$("securityPinConfirmInput");
+  const action=$("securityPinActionBtn");
+  if(!area || !input || !confirmInput || !action) return;
+
+  area.style.display="block";
+  area.hidden=false;
+  confirmInput.style.display="block";
+  confirmInput.hidden=false;
+  action.textContent="Guardar contraseña";
+  input.value="";
+  confirmInput.value="";
+  input.placeholder="Crea un código de 4 cifras";
+  confirmInput.placeholder="Repite el código";
+  input.setAttribute("autocomplete","new-password");
+  $("securityBiometricBtn").style.display="none";
+  $("securityPinBtn").style.display="none";
+  $("securityText").textContent="Es la primera vez que usas Control Fiscal. Crea un código de 4 cifras y confírmalo.";
+  securitySetStatus(message||"");
+
+  requestAnimationFrame(()=>setTimeout(()=>{
+    input.focus({preventScroll:true});
+  },50));
+}
+
+async function createSecurityPassword(){
+  const input=$("securityPinInput");
+  const confirmInput=$("securityPinConfirmInput");
   const pin=String(input.value||"").trim();
+  const confirm=String(confirmInput.value||"").trim();
 
   if(!/^\d{4}$/.test(pin)){
     securitySetStatus("El código debe tener 4 cifras.");
-    return;
+    input.focus({preventScroll:true});
+    return false;
+  }
+  if(pin!==confirm){
+    securitySetStatus("Los dos códigos no coinciden.");
+    confirmInput.value="";
+    confirmInput.focus({preventScroll:true});
+    return false;
   }
 
-  const saved=localStorage.getItem(SECURITY_PIN_KEY);
+  const salt=securityRandomHex();
+  const hash=await securityHash(pin,salt);
+  localStorage.setItem(SECURITY_SALT_KEY,salt);
+  localStorage.setItem(SECURITY_HASH_KEY,hash);
+  localStorage.removeItem(SECURITY_LEGACY_KEY);
 
-  if(!saved){
-    localStorage.setItem(SECURITY_PIN_KEY,pin);
-    securitySetStatus("Código creado.");
-    unlockSecurity();
-    return;
+  securitySetStatus("Contraseña creada correctamente. A partir de ahora podrás usar Face ID.");
+  unlockSecurity();
+  return true;
+}
+
+async function unlockWithPin(){
+  const input=$("securityPinInput");
+  const pin=String(input.value||"").trim();
+  if(!/^\d{4}$/.test(pin)){
+    securitySetStatus("El código debe tener 4 cifras.");
+    return false;
   }
 
-  if(pin!==saved){
+  if(!securityHasPassword()) return createSecurityPassword();
+
+  const salt=localStorage.getItem(SECURITY_SALT_KEY)||"";
+  const expected=localStorage.getItem(SECURITY_HASH_KEY)||"";
+  const received=await securityHash(pin,salt);
+
+  if(received!==expected){
     securitySetStatus("Código incorrecto.");
     input.value="";
-    return;
+    input.focus({preventScroll:true});
+    return false;
   }
 
   unlockSecurity();
+  return true;
+}
+
+async function securityPinAction(){
+  if(securityHasPassword()) return unlockWithPin();
+  return createSecurityPassword();
 }
 
 function unlockSecurity(){
@@ -3562,40 +3717,46 @@ function lockSecurity(){
   $("securityPinArea").style.display="none";
   $("securityPinArea").hidden=true;
   $("securityPinInput").value="";
+  $("securityPinConfirmInput").value="";
   securitySetStatus("");
 }
 
-function securityStart(){
-  // La app siempre arranca bloqueada.
+async function securityStart(){
   lockSecurity();
-
-  // Si Face ID está disponible y ya fue registrado, dejamos el botón preparado.
-  if(!securityHasWebAuthn()){
-    $("securityBiometricBtn").style.display="none";
-  }
+  await migrateLegacyPin();
 
   const input=$("securityPinInput");
-  if(input){
-    input.addEventListener("keydown",e=>{
-      if(e.key==="Enter") unlockWithPin();
-    });
+  const confirmInput=$("securityPinConfirmInput");
+  if(input) input.addEventListener("keydown",e=>{
+    if(e.key==="Enter") securityPinAction();
+  });
+  if(confirmInput) confirmInput.addEventListener("keydown",e=>{
+    if(e.key==="Enter") securityPinAction();
+  });
+
+  if(!securityHasPassword()){
+    showSecuritySetup();
+    return;
+  }
+
+  const info=await securityNativeAvailability();
+  const hasBiometry=!!info.isAvailable;
+  $("securityBiometricBtn").style.display=hasBiometry?"block":"none";
+  $("securityPinBtn").style.display="block";
+
+  if(hasBiometry){
+    setTimeout(()=>unlockWithBiometric(),250);
+  }else{
+    showPinUnlock("Face ID no está disponible. Introduce tu código.");
   }
 }
 
-/*
- * Bloqueo al abrir o volver a cargar la aplicación.
- * No usamos visibilitychange porque en iPhone puede
- * dispararse al abrir el teclado y cerrar accidentalmente
- * la ventana del PIN.
- */
 loadClients(false);
 loadInventory(false);
 loadAgenda(false);
 securityStart();
 
 </script>
-
-
 
 <div id="inventoryModal" class="modal hidden" onclick="if(event.target===this)closeInventoryModal()">
   <div class="modalCard">
