@@ -3756,16 +3756,21 @@ async function unlockWithBiometric(){
 
     await auth.authenticate({
       reason:"Desbloquear Control Fiscal",
-      cancelTitle:"Usar código",
-      allowDeviceCredential:false,
-      iosFallbackTitle:""
+      cancelTitle:"Cancelar",
+      allowDeviceCredential:false
     });
 
     unlockSecurity();
     return true;
   }catch(e){
     console.warn("Face ID no autenticado",e);
-    securitySetStatus("Face ID no verificado. Puedes usar tu código.");
+    const code=String(e?.code||"");
+    const detail=String(e?.message||"");
+    let texto="Face ID no verificado. Puedes usar tu código.";
+    if(code || detail){
+      texto += " [" + [code,detail].filter(Boolean).join(" · ") + "]";
+    }
+    securitySetStatus(texto);
     showPinUnlock();
     return false;
   }finally{
@@ -3931,7 +3936,10 @@ async function securityStart(){
   $("securityPinBtn").style.display="block";
 
   if(hasBiometry){
-    setTimeout(()=>unlockWithBiometric(),250);
+    // Esperamos a que la escena de iOS quede completamente activa.
+    // En algunas versiones, intentar autenticar demasiado pronto produce
+    // errores "notInteractive"/"systemCancel".
+    setTimeout(()=>unlockWithBiometric(),1200);
   }else if(hasNativeBiometry){
     const tipo = String(info.biometryType||"").toLowerCase();
     const reason = info.reason||info.code||"";
