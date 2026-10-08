@@ -8,6 +8,14 @@
   "plugins": {
     "CapacitorHttp": {
       "enabled": true
+    },
+    "LocalNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "banner",
+        "list"
+      ]
     }
   }
 }
