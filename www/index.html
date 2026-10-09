@@ -1500,11 +1500,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
       <div class="settingsGroup" id="accountSettingsGroup">
         <div class="settingsTitle">👤 CUENTA</div>
-        <div class="settingsHint">Cuenta conectada a Control Fiscal y hoja de datos asociada.</div>
+        <div class="settingsHint">Cuenta conectada a Control Fiscal. Tus datos se gestionan desde la aplicación; no necesitas abrir Google Sheets ni acceder a Apps Script.</div>
         <div id="accountSettingsEmail" class="settingsLabel" style="margin:10px 0;overflow-wrap:anywhere">—</div>
-        <a id="accountSpreadsheetLink" class="guideBtn" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">
-          <span class="guideIcon">📊</span><span>ABRIR MIS GOOGLE SHEETS</span>
-        </a>
         <button class="resetSettings" type="button" onclick="logoutControlFiscal()">CERRAR SESIÓN / CAMBIAR DE CUENTA</button>
       </div>
 
@@ -1636,7 +1633,6 @@ const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcJB5MwzcFw9Zm7WQkVhL
    ========================================================= */
 const CF_ACCOUNT_TOKEN_KEY = "cf_account_session_token_v76";
 const CF_ACCOUNT_EMAIL_KEY = "cf_account_email_v76";
-const CF_ACCOUNT_SHEET_URL_KEY = "cf_account_sheet_url_v76";
 const CF_LAST_ACCOUNT_KEY = "cf_last_account_email_v76";
 const CF_AUTH_ACTIONS = new Set(["estadoSistema","registroIniciar","registroVerificar","iniciarSesion","validarSesion","cerrarSesion"]);
 let accountMode = "login";
@@ -1744,13 +1740,13 @@ function saveAccountSession(data){
   if(email && previous!==email) clearUserLocalCaches();
   if(email){localStorage.setItem(CF_ACCOUNT_EMAIL_KEY,email);localStorage.setItem(CF_LAST_ACCOUNT_KEY,email);}
   if(data.sessionToken)localStorage.setItem(CF_ACCOUNT_TOKEN_KEY,data.sessionToken);
-  if(data.spreadsheetUrl)localStorage.setItem(CF_ACCOUNT_SHEET_URL_KEY,data.spreadsheetUrl);
+  localStorage.removeItem("cf_account_sheet_url_v76");
   updateAccountSettings();
 }
 function updateAccountSettings(){
   const email=$("accountSettingsEmail");if(email)email.textContent=cfAccountEmail()||"No hay ninguna cuenta conectada.";
-  const link=$("accountSpreadsheetLink");const url=localStorage.getItem(CF_ACCOUNT_SHEET_URL_KEY)||"";
-  if(link){link.href=url||"#";link.style.display=url?"flex":"none";}
+  // V77: no se expone enlace ni identificador del Google Sheets del usuario.
+  localStorage.removeItem("cf_account_sheet_url_v76");
 }
 async function startAccountSystem(){
   const gate=$("accountGate");if(gate)gate.classList.remove("hidden");
@@ -1835,7 +1831,7 @@ async function logoutControlFiscal(){
   try{if(token) await accountRequest({accion:"cerrarSesion",sessionToken:token});}catch(e){console.warn("No se pudo cerrar la sesión en el servidor",e);}
   localStorage.removeItem(CF_ACCOUNT_TOKEN_KEY);
   localStorage.removeItem(CF_ACCOUNT_EMAIL_KEY);
-  localStorage.removeItem(CF_ACCOUNT_SHEET_URL_KEY);
+  localStorage.removeItem("cf_account_sheet_url_v76");
   cfInitialDataLoaded=false;
   lockSecurity();
   $("accountGate").classList.remove("hidden");
