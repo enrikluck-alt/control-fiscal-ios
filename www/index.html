@@ -1046,10 +1046,86 @@ section:not(#home){padding-top:var(--cf-header-height)!important;}
 @supports not (height:100dvh){.app{height:100vh!important;}}
 @supports (-webkit-touch-callout:none){body{-webkit-text-size-adjust:100%;}}
 </style>
+
+<style id="cf-account-gate-styles">
+#accountGate{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:24px 18px calc(24px + env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 15%,#1c2b37 0,#081016 58%,#05090c 100%);overflow:auto;box-sizing:border-box;color:#f4f7f9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#accountGate.hidden{display:none}
+#accountGate .accountCard{width:min(100%,430px);border:1px solid #33424d;border-radius:24px;background:rgba(17,26,33,.96);box-shadow:0 24px 70px #0008;padding:24px 20px 20px;box-sizing:border-box}
+#accountGate .accountBrand{text-align:center;font-size:20px;font-weight:950;letter-spacing:.3px;margin-bottom:5px}
+#accountGate .accountSubtitle{text-align:center;color:#aeb9c2;font-size:13px;line-height:1.45;margin:0 0 20px}
+#accountGate .accountMode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+#accountGate .accountMode button{height:43px;border:1px solid #3a4955;border-radius:12px;background:#111b22;color:#eaf0f4;font-weight:850}
+#accountGate .accountMode button.active{background:#ffe02a;border-color:#ffe02a;color:#101316}
+#accountGate .accountField{display:grid;gap:7px;margin:12px 0}
+#accountGate .accountField label{font-size:11px;font-weight:900;letter-spacing:.25px;color:#e8eef3}
+#accountGate input{width:100%;min-width:0;box-sizing:border-box;height:48px;border-radius:12px;border:1px solid #43525d;background:#0b1319;color:#fff;padding:0 13px;font-size:16px;outline:none}
+#accountGate input:focus{border-color:#ffe02a;box-shadow:0 0 0 2px #ffe02a20}
+#accountGate .accountHint{font-size:11px;line-height:1.5;color:#aeb9c2;margin:10px 0}
+#accountGate .accountPrimary{width:100%;min-height:49px;border:0;border-radius:13px;background:#ffe02a;color:#101316;font-size:13px;font-weight:950;margin-top:8px}
+#accountGate .accountSecondary{width:100%;min-height:44px;border:1px solid #3a4955;border-radius:12px;background:transparent;color:#eaf0f4;font-size:12px;font-weight:850;margin-top:9px}
+#accountGate .accountStatus{min-height:20px;margin-top:12px;font-size:12px;line-height:1.45;color:#ffbf91;overflow-wrap:anywhere}
+#accountGate .accountStatus.ok{color:#86efac}
+#accountGate .accountVerify{border-top:1px solid #33424d;margin-top:17px;padding-top:15px}
+#accountGate .accountVerify[hidden]{display:none}
+#accountGate .accountCode{letter-spacing:5px;text-align:center;font-weight:900}
+#accountGate .accountSmallPrint{font-size:10px;line-height:1.5;color:#8f9ca6;margin-top:15px;text-align:center}
+body.lightTheme #accountGate{background:radial-gradient(circle at 50% 15%,#fff 0,#edf2f5 68%,#e5ebef 100%);color:#111820}
+body.lightTheme #accountGate .accountCard{background:#fff;border-color:#cbd5dc}
+body.lightTheme #accountGate .accountSubtitle,body.lightTheme #accountGate .accountHint,body.lightTheme #accountGate .accountSmallPrint{color:#59656e}
+body.lightTheme #accountGate .accountMode button{background:#f3f6f8;border-color:#cad2d8;color:#111820}
+body.lightTheme #accountGate .accountMode button.active{background:#ffe02a}
+body.lightTheme #accountGate input{background:#fff;color:#111820;border-color:#bbc6ce}
+@media(max-height:720px){#accountGate{align-items:flex-start;padding-top:18px}#accountGate .accountCard{padding:18px 16px}#accountGate .accountSubtitle{margin-bottom:12px}#accountGate .accountField{margin:8px 0}}
+</style>
+
 </head>
 
 <body>
 
+
+
+<!-- ACCESO DE CUENTA · correo verificado + contraseña propia de Control Fiscal -->
+<div id="accountGate">
+  <div class="accountCard">
+    <div class="accountBrand">🔐 CONTROL FISCAL</div>
+    <p class="accountSubtitle">Accede con tu correo de Google. Cada cuenta tendrá sus propios datos y hojas de Google Sheets.</p>
+    <div class="accountMode">
+      <button id="accountLoginModeBtn" class="active" type="button" onclick="setAccountMode('login')">INICIAR SESIÓN</button>
+      <button id="accountRegisterModeBtn" type="button" onclick="setAccountMode('register')">CREAR CUENTA</button>
+    </div>
+    <form id="accountForm" onsubmit="submitAccountForm(event)">
+      <div class="accountField">
+        <label for="accountEmail">CORREO DE GOOGLE</label>
+        <input id="accountEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu correo@gmail.com" required>
+      </div>
+      <div class="accountField">
+        <label for="accountPassword">CONTRASEÑA DE CONTROL FISCAL</label>
+        <input id="accountPassword" type="password" autocomplete="current-password" placeholder="Contraseña propia de la app" minlength="8" required>
+      </div>
+      <div id="accountConfirmField" class="accountField" hidden>
+        <label for="accountPasswordConfirm">REPITE LA CONTRASEÑA</label>
+        <input id="accountPasswordConfirm" type="password" autocomplete="new-password" placeholder="Repite la contraseña" minlength="8">
+      </div>
+      <div id="accountBootstrapField" class="accountField" hidden>
+        <label for="accountBootstrapCode">CÓDIGO DE ACTIVACIÓN INICIAL</label>
+        <input id="accountBootstrapCode" type="text" autocapitalize="characters" autocomplete="off" placeholder="Código generado por el administrador">
+      </div>
+      <p id="accountFormHint" class="accountHint">Utiliza la contraseña de tu cuenta de Control Fiscal, no la contraseña de Google. La primera vez se comprobará tu correo con un código enviado por email.</p>
+      <button id="accountSubmitBtn" class="accountPrimary" type="submit">ENTRAR</button>
+    </form>
+    <div id="accountVerifyArea" class="accountVerify" hidden>
+      <p class="accountHint">Te hemos enviado un código de verificación al correo indicado. Introduce ese código para activar la cuenta y crear las hojas de Google Sheets.</p>
+      <div class="accountField">
+        <label for="accountVerificationCode">CÓDIGO RECIBIDO POR EMAIL</label>
+        <input id="accountVerificationCode" class="accountCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+      </div>
+      <button class="accountPrimary" type="button" onclick="verifyAccountEmail()">VERIFICAR CORREO Y CREAR CUENTA</button>
+      <button class="accountSecondary" type="button" onclick="backToAccountForm()">VOLVER</button>
+    </div>
+    <div id="accountStatus" class="accountStatus" role="status" aria-live="polite"></div>
+    <div class="accountSmallPrint">Tu contraseña de Google nunca se solicita ni se guarda. La contraseña de esta app se almacena cifrada mediante hash. La cuenta se verifica por correo.</div>
+  </div>
+</div>
 
 <!-- BLOQUEO DE SEGURIDAD -->
 <div id="securityLock">
@@ -1421,6 +1497,17 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         </button>
       </div>
 
+
+      <div class="settingsGroup" id="accountSettingsGroup">
+        <div class="settingsTitle">👤 CUENTA</div>
+        <div class="settingsHint">Cuenta conectada a Control Fiscal y hoja de datos asociada.</div>
+        <div id="accountSettingsEmail" class="settingsLabel" style="margin:10px 0;overflow-wrap:anywhere">—</div>
+        <a id="accountSpreadsheetLink" class="guideBtn" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">
+          <span class="guideIcon">📊</span><span>ABRIR MIS GOOGLE SHEETS</span>
+        </a>
+        <button class="resetSettings" type="button" onclick="logoutControlFiscal()">CERRAR SESIÓN / CAMBIAR DE CUENTA</button>
+      </div>
+
       <div class="settingsGroup">
         <div class="settingsTitle">ℹ️ INFORMACIÓN</div>
         <div class="guideGrid">
@@ -1542,6 +1629,232 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcJB5MwzcFw9Zm7WQkVhLgWCi35YMC_3XCoqvc8VAet3G8-f8hxlpuTTJUcod3Z2YJAA/exec";
+
+/* =========================================================
+   CUENTAS MULTIUSUARIO · sesión de Control Fiscal
+   La contraseña de esta app es distinta a la contraseña de Google.
+   ========================================================= */
+const CF_ACCOUNT_TOKEN_KEY = "cf_account_session_token_v76";
+const CF_ACCOUNT_EMAIL_KEY = "cf_account_email_v76";
+const CF_ACCOUNT_SHEET_URL_KEY = "cf_account_sheet_url_v76";
+const CF_LAST_ACCOUNT_KEY = "cf_last_account_email_v76";
+const CF_AUTH_ACTIONS = new Set(["estadoSistema","registroIniciar","registroVerificar","iniciarSesion","validarSesion","cerrarSesion"]);
+let accountMode = "login";
+let pendingRegistrationEmail = "";
+let accountState = {needsBootstrapCode:false, setupRequired:false};
+let cfInitialDataLoaded = false;
+function cfSessionToken(){ return localStorage.getItem(CF_ACCOUNT_TOKEN_KEY) || ""; }
+function cfAccountEmail(){ return localStorage.getItem(CF_ACCOUNT_EMAIL_KEY) || ""; }
+function cfRandomRequestId(){
+  try{const a=new Uint8Array(24);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,"0")).join("");}
+  catch(e){return String(Date.now())+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);}
+}
+function accountSetStatus(text,ok=false){
+  const el=$("accountStatus");if(!el)return;el.textContent=text||"";el.classList.toggle("ok",!!ok);
+}
+function setAccountMode(mode){
+  accountMode=mode==="register"?"register":"login";
+  $("accountLoginModeBtn")?.classList.toggle("active",accountMode==="login");
+  $("accountRegisterModeBtn")?.classList.toggle("active",accountMode==="register");
+  $("accountConfirmField").hidden=accountMode!=="register";
+  $("accountBootstrapField").hidden=!(accountMode==="register"&&accountState.needsBootstrapCode);
+  $("accountPassword").setAttribute("autocomplete",accountMode==="register"?"new-password":"current-password");
+  $("accountSubmitBtn").textContent=accountMode==="register"?"CREAR CUENTA":"ENTRAR";
+  $("accountFormHint").textContent=accountMode==="register"
+    ? (accountState.needsBootstrapCode
+       ? "Primera cuenta: usa el código inicial generado por el administrador. Recibirás un código de verificación por correo. La contraseña es propia de Control Fiscal, no la de Google."
+       : "Crea una contraseña propia de Control Fiscal (mínimo 8 caracteres). Te enviaremos un código para verificar el correo.")
+    : "Introduce el correo asociado a tu cuenta de Control Fiscal y la contraseña que creaste para esta app.";
+  $("accountVerifyArea").hidden=true;
+  $("accountForm").hidden=false;
+  accountSetStatus("");
+}
+async function accountRequest(payload){
+  // En iOS podemos leer directamente la respuesta POST. En Safari, Apps Script
+  // no permite leer el POST cross-origin, así que se consulta una respuesta temporal por JSONP.
+  if(isNativeApp()){
+    return nativeJsonRequest(SCRIPT_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8","Accept":"application/json"},
+      body:JSON.stringify(payload)
+    });
+  }
+  const requestId=cfRandomRequestId();
+  const postBody={...payload,requestId};
+  await fetch(SCRIPT_URL,{
+    method:"POST",mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(postBody)
+  });
+  const start=Date.now();
+  while(Date.now()-start<90000){
+    try{
+      const answer=await cfPollAuthRequest(requestId);
+      if(answer && answer.ok===false) throw new Error(answer.error||"La operación de cuenta ha fallado.");
+      return answer;
+    }catch(e){
+      if(e && e.message && e.message.indexOf("CF_PENDING_AUTH_RESULT")<0) throw e;
+    }
+    await new Promise(resolve=>setTimeout(resolve,700));
+  }
+  throw new Error("La operación está tardando demasiado. Revisa la conexión e inténtalo otra vez.");
+}
+function cfPollAuthRequest(requestId){
+  return new Promise((resolve,reject)=>{
+    const callback="cfAuthResult_"+Date.now()+"_"+Math.floor(Math.random()*100000);
+    const script=document.createElement("script");
+    const params=new URLSearchParams({accion:"consultarSolicitudAuth",requestId,callback,_:String(Date.now())});
+    const timeout=setTimeout(()=>{cleanup();reject(new Error("CF_PENDING_AUTH_RESULT"));},5000);
+    window[callback]=data=>{
+      cleanup();
+      if(data && data.pending) reject(new Error("CF_PENDING_AUTH_RESULT"));
+      else if(data && data.result) resolve(data.result);
+      else if(data && typeof data.ok==="boolean") resolve(data);
+      else reject(new Error("CF_PENDING_AUTH_RESULT"));
+    };
+    script.onerror=()=>{cleanup();reject(new Error("CF_PENDING_AUTH_RESULT"));};
+    function cleanup(){clearTimeout(timeout);delete window[callback];script.remove();}
+    script.src=SCRIPT_URL+"?"+params.toString();document.body.appendChild(script);
+  });
+}
+async function refreshAccountSystemState(){
+  try{
+    accountState=await accountRequest({accion:"estadoSistema"});
+    $("accountBootstrapField").hidden=!(accountMode==="register"&&accountState.needsBootstrapCode);
+    if(accountState.setupRequired){
+      accountSetStatus("Antes del primer registro, el administrador debe ejecutar prepararSistemaMultiusuario() en Google Apps Script.");
+      $("accountSubmitBtn").disabled=true;
+    }else{
+      $("accountSubmitBtn").disabled=false;
+    }
+  }catch(e){
+    accountSetStatus(e.message||"No se pudo consultar el estado de las cuentas.");
+  }
+}
+function clearUserLocalCaches(){
+  ["cf_records","cf_clients","cf_inventory","cf_agenda","cf_pending_income","cf_stores","cf_providers","cf_store_list","cf_provider_list","cf_invoice_settings","cf_pending_records"].forEach(k=>localStorage.removeItem(k));
+  records=[];
+  if(typeof savedClients!=="undefined") savedClients=[];
+  if(typeof inventoryItems!=="undefined") inventoryItems=[];
+  if(typeof agendaEvents!=="undefined") agendaEvents=[];
+}
+function saveAccountSession(data){
+  const email=String(data.email||"").trim().toLowerCase();
+  const previous=localStorage.getItem(CF_LAST_ACCOUNT_KEY)||"";
+  if(email && previous!==email) clearUserLocalCaches();
+  if(email){localStorage.setItem(CF_ACCOUNT_EMAIL_KEY,email);localStorage.setItem(CF_LAST_ACCOUNT_KEY,email);}
+  if(data.sessionToken)localStorage.setItem(CF_ACCOUNT_TOKEN_KEY,data.sessionToken);
+  if(data.spreadsheetUrl)localStorage.setItem(CF_ACCOUNT_SHEET_URL_KEY,data.spreadsheetUrl);
+  updateAccountSettings();
+}
+function updateAccountSettings(){
+  const email=$("accountSettingsEmail");if(email)email.textContent=cfAccountEmail()||"No hay ninguna cuenta conectada.";
+  const link=$("accountSpreadsheetLink");const url=localStorage.getItem(CF_ACCOUNT_SHEET_URL_KEY)||"";
+  if(link){link.href=url||"#";link.style.display=url?"flex":"none";}
+}
+async function startAccountSystem(){
+  const gate=$("accountGate");if(gate)gate.classList.remove("hidden");
+  accountSetStatus("Comprobando cuenta…");
+  const token=cfSessionToken();
+  if(token){
+    try{
+      const result=await accountRequest({accion:"validarSesion",sessionToken:token});
+      if(result && result.ok){
+        saveAccountSession(result);
+        if(gate)gate.classList.add("hidden");
+        await startLocalSecurityForAccount();
+        return;
+      }
+    }catch(e){console.warn("Sesión anterior no válida",e);}
+    localStorage.removeItem(CF_ACCOUNT_TOKEN_KEY);
+  }
+  setAccountMode("login");
+  if(gate)gate.classList.remove("hidden");
+  accountSetStatus("");
+  await refreshAccountSystemState();
+}
+async function submitAccountForm(event){
+  event?.preventDefault();
+  const email=String($("accountEmail").value||"").trim().toLowerCase();
+  const password=String($("accountPassword").value||"");
+  const button=$("accountSubmitBtn");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){accountSetStatus("Introduce un correo válido.");return;}
+  if(password.length<8){accountSetStatus("La contraseña de Control Fiscal debe tener al menos 8 caracteres.");return;}
+  if(accountMode==="register"){
+    if(password!==String($("accountPasswordConfirm").value||"")){accountSetStatus("Las contraseñas no coinciden.");return;}
+    if(accountState.setupRequired){accountSetStatus("El administrador debe ejecutar prepararSistemaMultiusuario() en Apps Script antes del primer registro.");return;}
+    if(accountState.needsBootstrapCode&&!String($("accountBootstrapCode").value||"").trim()){accountSetStatus("Introduce el código de activación inicial.");return;}
+  }
+  button.disabled=true;accountSetStatus(accountMode==="register"?"Enviando código de verificación…":"Iniciando sesión…");
+  try{
+    if(accountMode==="login"){
+      const data=await accountRequest({accion:"iniciarSesion",email,password});
+      saveAccountSession(data);
+      $("accountPassword").value="";$("accountPasswordConfirm").value="";
+      $("accountGate").classList.add("hidden");
+      accountSetStatus("");
+      await startLocalSecurityForAccount();
+    }else{
+      const data=await accountRequest({accion:"registroIniciar",email,password,bootstrapCode:String($("accountBootstrapCode").value||"").trim()});
+      pendingRegistrationEmail=email;
+      $("accountForm").hidden=true;$("accountVerifyArea").hidden=false;
+      accountSetStatus(data.mensaje||"Código enviado. Revisa el correo.",true);
+      $("accountVerificationCode").focus({preventScroll:true});
+    }
+  }catch(e){accountSetStatus(e.message||"No se ha podido completar la operación.");}
+  finally{button.disabled=false;}
+}
+async function verifyAccountEmail(){
+  const email=pendingRegistrationEmail||String($("accountEmail").value||"").trim().toLowerCase();
+  const codigo=String($("accountVerificationCode").value||"").replace(/\s/g,"");
+  if(!email||!/^\d{6}$/.test(codigo)){accountSetStatus("Introduce el código de 6 cifras que recibiste por email.");return;}
+  const btn=$("accountVerifyArea").querySelector(".accountPrimary");if(btn)btn.disabled=true;
+  accountSetStatus("Verificando correo y preparando tus hojas…");
+  try{
+    const data=await accountRequest({accion:"registroVerificar",email,codigo});
+    saveAccountSession(data);
+    $("accountPassword").value="";$("accountPasswordConfirm").value="";$("accountVerificationCode").value="";
+    $("accountGate").classList.add("hidden");
+    showToastMessage("Cuenta creada","Tu cuenta y tus hojas de Google Sheets están preparadas.");
+    await startLocalSecurityForAccount();
+  }catch(e){accountSetStatus(e.message||"No se ha podido verificar el correo.");}
+  finally{if(btn)btn.disabled=false;}
+}
+function backToAccountForm(){
+  $("accountVerifyArea").hidden=true;$("accountForm").hidden=false;accountSetStatus("");
+}
+async function startLocalSecurityForAccount(){
+  cfInitialDataLoaded=false;
+  updateAccountSettings();
+  await securityStart();
+}
+async function logoutControlFiscal(){
+  const email=cfAccountEmail();
+  if(!confirm("¿Quieres cerrar la sesión de "+email+" en este dispositivo?"))return;
+  const token=cfSessionToken();
+  try{if(token) await accountRequest({accion:"cerrarSesion",sessionToken:token});}catch(e){console.warn("No se pudo cerrar la sesión en el servidor",e);}
+  localStorage.removeItem(CF_ACCOUNT_TOKEN_KEY);
+  localStorage.removeItem(CF_ACCOUNT_EMAIL_KEY);
+  localStorage.removeItem(CF_ACCOUNT_SHEET_URL_KEY);
+  cfInitialDataLoaded=false;
+  lockSecurity();
+  $("accountGate").classList.remove("hidden");
+  $("accountPassword").value="";$("accountPasswordConfirm").value="";
+  setAccountMode("login");
+  await refreshAccountSystemState();
+  accountSetStatus("Sesión cerrada.",true);
+}
+async function loadInitialDataForAccount(){
+  if(cfInitialDataLoaded || !cfSessionToken())return;
+  cfInitialDataLoaded=true;
+  updateAccountSettings();
+  const results=await Promise.allSettled([
+    refreshData(false),loadSuppliersFromGoogle(false),loadInvoiceSettings(false),
+    loadClients(false),loadInventory(false),loadAgenda(false),loadPendingIncome(false)
+  ]);
+  results.forEach(r=>{if(r.status==="rejected")console.warn("Carga inicial de datos:",r.reason);});
+}
+
 
 
 /* =========================================================
@@ -1734,6 +2047,7 @@ function setAppTheme(theme){
 function openSettings(){
   only("settingsPage");
   nav("settings");
+  updateAccountSettings();
   applyAppSettings();
   renderSupplierPanel();
   loadSuppliersFromGoogle(false);
@@ -2563,6 +2877,7 @@ async function sendRecord(tipo){
 
   const c=calcRecord(tipo,t,i);
   const payload={
+    sessionToken:cfSessionToken(),
     tipo,
     tercero,
     concepto,
@@ -2748,43 +3063,21 @@ const NATIVE_WRITE_ACTIONS=new Set([
 ]);
 
 function callAction(payload){
-  if(isNativeApp()){
-    return (async()=>{
-      const accion=String(payload.accion||"");
-      if(NATIVE_WRITE_ACTIONS.has(accion)){
-        return await nativeJsonRequest(SCRIPT_URL,{
-          method:"POST",
-          headers:{"Content-Type":"application/json;charset=utf-8","Accept":"application/json"},
-          body:JSON.stringify(payload)
-        });
-      }
-      const params=new URLSearchParams();
-      Object.entries(payload).forEach(([k,v])=>params.set(k,String(v)));
-      params.set("_",Date.now().toString());
-      return await nativeJsonRequest(SCRIPT_URL+"?"+params.toString(),{
-        method:"GET",
-        headers:{"Accept":"application/json"}
-      });
-    })();
+  const accion=String(payload.accion||"");
+  const requestPayload=CF_AUTH_ACTIONS.has(accion) ? {...payload} : {...payload,sessionToken:payload.sessionToken||cfSessionToken()};
+  if(!CF_AUTH_ACTIONS.has(accion) && !requestPayload.sessionToken){
+    return Promise.reject(new Error("Inicia sesión en Control Fiscal para continuar."));
   }
-
-  return new Promise((resolve,reject)=>{
-    const callback="cfAction_"+Date.now()+"_"+Math.floor(Math.random()*10000);
-    const script=document.createElement("script");
-    const params=new URLSearchParams();
-    params.set("callback",callback);
-    Object.entries(payload).forEach(([k,v])=>params.set(k,String(v)));
-    const timeout=setTimeout(()=>{cleanup();reject(new Error("La operación está tardando más de lo normal. Puedes volver a pulsar guardar; la factura no se duplicará."));},90000);
-    window[callback]=data=>{
-      cleanup();
-      if(data&&data.ok) resolve(data);
-      else reject(new Error(data?.error||"Operación no realizada"));
-    };
-    script.onerror=()=>{cleanup();reject(new Error("No se pudo conectar con Google Sheets"));};
-    function cleanup(){clearTimeout(timeout);delete window[callback];script.remove();}
-    script.src=SCRIPT_URL+"?"+params.toString()+"&_="+Date.now();
-    document.body.appendChild(script);
-  });
+  if(isNativeApp()){
+    return nativeJsonRequest(SCRIPT_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8","Accept":"application/json"},
+      body:JSON.stringify(requestPayload)
+    });
+  }
+  // Para Safari enviamos el cuerpo mediante POST no-cors y recogemos la respuesta
+  // temporal por una URL aleatoria, evitando poner el token en la dirección.
+  return accountRequest(requestPayload);
 }
 
 async function saveEditedRecord(){
@@ -3036,68 +3329,19 @@ async function adjustInventory(id,delta){
 async function deleteInventoryItem(id){const item=inventoryItems.find(x=>String(x.id)===String(id));if(!item)return;if(!confirm(`¿Eliminar "${item.articulo}" del inventario?`))return;const before=[...inventoryItems];inventoryItems=inventoryItems.filter(x=>String(x.id)!==String(id));localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();try{await callAction({accion:"eliminarInventario",id:String(id)});showToastMessage("Material eliminado",item.articulo);await loadInventory(false);}catch(err){inventoryItems=before;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();showToastMessage("Error",err.message||"No se pudo eliminar el material.");}}
 
 function syncFromSheets(){
-  if(isNativeApp()){
-    return (async()=>{
-      const data=await nativeJsonRequest(SCRIPT_URL+"?_="+Date.now(),{
-        method:"GET",
-        headers:{"Accept":"application/json"}
-      });
-      const server=[...(data.compras||[]),...(data.facturacion||[])];
-      server.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-      records=server;
-      localStorage.setItem("cf_records",JSON.stringify(records.slice(0,200)));
-      updatePendingDocuments();
-      renderLatest();
-      if(!$('recordsPage').classList.contains('hidden')){
-        buildRecordPeriods();
-        renderAll();
-      }
-      if(!$('summaryPage').classList.contains('hidden')) updateSummary();
-      return data;
-    })();
-  }
-
-  return new Promise((resolve,reject)=>{
-    const callback="cfCallback_"+Date.now();
-    const script=document.createElement("script");
-    const timeout=setTimeout(()=>{
-      cleanup();
-      reject(new Error("Tiempo de espera agotado"));
-    },12000);
-
-    window[callback]=data=>{
-      cleanup();
-      if(!data||!data.ok){
-        reject(new Error(data?.error||"Respuesta no válida"));
-        return;
-      }
-      const server=[...(data.compras||[]),...(data.facturacion||[])];
-      server.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-      records=server;
-      localStorage.setItem("cf_records",JSON.stringify(records.slice(0,200)));
-      updatePendingDocuments();
-      renderLatest();
-      if(!$('recordsPage').classList.contains('hidden')){
-        buildRecordPeriods();
-        renderAll();
-      }
-      if(!$('summaryPage').classList.contains('hidden')) updateSummary();
-      resolve(data);
-    };
-
-    script.onerror=()=>{
-      cleanup();
-      reject(new Error("No se pudo conectar con Google Sheets"));
-    };
-
-    function cleanup(){
-      clearTimeout(timeout);
-      delete window[callback];
-      script.remove();
+  return callAction({accion:"syncRecords"}).then(data=>{
+    const server=[...(data.compras||[]),...(data.facturacion||[])];
+    server.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+    records=server;
+    localStorage.setItem("cf_records",JSON.stringify(records.slice(0,200)));
+    updatePendingDocuments();
+    renderLatest();
+    if(!$('recordsPage').classList.contains('hidden')){
+      buildRecordPeriods();
+      renderAll();
     }
-
-    script.src=SCRIPT_URL+"?callback="+encodeURIComponent(callback)+"&_="+Date.now();
-    document.body.appendChild(script);
+    if(!$('summaryPage').classList.contains('hidden')) updateSummary();
+    return data;
   });
 }
 
@@ -3607,8 +3851,6 @@ $("homeBrandImageInput")?.addEventListener("change",e=>saveHomeBrandImage(e.targ
 
 migrateOldSuppliers();
 renderSupplierPanel();
-loadSuppliersFromGoogle(false);
-loadInvoiceSettings(false);
 
 $("notificationTime").addEventListener("change",async e=>{
   saveSetting(SETTINGS_KEYS.notificationTime,e.target.value||"09:00");
@@ -3631,7 +3873,6 @@ buildSummaryPeriods();
 buildRecordPeriods();
 renderLatest();
 initScrollIndicator();
-refreshData(false);
 
 
 /* =========================================================
@@ -3878,6 +4119,7 @@ function unlockSecurity(){
   const lock=$("securityLock");
   if(lock) lock.classList.add("hidden");
   securitySetStatus("");
+  if(cfSessionToken()) loadInitialDataForAccount().catch(e=>console.warn("No se pudieron cargar todos los datos iniciales",e));
 }
 
 function lockSecurity(){
@@ -3933,10 +4175,8 @@ async function securityStart(){
 }
 
 
-loadClients(false);
-loadInventory(false);
-loadAgenda(false);
-securityStart();
+// Los datos privados se cargan después de iniciar sesión y desbloquear la app.
+startAccountSystem();
 
 </script>
 
