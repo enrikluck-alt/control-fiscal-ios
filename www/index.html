@@ -1540,8 +1540,6 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
 </div>
 
-<script src="biometric.bundle.js"></script>
-
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcJB5MwzcFw9Zm7WQkVhLgWCi35YMC_3XCoqvc8VAet3G8-f8hxlpuTTJUcod3Z2YJAA/exec";
 
@@ -3649,7 +3647,46 @@ function securitySetStatus(text){
 }
 
 function nativeBiometric(){
-  return window.ControlFiscalBiometricAuth || null;
+  // Capacitor iOS registra los métodos nativos en window.Capacitor.Plugins.
+  // No usamos registerPlugin() ni un bundle JS duplicado: el puente nativo
+  // ya expone BiometricAuthNative desde el arranque del WKWebView.
+  const cap = window.Capacitor || null;
+  const plugins = cap && cap.Plugins ? cap.Plugins : {};
+  const plugin = plugins.BiometricAuthNative || plugins.BiometricAuth || null;
+  const checkFn = plugin && typeof plugin.checkBiometry === "function"
+    ? plugin.checkBiometry.bind(plugin)
+    : null;
+  const authFn = plugin && typeof plugin.authenticate === "function"
+    ? plugin.authenticate.bind(plugin)
+    : plugin && typeof plugin.internalAuthenticate === "function"
+      ? plugin.internalAuthenticate.bind(plugin)
+      : null;
+
+  const status = {
+    capacitorPresent: !!cap,
+    platform: cap && typeof cap.getPlatform === "function" ? cap.getPlatform() : "unknown",
+    pluginName: plugins.BiometricAuthNative ? "BiometricAuthNative" : (plugins.BiometricAuth ? "BiometricAuth" : "not-found"),
+    pluginKeys: Object.keys(plugins),
+    nativePluginPresent: !!plugin,
+    checkBiometryType: checkFn ? "function" : typeof plugin?.checkBiometry,
+    authenticateType: authFn ? "function" : "undefined",
+    internalAuthenticateType: typeof plugin?.internalAuthenticate,
+    bridgeLoaded: !!(plugin && checkFn && authFn),
+    error: ""
+  };
+  if (!plugin) status.error = "Capacitor no expuso BiometricAuthNative dentro de Capacitor.Plugins.";
+  else if (!checkFn) status.error = "El plugin nativo no expone checkBiometry().";
+  else if (!authFn) status.error = "El plugin nativo no expone internalAuthenticate()/authenticate().";
+  window.__CF_BIOMETRIC_BRIDGE_STATUS = status;
+  if (!status.bridgeLoaded) console.error("[Control Fiscal Face ID] Puente nativo no disponible", status);
+  else console.info("[Control Fiscal Face ID] Puente nativo listo", status);
+
+  if (!status.bridgeLoaded) return null;
+  // La API pública autentica mediante internalAuthenticate en el plugin nativo.
+  return {
+    checkBiometry: checkFn,
+    authenticate: authFn
+  };
 }
 
 function securityRandomHex(bytes=16){
