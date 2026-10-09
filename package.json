@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "cap:add:ios": "cap add ios",
-    "cap:sync": "cap sync ios"
+    "cap:sync": "cap sync ios",
+    "build:biometric": "esbuild biometric-entry.js --bundle --platform=browser --format=iife --target=es2020 --outfile=www/biometric.bundle.js"
   },
   "dependencies": {
     "@capacitor/core": "8.5.2",
