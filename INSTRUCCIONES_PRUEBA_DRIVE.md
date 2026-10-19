@@ -1,9 +1,9 @@
-# Control Fiscal V78 — Prueba real de Drive (NO producción)
+# V78: prueba de libro personal
 
-Sube el contenido de esta carpeta a la rama `v78-google-test`, reemplazando archivos anteriores. No subas IPA al directorio `www`. Ejecuta el workflow de Actions y descarga la IPA generada. Instala con Sideloadly.
+Sube el contenido del ZIP a la rama `v78-google-test` (incluye los archivos ocultos `.github`). Compila en GitHub Actions e instala la IPA con Sideloadly.
 
-Al pulsar Iniciar sesión, se solicitará `drive.file`, se intentará buscar un libro V78 y, si no existe, se creará uno en el Drive de la cuenta autorizada. Pulsa de nuevo para verificar que recupera el mismo ID.
+En iPhone pulsa **Buscar o crear mi libro de prueba**. Se creará, si no existe, un Google Sheets vacío llamado `Control Fiscal - Datos fiscales` en el Drive de la cuenta elegida. Se crean las pestañas Configuracion, Compras, Facturas, Inventario, Clientes, Agenda e Ingresos. No se introducen datos fiscales.
 
-**NO USAR PARA DATOS REALES.** Esta versión solo prueba Google OAuth, Drive y Sheets; la V77 fiscal permanece bloqueada. El alcance `drive.file` puede requerir comprobaciones adicionales de descubrimiento tras reinstalación.
+Cuando muestre el ID, vuelve a pulsar: debe decir **LIBRO RECUPERADO** con el mismo ID. Si aparece un error que incluya ID, no borres ni vuelvas a crear nada manualmente; envía el texto del error.
 
-Si aparece error, comparte el texto SIN tokens ni credenciales. No pulses repetidamente crear si indica que se creó un libro pero falló su etiquetado.
+El token se mantiene únicamente en memoria durante la prueba. No compartas tokens. El proyecto V78 sigue siendo experimental.
