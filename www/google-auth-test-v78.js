@@ -1,32 +1,61 @@
-/* V78: prueba aislada de OAuth Drive. No habilita operaciones fiscales. */
+/* Control Fiscal V78: diagnóstico seguro de OAuth. NO habilita operaciones fiscales. */
 (function(){
   'use strict';
   const clientId='429272495544-72rmbs21hjds0fqb2hjlskbojr6gmi4g.apps.googleusercontent.com';
   const gate=document.createElement('div'); gate.id='cf-google-test-gate';
-  gate.innerHTML='<div class="panel"><h2>Control Fiscal V78</h2><p>Prueba Google Drive personal</p><button id="cf-google-signin">Iniciar sesión y comprobar Drive</button><p class="small" id="cf-google-result">Se solicitará permiso para los archivos de Control Fiscal. No se habilitan operaciones fiscales.</p></div>';
+  gate.innerHTML='<div class="panel"><h2>Control Fiscal V78</h2><p>Diagnóstico seguro de Google Drive</p><button id="cf-google-signin">Diagnosticar acceso Google</button><p class="small" id="cf-google-result">No se mostrarán tokens ni se escribirán datos fiscales.</p></div>';
   document.body.appendChild(gate);
   const msg=document.getElementById('cf-google-result');
   const btn=document.getElementById('cf-google-signin');
-  const show=(text)=>{msg.textContent=text;};
+  const show=(s)=>{msg.textContent=s;};
+  function tokenKind(token){
+    if(typeof token!=='string' || !token) return 'ausente';
+    if(token.split('.').length===3) return 'formato JWT (comprobar si se usa idToken por error)';
+    return 'formato opaco';
+  }
+  function safeKeys(obj){
+    if(!obj || typeof obj!=='object') return 'no es objeto';
+    return Object.keys(obj).filter(k=>/^(token|accessToken|idToken|refreshToken|serverAuthCode|expires|expiresIn|expirationDate|scopes|scope|profile|user|provider)$/i.test(k)).join(', ')||'(ninguna de las claves conocidas)';
+  }
+  async function probe(accessToken){
+    try{
+      const r=await fetch('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)',{
+        method:'GET',headers:{Authorization:'Bearer '+accessToken},cache:'no-store'
+      });
+      const data=await r.json().catch(()=>({}));
+      return {status:r.status,message:r.ok?'Autorización Drive aceptada':String(data?.error?.message||'Petición rechazada')};
+    }catch(e){return {status:'red',message:String(e?.message||e)};}
+  }
   btn.addEventListener('click',async()=>{
-    btn.disabled=true;show('Conectando con Google…');
+    btn.disabled=true; show('Solicitando autorización a Google…');
     try{
       if(!window.Capacitor || window.Capacitor.getPlatform()!=='ios') throw Error('Se necesita la aplicación nativa iOS.');
       const social=window.ControlFiscalSocialLogin;
       if(!social || typeof social.initialize!=='function') throw Error('No se ha cargado SocialLogin.');
-      if(!window.ControlFiscalDriveV78) throw Error('No se ha cargado drive-v78.js.');
       await social.initialize({google:{iOSClientId:clientId,mode:'online'}});
       const response=await social.login({provider:'google',options:{scopes:['openid','email','profile','https://www.googleapis.com/auth/drive.file']}});
-      const result=response && response.result;
-      if(!result || !result.idToken) throw Error('Google no devolvió token de identidad.');
-      // Nunca enviar tokens a Apps Script ni imprimirlos en pantalla o logs.
-      const accessToken=typeof result.accessToken==='string' ? result.accessToken : result.accessToken && result.accessToken.token;
-      if(!accessToken) throw Error('Identidad correcta, pero no hay token OAuth para Drive. Revisar respuesta del plugin y los scopes.');
-      show('Autenticación correcta. Buscando o creando el libro de prueba en tu Drive…');
-      const book=await window.ControlFiscalDriveV78.findOrCreateBook(accessToken);
-      show((book.created?'Libro creado':'Libro existente recuperado')+' correctamente en tu Google Drive.\nNombre: '+book.name+'\nID: '+book.id+'\n\nPrueba técnica de Drive completada. Las operaciones fiscales siguen bloqueadas.');
-      btn.textContent='Repetir prueba de recuperación';
-    }catch(e){show('Error: '+(e && e.message ? e.message : String(e)));}
+      const result=response?.result;
+      if(!result) throw Error('Respuesta de Google sin result.');
+      const raw=result.accessToken;
+      const accessToken=typeof raw==='string'?raw:(raw && typeof raw.token==='string'?raw.token:null);
+      const details=[
+        'Identidad (idToken): '+(typeof result.idToken==='string' && result.idToken.length>0?'presente':'ausente'),
+        'Claves conocidas en result: '+safeKeys(result),
+        'Tipo de accessToken: '+(typeof raw==='string'?'cadena':raw===null?'null':typeof raw),
+        'Claves conocidas de accessToken: '+safeKeys(raw),
+        'Token de acceso: '+tokenKind(accessToken)
+      ];
+      if(!accessToken){show(details.join('\n')+'\nNo hay accessToken utilizable.');return;}
+      const check=await probe(accessToken);
+      details.push('Prueba de autorización Drive: HTTP '+check.status);
+      details.push('Respuesta Drive: '+check.message);
+      if(check.status===200){
+        details.push('La autorización básica funciona. NO se han creado archivos.');
+      }else{
+        details.push('No se ha intentado crear ninguna hoja para evitar duplicados.');
+      }
+      show(details.join('\n'));
+    }catch(e){show('Error de autenticación: '+String(e?.message||e));}
     finally{btn.disabled=false;}
   });
 })();
