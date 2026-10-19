@@ -37,6 +37,46 @@ async function repair(token,rawId){const before=await inspect(token,rawId);const
  if(missing.length)throw Error('Faltan pestañas tras actualizar: '+missing.join(', '));
  return {id:before.id,name:before.drive.name,changed:requests.length,tabs:finalNames};
 }
+const BOOK_TITLE='Control Fiscal - Datos fiscales';
+const APP_KEY='controlFiscalVersion';
+const APP_VERSION='78';
+async function discover(token){
+ // drive.file only lists files this OAuth application can access; never claim global account visibility.
+ const query="mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false and (name = '"+BOOK_TITLE+"' or appProperties has { key = '"+APP_KEY+"' and value = '"+APP_VERSION+"' })";
+ let next=null,files=[];
+ do{
+  const params=new URLSearchParams({q:query,fields:'nextPageToken,files(id,name,mimeType,appProperties)',pageSize:'100'});
+  if(next)params.set('pageToken',next);
+  const result=await request(token,'/drive/v3/files?'+params.toString());
+  files.push(...(result.files||[]));next=result.nextPageToken||null;
+  if(files.length>100)throw Error('Demasiados libros candidatos: selección manual necesaria');
+ }while(next);
+ const unique=[...new Map(files.map(f=>[f.id,f])).values()];
+ if(unique.length>1)throw Error('Se encontraron '+unique.length+' libros candidatos. No se creará otro; pega el enlace del correcto para seleccionarlo.');
+ return unique[0]||null;
+}
+async function createPersonalBook(token){
+ // Creation through Drive makes it app-created under drive.file. No retries on partial success.
+ const metadata={name:BOOK_TITLE,mimeType:'application/vnd.google-apps.spreadsheet',appProperties:{[APP_KEY]:APP_VERSION}};
+ const file=await request(token,'/drive/v3/files?fields=id,name,mimeType','POST',metadata);
+ if(!file.id)throw Error('Drive no devolvió el ID del nuevo libro; no repitas la creación automáticamente');
+ return file;
+}
+async function automaticBook(token,{allowCreate=false}={}){
+ let file=await discover(token);let created=false;
+ if(!file){
+  if(!allowCreate)return {found:false,created:false};
+  file=await createPersonalBook(token);created=true;
+ }
+ try{
+  // An existing spreadsheet may still be propagating to Sheets immediately after creation.
+  const repaired=await repair(token,file.id);
+  return {found:true,created,id:repaired.id,name:repaired.name,tabs:repaired.tabs,changed:repaired.changed};
+ }catch(error){
+  throw Error((created?'El libro se ha creado, pero no se pudo configurar. NO vuelvas a crear otro. ':'El libro existe, pero no se pudo configurar. ')+
+   'ID: '+file.id+'. '+error.message);
+ }
+}
 const TEST_MARKER='CFV78_TEST_RW_V1';
 async function findTestRows(token,id){
  const result=await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(id)+'/values/'+encodeURIComponent('Configuracion!A:C'));
@@ -65,5 +105,5 @@ async function writeAndVerifyTest(token,rawId){
  if(!after.found||after.value!==value)throw Error('La escritura se envió, pero la lectura no coincide. No repitas la escritura; usa Verificar lectura.');
  return {...after,created:true};
 }
-global.ControlFiscalDriveV78=Object.freeze({inspect,repair,parseId,verifyTest,writeAndVerifyTest});
+global.ControlFiscalDriveV78=Object.freeze({inspect,repair,parseId,verifyTest,writeAndVerifyTest,discover,automaticBook});
 })(window);
