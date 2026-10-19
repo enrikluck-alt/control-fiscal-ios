@@ -96,6 +96,8 @@ async function automatic(allowCreate){buttons.forEach(b=>b.disabled=true);show('
  }catch(e){show('Error: '+String(e?.message||e).slice(0,850));}
  finally{buttons.forEach(b=>b.disabled=false);}
 }
+// Read-only session accessor for isolated V78 tests; cleared on logout.
+window.ControlFiscalV78Session=()=>token&&activeEmail?{token,email:activeEmail}:null;
 document.getElementById('cf-login-account').addEventListener('click',signIn);
 document.getElementById('cf-logout-account').addEventListener('click',signOut);
 document.getElementById('cf-auto-find').addEventListener('click',()=>automatic(false));
