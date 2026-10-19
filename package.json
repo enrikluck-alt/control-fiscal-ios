@@ -1,4 +1,3 @@
-
 {
   "name": "control-fiscal-ios",
   "version": "1.8.1",
@@ -6,7 +5,7 @@
   "scripts": {
     "cap:add:ios": "cap add ios",
     "cap:sync": "cap sync ios",
-    "build:google": "esbuild google-login.js --bundle --platform=browser --format=iife --outfile=www/google-login.bundle.js"
+    "build:google": "esbuild google-login-entry.js --bundle --platform=browser --format=iife --outfile=www/google-login.bundle.js"
   },
   "dependencies": {
     "@capacitor/core": "8.5.2",
