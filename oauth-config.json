@@ -1,0 +1,6 @@
+{
+  "iosClientId": "429272495544-72rmbs21hjds0fqb2hjlskbojr6gmi4g.apps.googleusercontent.com",
+  "iosBundleId": "com.chispassound.controlfiscal",
+  "iosRedirectScheme": "com.googleusercontent.apps.429272495544-72rmbs21hjds0fqb2hjlskbojr6gmi4g",
+  "scopes": ["openid", "email", "profile", "https://www.googleapis.com/auth/drive.file"]
+}
