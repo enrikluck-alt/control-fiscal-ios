@@ -37,5 +37,33 @@ async function repair(token,rawId){const before=await inspect(token,rawId);const
  if(missing.length)throw Error('Faltan pestañas tras actualizar: '+missing.join(', '));
  return {id:before.id,name:before.drive.name,changed:requests.length,tabs:finalNames};
 }
-global.ControlFiscalDriveV78=Object.freeze({inspect,repair,parseId});
+const TEST_MARKER='CFV78_TEST_RW_V1';
+async function findTestRows(token,id){
+ const result=await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(id)+'/values/'+encodeURIComponent('Configuracion!A:C'));
+ const rows=Array.isArray(result.values)?result.values:[];
+ return rows.map((row,index)=>({row,index:index+1})).filter(item=>item.row[0]===TEST_MARKER);
+}
+async function verifyTest(token,rawId){
+ const book=await inspect(token,rawId);
+ const names=(book.sheet.sheets||[]).map(s=>s.properties?.title);
+ if(!names.includes('Configuracion'))throw Error('Falta la pestaña Configuracion');
+ const matches=await findTestRows(token,book.id);
+ if(matches.length>1)throw Error('Se encontraron '+matches.length+' registros de prueba; no se escribirá nada más');
+ if(matches.length===0)return {id:book.id,found:false,count:0};
+ const values=matches[0].row;
+ if(values[2]!=='LECTURA_OK')throw Error('Registro de prueba incompleto en fila '+matches[0].index);
+ return {id:book.id,found:true,count:1,row:matches[0].index,marker:values[0],value:values[1]};
+}
+async function writeAndVerifyTest(token,rawId){
+ const before=await verifyTest(token,rawId);
+ if(before.found)return {...before,created:false};
+ const value='Prueba V78 '+new Date().toISOString();
+ await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(before.id)+'/values/'+encodeURIComponent('Configuracion!A:C')+':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS','POST',{
+  values:[[TEST_MARKER,value,'LECTURA_OK']]
+ });
+ const after=await verifyTest(token,before.id);
+ if(!after.found||after.value!==value)throw Error('La escritura se envió, pero la lectura no coincide. No repitas la escritura; usa Verificar lectura.');
+ return {...after,created:true};
+}
+global.ControlFiscalDriveV78=Object.freeze({inspect,repair,parseId,verifyTest,writeAndVerifyTest});
 })(window);
