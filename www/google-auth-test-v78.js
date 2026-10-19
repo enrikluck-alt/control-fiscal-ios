@@ -12,7 +12,8 @@
     btn.disabled=true; msg.textContent='Conectando con Google…';
     try{
       if(!window.Capacitor || window.Capacitor.getPlatform()!=='ios') throw Error('Esta prueba requiere un iPhone con la aplicación nativa.');
-      social=window.Capacitor.registerPlugin('SocialLogin');
+      social=window.ControlFiscalSocialLogin;
+      if(!social || typeof social.initialize!=='function') throw Error('No se ha cargado el plugin nativo SocialLogin.');
       await social.initialize({google:{iOSClientId:clientId,mode:'online'}});
       const response=await social.login({provider:'google',options:{scopes:['email','profile']}});
       const result=response && response.result;
