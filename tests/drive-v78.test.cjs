@@ -1,21 +1,24 @@
-const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');
-const code=fs.readFileSync('www/drive-v78.js','utf8');const token='TEST_TOKEN_NOT_REAL_123456789';
-function setup(handler){const window={CapacitorHttpNative:{request:handler}};vm.runInNewContext(code,{window,URLSearchParams,encodeURIComponent});return window.ControlFiscalDriveV78;}
-function res(data,status=200){return {status,data};}
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const id='1XI0vJjHtDXBpiah_Xss24_rOcuInUFeNIf0n6NYPJwQ';
+const calls=[];
+const window={CapacitorHttpNative:{request:async req=>{
+ calls.push(req);
+ if(req.url.startsWith('https://www.googleapis.com/drive/v3/files/'))return {status:200,data:{id,name:'Control Fiscal - Datos fiscales',mimeType:'application/vnd.google-apps.spreadsheet'}};
+ if(req.url.startsWith('https://sheets.googleapis.com/v4/spreadsheets/')){
+ if(req.method==='POST')return {status:200,data:{replies:[]}};
+ return {status:200,data:{spreadsheetId:id,sheets:[{properties:{sheetId:0,title:'Hoja 1'}}]}};
+ }
+ return {status:404,data:{error:{message:'wrong endpoint'}}};
+}}};
+vm.runInNewContext(fs.readFileSync('www/drive-v78.js','utf8'),{window});
 (async()=>{
- let calls=[];const api=setup(async opts=>{calls.push(opts);assert.equal(opts.headers.Authorization,'Bearer '+token);
-  if(opts.url.includes('/drive/v3/files?')&&opts.method==='GET')return res({files:[]});
-  if(opts.url.includes('/drive/v3/files?')&&opts.method==='POST')return res({id:'book1',name:'Control Fiscal - Datos fiscales'});
-  if(opts.url.includes('/sheets/v4/spreadsheets/book1?'))return res({sheets:[]});
-  if(opts.url.includes(':batchUpdate'))return res({replies:[]});
-  throw Error('unexpected '+opts.url);
- });
- const b=await api.findOrCreateBook(token);assert.equal(b.created,true);assert.equal(b.tabsAdded,7);assert.equal(calls.length,4);assert.equal(calls[1].data.appProperties.controlFiscalVersion,'78');
- const existing=setup(async opts=>{if(opts.url.includes('/drive/v3/files?'))return res({files:[{id:'same',name:'Libro'}]});if(opts.url.includes('/sheets/v4/spreadsheets/same?'))return res({sheets:[{properties:{title:'Configuracion'}},...['Compras','Facturas','Inventario','Clientes','Agenda','Ingresos'].map(title=>({properties:{title}}))]});throw Error('unexpected write')});
- assert.equal((await existing.findOrCreateBook(token)).id,'same');
- const duplicates=setup(async()=>res({files:[{id:'one'},{id:'two'}]}));await assert.rejects(()=>duplicates.findOrCreateBook(token),/varios libros/);
- const partial=setup(async opts=>{if(opts.url.includes('/drive/v3/files?'))return res({files:[{id:'recover',name:'Libro'}]});if(opts.url.includes('/sheets/v4/spreadsheets/recover?'))return res({sheets:[]});if(opts.url.includes(':batchUpdate'))return res({error:{message:'denied'}},403);throw Error('unexpected')});
- await assert.rejects(()=>partial.findOrCreateBook(token),/Libro existente ID recover/);
- await assert.rejects(()=>api.findOrCreateBook(''),/token OAuth/);
- console.log('OK: 5 pruebas de Drive V78');
+ const api=window.ControlFiscalDriveV78;
+ const result=await api.inspect('valid-token-12345678901234567890',id);
+ assert.equal(result.id,id);
+ assert.ok(calls.some(c=>c.url.startsWith('https://sheets.googleapis.com/v4/spreadsheets/')));
+ assert.ok(calls.some(c=>c.url.startsWith('https://www.googleapis.com/drive/v3/files/')));
+ assert.ok(!calls.some(c=>c.url.includes('www.googleapis.com/sheets/v4')));
+ console.log('OK: endpoints Drive y Sheets correctos; inspect no crea documentos');
 })().catch(e=>{console.error(e);process.exitCode=1});

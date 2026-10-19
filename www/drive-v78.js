@@ -1,12 +1,15 @@
 /* V78 recovery-only: NEVER creates another spreadsheet. */
 (function(global){'use strict';
-const ROOT='https://www.googleapis.com';
+const DRIVE_ROOT='https://www.googleapis.com';
+const SHEETS_ROOT='https://sheets.googleapis.com';
 const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda','Ingresos'];
 async function request(token,path,method='GET',body){
  if(typeof token!=='string'||token.length<20)throw Error('Token OAuth ausente');
  const http=global.CapacitorHttpNative;
  if(!http||typeof http.request!=='function')throw Error('HTTP nativo no disponible');
- const opts={url:ROOT+path,method,headers:{Authorization:'Bearer '+token,Accept:'application/json'}};
+ const root=path.startsWith('/sheets/v4/')?SHEETS_ROOT:DRIVE_ROOT;
+ const apiPath=path.startsWith('/sheets/v4/')?path.slice('/sheets'.length):path;
+ const opts={url:root+apiPath,method,headers:{Authorization:'Bearer '+token,Accept:'application/json'}};
  if(body!==undefined){opts.headers['Content-Type']='application/json';opts.data=body;}
  let r;try{r=await http.request(opts);}catch(e){throw Error('Error de transporte: '+String(e?.message||e).slice(0,180));}
  let d=r.data;if(typeof d==='string'){try{d=JSON.parse(d)}catch{d={raw:d.slice(0,150)}}}
