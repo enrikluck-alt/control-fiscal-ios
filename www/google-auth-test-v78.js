@@ -31,7 +31,8 @@
         'Access token: '+(token?'presente':'ausente'),
         '¿Access token igual a ID token?: '+(token&&result.idToken?String(token===result.idToken):'no comprobable'),
         'Userinfo con token del login: '+await check(token,'https://www.googleapis.com/oauth2/v3/userinfo'),
-        'Drive con token del login: '+await check(token,'https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)')
+        'Drive con token del login: '+await check(token,'https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)'),
+        'Longitud del token (rango): '+(!token?'ausente':token.length<40?'menos de 40':token.length<150?'40–149':token.length<500?'150–499':'500 o más')
       ];
       if(typeof social.getAuthorizationCode==='function'){
         try{
@@ -45,6 +46,18 @@
           }
         }catch(e){lines.push('getAuthorizationCode: no disponible ('+(e?.name||'error')+')');}
       }
+      if(typeof social.refresh==='function'){
+        try{
+          await social.refresh({provider:'google',options:{}});
+          lines.push('Refresh nativo: completado');
+          const renewed=await social.login({provider:'google',options:{scopes:['email','profile','https://www.googleapis.com/auth/drive.file']}});
+          const newToken=getToken(renewed?.result?.accessToken);
+          lines.push('Token tras refresh: '+(newToken?'presente':'ausente'));
+          lines.push('¿Token diferente?: '+(token&&newToken?String(token!==newToken):'no comprobable'));
+          lines.push('Userinfo tras refresh: '+await check(newToken,'https://www.googleapis.com/oauth2/v3/userinfo'));
+          lines.push('Drive tras refresh: '+await check(newToken,'https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)'));
+        }catch(e){lines.push('Refresh nativo: error ('+(e?.name||'desconocido')+')');}
+      }else{lines.push('Refresh nativo: método no disponible');}
       lines.push('No se han creado ni modificado archivos.');
       show(lines.join('\n'));
     }catch(e){show('Error: '+String(e?.message||e));}
