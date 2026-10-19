@@ -3,7 +3,7 @@
 const clientId='429272495544-72rmbs21hjds0fqb2hjlskbojr6gmi4g.apps.googleusercontent.com';
 const scopes=['openid','email','profile','https://www.googleapis.com/auth/drive.file'];
 const gate=document.createElement('div');gate.id='cf-google-test-gate';
-gate.innerHTML='<div class="panel"><h2>Control Fiscal V78</h2><p>Lectura y escritura de prueba (no crea otro libro)</p><label for="cf-existing-id">ID o enlace de la hoja existente</label><input id="cf-existing-id" type="text" autocomplete="off" spellcheck="false" placeholder="Pega aquí la URL de Google Sheets" style="display:block;width:100%;box-sizing:border-box;margin:12px 0;padding:12px;color:#111;background:#fff;border-radius:8px"><button id="cf-auto-find">Buscar mi libro automáticamente</button> <button id="cf-auto-create">Crear solo si no existe</button><div style="margin-top:12px"><button id="cf-inspect">Comprobar libro</button> <button id="cf-repair">Configurar 7 pestañas</button></div><div style="margin:12px 0;padding:10px;border:1px solid #888;border-radius:8px"><strong>Cuenta Google activa</strong><p id="cf-active-account">Sin verificar</p><button id="cf-login-account">Iniciar sesión / elegir cuenta</button> <button id="cf-logout-account">Cerrar sesión y cambiar cuenta</button></div><div style="margin-top:14px"><button id="cf-write-test">Guardar y leer prueba</button> <button id="cf-read-test">Verificar lectura</button></div><p class="small" id="cf-google-result">Primero pulsa Comprobar libro. Solo después configura las pestañas.</p></div>';
+gate.innerHTML='<div class="panel"><h2>Control Fiscal V78</h2><p>Prueba multiusuario con comprobación de permisos Drive</p><label for="cf-existing-id">ID o enlace de la hoja existente</label><input id="cf-existing-id" type="text" autocomplete="off" spellcheck="false" placeholder="Pega aquí la URL de Google Sheets" style="display:block;width:100%;box-sizing:border-box;margin:12px 0;padding:12px;color:#111;background:#fff;border-radius:8px"><button id="cf-auto-find">Buscar mi libro automáticamente</button> <button id="cf-auto-create">Crear solo si no existe</button><div style="margin-top:12px"><button id="cf-inspect">Comprobar libro</button> <button id="cf-repair">Configurar 7 pestañas</button></div><div style="margin:12px 0;padding:10px;border:1px solid #888;border-radius:8px"><strong>Cuenta Google activa</strong><p id="cf-active-account">Sin verificar</p><button id="cf-login-account">Iniciar sesión / elegir cuenta</button> <button id="cf-logout-account">Cerrar sesión y cambiar cuenta</button></div><div style="margin-top:14px"><button id="cf-write-test">Guardar y leer prueba</button> <button id="cf-read-test">Verificar lectura</button></div><p class="small" id="cf-google-result">Primero pulsa Comprobar libro. Solo después configura las pestañas.</p></div>';
 document.body.appendChild(gate);
 const input=document.getElementById('cf-existing-id');const msg=document.getElementById('cf-google-result');
 const buttons=['cf-inspect','cf-repair','cf-write-test','cf-read-test','cf-auto-find','cf-auto-create','cf-login-account','cf-logout-account'].map(id=>document.getElementById(id));
@@ -20,6 +20,21 @@ async function nativeUserinfo(t){
  if(r.status!==200||!data||typeof data.email!=='string'||!data.email_verified)throw Error('No se pudo verificar la cuenta Google (HTTP '+r.status+')');
  return data.email;
 }
+// Verify actual Drive authorization, not just Google identity. A successful
+// Userinfo response does NOT prove that drive.file was granted.
+async function nativeDriveCheck(t){
+ const http=window.CapacitorHttpNative;
+ if(!http||typeof http.request!=='function')throw Error('HTTP nativo no disponible');
+ const r=await http.request({url:'https://www.googleapis.com/drive/v3/files?pageSize=1&fields=nextPageToken%2Cfiles(id)',method:'GET',headers:{Authorization:'Bearer '+t,Accept:'application/json'}});
+ if(r.status!==200){
+  let d=r.data; if(typeof d==='string'){try{d=JSON.parse(d)}catch{d={}}}
+  const detail=String(d?.error?.message||'sin detalle').slice(0,180);
+  const err=new Error('Google Drive HTTP '+r.status+': '+detail+'. Cierra sesión, vuelve a conectar esta cuenta y autoriza el acceso a los archivos de la aplicación.');
+  err.authFailure=r.status===401||r.status===403;
+  throw err;
+ }
+ return true;
+}
 async function exclusive(fn){
  if(busy)return;busy=true;buttons.forEach(b=>b.disabled=true);
  try{await fn();}catch(e){show('Error: '+String(e?.message||e).slice(0,850));}
@@ -27,7 +42,10 @@ async function exclusive(fn){
 }
 
 async function auth(){
- if(token&&activeEmail)return token;
+ if(token&&activeEmail){
+  try{await nativeUserinfo(token);await nativeDriveCheck(token);return token;}
+  catch(e){resetSession();throw Error('La sesión anterior ya no tiene acceso válido. '+e.message);}
+ }
  if(authPromise)return authPromise;
  authPromise=(async()=>{
   if(!window.Capacitor||window.Capacitor.getPlatform()!=='ios')throw Error('Requiere iOS');
@@ -39,12 +57,13 @@ async function auth(){
   if(typeof t!=='string'||t.length<20)throw Error('No se recibió token OAuth');
   // Validate the actual bearer against Google before binding any spreadsheet ID.
   const email=await nativeUserinfo(t);
+  await nativeDriveCheck(t);
   token=t;activeEmail=email;accountEl.textContent=email;
   return token;
  })();
  try{return await authPromise;}catch(e){resetSession();throw e;}finally{authPromise=null;}
 }
-async function signIn(){await exclusive(async()=>{show('Verificando cuenta Google…');await auth();show('Cuenta Google conectada: '+activeEmail+'\nAhora puedes buscar su libro automáticamente.');});}
+async function signIn(){await exclusive(async()=>{show('Verificando cuenta Google…');await auth();show('Cuenta Google y permiso Drive verificados: '+activeEmail+'\nAhora puedes buscar su libro automáticamente.');});}
 async function signOut(){await exclusive(async()=>{
  show('Cerrando sesión Google…');
  const plugin=social();let warning='';
@@ -68,7 +87,7 @@ async function testAction(write){buttons.forEach(b=>b.disabled=true);show('Compr
   show((r.created?'PRUEBA GUARDADA Y LEÍDA': 'LECTURA CORRECTA')+'\nID del libro: '+r.id+'\nPestaña: Configuracion\nFila: '+r.row+'\nMarcador: '+r.marker+'\nValor: '+r.value+'\nCoincidencia: correcta\nNo se han escrito datos fiscales reales.');
  }catch(e){show('Error: '+String(e?.message||e).slice(0,650));}finally{buttons.forEach(b=>b.disabled=false);}
 }
-async function automatic(allowCreate){buttons.forEach(b=>b.disabled=true);show('Buscando tu libro en Google Drive…');
+async function automatic(allowCreate){buttons.forEach(b=>b.disabled=true);show('Verificando sesión y permisos de Drive antes de buscar…');
  try{
   const t=await auth();const r=await window.ControlFiscalDriveV78.automaticBook(t,{allowCreate});
   if(!r.found){show('No se encontró ningún libro accesible para esta aplicación. Si ya tienes uno, pega su enlace y pulsa Comprobar libro. Si es tu primera instalación, pulsa Crear solo si no existe.');return;}
