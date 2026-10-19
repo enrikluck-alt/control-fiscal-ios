@@ -36,17 +36,59 @@ jobs:
 
       - name: Configure iOS permissions
         run: |
+          
+      - name: Configure iOS permissions and Google OAuth
+        run: |
           python3 - <<'PY'
           import plistlib
           from pathlib import Path
+
           p = Path('ios/App/App/Info.plist')
+
           with p.open('rb') as f:
               data = plistlib.load(f)
-          data['NSFaceIDUsageDescription'] = 'Control Fiscal utiliza Face ID para desbloquear la aplicación de forma segura.'
+
+          data['NSFaceIDUsageDescription'] = (
+              'Control Fiscal utiliza Face ID para desbloquear '
+              'la aplicación de forma segura.'
+          )
           data['UIViewControllerBasedStatusBarAppearance'] = True
+
+          client_id = (
+              '429272495544-'
+              '72rmbs21hjds0fqb2hjlskbojr6gmi4g'
+              '.apps.googleusercontent.com'
+          )
+
+          reversed_client_id = '.'.join(
+              reversed(client_id.split('.'))
+          )
+
+          data['GIDClientID'] = client_id
+
+          url_types = data.get('CFBundleURLTypes', [])
+          if not any(
+              reversed_client_id in item.get('CFBundleURLSchemes', [])
+              for item in url_types
+          ):
+              url_types.append({
+                  'CFBundleURLSchemes': [reversed_client_id]
+              })
+
+          data['CFBundleURLTypes'] = url_types
+
           with p.open('wb') as f:
               plistlib.dump(data, f, sort_keys=False)
+
+          assert any(
+              reversed_client_id in item.get('CFBundleURLSchemes', [])
+              for item in data['CFBundleURLTypes']
+          )
+
+          print('Google OAuth URL scheme configurado')
+          print('Bundle ID:', data.get('CFBundleIdentifier'))
           PY
+
 
       - name: Set minimum iOS deployment target to 15.0
         run: |
