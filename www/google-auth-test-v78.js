@@ -4,7 +4,7 @@
   const clientId='429272495544-72rmbs21hjds0fqb2hjlskbojr6gmi4g.apps.googleusercontent.com';
   const scopes=['openid','email','profile','https://www.googleapis.com/auth/drive.file'];
   const gate=document.createElement('div'); gate.id='cf-google-test-gate';
-  gate.innerHTML='<div class="panel"><h2>Control Fiscal V78</h2><p>Diagnóstico OAuth iOS (solo lectura)</p><button id="cf-google-signin">Probar sesión nueva</button><p class="small" id="cf-google-result">Se cerrará la sesión de Google de esta aplicación y se solicitará una nueva. No se crearán archivos.</p></div>';
+  gate.innerHTML='<div class="panel"><h2>Control Fiscal V78</h2><p>Diagnóstico OAuth iOS (solo lectura)</p><button id="cf-google-signin">Comprobar acceso Google</button><p class="small" id="cf-google-result">Se comprobará el acceso sin cerrar la sesión. No se crearán archivos.</p></div>';
   document.body.appendChild(gate);
   const btn=document.getElementById('cf-google-signin');
   const msg=document.getElementById('cf-google-result');
@@ -13,7 +13,7 @@
   const errorName=e=>String(e?.message||e?.name||'Error').slice(0,180);
   const endpoints=[['Userinfo','https://www.googleapis.com/oauth2/v3/userinfo'],['Drive','https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)']];
   async function testFetch(token,url){
-    try{const r=await fetch(url,{headers:{Authorization:'Bearer '+token},cache:'no-store'});return 'HTTP '+r.status;}
+    try{const r=await fetch(url,{headers:{Authorization:'Bearer '+token},cache:'no-store'});const data=await r.json().catch(()=>({}));return 'HTTP '+r.status+(r.ok?'':' - '+String(data?.error?.status||data?.error?.message||'sin detalle').slice(0,220));}
     catch(e){return 'error '+errorName(e);}
   }
   async function testNative(token,url){
@@ -21,7 +21,8 @@
       const http=window.CapacitorHttpNative;
       if(!http||typeof http.request!=='function') return 'no disponible';
       const r=await http.request({url,method:'GET',headers:{Authorization:'Bearer '+token,'Accept':'application/json'}});
-      return 'HTTP '+r.status;
+      const data=typeof r.data==='string'?(()=>{try{return JSON.parse(r.data)}catch{return {}}})():r.data;
+      return 'HTTP '+r.status+(r.status>=400?' - '+String(data?.error?.status||data?.error?.message||'sin detalle').slice(0,220):'');
     }catch(e){return 'error '+errorName(e);}
   }
   btn.addEventListener('click',async()=>{
@@ -32,8 +33,7 @@
       const social=window.ControlFiscalSocialLogin;
       if(!social) throw Error('SocialLogin no disponible.');
       await social.initialize({google:{iOSClientId:clientId,mode:'online'}});
-      try{await social.logout({provider:'google'});lines.push('Cierre de sesión anterior: correcto');}
-      catch(e){lines.push('Cierre de sesión anterior: '+errorName(e));}
+      lines.push('Sin cierre forzado de sesión.');
       const response=await social.login({provider:'google',options:{scopes}});
       const result=response?.result||{};
       const token=getToken(result.accessToken);
@@ -43,6 +43,7 @@
       lines.push('Formato token: '+(!token?'ausente':token.split('.').length===3?'3 segmentos (posible JWT)':'opaco'));
       lines.push('¿Igual al ID token?: '+(token&&result.idToken?String(token===result.idToken):'no comprobable'));
       lines.push('Expiración informada: '+(result.accessTokenExpirationDate?'presente':'no indicada'));
+      lines.push('Scopes solicitados: openid email profile drive.file');
       if(token){
         for(const [name,url] of endpoints){
           lines.push(name+' web: '+await testFetch(token,url));

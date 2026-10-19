@@ -1,10 +1,12 @@
-# V78 — Prueba OAuth iOS 4
+# V78 - Prueba sin bucle de sesión
 
-1. Subir **el contenido** de este ZIP a la raíz de la rama `v78-google-test`.
-2. Ejecutar GitHub Actions → Build unsigned iOS IPA.
-3. Instalar la IPA mediante Sideloadly.
-4. Pulsar «Probar sesión nueva», seleccionar la cuenta y enviar captura del resultado.
+Esta versión elimina `social.logout()` del botón de diagnóstico. El inicio de sesión puede mostrar el selector de cuenta de Google, pero ya no se fuerza el cierre previo.
 
-La prueba cierra la sesión de Google de la aplicación antes de volver a iniciar sesión. No elimina archivos del Drive ni modifica registros fiscales. Compara peticiones HTTP de WebView y nativas; no muestra, guarda ni registra tokens.
+1. Subir **el contenido** del ZIP a la raíz de la rama `v78-google-test`.
+2. Ejecutar `Build unsigned iOS IPA` e instalar la IPA.
+3. Pulsar **Comprobar acceso Google** una sola vez.
+4. Enviar una captura del diagnóstico; incluye HTTP 403 y el mensaje de error, pero nunca tokens.
 
-Si ambos métodos devuelven 401, habrá que inspeccionar la respuesta del SDK nativo y la configuración OAuth; si solo falla uno, el problema apunta al transporte HTTP. No utilizar datos reales todavía.
+No se crean archivos ni se activan operaciones fiscales.
+
+Si el selector de cuenta se repite sin volver a la aplicación, detenerse y comunicarlo; el problema sería de flujo de autenticación y no del permiso Drive.
