@@ -1,66 +1,38 @@
-/* V78: libro personal de prueba. Token solo en memoria; llamadas nativas iOS. */
-(function(global){
-'use strict';
+/* V78 recovery-only: NEVER creates another spreadsheet. */
+(function(global){'use strict';
 const ROOT='https://www.googleapis.com';
-const TITLE='Control Fiscal - Datos fiscales';
 const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda','Ingresos'];
-const KEY='controlFiscalVersion';
-function checkToken(t){if(typeof t!=='string'||t.length<20)throw Error('Falta token OAuth válido');}
 async function request(token,path,method='GET',body){
-  checkToken(token);
-  const http=global.CapacitorHttpNative;
-  if(!http||typeof http.request!=='function')throw Error('HTTP nativo no disponible');
-  const opts={url:ROOT+path,method,headers:{Authorization:'Bearer '+token,Accept:'application/json'}};
-  if(body!==undefined){opts.headers['Content-Type']='application/json';opts.data=body;}
-  let response;
-  try{response=await http.request(opts);}catch(e){throw Error('Error de transporte nativo: '+String(e?.message||e).slice(0,180));}
-  let data=response.data;
-  if(typeof data==='string'){try{data=JSON.parse(data)}catch{data={}}}
-  if(!data||typeof data!=='object')data={};
-  if(response.status<200||response.status>=300)throw Error('Google API HTTP '+response.status+': '+String(data.error?.message||data.error?.status||'sin detalle').slice(0,240));
-  return data;
+ if(typeof token!=='string'||token.length<20)throw Error('Token OAuth ausente');
+ const http=global.CapacitorHttpNative;
+ if(!http||typeof http.request!=='function')throw Error('HTTP nativo no disponible');
+ const opts={url:ROOT+path,method,headers:{Authorization:'Bearer '+token,Accept:'application/json'}};
+ if(body!==undefined){opts.headers['Content-Type']='application/json';opts.data=body;}
+ let r;try{r=await http.request(opts);}catch(e){throw Error('Error de transporte: '+String(e?.message||e).slice(0,180));}
+ let d=r.data;if(typeof d==='string'){try{d=JSON.parse(d)}catch{d={raw:d.slice(0,150)}}}
+ if(!d||typeof d!=='object')d={};
+ if(r.status<200||r.status>=300){const detail=d.error?.message||d.error?.status||d.message||d.raw||'sin detalle';throw Error('HTTP '+r.status+' '+String(detail).slice(0,260));}
+ return d;
 }
-async function findBooks(token){
-  const q="mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false and appProperties has { key = '"+KEY+"' and value = '78' }";
-  const books=[];let pageToken;
-  do{
-    const p=new URLSearchParams({q,fields:'nextPageToken,files(id,name,appProperties)',pageSize:'100'});
-    if(pageToken)p.set('pageToken',pageToken);
-    const r=await request(token,'/drive/v3/files?'+p.toString());
-    books.push(...(r.files||[]));pageToken=r.nextPageToken;
-  }while(pageToken);
-  return books;
+function parseId(raw){const s=String(raw||'').trim();const m=s.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);const id=m?m[1]:s;if(!/^[a-zA-Z0-9_-]{20,}$/.test(id))throw Error('Introduce el ID o la URL completa de la hoja existente');return id;}
+async function inspect(token,rawId){const id=parseId(rawId);
+ const drive=await request(token,'/drive/v3/files/'+encodeURIComponent(id)+'?fields=id,name,mimeType,appProperties');
+ if(drive.mimeType!=='application/vnd.google-apps.spreadsheet')throw Error('El archivo de Drive no es Google Sheets');
+ let sheet;try{sheet=await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(id)+'?fields=spreadsheetId,sheets(properties(sheetId,title))');}
+ catch(e){throw Error('Drive encuentra "'+drive.name+'" pero Sheets API falla: '+e.message+'. No se ha modificado nada. Comprueba que Google Sheets API esté habilitada en el proyecto y el alcance del token.');}
+ return {id,drive,sheet};
 }
-async function ensureTabs(token,id){
-  const r=await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(id)+'?fields=sheets.properties.title');
-  const existing=new Set((r.sheets||[]).map(s=>s.properties?.title));
-  const missing=TABS.filter(t=>!existing.has(t));
-  if(missing.length){
-    await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(id)+':batchUpdate','POST',{
-      requests:missing.map(title=>({addSheet:{properties:{title}}}))
-    });
-  }
-  return {missing:missing.length};
+async function repair(token,rawId){const before=await inspect(token,rawId);const sheets=before.sheet.sheets||[];
+ const names=new Set(sheets.map(s=>s.properties?.title));const requests=[];
+ const defaultSheet=sheets.find(s=>['Hoja 1','Sheet1'].includes(s.properties?.title));
+ if(defaultSheet&&!names.has('Configuracion')){requests.push({updateSheetProperties:{properties:{sheetId:defaultSheet.properties.sheetId,title:'Configuracion'},fields:'title'}});names.add('Configuracion');}
+ for(const title of TABS)if(!names.has(title))requests.push({addSheet:{properties:{title}}});
+ if(requests.length)await request(token,'/sheets/v4/spreadsheets/'+encodeURIComponent(before.id)+':batchUpdate','POST',{requests});
+ const after=await inspect(token,before.id);
+ const finalNames=(after.sheet.sheets||[]).map(s=>s.properties?.title);
+ const missing=TABS.filter(t=>!finalNames.includes(t));
+ if(missing.length)throw Error('Faltan pestañas tras actualizar: '+missing.join(', '));
+ return {id:before.id,name:before.drive.name,changed:requests.length,tabs:finalNames};
 }
-async function findOrCreateBook(token){
-  const books=await findBooks(token);
-  if(books.length>1)throw Error('Hay varios libros V78; no se creará otro. Revisar Drive.');
-  if(books.length===1){
-    const book=books[0];
-    try{const tabs=await ensureTabs(token,book.id);return {id:book.id,name:book.name,created:false,tabsAdded:tabs.missing};}
-    catch(e){throw Error('Libro existente ID '+book.id+'; '+e.message);}
-  }
-  // Drive crea y etiqueta en UNA petición, para poder recuperarlo incluso si Sheets falla.
-  const created=await request(token,'/drive/v3/files?fields=id,name,appProperties','POST',{
-    name:TITLE,mimeType:'application/vnd.google-apps.spreadsheet',appProperties:{[KEY]:'78'}
-  });
-  if(!created.id)throw Error('Drive no devolvió el ID del libro');
-  try{
-    const tabs=await ensureTabs(token,created.id);
-    return {id:created.id,name:created.name||TITLE,created:true,tabsAdded:tabs.missing};
-  }catch(e){
-    throw Error('Libro creado, pero faltó configurar pestañas. NO repetir creación manualmente. ID: '+created.id+'; '+e.message);
-  }
-}
-global.ControlFiscalDriveV78=Object.freeze({findBooks,findOrCreateBook});
+global.ControlFiscalDriveV78=Object.freeze({inspect,repair,parseId});
 })(window);
