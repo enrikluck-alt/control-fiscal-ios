@@ -16,8 +16,17 @@ jobs:
         with:
           node-version: 22
 
+     
       - name: Install dependencies
         run: npm install
+
+      - name: Build Google native login JS bundle
+        run: |
+          set -euo pipefail
+          npm run build:google
+          test -s www/google-login.bundle.js
+          echo "Google login bundle generado correctamente"
+          ls -lh www/google-login.bundle.js
 
       - name: Add iOS platform
         run: npx cap add ios
