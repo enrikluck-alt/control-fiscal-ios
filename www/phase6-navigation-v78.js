@@ -2,7 +2,7 @@
    al backend anterior. Los formularios existentes siguen usando Sheets personal. */
 (function(){'use strict';
 const gate=document.getElementById('cf-google-test-gate');const panel=gate?.querySelector('.panel');if(!panel)return;
-const sections=[['clientes','Clientes','cf-phase2'],['compras','Compras','cf-phase3'],['facturas','Facturas e ingresos','cf-phase4'],['agenda','Agenda','cf-phase5']];
+const sections=[['clientes','Clientes','cf-phase2'],['inventario','Inventario','cf-phase2'],['compras','Compras','cf-phase3'],['facturas','Facturas e ingresos','cf-phase4'],['agenda','Agenda','cf-phase5']];
 const css=document.createElement('style');css.id='cf-v78-phase6-nav-css';css.textContent=`
 #cf-google-test-gate{background:#0b1220!important;padding:calc(12px + env(safe-area-inset-top)) 12px calc(22px + env(safe-area-inset-bottom))!important}
 #cf-google-test-gate .panel{background:#142035!important;max-width:660px!important;border:1px solid #32445c;border-radius:20px!important;padding:16px!important;text-align:left!important}
@@ -30,13 +30,13 @@ const find=document.getElementById('cf-auto-find');const create=document.getElem
 if(account)context.appendChild(account);if(find)context.appendChild(find);if(create)context.appendChild(create);
 const result=document.getElementById('cf-google-result');if(result)context.appendChild(result);
 panel.insertBefore(context,head.nextSibling);panel.insertBefore(nav,context.nextSibling);
-const panes=sections.map(([key,label,cls])=>{const p=panel.querySelector('.'+cls);if(p){p.classList.add('cf-p6-section');p.dataset.section=key;}return p;});
+const panes=sections.map(([key,label,cls])=>{const p=panel.querySelector('.'+cls);if(p){p.classList.add('cf-p6-section');if(cls!=='cf-phase2')p.dataset.section=key;}return p;});
 const tools=document.createElement('details');tools.className='cf-p6-tools';tools.innerHTML='<summary>Herramientas de Drive y diagnóstico</summary>';
 const ids=['cf-existing-id','cf-inspect','cf-repair','cf-write-test','cf-read-test'];
 for(const id of ids){const el=document.getElementById(id);if(!el)continue;if(id==='cf-existing-id'&&el.previousElementSibling?.tagName==='LABEL')tools.appendChild(el.previousElementSibling);tools.appendChild(el);}
 const advanced=panel.querySelector('.cf-v78-advanced');if(advanced)tools.appendChild(advanced);
 nav.after(tools);
-function show(key){panes.forEach((p,i)=>{if(p)p.hidden=sections[i][0]!==key});buttons.forEach(b=>{if(b.dataset.section===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});const p=panes[sections.findIndex(x=>x[0]===key)];if(p)p.scrollIntoView({block:'nearest'});}
+function show(key){panes.forEach((p,i)=>{if(p)p.hidden=!((key==='clientes'||key==='inventario')?sections[i][2]==='cf-phase2':sections[i][0]===key)});if(key==='clientes'||key==='inventario'){panel.querySelector('.cf-phase2 [data-tab="'+(key==='clientes'?'Clientes':'Inventario')+'"]')?.click();}buttons.forEach(b=>{if(b.dataset.section===key)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});const p=panes[sections.findIndex(x=>x[0]===key)];if(p)p.scrollIntoView({block:'nearest'});}
 buttons.forEach(b=>b.addEventListener('click',()=>show(b.dataset.section)));
-show('clientes');
+const p2=panel.querySelector('.cf-phase2');if(p2){const h=p2.querySelector('h3');if(h)h.textContent='Clientes e inventario · Google Drive personal';const note=h?.nextElementSibling;if(note?.tagName==='P')note.textContent='Formularios V78 adaptados a los campos de V77. Las pantallas originales de V77 aún no están activadas.';}show('clientes');
 })();

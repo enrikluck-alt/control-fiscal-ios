@@ -3019,7 +3019,7 @@ function inventoryCategoryChanged(){
 function openInventory(){only("inventoryPage");nav("inventory");buildInventoryCategoryControls();renderInventory();loadInventory(false);}
 async function loadInventory(showError=false){
   try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));buildInventoryCategoryControls();renderInventory();}
-  catch(e){try{inventoryItems=JSON.parse(localStorage.getItem("cf_inventory")||"[]")}catch(_){inventoryItems=[]}buildInventoryCategoryControls();renderInventory();if(showError)showToastMessage("Sin conexión","No se pudo cargar el inventario.");}
+  catch(e){inventoryItems=[];buildInventoryCategoryControls();renderInventory();showToastMessage("Sin conexión","No se pudo cargar el inventario desde la cuenta Google activa.");}
 }
 function renderInventory(){
   const wrap=$("inventoryList");if(!wrap)return;
@@ -4236,3 +4236,4 @@ securityStart();
 </style>
 <script src="phase5-v78.js"></script>
 <script src="phase6-navigation-v78.js"></script>
+<script src="phase6b2-inventory-v78.js"></script>
