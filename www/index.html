@@ -1541,7 +1541,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 </div>
 
 <div id="cf-v78-warning" role="alert" style="position:fixed;z-index:999999;top:0;left:0;right:0;background:#6e1b1b;color:white;padding:12px;text-align:center;font:600 14px sans-serif">V78 EN DESARROLLO — NO INTRODUCIR DATOS REALES. OAuth y almacenamiento individual pendientes.</div>
-<script src="biometric.bundle.js"></script>
+<script src="biometric-bridge.js"></script>
 
 
 <script>
@@ -3661,7 +3661,16 @@ function securitySetStatus(text){
 }
 
 function nativeBiometric(){
-  return window.ControlFiscalBiometricAuth || null;
+  const cap = window.Capacitor || null;
+  const plugins = cap && cap.Plugins ? cap.Plugins : {};
+  const native = plugins.BiometricAuthNative || plugins.BiometricAuth || null;
+  const auth = native || (window.CFResolveBiometric ? window.CFResolveBiometric() : null);
+  if (!auth || typeof auth.checkBiometry !== 'function') return null;
+  if (typeof auth.authenticate === 'function') return auth;
+  if (typeof auth.internalAuthenticate === 'function') {
+    return {checkBiometry: auth.checkBiometry.bind(auth), authenticate: auth.internalAuthenticate.bind(auth)};
+  }
+  return null;
 }
 
 function securityRandomHex(bytes=16){
