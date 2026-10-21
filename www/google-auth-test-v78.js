@@ -104,6 +104,11 @@ async function automatic(allowCreate){buttons.forEach(b=>b.disabled=true);show('
 }
 // Read-only session accessor for isolated V78 tests; cleared on logout.
 window.ControlFiscalV78Session=()=>token&&activeEmail?{token,email:activeEmail}:null;
+// Public UI methods: avoid relying on hidden diagnostic button clicks.
+window.ControlFiscalGoogleLogin=async()=>{await auth();return {email:activeEmail};};
+window.ControlFiscalGoogleFindBook=async(allowCreate=false)=>{const t=await auth();const r=await window.ControlFiscalDriveV78.automaticBook(t,{allowCreate});if(r.found){input.value=r.id;verifiedId=r.id;}return r;};
+window.ControlFiscalGoogleBookId=()=>verifiedId;
+
 document.getElementById('cf-login-account').addEventListener('click',signIn);
 document.getElementById('cf-logout-account').addEventListener('click',signOut);
 document.getElementById('cf-auto-find').addEventListener('click',()=>automatic(false));

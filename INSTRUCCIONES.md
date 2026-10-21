@@ -1,11 +1,12 @@
-# Control Fiscal V76-Google — Acceso y menú original corregidos
+# Control Fiscal V76-Google — Acceso limpio
 
-Compilar desde la rama `v78-google-test`, sin modificar `main`. Subir todos los archivos, incluida `.github/workflows`.
+- Subir el contenido del ZIP a la rama `v78-google-test`, incluida `.github/workflows`. No tocar `main`.
+- GitHub Actions: ejecutar `Build unsigned iOS IPA`; instalar IPA con Sideloadly.
+- Inicio: solo pantalla de acceso con Google, búsqueda automática de libro y opción de creación.
+- Cuando el libro esté conectado, aparece `Entrar en Control Fiscal`.
+- En Ajustes, `CERRAR SESIÓN` conserva confirmación y vibración; vuelve al acceso.
+- Se oculta el panel de diagnóstico; los módulos Google Sheets permanecen en el proyecto y se cargan únicamente al entrar.
+- Se han eliminado de `www` los tres scripts sin referencias: `phase1-v78.js`, `biometric-bridge.js`, `v78-mobile-ui.js`. Los demás son dependencias de módulos o interfaz.
+- No borra datos de Google Drive. No reactivar Apps Script antiguo.
 
-- Pantalla inicial: únicamente acceso Google, estado de cuenta y búsqueda/creación del libro.
-- Solo tras autenticar y conectar el libro, pulsar «Entrar en Control Fiscal».
-- Se conserva el menú V76, la navegación inferior y el botón de cerrar sesión con vibración en Ajustes.
-- Tras cerrar sesión, vuelve a la pantalla de acceso.
-- Los formularios se ocultan mientras no haya acceso; los módulos Google existentes se mantienen.
-
-No se han probado el inicio de sesión ni los formularios en un iPhone con esta compilación. La cuenta debe tener permisos Drive/Sheets. No activar el Apps Script antiguo.
+**Pendiente de prueba en iPhone:** arranque, autenticación, búsqueda del libro, acceso a módulos y cambio de cuenta.
