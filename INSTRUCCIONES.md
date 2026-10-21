@@ -1,9 +1,16 @@
-# Control Fiscal V76-Google — cierre de sesión corregido
+# Control Fiscal V76-Google — corrección de cierre de sesión
 
-Esta revisión corrige la vuelta a la pantalla Google después de confirmar «CERRAR SESIÓN» en Ajustes. Conserva la vibración y el cierre nativo Google, pero ya no recarga la página (lo que podía devolver al menú fiscal en vez de mostrar el acceso).
+## Cambios
+- Se cargan explícitamente los módulos nativos Google, Drive y CRUD en `www/index.html` antes de la navegación y del botón de cierre de sesión. En la versión anterior no se cargaba `google-auth-test-v78.js`, por eso faltaba `ControlFiscalV78Logout`.
+- Se mantienen vibración, confirmación y retorno a la pantalla de acceso a Google.
+- Se propagan los errores del cierre nativo para mostrarlos en Ajustes.
+- Se conserva el diseño original, los datos de Drive y la rama `main` sin cambios.
 
-Al salir, el panel de Google vuelve a su contenedor de inicio, se ocultan las páginas fiscales y se elimina la referencia local al libro anterior. Para entrar con otra cuenta, pulsa «Iniciar sesión / elegir cuenta», autoriza y busca o crea el libro de esa cuenta. No se borran hojas ni documentos de Drive.
+## Compilación
+1. Descomprimir el ZIP y subir su **contenido**, incluida `.github/workflows`, a `v78-google-test`.
+2. Ejecutar el workflow **Build unsigned iOS IPA**.
+3. Descargar IPA e instalar con Sideloadly.
+4. Probar inicio de sesión, búsqueda de libro, Ajustes → CERRAR SESIÓN, vibración, confirmación y selección de otra cuenta.
 
-Subir a la rama `v78-google-test` con la carpeta `.github` y compilar desde GitHub Actions. No tocar `main`.
-
-Prueba pendiente en iPhone. Si el plugin nativo falla al cerrar sesión, aparecerá un error bajo el botón; no se simula una salida exitosa.
+## Advertencia
+No se ha validado en iPhone. Esta corrección activa la inicialización real de Google que faltaba en la entrega anterior. Si iOS vuelve a cerrarse, enviar el `.ips` correspondiente. El permiso `drive.file` puede no bastar para determinados libros preexistentes.

@@ -65,14 +65,17 @@ async function auth(){
 }
 async function signIn(){await exclusive(async()=>{show('Verificando cuenta Google…');await auth();show('Cuenta Google y permiso Drive verificados: '+activeEmail+'\nAhora puedes buscar su libro automáticamente.');});}
 async function signOut(){
- return exclusive(async()=>{
+ if(busy)throw Error('Hay una operación Google en curso. Espera y vuelve a intentarlo.');
+ busy=true;buttons.forEach(b=>b.disabled=true);
+ try{
   show('Cerrando sesión Google…');
   const plugin=social();
   if(!plugin||typeof plugin.logout!=='function')throw Error('El plugin Google no permite cerrar la sesión de forma segura.');
   await plugin.logout({provider:'google'});
   resetSession();
   show('Sesión de Google cerrada. Ya puedes entrar con otra cuenta.');
- });
+ }catch(e){show('Error al cerrar sesión: '+String(e?.message||e));throw e;}
+ finally{busy=false;buttons.forEach(b=>b.disabled=false);}
 }
 // El botón de Ajustes usa el mismo cierre nativo que el botón de diagnóstico.
 window.ControlFiscalV78Logout=signOut;
