@@ -1,11 +1,9 @@
-# Control Fiscal V78 — interfaz funcional (Fase 8B)
+# Control Fiscal V78 — Fase 8D (interfaz original)
 
-Sube el contenido del ZIP a la rama `v78-google-test` y compila con GitHub Actions.
-
-- Inicio: menú basado en los botones originales de V77, pero conectados a los módulos V78 con Google Sheets personal.
-- Se ocultan los paneles de prueba; las herramientas avanzadas permanecen en Ajustes.
-- La interfaz original de V77 sigue presente en el código, pero sus llamadas al antiguo Apps Script NO se reactivan.
-- Las pantallas de Compras, Facturas, Ingresos y Agenda son adaptaciones de V78 al estilo V77; no equivalen todavía a todas las funciones de V77.
-- No usar datos fiscales reales: emisión de facturas legales, adjuntos, biometría nativa y auditoría de seguridad siguen pendientes de validación.
-- Si no hay sesión Google o libro seleccionado, vuelve a Inicio y utiliza los controles de cuenta.
-- El ZIP incluye únicamente este archivo Markdown.
+- Sube el contenido de este ZIP a la rama `v78-google-test` (no a `main`).
+- Compila en GitHub Actions e instala la IPA con Sideloadly.
+- Al abrir la aplicación debe aparecer directamente la pantalla original V77: logo, tarjetas amarilla/morada/blancas y barra inferior fija.
+- En **Ajustes > Cuenta Google y almacenamiento personal** inicia sesión y pulsa **Buscar mi libro automáticamente**. No se crea otro libro si ya existe.
+- Compras, Facturación, Agenda, Stock y Clientes usan los formularios V78 conectados a Sheets, dentro del marco original. No se habilita el Apps Script antiguo.
+- Los registros históricos V77 del resumen no se muestran como datos reales. La generación de facturas legales y Face ID nativo siguen pendientes.
+- Prueba inicio, barra inferior, Ajustes, conexión Google y lectura/escritura de un registro ficticio. Si un módulo no se abre, conserva la IPA anterior para volver atrás.
