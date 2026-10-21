@@ -1,9 +1,9 @@
-# Control Fiscal V78 — Fase 8D (interfaz original)
+# Control Fiscal V78 — Fase 8E (candidata de diagnóstico)
 
-- Sube el contenido de este ZIP a la rama `v78-google-test` (no a `main`).
-- Compila en GitHub Actions e instala la IPA con Sideloadly.
-- Al abrir la aplicación debe aparecer directamente la pantalla original V77: logo, tarjetas amarilla/morada/blancas y barra inferior fija.
-- En **Ajustes > Cuenta Google y almacenamiento personal** inicia sesión y pulsa **Buscar mi libro automáticamente**. No se crea otro libro si ya existe.
-- Compras, Facturación, Agenda, Stock y Clientes usan los formularios V78 conectados a Sheets, dentro del marco original. No se habilita el Apps Script antiguo.
-- Los registros históricos V77 del resumen no se muestran como datos reales. La generación de facturas legales y Face ID nativo siguen pendientes.
-- Prueba inicio, barra inferior, Ajustes, conexión Google y lectura/escritura de un registro ficticio. Si un módulo no se abre, conserva la IPA anterior para volver atrás.
+Base: Fase 8C proporcionada por el usuario. No modificar `main`; subir a la rama `v78-google-test`.
+
+Cambios: se restaura la pantalla inicial V77 sin mover nodos de la interfaz durante el arranque; los módulos Google se abren solo al pulsar. La opción `CapacitorHttp.enabled` pasa a `false` para evitar la interceptación global de `fetch`/XHR. Las llamadas explícitas a `CapacitorHttpNative` siguen existiendo.
+
+**Importante:** la causa nativa `swift_dynamicCastFailure` del informe IPS no está confirmada; esta versión es una prueba controlada, no una reparación demostrada. Si vuelve a cerrarse, obtener un nuevo informe IPS.
+
+Primero comprobar que abre; luego Ajustes → Conectar cuenta Google y Google Sheets; finalmente módulos. La Fase 8C es el respaldo.
