@@ -4,5 +4,18 @@
   "webDir": "www",
   "ios": {
     "contentInset": "never"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": false
+    },
+    "LocalNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "banner",
+        "list"
+      ]
+    }
   }
 }
