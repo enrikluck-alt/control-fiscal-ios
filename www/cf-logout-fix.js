@@ -20,7 +20,8 @@ async function logout(){
   if(window.ControlFiscalV78Session?.())throw new Error('La sesión continúa activa.');
   // No borrar datos fiscales ni usar el cierre del antiguo Apps Script.
   if(status)status.textContent='Sesión cerrada. Volviendo al acceso…';
-  window.location.reload();
+  window.dispatchEvent(new Event('cf-google-session-ended'));
+  if(status)status.textContent='';
  }catch(e){
   if(status)status.textContent='Error al cerrar sesión: '+String(e?.message||e);
   button.disabled=false;

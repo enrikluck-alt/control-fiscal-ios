@@ -29,6 +29,19 @@ const formBody=$('formBody');formBody.appendChild(pane);
 const header=$('formHeader');
 
 let entered=false;
+// Restaurar realmente el acceso Google tras salir, sin recargar la interfaz antigua.
+window.addEventListener('cf-google-session-ended',()=>{
+ entered=false;
+ // El panel de Google se trasladó al formulario al entrar. Debe volver al gate.
+ gate.appendChild(panel);
+ gate.classList.remove('cf-original-entered');
+ pane.replaceChildren();
+ // La V76 antigua NO es la pantalla de acceso Google.
+ for(const id of ['home','formPage','summaryPage','recordsPage','settingsPage','agendaPage','inventoryPage']) $(id)?.classList.add('hidden');
+ const lock=$('securityLock');if(lock)lock.classList.add('hidden');
+ gate.scrollTop=0;
+ window.scrollTo?.(0,0);
+});
 function activeGoogle(){return window.ControlFiscalV78Session?.()||null;}
 start.addEventListener('click',()=>{
  const session=activeGoogle();const id=$('cf-existing-id')?.value?.trim();
