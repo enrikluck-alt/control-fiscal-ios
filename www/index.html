@@ -1505,7 +1505,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <a id="accountSpreadsheetLink" class="guideBtn" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none">
           <span class="guideIcon">📊</span><span>ABRIR MIS GOOGLE SHEETS</span>
         </a>
-        <button class="resetSettings" type="button" onclick="logoutControlFiscal()">CERRAR SESIÓN / CAMBIAR DE CUENTA</button>
+        <div class="settingsHint">Para cambiar de cuenta, utiliza CERRAR SESIÓN al final de Ajustes.</div>
       </div>
 
       <div class="settingsGroup">
@@ -1526,6 +1526,13 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="settingsTitle">🔄 RESTABLECER</div>
         <div class="settingsHint">Vuelve a los colores y fondo originales de Control Fiscal.</div>
         <button class="resetSettings" type="button" onclick="resetAppSettings()">RESTABLECER AJUSTES</button>
+      </div>
+
+      <div class="settingsGroup" id="cf-google-logout-settings">
+        <div class="settingsTitle">👤 SESIÓN DE GOOGLE</div>
+        <div class="settingsHint">Cierra la sesión de esta cuenta y vuelve a la pantalla de acceso para entrar con otra. No se eliminan datos de Google Drive.</div>
+        <button class="resetSettings" id="cf-logout-from-settings" type="button">CERRAR SESIÓN</button>
+        <div id="cf-logout-from-settings-status" class="settingsHint" role="status" aria-live="polite"></div>
       </div>
 
     </div>

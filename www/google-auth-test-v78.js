@@ -64,15 +64,18 @@ async function auth(){
  try{return await authPromise;}catch(e){resetSession();throw e;}finally{authPromise=null;}
 }
 async function signIn(){await exclusive(async()=>{show('Verificando cuenta Google…');await auth();show('Cuenta Google y permiso Drive verificados: '+activeEmail+'\nAhora puedes buscar su libro automáticamente.');});}
-async function signOut(){await exclusive(async()=>{
- show('Cerrando sesión Google…');
- const plugin=social();let warning='';
- try{if(plugin&&typeof plugin.logout==='function')await plugin.logout({provider:'google'});
- else warning='El plugin no dispone de cierre de sesión nativo.';
- }catch(e){warning='Google no confirmó el cierre de sesión: '+String(e?.message||e).slice(0,180);}
- resetSession();
- show(warning?warning+'\nSe han limpiado las referencias locales. No continúes con otra cuenta hasta resolver el cierre nativo.':'Sesión cerrada. No se ha borrado ningún archivo de Drive.\nPulsa Iniciar sesión / elegir cuenta y comprueba el correo mostrado antes de acceder a un libro.');
- });}
+async function signOut(){
+ return exclusive(async()=>{
+  show('Cerrando sesión Google…');
+  const plugin=social();
+  if(!plugin||typeof plugin.logout!=='function')throw Error('El plugin Google no permite cerrar la sesión de forma segura.');
+  await plugin.logout({provider:'google'});
+  resetSession();
+  show('Sesión de Google cerrada. Ya puedes entrar con otra cuenta.');
+ });
+}
+// El botón de Ajustes usa el mismo cierre nativo que el botón de diagnóstico.
+window.ControlFiscalV78Logout=signOut;
 async function action(repair){buttons.forEach(b=>b.disabled=true);show('Conectando con Google…');
  try{const id=window.ControlFiscalDriveV78.parseId(input.value);const t=await auth();
  if(repair&&verifiedId!==id)throw Error('Primero pulsa Comprobar libro con este mismo ID');
