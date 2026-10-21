@@ -65,24 +65,6 @@ original.querySelectorAll('button.home').forEach(b=>b.addEventListener('click',e
 const grid=original.querySelector('.homegrid');if(grid&&!grid.querySelector('#cf-original-clients')){
  const b=document.createElement('button');b.id='cf-original-clients';b.type='button';b.className='home full';b.innerHTML='<div class="icon">👥</div><div class="text"><b>CLIENTES</b><small>GESTIONA TUS CLIENTES</small></div><div class="chev">›</div>';b.addEventListener('click',()=>showOriginal('clientes'));grid.appendChild(b);
 }
-// Cierre de sesión accesible desde el último apartado de Ajustes originales.
-const logoutButton=$('cf-logout-from-settings');
-logoutButton?.addEventListener('click',async()=>{
- const status=$('cf-logout-from-settings-status');
- if(!window.confirm('¿Cerrar sesión de Google y volver al acceso para elegir otra cuenta?'))return;
- logoutButton.disabled=true;
- if(status)status.textContent='Cerrando sesión de Google…';
- try{
-  if(typeof window.ControlFiscalV78Logout!=='function')throw Error('El módulo de Google no está disponible.');
-  await window.ControlFiscalV78Logout();
-  if(window.ControlFiscalV78Session?.())throw Error('La sesión de Google sigue activa. No se ha cambiado de cuenta.');
-  // No se borran libros ni datos fiscales de Google Drive.
-  window.location.reload();
- }catch(error){
-  if(status)status.textContent='No se pudo cerrar sesión: '+String(error?.message||error);
-  logoutButton.disabled=false;
- }
-});
 // Do not render original V77 records: they belonged to the disabled admin backend.
 const latest=$('latest');if(latest)latest.innerHTML='<div style="padding:14px;color:#57636e;font-size:12px">Los registros se consultan en cada módulo conectado a Google Sheets.</div>';
 })();

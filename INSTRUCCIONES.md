@@ -1,21 +1,14 @@
-# Control Fiscal V76-Google — Cerrar sesión desde Ajustes
+# Control Fiscal V76-Google — Cerrar sesión + vibración
 
-Esta versión parte de ControlFiscal_V76_Google_Integracion_Beta.zip y cambia exclusivamente el acceso al cierre de sesión Google.
+Esta actualización conserva el proyecto anterior y corrige la conexión del botón CERRAR SESIÓN de Ajustes, que antes dependía de que se inicializara la interfaz V78. Ahora el manejador se instala siempre, incluso si la interfaz original sigue activa.
 
-- Al final de **Ajustes** aparece **CERRAR SESIÓN**.
-- El botón solicita confirmación, invoca el cierre nativo de Google y, si se ha limpiado la sesión, recarga la aplicación para mostrar la pantalla de acceso Google y permitir elegir otra cuenta.
-- Si falla el cierre nativo, muestra el error y no continúa al cambio de cuenta.
-- No elimina archivos de Google Drive ni modifica las hojas fiscales.
-- Se retira el antiguo botón de cierre de sesión del bloque de Cuenta, ya que correspondía al sistema anterior de Apps Script.
+Al tocar el botón se solicita vibración háptica nativa mediante @capacitor/haptics y se pide confirmación. Si se confirma, se invoca el cierre de sesión Google existente, se verifica que no quede una sesión activa y se recarga la aplicación para mostrar el acceso. Si falla, se muestra el error debajo del botón. No elimina datos de Google Drive ni usa el Apps Script anterior para cerrar la sesión.
 
-## Instalación
+## Compilar
 
-Sube el contenido del ZIP a la rama `v78-google-test`, incluyendo `.github/workflows`, sin modificar `main`. Ejecuta el workflow de compilación iOS e instala la IPA con Sideloadly.
+1. Descomprimir y subir todo el contenido a la rama `v78-google-test` (no modificar `main`).
+2. Ejecutar el workflow `Build unsigned iOS IPA` en GitHub Actions.
+3. Instalar la IPA mediante Sideloadly.
+4. Ir a Ajustes, pulsar CERRAR SESIÓN, comprobar vibración y confirmar. Probar acceso con otra cuenta.
 
-## Prueba
-
-Abre la app, ve a **Ajustes**, baja al final y pulsa **CERRAR SESIÓN**. Comprueba que aparece la pantalla de Google y que puedes elegir una cuenta diferente. No pruebes con datos fiscales importantes hasta confirmar que el libro mostrado pertenece a la cuenta correcta.
-
-## Limitaciones
-
-Se ha validado sintaxis JavaScript e integridad del ZIP, pero no se ha ejecutado en un iPhone. Esta modificación no valida el funcionamiento del resto de los módulos.
+**Nota:** la vibración real depende del dispositivo y del soporte del plugin en iOS. La integración se ha validado estáticamente, no en un iPhone. Si aparece un error de cierre de sesión, copiar el texto mostrado debajo del botón.
