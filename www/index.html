@@ -3998,10 +3998,54 @@ async function securityStart(){
     : "Face ID nativo no está registrado en la compilación iOS. Se usará el código como alternativa.");
 }
 
+/* FASE 7B: bloqueo de privacidad al abandonar la app.
+   El PIN/Face ID es un bloqueo local, no sustituye el OAuth de Google. */
+let cf7bSecurityReady=false;
+let cf7bBackgroundLocked=false;
+let cf7bResumePending=false;
+function cf7bOnBackground(){
+  if(!cf7bSecurityReady) return;
+  const lock=document.getElementById("securityLock");
+  if(lock && lock.classList.contains("hidden")){
+    lockSecurity();
+    cf7bBackgroundLocked=true;
+  }
+}
+async function cf7bOnForeground(){
+  if(!cf7bSecurityReady || !cf7bBackgroundLocked || cf7bResumePending) return;
+  cf7bBackgroundLocked=false;
+  cf7bResumePending=true;
+  try{
+    lockSecurity();
+    if(!securityHasPassword()){
+      showSecuritySetup();
+      return;
+    }
+    showPinUnlock("Aplicación bloqueada al volver del segundo plano.");
+    const bio=document.getElementById("securityBiometricBtn");
+    if(bio) bio.style.display="block";
+    const info=await securityNativeAvailability();
+    if(info && info.isAvailable && !document.hidden){
+      await unlockWithBiometric();
+    }
+  }catch(e){
+    console.warn("No se pudo comprobar el desbloqueo al volver",e);
+    showPinUnlock("Utiliza tu código para continuar.");
+  }finally{
+    cf7bResumePending=false;
+  }
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden) cf7bOnBackground();
+  else cf7bOnForeground();
+});
+window.addEventListener("pagehide",cf7bOnBackground);
+window.addEventListener("pageshow",()=>{ if(!document.hidden) cf7bOnForeground(); });
+
 loadClients(false);
 loadInventory(false);
 loadAgenda(false);
-securityStart();
+securityStart().finally(()=>{cf7bSecurityReady=true;});
 
 </script>
 
