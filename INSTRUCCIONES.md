@@ -21,3 +21,12 @@ Esta versión es una PRUEBA DE AISLAMIENTO, no una versión funcional de Control
 - Si se cierra: el problema también se reproduce sin plugins adicionales ni JS fiscal; hay que revisar firma, iOS, Capacitor y registros nativos.
 
 **No borrar la app para probar salvo necesidad**: una desinstalación completa puede eliminar datos locales. Los datos en Google Sheets permanecen independientes.
+
+## Corrección 8F1 del error `Missing script: build:google`
+El fallo anterior ocurrió porque se ejecutó el workflow ANTIGUO «Build Google native login JS bundle», que todavía llamaba a `npm run build:google`.
+
+**Selecciona expresamente** en GitHub Actions el workflow **«Build iOS Fase 8F1 - Diagnostico CORREGIDO»**. Si sigue apareciendo el paso «Build Google native login JS bundle», estás ejecutando el workflow antiguo o no has sustituido `.github/workflows/build-ios.yml` en la rama correcta.
+
+Se añade además un script `build:google` de compatibilidad que crea un archivo JavaScript inerte, sin login ni llamadas de red, para evitar el error de script inexistente si accidentalmente se ejecuta un workflow anterior. El workflow de diagnóstico 8F1 no llama a ese script y comprueba que no exista el bundle.
+
+Comprueba que la ejecución de Actions corresponde a `v78-google-test` y al commit que acabas de subir.

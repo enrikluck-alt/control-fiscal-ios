@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "cap:add:ios": "cap add ios",
-    "cap:sync": "cap sync ios"
+    "cap:sync": "cap sync ios",
+    "build:google": "node scripts/diagnostic-google-stub.cjs"
   },
   "dependencies": {
     "@capacitor/core": "8.5.2",
