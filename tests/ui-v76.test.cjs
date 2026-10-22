@@ -31,7 +31,7 @@ test('Inicio, Agenda y Stock son el HTML original V76 (sin clones V78)',()=>{
   const match=new RegExp('<section id="'+name+'"[\\s\\S]*?<\\/section>').exec(html);
   assert.ok(match,'No existe '+name);
   // La tarjeta FACTURACIÓN de Inicio va al mismo módulo que la pestaña inferior.
-  const normalized=name==='home'?match[0].replace('onclick="openFacturacionPage()"','onclick="openForm(\'Facturado\')"'):match[0];
+  const normalized=name==='home'?match[0].replace('onclick="openFacturacionPage()"','onclick="openForm(\'Facturado\')"').replace('src="control-fiscal-logo.jpg"','src="chispas-logo.png"'):match[0];
   assert.equal(sha(normalized),digest,'Se ha modificado el diseño original de '+name);
  }
 });

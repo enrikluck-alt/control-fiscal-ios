@@ -141,15 +141,13 @@ async function connect(automatic=false){
       throw Error('No se ha podido recuperar la autorización de Google de forma automática. Pulsa INICIAR SESIÓN para reconectar tu cuenta. Tu libro no se ha borrado.');
    }
    response=cached;
-  }else{response=await plugin.login({provider:'google',options:{scopes:SCOPES,forcePrompt:false}});}
+  }else{response=await plugin.login({provider:'google',options:{scopes:SCOPES,forcePrompt:true}});}
   const token=getToken(response);
   if(!token){throw Error('No hay autorización vigente de Google. Pulsa iniciar sesión para renovarla.');}
   const email=await verify(token);
-  const hint=String(element('accountEmailHint')?.value||'').trim().toLowerCase();
-  if(!automatic&&hint&&email!==hint){
-    try{await plugin.logout({provider:'google'});}catch{}
-    throw Error('Has elegido '+email+', pero escribiste '+hint+'. Elige la cuenta indicada o borra el correo opcional.');
-  }
+  // La cuenta que ha confirmado Google prevalece sobre cualquier correo escrito.
+  // Nunca convertir el campo opcional en una restricción ni cerrar sesión por diferencia.
+  if(!automatic&&element('accountEmailHint'))element('accountEmailHint').value=email;
   if(guard!==epoch)throw Error('La sesión cambió durante la verificación.');
   status('Cuenta verificada: '+email+'. Buscando libro existente…');
   const stored=bookId(root.localStorage.getItem(cacheKey(email)));
@@ -199,7 +197,7 @@ async function createBook(){
  }catch(e){status(err(e));}finally{if(b)b.disabled=false;}
 }
 async function logout(){
- try{await root.CFHaptics?.impact({style:'Light'});}catch{try{navigator.vibrate?.(35);}catch{}}
+ try{if(root.CFHaptics?.impact)await root.CFHaptics.impact({style:'LIGHT'});else navigator.vibrate?.(40);}catch(e){try{navigator.vibrate?.(40);}catch{}}
  if(!root.confirm('¿Quieres cerrar la sesión de Google y volver a la pantalla de acceso?'))return;
  clear();
  const plugin=root.ControlFiscalSocialLogin;

@@ -1,39 +1,39 @@
-# Control Fiscal V76–Google · R5 (correcciones de usabilidad)
+# Control Fiscal V76-Google · R6 — Diseño, selector de cuentas y vibración
 
-**Proyecto de pruebas.** Conserva las ventanas V76 y la cuenta Google personal. No emitas facturas fiscales definitivas sin comprobar los requisitos legales y los datos de numeración.
+**Versión de pruebas:** `UI76-20261022-R6`. Conserva las pantallas y formularios V76; este paquete no ha sido compilado en Xcode ni probado con la cuenta real desde este entorno. **No utilizar todavía para facturas fiscales reales** sin validar números, PDF, IVA y comportamiento multiusuario.
 
-## Instalar
+## Compilar en GitHub Actions
 
-1. Descomprime y sube **todos los archivos** a `v78-google-test` (no modificar `main`). Incluye `.github/workflows/build-ios.yml`.
-2. Ejecuta `Build unsigned iOS IPA` en GitHub Actions sobre esa rama.
-3. Descarga **ControlFiscal-V76-Google-Correcciones-UX-R5-IPA**. Instala `ControlFiscal_V76_Google_Correcciones_R5.ipa` mediante Sideloadly.
-4. Comprueba en la parte inferior de Ajustes `UI76-20261022-R5`.
+1. Descomprime el ZIP y sube **todo su contenido**, incluida `.github/workflows/build-ios.yml`, a la rama `v78-google-test`. No alteres `main`.
+2. Ejecuta el workflow **Build unsigned iOS IPA** en esa rama.
+3. Descarga **`ControlFiscal-V76-Google-Diseno-Cuenta-R6-IPA`**, que contiene `ControlFiscal_V76_Google_Diseno_Cuenta_R6.ipa`.
+4. Instala la IPA con Sideloadly. En la parte inferior de Ajustes debe verse `UI76-20261022-R6`. Si aparece R5, la IPA no es la nueva.
 
-## Correcciones de R5
+## Cambios de R6
 
-- Blanco/negro: se ha extendido la paleta a tarjetas de gráficos, licitaciones, opciones de numeración, facturación y los ejemplos de la guía. Comprueba contraste de texto y botones en ambos temas.
-- Edición sin zoom automático: todos los campos `input`, `select` y `textarea` usan al menos 16 px; el zoom de accesibilidad del dispositivo sigue permitido. No se bloquea el pellizco voluntario.
-- Licitaciones: el enlace abre primero una página **HTTPS oficial del Gobierno de España** (`administracion.gob.es`) que explica cómo entrar a la plataforma pública. Si el destino gubernamental posterior muestra alerta de certificado, no aceptes el riesgo.
-- Google: se inicia el plugin nativo en cuanto carga la app y se quita la espera artificial de 600 ms. Si marcas mantener sesión, intenta recuperar la autorización guardada por el plugin; si Google no entrega un token válido, vuelve al acceso sin borrar el libro o afirmar falsamente que expiró. El inicio de sesión manual verificado no fuerza un segundo PIN/Face ID inmediato si ya existe PIN local; **al enviar la app a segundo plano y regresar se mantiene el bloqueo de seguridad**. En una cuenta sin PIN se solicitará configurarlo.
-- Editor de facturas: ahora explica con ejemplos visuales `texto fijo`, `año (2/4)` e `incremental (ancho:inicio)`; el ejemplo `F` + `4` + `-` + `3:1` se representa como `F2026-001`.
-- Guía: ampliada a 11 apartados con demostraciones visuales ilustrativas, sin datos reales.
-- Información: descripción de módulos, autor, funcionamiento y seguridad.
-- Comparar precios: Ajustes → Información y herramientas → Comparar precios. Permite introducir producto y abrir Idealo o Google Shopping, además de **ordenar de menor a mayor ofertas que el usuario haya verificado y añadido manualmente**. **No** hay extracción automática ni cobertura de todas las tiendas: requiere un servicio de datos comercial y autorización de los proveedores. Las ofertas no se guardan en Google Sheets.
+- **Selector de Google:** `INICIAR SESIÓN CON GOOGLE` pide selección de cuenta (`forcePrompt` en iOS). El texto opcional escrito no restringe la cuenta: se acepta la identidad **verificada por Google** y se actualiza el campo con ella. La opción de recordar sesión mantiene la lógica de recuperación existente; la selección interactiva solo se abre cuando pulsas Iniciar sesión.
+- **Vibración:** el código anterior enviaba `style: 'Light'`, pero Capacitor Haptics requiere `style: 'LIGHT'`. Se corrige en el cierre de sesión y en los botones de guardar facturación, inventario, facturas, clientes, compras, agenda, cambios e ingresos. Si el teléfono no admite la vibración, el plugin puede resolver sin producirla; el fallback web no garantiza vibrar en iOS.
+- **Ajustes → Diseño:** nuevo botón desplegable. Contiene fondo negro/blanco, imagen del menú, colores de compras/facturación/ingresos, rendimiento y Restablecer ajustes. No se cambian sus controles originales.
+- **Ajustes → Cuenta:** aparece **al final**, con botón rojo **CERRAR SESIÓN / CAMBIAR DE CUENTA**. Mantiene la confirmación y no elimina el libro personal en Google Drive.
+- **Imagen predeterminada:** logotipo *Control Fiscal* incluido como `www/control-fiscal-logo.jpg`, ya no se muestra Chispas Sound como imagen predeterminada del menú. Se conserva cualquier imagen personalizada previamente guardada. También es la imagen alternativa para PDF cuando el usuario no haya elegido una imagen específica de factura. El icono nativo de iOS no se cambia en esta corrección.
+- **Limpieza:** la carpeta `www` ya no contiene `chispas-logo.png` ni pantallas de pruebas de V78. El workflow genera el bundle nativo de Google durante la compilación y verifica el logo y el identificador R6 en el contenido copiado a iOS.
 
-## Comprobación en iPhone
+## Importante: Google indica «Aplicación no verificada»
 
-1. Abrir la app con **Mantener sesión** activado; si hay autorización nativa válida y libro previamente seleccionado, deberá verificar automáticamente, sin paso artificial de espera. Si no hay autorización, aparecerá «reconectar» con el libro intacto.
-2. Entrar manualmente con Google: si ya has configurado el PIN local, no debe solicitarlo por segunda vez inmediatamente. Salir de la app y volver: debe bloquear con Face ID o PIN.
-3. Cambiar entre **Negro/Blanco**. Comprueba Resumen (gráfico y licitaciones), Facturación (Crear factura / Registrar ingreso), Opciones de factura, Guía e Información.
-4. Tocar los campos de número en Opciones de factura: no debe ampliarse toda la interfaz; desliza en el modal sin desplazamiento horizontal.
-5. Comprobar que el enlace gubernamental abre una conexión segura. Si se ve una alerta de seguridad en el sitio enlazado desde el portal, no ignores el certificado.
-6. Abrir la nueva Guía desde Ajustes y comprobar los once apartados y ejemplos.
-7. Comparar precios: escribir un modelo, abrir buscadores oficiales y añadir varias ofertas de prueba: la tabla local debe ordenarlas de menor a mayor.
-8. Repetir una factura de ensayo R4, guardar y recuperar borrador, agenda e inventario.
+**Esa advertencia la emite Google, no Control Fiscal, y no puede desaparecer solamente cambiando el código.** La aplicación solicita permisos de Drive, Google Sheets, Calendar y `gmail.send`. El propietario del proyecto OAuth debe configurar en Google Cloud Console → **Google Auth Platform** la pantalla de consentimiento, el dominio/identidad de la aplicación y los permisos solicitados; añadir usuarios de prueba mientras esté en modo Testing y solicitar **verificación** antes de distribuir públicamente una app con permisos sensibles/restringidos. La aprobación depende de Google. No recomendamos ignorar advertencias de seguridad en cuentas ajenas; para las pruebas, usa únicamente cuentas expresamente autorizadas en el proyecto.
 
-## Límites
+Consulta la documentación oficial: https://support.google.com/cloud/answer/7454865 y https://developers.google.com/identity/protocols/oauth2/production-readiness/overview
 
-- No se ha probado Xcode nativo en este entorno. Google OAuth, Face ID y sitios externos deben comprobarse en iPhone.
-- Restaurar una sesión depende de que Google conserve autorización nativa utilizable y de los permisos OAuth. No es correcto guardar un token permanente en `localStorage` para evitar volver a identificarse.
-- El buscador de precios **no tiene integración de tiendas ni precios en vivo dentro de la app**. Ningún programa puede asegurar precios de «todas las tiendas» sin cobertura de datos y acuerdos.
-- Las facturas numeradas, el PDF y Google Sheets conservan las limitaciones y advertencias legales de R4. No modificar a mano las filas de `CF_Facturas_Emitidas`.
+## Pruebas recomendadas en el iPhone
+
+1. Inicia sesión introduciendo en el campo de referencia el **correo A**, pero escoge el **correo B** en el selector de Google. **No debe rechazarlo por diferencia de correos** y el libro conectado debe pertenecer al correo B.
+2. En Ajustes → Datos de facturación, toca Guardar: comprueba que vibra y guarda en Sheets.
+3. En Stock → Nuevo material → Guardar: comprueba vibración y persistencia tras refrescar.
+4. En Ajustes despliega Diseño, cambia a blanco, personaliza colores/imagen, elige ahorro de rendimiento y Restablecer; comprueba que todos están agrupados.
+5. Al final de Ajustes, abre Cuenta y toca el botón rojo. Debe vibrar, pedir confirmación y regresar al acceso de Google. Comprueba con una **segunda cuenta de prueba** que no se muestran datos locales de la primera.
+6. Comprueba que el logotipo predeterminado del menú es Control Fiscal y que un logotipo personalizado no se pierde al actualizar.
+7. Prueba una factura **ficticia** y verifica su PDF antes de usar datos reales.
+
+## Validación realizada
+
+Pruebas automatizadas `npm test`, revisión sintáctica de archivos JavaScript y scripts incrustados, estructura HTML y ZIP, y correspondencia de archivos esperados por GitHub Actions. No se ha completado un `xcodebuild` en esta máquina y **la prueba visual automatizada del navegador fue bloqueada por el entorno**: Google OAuth, vibración real e instalación dependen del iPhone.

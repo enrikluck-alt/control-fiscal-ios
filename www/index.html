@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261022-R5">
+<html lang="es" data-cf-ui-build="UI76-20261022-R6">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1174,6 +1174,18 @@ input,select,textarea,.input,.select,.textarea,#cfInvoiceSegmentList input,#cfIn
 .cfPriceRow small{display:block;font-size:10px;color:var(--muted)}
 .cfPriceCard .field{margin:10px 0}.cfPriceCard .field input{width:100%}
 @media (max-width:400px){.cfNumberSegment{grid-template-columns:minmax(95px,40%) minmax(0,1fr) 32px}.cfNumberSegment input,.cfNumberSegment select{font-size:16px!important}}
+
+/* R6: diseño agrupado, panel responsivo y cierre de sesión seguro */
+#settingsPage .cfDesignToggleWrapper{margin:14px 0 6px}
+#settingsPage .cfDesignToggle{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:15px!important;border-radius:13px}
+#settingsPage .cfDesignToggle span:nth-child(2){flex:1}
+#settingsPage .cfDesignToggle small{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:5px}
+#settingsPage .cfDesignPanel{border:1px solid var(--line);border-radius:14px;padding:2px 12px;margin:6px 0 14px;background:var(--card)}
+#settingsPage .cfDesignPanel[hidden]{display:none!important}
+#settingsPage .cfLogoutDanger{display:block;width:100%;min-height:52px;margin:14px 0 4px;border:1px solid #fca5a5;border-radius:12px;background:#b91c1c!important;color:#fff!important;font-size:15px;font-weight:900;letter-spacing:.025em;cursor:pointer}
+#settingsPage .cfLogoutDanger:active{background:#991b1b!important;transform:scale(.99)}
+body.lightTheme #settingsPage .cfDesignPanel{background:#fff}
+@media(max-width:420px){#settingsPage .cfDesignToggle{padding:11px!important}#settingsPage .cfDesignPanel{padding:2px 9px}}
 </style>
 </head>
 
@@ -1191,9 +1203,9 @@ input,select,textarea,.input,.select,.textarea,#cfInvoiceSegmentList input,#cfIn
       <button type="button" id="accountModeCreate" onclick="CFGoogleAccount.setAccessMode('create')">CREAR CUENTA</button>
     </div>
     <div class="accountField">
-      <label for="accountEmailHint">CORREO GOOGLE (OPCIONAL)</label>
+      <label for="accountEmailHint">CORREO DE REFERENCIA (OPCIONAL)</label>
       <input id="accountEmailHint" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="tuusuario@gmail.com">
-      <p class="accountHint">Si lo indicas, comprobaremos que eliges esa cuenta. La contraseña se introduce únicamente en Google.</p>
+      <p class="accountHint">El correo escrito aquí no limita la cuenta: al pulsar Iniciar sesión puedes elegir cualquier cuenta en Google. La contraseña nunca se introduce en esta aplicación.</p>
     </div>
     <button id="accountGoogleBtn" class="accountPrimary" type="button" onclick="CFGoogleAccount.connect()">INICIAR SESIÓN CON GOOGLE</button>
     <button id="accountSignupBtn" class="accountPrimary" hidden type="button" onclick="CFGoogleAccount.createGoogleAccount()">CREAR CUENTA GOOGLE</button>
@@ -1248,7 +1260,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 <section id="home">
   <div class="hero">
     <div class="homeBrand">
-      <img id="homeBrandImage" class="homeBrandImage" src="chispas-logo.png" alt="Logo de Control Fiscal">
+      <img id="homeBrandImage" class="homeBrandImage" src="control-fiscal-logo.jpg" alt="Logo de Control Fiscal">
     </div>
     <div class="title">CONTROL FISCAL</div>
     <div class="tag">REGISTRA · CONTROLA · SIMPLIFICA</div>
@@ -1490,7 +1502,6 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
   <div class="page">
     <div class="settingsCard">
-
       <div class="settingsGroup">
         <div class="settingsTitle">🔔 NOTIFICACIONES</div>
 
@@ -1509,6 +1520,14 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div id="notificationStatus" class="settingsHint"></div>
       </div>
 
+
+
+      <div class="cfDesignToggleWrapper">
+        <button id="cfDesignToggle" type="button" class="guideBtn cfDesignToggle" onclick="toggleDesignSettings()" aria-controls="cfDesignPanel" aria-expanded="false">
+          <span class="guideIcon">🎨</span><span>DISEÑO <small>Fondo, imagen, colores y rendimiento</small></span><span id="cfDesignChevron" aria-hidden="true">▾</span>
+        </button>
+      </div>
+      <div id="cfDesignPanel" class="cfDesignPanel" hidden>
       <div class="settingsGroup">
         <div class="settingsTitle">🎨 FONDO</div>
 
@@ -1522,7 +1541,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="settingsTitle">🖼️ IMAGEN DEL MENÚ PRINCIPAL</div>
         <div class="settingsHint">Puedes elegir una imagen para mostrar arriba del menú principal. Si no subes ninguna, se utilizará la imagen predeterminada de Control Fiscal.</div>
         <div class="homeImageSettings">
-          <div class="homeImagePreview"><img id="homeBrandPreview" src="chispas-logo.png" alt="Vista previa"></div>
+          <div class="homeImagePreview"><img id="homeBrandPreview" src="control-fiscal-logo.jpg" alt="Vista previa"></div>
           <div class="homeImageActions">
             <label class="guideBtn homeImageUploadBtn">
               <span class="guideIcon">🖼️</span>
@@ -1571,6 +1590,22 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
       <div class="settingsGroup">
+        <div class="settingsTitle">📱 RENDIMIENTO Y PANTALLA</div>
+        <div class="settingsHint">La interfaz se adapta a iPhone y iPad y conserva la definición nativa de la pantalla. El modo ahorro reduce desenfoques y animaciones; no modifica la resolución física.</div>
+        <div class="settingsRow"><div class="settingsLabel">Calidad gráfica</div>
+          <select class="select" id="cfGraphicsMode" style="max-width:230px" onchange="setCFGraphicsMode(this.value)">
+            <option value="high">Máxima calidad</option><option value="low">Ahorro de rendimiento</option>
+          </select>
+        </div>
+      </div>
+      <div class="settingsGroup">
+        <div class="settingsTitle">🔄 RESTABLECER</div>
+        <div class="settingsHint">Vuelve a los colores y fondo originales de Control Fiscal.</div>
+        <button class="resetSettings" type="button" onclick="resetAppSettings()">RESTABLECER AJUSTES</button>
+      </div>
+      
+      </div>
+      <div class="settingsGroup">
         <div class="settingsTitle">🏪 TIENDAS / PROVEEDORES</div>
         <div class="settingsHint">
           Las tiendas y proveedores se guardan por separado. En una compra puedes escribir unas letras, por ejemplo <strong>Ma</strong>, y seleccionar directamente la coincidencia.
@@ -1599,22 +1634,6 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <button class="guideBtn" type="button" onclick="openInvoiceNumberOptions()">⚙️ OPCIONES DE NUMERACIÓN E IMAGEN PDF</button>
       </div>
       <div class="settingsGroup">
-        <div class="settingsTitle">📱 RENDIMIENTO Y PANTALLA</div>
-        <div class="settingsHint">La interfaz se adapta a iPhone y iPad y conserva la definición nativa de la pantalla. El modo ahorro reduce desenfoques y animaciones; no modifica la resolución física.</div>
-        <div class="settingsRow"><div class="settingsLabel">Calidad gráfica</div>
-          <select class="select" id="cfGraphicsMode" style="max-width:230px" onchange="setCFGraphicsMode(this.value)">
-            <option value="high">Máxima calidad</option><option value="low">Ahorro de rendimiento</option>
-          </select>
-        </div>
-      </div>
-      <div class="settingsGroup" id="accountSettingsGroup">
-        <div class="settingsTitle">👤 CUENTA</div>
-        <div class="settingsHint">Cuenta conectada a Control Fiscal y hoja de datos asociada.</div>
-        <div id="accountSettingsEmail" class="settingsLabel" style="margin:10px 0;overflow-wrap:anywhere">—</div>
-        <button class="resetSettings" type="button" onclick="logoutControlFiscal()">CERRAR SESIÓN / CAMBIAR DE CUENTA</button>
-      </div>
-
-      <div class="settingsGroup">
         <div class="settingsTitle">ℹ️ INFORMACIÓN Y HERRAMIENTAS</div>
         <div class="guideGrid">
           <button class="guideBtn" type="button" onclick="openGuide()">
@@ -1629,12 +1648,15 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         </div>
       </div>
 
-      <div class="settingsGroup">
-        <div class="settingsTitle">🔄 RESTABLECER</div>
-        <div class="settingsHint">Vuelve a los colores y fondo originales de Control Fiscal.</div>
-        <button class="resetSettings" type="button" onclick="resetAppSettings()">RESTABLECER AJUSTES</button>
+      <div class="settingsGroup" id="accountSettingsGroup">
+        <div class="settingsTitle">👤 CUENTA</div>
+        <div class="settingsHint">Cuenta conectada a Control Fiscal y hoja de datos asociada.</div>
+        <div id="accountSettingsEmail" class="settingsLabel" style="margin:10px 0;overflow-wrap:anywhere">—</div>
+        <button id="cfLogoutDangerButton" class="cfLogoutDanger" type="button" onclick="logoutControlFiscal()">🚪 CERRAR SESIÓN / CAMBIAR DE CUENTA</button>
       </div>
-      <div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R5</div>
+
+
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R6</div>
 
     </div>
   </div>
@@ -1801,9 +1823,23 @@ function cfHandleAppState(isActive){
   }
 }
 function cfTapFeedback(){
- try{const p=window.CFHaptics?.impact({style:'Light'});if(p?.catch)p.catch(()=>{});}catch(e){try{navigator.vibrate?.(35);}catch{}}
+ // Capacitor acepta 'LIGHT' (no 'Light'); capturamos fallos asíncronos también.
+ try{
+   const h=window.CFHaptics;
+   if(h?.impact){
+     const promise=h.impact({style:'LIGHT'});
+     if(promise?.catch)promise.catch(()=>{try{navigator.vibrate?.(45);}catch(_){}});
+     return;
+   }
+ }catch(e){console.warn('Respuesta háptica no disponible:',e);}
+ try{navigator.vibrate?.(45);}catch(_){ /* iOS no soporta vibración web genérica */ }
 }
-const CF_HAPTIC_ACTIONS=new Set(['saveCurrentClient','saveSimpleClient','saveInvoice','emitInvoice','sendRecord','saveAgendaEvent','saveInvoiceSettings','saveInventoryItem']);
+const CF_HAPTIC_ACTIONS=new Set([
+ 'saveCurrentClient','saveSimpleClient','saveInvoice','emitInvoice','sendRecord',
+ 'saveAgendaEvent','saveInvoiceSettings','saveInventoryItem','saveEditedRecord',
+ 'savePendingIncome','saveInvoiceNumberOptions'
+]);
+// Escuchamos desde captura para admitir botones generados dinámicamente por V76.
 document.addEventListener('click',e=>{
  const btn=e.target.closest?.('button');if(!btn)return;
  const code=btn.getAttribute('onclick')||'';
@@ -1909,7 +1945,7 @@ function applyAppSettings(){
 
 function applyHomeBrandImage(){
   const saved=localStorage.getItem(SETTINGS_KEYS.homeBrandImage)||"";
-  const src=saved || "chispas-logo.png";
+  const src=saved || "control-fiscal-logo.jpg";
   const main=$("homeBrandImage");
   const preview=$("homeBrandPreview");
   if(main) main.src=src;
@@ -1960,6 +1996,16 @@ function setAppTheme(theme){
   if(theme!=="dark" && theme!=="light") return;
   localStorage.setItem(SETTINGS_KEYS.theme,theme);
   applyAppSettings();
+}
+
+function toggleDesignSettings(forceOpen){
+ const panel=document.getElementById('cfDesignPanel');
+ const button=document.getElementById('cfDesignToggle');
+ if(!panel||!button)return;
+ const open=typeof forceOpen==='boolean'?forceOpen:panel.hasAttribute('hidden');
+ if(open)panel.removeAttribute('hidden');else panel.setAttribute('hidden','');
+ button.setAttribute('aria-expanded',String(open));
+ const chevron=document.getElementById('cfDesignChevron');if(chevron)chevron.textContent=open?'▴':'▾';
 }
 
 function openSettings(){
@@ -4466,7 +4512,7 @@ startAccountSystem();
   <hr style="margin:22px 0;border:0;border-top:1px solid var(--line)">
   <h3>IMAGEN PARA FACTURAS (PDF)</h3>
   <p class="settingsHint">Se usará esta imagen únicamente en las facturas. Si no eliges ninguna, se usará el logo del menú principal.</p>
-  <img id="cfInvoiceLogoPreview" src="chispas-logo.png" alt="Imagen para factura" style="display:block;object-fit:contain;width:150px;max-height:100px;margin:12px 0">
+  <img id="cfInvoiceLogoPreview" src="control-fiscal-logo.jpg" alt="Imagen para factura" style="display:block;object-fit:contain;width:150px;max-height:100px;margin:12px 0">
   <input id="cfInvoiceLogoInput" type="file" accept="image/png,image/jpeg" class="input" onchange="saveInvoiceLogo(this)" style="height:auto;padding:10px">
   <p class="settingsHint" id="cfInvoiceLogoStatus"></p>
  </div>

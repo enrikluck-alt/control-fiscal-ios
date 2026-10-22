@@ -94,10 +94,10 @@
    const menuImage=root.localStorage?.getItem?.('cf_home_brand_image')||'';
    if(/^data:image\/(png|jpeg|jpg);base64,/.test(menuImage))return menuImage;
    if(!root.fetch||!root.btoa)return '';
-   const response=await root.fetch('chispas-logo.png');if(!response.ok)return '';
+   const response=await root.fetch('control-fiscal-logo.jpg');if(!response.ok)return '';
    const bytes=new Uint8Array(await response.arrayBuffer());let binary='';
    for(let k=0;k<bytes.length;k+=16384)binary+=String.fromCharCode(...bytes.subarray(k,k+16384));
-   return 'data:image/png;base64,'+root.btoa(binary);
+   return 'data:image/jpeg;base64,'+root.btoa(binary);
   }catch(e){root.console?.warn?.('No se puede cargar el logotipo de la factura',e);return '';}
  }
  async function generate(saved){
