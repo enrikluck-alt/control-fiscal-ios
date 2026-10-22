@@ -90,10 +90,24 @@ async function useBook(token,email,id){
  root.localStorage.setItem(cacheKey(email),id);
  session={token,email,id};
  if(typeof root.updateAccountSettings==='function')root.updateAccountSettings();
- element('accountGate')?.classList.add('hidden');
+ // Restaurar exactamente la navegación de V76. No debemos reabrir la última
+ // ventana (Ajustes, Compras, etc.) después de cambiar de usuario.
+ if(typeof root.goHome==='function')root.goHome();
  element('accountCreateBtn')?.setAttribute('hidden','');
- status('Cuenta y libro verificados.',true);
- await root.startLocalSecurityForAccount();
+ status('Cuenta y libro verificados. Abriendo Inicio…',true);
+ try {
+   // securityStart muestra inmediatamente el bloqueo con PIN/Face ID. Solo
+   // ocultamos el acceso Google una vez que el bloqueo está inicializado.
+   const securityReady=root.startLocalSecurityForAccount();
+   element('accountGate')?.classList.add('hidden');
+   await securityReady;
+ } catch (error) {
+   // Si el bloqueo no puede arrancar, NUNCA mostrar datos fiscales sin acceso.
+   clear();
+   if(typeof root.lockSecurity==='function')root.lockSecurity();
+   element('accountGate')?.classList.remove('hidden');
+   status('No se ha podido iniciar la protección de la aplicación: '+err(error));
+ }
 }
 async function connect(automatic=false){
  if(connecting)return;connecting=true;

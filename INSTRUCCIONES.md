@@ -1,64 +1,54 @@
-# Control Fiscal V76-Google — Estable de pruebas · 22/10/2026
+# Control Fiscal V76-Google — interfaz ORIGINAL V76 · UI76-20261022-R1
 
-## Qué es esta entrega
+## Qué corrige esta edición
 
-Versión **para probar todos los menús con un libro de Google de ensayo**. El HTML, las tarjetas, el logotipo, la navegación inferior y las ventanas de V76 se mantienen. No se carga ningún panel de diagnóstico de V78 ni el Apps Script antiguo.
+Esta versión parte de **ControlFiscal_V76_Google_Estable_Fix_NPM_8_5_14.zip** (última base reconstruida con OAuth y Google Sheets), conservando en `www/index.html` los estilos originales de V76 y sus formularios originales. No usa ni carga las pantallas de pruebas de V78.
 
-**NO apta todavía para emitir facturas fiscales definitivas:** la emisión con numeración correlativa, PDF automático y correo sigue inhabilitada. El formulario de factura guarda **BORRADORES** únicos y muestra esta situación expresamente. No se incluyen datos del usuario ni credenciales privadas de Google.
+1. **Tras iniciar sesión con Google y localizar o crear el libro personal, selecciona directamente Inicio (V76)**. Si tienes PIN o Face ID activo, primero tendrás que desbloquear. No tendrás que pulsar un botón extra «Entrar en Control Fiscal».
+2. Las funciones que crean las ventanas de **Compras, Facturación, Agenda, Stock, Ajustes y la navegación inferior** son las de V76. Se mantiene la adaptación a Google Sheets en las funciones que acceden a datos.
+3. El botón de **Cerrar sesión** de Ajustes mantiene la vibración, confirmación y regreso a Google. Se comprueba la separación entre dos cuentas con una prueba automatizada.
+4. **Identificación de versión:** en la parte inferior de Ajustes se puede leer `UI76-20261022-R1`.
+5. Se realizan comprobaciones contra las firmas del **HTML V76 original**: once bloques de estilos idénticos, secciones de Inicio, Agenda y Stock y once funciones de navegación/formularios sin cambios visuales. Total **18 pruebas** locales superadas (incluidas las pruebas del adaptador de Sheets y autenticación simulada).
+6. El workflow borra **en la copia del runner** los restos de V78 que pudieran quedar en `www` de la rama de GitHub y **rechaza cualquier IPA que contenga un `index.html` diferente** del esperado. Esto es importante porque las capturas recibidas mostraban textos que NO están en el ZIP reconstruido anterior.
 
-## Correcciones respecto al ZIP auditado
+## Cómo generar la IPA correcta
 
-1. Se añade automáticamente la hoja `CF_Registros_v2` al conectar el libro. Las altas, ediciones y eliminaciones operativas se escriben como un **historial de revisiones** en esa hoja, sin alterar las filas históricas de `Clientes`, `Compras`, `Facturación`, `Inventario`, `Agenda` ni `Ingresos`. El adaptador presenta la versión combinada a los formularios originales. En Google Sheets las nuevas operaciones deben consultarse en `CF_Registros_v2` (no en las columnas originales de cada pestaña).
-2. **Eliminar desde la app oculta un registro pero no borra su fila histórica**. Este comportamiento preserva el documento original y permite auditoría, pero debe tenerse en cuenta si se utiliza la hoja fuera de la aplicación: las fórmulas externas que lean solamente las pestañas originales no verán estas revisiones.
-3. Las facturas nuevas pasan a ser **borradores** `BOR-...` con identificadores aleatorios, no números fiscales correlativos. Dos altas simultáneas ya no reciben el mismo supuesto número de factura. El formulario y su mensaje confirman que **NO se ha emitido factura** y que **NO hay PDF**. Los borradores no cuentan como facturas emitidas en el resumen fiscal.
-4. Adjuntos PDF/JPG/PNG enviados por MIME `multipart/related` con **bytes reales**, tamaño máximo **5 MB**, en vez de base64 textual incorrecto. Una respuesta de Drive sin éxito impide confirmar la compra. El envío real desde iPhone debe comprobarse.
-5. Las peticiones HTTPS a Google usan `fetch` de WKWebView, no llamadas directas `CapacitorHttp.request`, para evitar repetir el componente nativo señalado en los antiguos informes de cierre. La compatibilidad CORS y permisos de Google deben verificarse en el iPhone.
-6. Se verifica que **el usuario es propietario** del libro (`ownedByMe`), no solo que tiene acceso a una hoja compartida. No se crea un nuevo libro sin pedir confirmación.
-7. En Ajustes, **CERRAR SESIÓN / CAMBIAR DE CUENTA** conserva vibración, confirmación, limpieza de cachés y retorno al acceso; las operaciones pendientes comprueban la identidad de la cuenta al finalizar.
-8. Se retiran archivos y funciones de transporte de pruebas que no utiliza la interfaz original.
+1. **No toques `main`.** Descomprime este ZIP en tu PC y sube **todos sus archivos y carpetas** a la raíz de la rama `v78-google-test`, incluyendo `.github/workflows/build-ios.yml`, `package.json`, `tests/` y `www/`.
+2. El workflow limpia en el runner los restos que no pertenecen a esta edición de `www`. En el repositorio también puedes borrar posteriormente los scripts V78 antiguos, pero no es necesario para el paquete que genera este workflow.
+3. En GitHub → **Actions** → **Build unsigned iOS IPA** → **Run workflow** selecciona **`v78-google-test`**. No ejecutes un workflow antiguo o una rama diferente.
+4. En el log confirma que aparecen: `INTERFAZ REQUERIDA: UI76-20261022-R1`, `18` pruebas correctas, `Comprobado: app iOS contiene HTML V76 exacto` e `IPA verificada: diseño V76 original`.
+5. **Descarga solo el artefacto** `ControlFiscal-V76-UI-Original-20261022-IPA`. Dentro habrá `ControlFiscal_V76_UI_Original_20261022.ipa` y un pequeño fichero de diagnóstico. No reutilices una IPA descargada de una ejecución anterior.
+6. Instala esa IPA con Sideloadly. El **identificador de la app no ha cambiado**, así que corresponde a Control Fiscal como antes. No borres tu libro de Drive ni el original V76.
+7. Tras entrar con Google, si ya tienes un libro personal propio se abrirá al verificarlo. Si no existe, la app ofrecerá crearlo con confirmación. Si hay varios, deberá seleccionar el libro correcto introduciendo su enlace. Después, si hay PIN/Face ID, desbloquea y comprueba el **menú Inicio original V76**.
+8. Abre Ajustes, desplázate hasta el final y confirma que aparece **`UI76-20261022-R1`**. Si no aparece, **no estás probando esta IPA**: comprueba rama y artefacto descargado.
 
-## Compilar IPA en Windows usando GitHub Actions
+## Qué probar primero
 
-1. **Haz copia de seguridad del libro real antes de probar otra compilación.** Para la primera prueba usa preferentemente otra cuenta Google y un libro de ensayo con información ficticia.
-2. Descomprime y sube **el contenido** del ZIP a la rama `v78-google-test`, **sin tocar `main`**. Elimina primero de dicha rama cualquier archivo antiguo que no forme parte de este ZIP (excepto tus ficheros independientes deliberados); incluye la carpeta oculta `.github/workflows/`.
-3. En GitHub Actions, selecciona **Build unsigned iOS IPA**, rama `v78-google-test`, y ejecuta el workflow.
-4. Descarga el artefacto `ControlFiscal-IPA`, extrae `ControlFiscal.ipa` e instálala mediante Sideloadly. La IPA se genera en GitHub, no viene incluida en el ZIP.
-5. Comprueba en el log que **12 pruebas** pasan, que se ejecuta `npm run build:google`, que se añade la plataforma iOS y que termina `xcodebuild`.
+- Inicio: logo, tarjetas originales y barra inferior V76.
+- Compras: no debe aparecer «Google Sheets personal» ni «Nueva compra de prueba»; debe estar el formulario original con **Tienda / Proveedor, Concepto, Importe total, IVA, adjunto y Guardar**.
+- Facturación: debe mostrar la navegación y formularios originales. **La creación de facturas sigue limitada a borradores**, sin numeración legal ni PDF automático, mientras se completa la emisión fiscal.
+- Agenda: el calendario, eventos y formularios originales V76.
+- Stock: artículos, cantidades, categorías y formularios V76.
+- Ajustes: colores, notificaciones, imagen, cuenta y Cerrar sesión, con la misma estructura V76.
+- Cambio de cuenta: cierra sesión, entra con otra y verifica que solo ve los datos de la segunda; al volver a la primera reaparecen sus registros.
 
-## Configuración de Google
+## Seguridad de datos y limitaciones
 
-- OAuth iOS configurado para `com.chispassound.controlfiscal`, con el cliente existente en `oauth-config.json`.
-- En Google Cloud deben estar activas **Google Drive API** y **Google Sheets API**; scopes `openid`, `email`, `profile`, `drive.file`, `drive.metadata.readonly`, `spreadsheets`.
-- Si el proyecto de Google OAuth continúa en estado *Testing*, añade a la cuenta como usuario de prueba. La publicación para usuarios no probadores puede requerir la verificación OAuth de Google.
-- Al iniciar sesión la app consulta el correo verificado y busca libros **propios** con nombre Control Fiscal. Si hay uno lo abre; si hay varios solicita un enlace explícito; si no hay ninguno ofrece crearlo. No se guarda la contraseña ni el token OAuth en almacenamiento local persistente.
-- El login no se ejecuta de forma automática al abrir la app para evitar cierres en la inicialización nativa. Selecciona la cuenta con el botón de Google cada vez que sea necesario.
+**Para la primera prueba utiliza preferentemente un libro de ensayo y datos ficticios.** El adaptador de Google Sheets mantiene el historial de V76 y almacena nuevas operaciones en la pestaña `CF_Registros_v2`. No sobrescribe las filas históricas, pero otros informes que lean solo las pestañas originales no verán las nuevas revisiones. El bloqueo PIN/Face ID y el inicio nativo de Google requieren verificación real en iPhone.
 
-## Protocolo de prueba de menús en iPhone
+**No utilizar para emitir facturas fiscales definitivas:** PDF automático, correo y numeración fiscal segura siguen pendientes. Los registros de factura nuevos se guardan como **borradores**, con identificadores únicos. No se prometen como facturas emitidas.
 
-Prueba con datos ficticios y deja constancia del resultado de cada apartado:
+Esta revisión **no está validada en Xcode ni en el iPhone**. Las pruebas locales usan Google simulado y validan la integridad de la interfaz fuente; GitHub Actions realizará la compilación nativa y comprobará la interfaz dentro de la IPA. Si falla un paso, guarda el error exacto.
 
-1. Arranque: ¿se ve el acceso Google?, ¿funciona la selección de cuenta?, ¿se abre o crea el libro?, ¿desaparece la pantalla de acceso?
-2. Inicio y barra inferior: todas las tarjetas, Inicio, Compras, Facturación, Agenda, Stock y Ajustes deben conservar la apariencia V76.
-3. Clientes: crear, reabrir, editar, cerrar/reabrir sesión, eliminar y comprobar que el histórico no desaparece físicamente del libro antiguo.
-4. Compras y registros: crear sin adjunto, editar, consultar en Registros, eliminar; después crear otra con un PDF/JPG pequeño y abrirlo en Drive. Si falla, anota el texto de error.
-5. Facturación: guardar **solo un borrador**, comprobar número `BOR-...` y que NO se contabiliza como factura emitida. No utilizar para enviar una factura real.
-6. Inventario: alta, ajuste +1/-1, modificación, eliminación y reapertura.
-7. Agenda: alta, edición, visualización de calendario, eliminación.
-8. Ingresos pendientes, proveedores, ajustes fiscales y Resumen: comprobar datos, cambios y totales.
-9. Ajustes: vibración, confirmación de cierre de sesión y entrada con otra cuenta B; la cuenta B no debe mostrar registros de A.
-10. Regresar a A: deben reaparecer sus datos. Verificar que las pestañas originales de Sheets no se han sobrescrito.
+## Contenido del proyecto
 
-## Limitaciones conocidas que no deben ocultarse
+- `www/index.html`: diseño original V76 y lógica de formularios V76.
+- `www/chispas-logo.png`: logo original.
+- `www/cf-google-auth.js`: cuenta Google, Drive y navegación directa a Inicio.
+- `www/cf-google-data.js`: operaciones de Sheets y compatibilidad histórica.
+- `www/cf-google-upload.js`: subida de adjuntos de prueba.
+- `google-login-entry.js`: entrada para el plugin nativo (el workflow genera `www/google-login.bundle.js`).
+- `.github/workflows/build-ios.yml`: compilación y comprobaciones de fuente y contenido de la IPA.
+- `tests/`: pruebas de Google simulado y firmas de diseño V76.
 
-- **No se genera PDF ni se envían facturas por correo.** No utilices la opción de emitir para fines fiscales ni declares los borradores como facturas.
-- El diario de revisiones no migra ni modifica el esquema original; cualquier informe externo que lea exclusivamente las antiguas columnas verá la información histórica, no las revisiones del diario. Para uso real habrá que decidir y validar una migración o una vista compatible.
-- Adjuntos (máximo 5 MB) y Google OAuth real **pendientes de validación en iOS**. Los tests utilizan servicios simulados; no equivalen a una conexión real a Drive.
-- PIN/Face ID y notificaciones nativas requieren la prueba física del iPhone. La app y los plugins se compilan en GitHub Actions, pero no se ha ejecutado Xcode en este entorno.
-- El diario de cambios de Sheets es apend-only, pero no un sistema transaccional fiscal. Ediciones simultáneas del **mismo** registro desde dos dispositivos pueden quedar resueltas por la última revisión; no es adecuado todavía para contabilidad concurrente de producción.
-- El acceso automático a libros compartidos se impide de manera deliberada: debe ser propietario de su libro.
-
-## Validación local realizada
-
-`npm test` ejecuta **12 pruebas** con Google simulado: CRUD, separación de cuentas, clientes históricos no destructivos, conservación de facturación y agenda, alta solo en el diario, borradores concurrentes e idempotencia local, formato binario de adjuntos y ausencia de transporte HTTP nativo directo. Archivos JavaScript y scripts HTML tienen sintaxis válida y el ZIP se comprueba con CRC.
-
-**Si la IPA no arranca o falla Google OAuth, guarda la captura exacta y el informe `.ips`.** No borres el libro de Google ni desinstales la V76 que funciona sin respaldo.
+**La carpeta `www` del ZIP contiene exclusivamente esos cinco archivos;** el sexto (`google-login.bundle.js`) se genera durante la compilación. Solo hay un archivo `INSTRUCCIONES.md` en el proyecto.
