@@ -1,58 +1,66 @@
-# Control Fiscal V76-Google · R3 (UI76-20261022-R3)
+# Control Fiscal V76–Google R4 · Resumen, numeración y facturas
 
-**Proyecto para pruebas en iPhone, no certificado para facturación reglamentaria.** Conserva el diseño de V76. Trabajar en la rama **`v78-google-test`**, **sin modificar `main`**. El proyecto contiene un solo `INSTRUCCIONES.md`.
+**Versión de prueba.** Conserva las pantallas originales V76 y el almacenamiento privado del usuario en Google Drive/Sheets. No utilizar con facturación fiscal real hasta comprobar requisitos normativos y emisión/registro en iPhone.
 
-## Compilación
+## Instalar
 
-1. Extrae el ZIP y sube **su contenido**, no la carpeta contenedora, a `v78-google-test`. Asegúrate de reemplazar los archivos anteriores, incluida `.github/workflows/build-ios.yml`.
-2. En GitHub Actions selecciona `Build unsigned iOS IPA`, rama `v78-google-test`.
-3. Descarga el artefacto **`ControlFiscal-V76-Google-Emision-Calendar-R3-IPA`** y la IPA **`ControlFiscal_V76_Google_Emision_Calendar_R3.ipa`**.
-4. Instálala en el iPhone mediante Sideloadly. Comprueba en Ajustes, al final, que pone **`UI76-20261022-R3`**. Si pone R2, has instalado una compilación anterior.
-5. No utilices información fiscal real en las primeras pruebas. Utiliza una cuenta y libro de ensayo y guarda una copia del libro original.
+1. Descomprimir y subir **todo el contenido** del proyecto a la rama `v78-google-test`. Mantener `main` intacta.
+2. Incluir los ficheros ocultos `.github/workflows/build-ios.yml` y el nuevo `www/cf-invoice-numbering.js`.
+3. Ejecutar `Build unsigned iOS IPA` en GitHub Actions desde `v78-google-test`.
+4. Descargar **ControlFiscal-V76-Google-Resumen-PDF-R4-IPA** e instalar la IPA con Sideloadly.
+5. En Ajustes al final debe aparecer **UI76-20261022-R4**.
 
-La compilación requiere conexión a npm y Google. El flujo de GitHub valida archivos de `www`, ejecuta `npm test`, compila el JS de OAuth con esbuild, sincroniza los plugins y comprueba el HTML incluido en la IPA. **Aquí se verificaron 34 pruebas locales, sintaxis y simulación visual de navegación; no se ha compilado ni ejecutado la aplicación de forma nativa en iOS.**
+## Novedades
 
-## Nueva funcionalidad
+### Resumen
 
-- **V76 intacta:** menú y formularios originales, sin interfaz de diagnóstico de V78.
-- **Facturas a medias:** la información y las líneas se mantienen en memoria al pasar de Facturación a Inicio/Compras/Agenda/Stock y volver. No se guarda el formulario inacabado en Drive ni garantiza recuperarlo al cerrar totalmente la app, reiniciar o reinstalar. «Nueva factura» limpia el formulario deliberadamente.
-- **Direcciones de España:** ciudad ↔ código postal ↔ provincia mediante el directorio de municipios del INE elaborado por `regi-es/ds-codigos-postales-ine-es`. Requiere Internet. Si hay varios municipios o CP, pide elección en lugar de adivinar. Se puede editar manualmente. Fuente: sitio web del INE, `www.ine.es`.
-- **Vibración breve al pulsar:** guardar cliente, borrador, emitir factura, compra, evento, datos de facturación, material, tipo de inventario y cerrar sesión (si está permitido en el dispositivo).
-- **Facturación:** se mantienen «Guardar solo borrador» y «Emitir factura y generar PDF». El PDF de emisión contiene número serie `CF`, fecha, emisor, NIF/CIF, dirección, datos del cliente, conceptos, cantidades, precios, descuento, IVA, total y logotipo. Una vez emitida, la factura queda en una pestaña dedicada **`CF_Facturas_Emitidas`** sin sobrescribir el historial; el PDF se sube a Drive y su enlace se almacena en **`CF_Facturas_Documentos`** si ambas operaciones funcionan. Se conserva el PDF del borrador marcado **NO EMITIDA**.
-- **Correo del cliente:** checkbox opcional «Enviar copia por correo». Requiere correo válido y confirmación expresa. Gmail solo se considera enviado si la API devuelve identificador. Si falla, se notifica; **la emisión ya registrada NO se revierte**.
-- **WhatsApp:** al compartir el PDF, iOS muestra su menú nativo para seleccionar WhatsApp y destinatario. No envía nada automáticamente.
-- **Agenda:** guardar evento en Sheets y sincronizar con el Google Calendar principal mediante Calendar API. Cuando falla, el mensaje indica que el evento existe en Sheets pero no se sincronizó, y permite reintentar. La eliminación intenta retirarlo de Calendar antes de eliminarlo de Sheets.
-- **Inventario:** tipos personalizados persistidos en Configuracion (`cf_inventory_categories`) del Google Sheets individual.
-- **Notificaciones:** tras la primera compra sin adjunto puede solicitar permiso; con permiso concedido, programa aviso local diario a la hora elegida, cancelándolo cuando no quedan compras sin justificante. Es una notificación local de iOS: no sirve como garantía de entrega diaria si el sistema la limita.
-- **Horas:** inputs de recordatorio, inicio y final de eventos con tipografía aumentada; el selector nativo de hora lo controla iOS.
-- **Seguridad:** mismo inicio con Google, recuperar libro propio, mantenimiento de sesión opcional y Face ID/PIN al volver a primer plano.
+- Gráfico comparativo de **compras** y **facturación** con IVA.
+- Al elegir un año se dibujan los 12 meses; al elegir un mes, cuatro tramos (días 1–7, 8–14, 15–21 y 22–fin).
+- La diferencia no equivale al beneficio neto. Los borradores nuevos no cuentan como factura emitida.
+- Botón que abre el buscador público de licitaciones de la Plataforma de Contratación del Sector Público. **No descarga licitaciones en segundo plano**; la consulta se realiza en el portal oficial.
 
-## Configuración de Google Cloud para esta versión
+### Ajustes → Datos de facturación → Opciones de factura
 
-**IMPORTANTE: nuevos permisos OAuth.** La app solicita, además de los permisos ya usados de Google Drive/Sheets:
+- Editor de hasta 10 segmentos: **texto fijo**, **año automático** y **número incremental**. Debe existir exactamente un segmento incremental.
+- Ejemplo: texto fijo `F` + año de 4 cifras + texto fijo `-` + incremento (`3:1`) = **F2026-001**.
+- Para `F-2026-001`, establece el texto fijo inicial como `F-`.
+- En la pieza incremental el valor `3:1` indica 3 dígitos y número inicial 1. Para continuar un historial que ya llega a 004, selecciona un inicio adecuado y comprueba la vista previa. La app impide algunos duplicados históricos, pero **no reemplaza una verificación fiscal independiente**.
+- El incremento sigue **el orden global de emisión** en la pestaña de facturas emitidas del libro, incluso al cambiar de año. **No hay reinicio automático anual** en esta versión.
+- Configuración y número anterior quedan asociados a cada factura en el libro personal; no se renumeran facturas emitidas al cambiar opciones.
+- **No borrar, reordenar ni modificar manualmente** filas de `CF_Facturas_Emitidas`. La numeración depende de su orden y debe conservarse íntegra.
 
-- `https://www.googleapis.com/auth/calendar.events`
-- `https://www.googleapis.com/auth/gmail.send`
+### Imagen de factura y PDF
 
-Habilita **Google Calendar API** y **Gmail API** en el mismo proyecto de Google Cloud que usa el cliente OAuth iOS. Configura pantalla de consentimiento, scopes y usuarios de prueba si la aplicación sigue en modo Testing. Google podría exigir verificación adicional antes de permitir a usuarios fuera de la lista de pruebas. Si OAuth rechaza un permiso, el inicio de sesión completo podría fallar hasta configurar el proyecto. **No introduzcas contraseñas de Gmail en la app.**
+- La imagen de factura se configura por separado de la del menú principal, desde el mismo cuadro Opciones de factura. Se aceptan PNG/JPG de hasta 3 MB.
+- Se guarda en Google Drive con la cuenta actual y queda registrada en las opciones del libro personal. El PDF utiliza esa imagen; si no existe, usa la del menú o el logotipo incluido.
+- Nuevo PDF vectorial A4 siguiendo la plantilla aportada: imagen a la izquierda; fecha/número a la derecha; emisor y cliente a dos columnas; tabla de conceptos; importe base, IVA, descuento y total.
+- Los textos y líneas se generan como vectores nítidos. La calidad real de la imagen sigue limitada por su fichero original: una imagen de poca definición no gana detalle al ampliarla.
+- La plantilla visual no constituye por sí sola una validación fiscal ni de VERI*FACTU.
 
-## Orden recomendado para la comprobación en el iPhone
+### Adaptación a teléfonos/tablets y rendimiento
 
-1. Comprueba la marca R3 y el diseño V76; inicia sesión, elige libro y desbloquea con Face ID/PIN.
-2. Crea una **factura ficticia** con tres conceptos. Cambia a Inicio, Compras y vuelve: cantidades, precios y datos del cliente deben conservarse. Comprueba «Nueva factura» después de emitir.
-3. Escribe CP `02001` y verifica provincia Albacete. Escribe otra ciudad con varios CP y comprueba que te pide elegir sin asignar uno incorrecto.
-4. Guarda cliente, compra sin adjunto, material y tipo nuevo. Comprueba vibración y que el tipo se conserva tras volver a entrar.
-5. Con permiso de notificaciones, comprueba en Ajustes la hora diaria. No presupongas que el aviso ya se entregó antes de llegar la hora configurada.
-6. Crea un evento con hora y revisa su presencia en Google Calendar. Edita y elimina otro evento de ensayo.
-7. Guarda primero **borrador** y prueba su PDF. Después, con **otra factura ficticia**, prueba **Emitir factura** y abre el PDF; verifica el logo, datos, artículo e IVA. Comprueba la pestaña `CF_Facturas_Emitidas`. **No pulses emitir repetidamente si Google o Drive están fallando**: puede existir una emisión aunque el PDF o la respuesta fallaran.
-8. Prueba el checkbox de correo solo con un correo tuyo de prueba. Comprueba el Gmail del emisor y el mensaje en la bandeja de destino. Comparte otra copia por WhatsApp usando un contacto de prueba.
-9. Cierra sesión y entra con otra cuenta; confirma que no muestra la información de la primera. Verifica Face ID al salir y volver de la app.
+- Para iPhone pequeño se ajustan márgenes, controles y tamaños mínimos.
+- Para iPad se amplía el ancho utilizable, conservando el diseño V76.
+- Ajustes → Rendimiento y pantalla permite **Máxima calidad** o **Ahorro de rendimiento**. El modo ahorro reduce efectos de desenfoque, sombras y animaciones, pero **no modifica la resolución física de la pantalla ni el framebuffer nativo**. Las fuentes y los gráficos utilizan el renderizado nativo/vectorial.
 
-## Limitaciones y advertencia de facturación
+## Pruebas locales ejecutadas
 
-- **La generación de una factura numerada y su PDF no equivale a certificación fiscal ni a software conforme a RRSIF/VERI*FACTU.** No se han implementado mecanismos legales como encadenamiento/huella de registros, declaraciones responsables, gestión fiscal de rectificativas y todos los supuestos de IVA/retenciones. Consulta a tu asesor fiscal antes de emitir facturas reales o distribuir esta versión.
-- La numeración `CF-000001...` se deriva de las posiciones de filas **añadidas** a una pestaña exclusiva. No borres, muevas ni ordenes esa pestaña directamente y no la uses como sistema certificado de facturación. Conserva una copia de seguridad. Si la subida del PDF o correo falla, la factura podría constar registrada sin adjunto o sin envío.
-- No se garantizan compatibilidad del nuevo sistema con plantillas PDF históricas, emisiones entre varios dispositivos simultáneos, tamaños de adjunto superiores a 5 MB, ni la entrega de notificaciones a hora exacta. La autocompletación postal requiere red y depende de disponibilidad de fuente de datos externa.
-- No se ha realizado compilación de Xcode ni acceso real con Google, Gmail y Calendar en este entorno. Las 34 pruebas incluidas simulan las API y comprueban la lógica, pero **no sustituyen las pruebas de la IPA**.
+- **38 pruebas automatizadas superadas**, incluidas numeración configurable, cambio de serie sin alterar facturas anteriores, prevención de coincidencia con números históricos, facturación/Calendar/Gmail de prueba, separación de cuentas y firmas de la interfaz V76.
+- Sintaxis de los JavaScript y de los scripts embebidos en HTML comprobada.
+- Estructura del ZIP y ruta de GitHub Actions comprobadas.
+- **No** se ha ejecutado una compilación nativa de Xcode, ni una autenticación real en tu iPhone. La búsqueda de licitaciones, el PDF con logos personalizados en otros dispositivos y los layouts de iPad requieren comprobación real.
 
-En caso de error, envía **captura + función + mensaje exacto** y comprueba la marca `UI76-20261022-R3` antes de reportarlo.
+## Lista de pruebas en iPhone
+
+1. Accede con Google y observa la interfaz original V76. Abre Ajustes y verifica `UI76-20261022-R4`.
+2. Entra en Resumen: elige 2026, comprueba los 12 meses y elige un mes para mostrar las semanas. Compara importes con los registros reales de prueba.
+3. Pulsa **Buscar licitaciones oficiales** y verifica que abre el portal legítimo.
+4. En Ajustes → Opciones de factura configura `F` + año + `-` + incremento. Revisa vista previa y guarda.
+5. Sube una imagen propia de factura, vuelve a Facturación y crea una **factura de prueba con datos ficticios**. Comprueba número, formato y PDF.
+6. Reabre la factura y verifica que el número no cambia. Si hay facturas antiguas, comprueba que no se han renumerado.
+7. En Ajustes selecciona Ahorro de rendimiento y vuelve a Máxima calidad; verifica el uso del iPhone. En iPad comprueba márgenes y columnas.
+8. Comprueba que las funciones de R3 (cambio de cuenta, borradores, agenda, inventario, notificaciones, Face ID y compartir PDF) siguen operativas.
+
+## Precauciones sobre facturación
+
+España exige correlación de la numeración dentro de cada serie, documentación completa y otras obligaciones según el caso. Esta versión **no está certificada** conforme a RRSIF/VERI*FACTU ni garantiza ausencia de colisiones ante dos usuarios/dispositivos que emitan simultáneamente con configuraciones diferentes. No emitas facturas reales hasta validar ese punto y el resto de requisitos legales.

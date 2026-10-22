@@ -22,7 +22,7 @@ test('la edición mantiene los 11 estilos originales de V76 idénticos',()=>{
  const styles=[...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi)].map(m=>sha(m[1]));
  for(const digest of ref.v76StylesSha256)assert.ok(styles.includes(digest),'Falta estilo original V76 '+digest);
  // La única regla adicional está limitada a [hidden] del acceso Google.
- assert.equal(styles.length,ref.v76StylesSha256.length+3);
+ assert.equal(styles.length,ref.v76StylesSha256.length+4);
  assert.match(html,/<style id="cf-r3-accessibility">/);
  assert.match(html,/<style id="cf-v76-access-security-ui">/);
 });
@@ -45,7 +45,7 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
   assert.ok(!html.includes(str),'Se ha vuelto a incorporar la interfaz de pruebas: '+str);
  }
  const htmlScripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(x=>x[1]);
- assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js']);
+ assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
  assert.match(html,new RegExp('data-cf-ui-build="'+ref.buildTag+'"'));

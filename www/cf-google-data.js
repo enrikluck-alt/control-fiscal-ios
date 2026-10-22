@@ -117,7 +117,7 @@ async function issuedRecords(s){
  return rows.map((r,index)=>{
   if(r[0]!=='CF_FACTURA_EMITIDA_1'||!r[1])return null;
   const doc=parseJSON(r[2],null);if(!doc||typeof doc!=='object')return null;
-  const invoiceNumber='CF-'+String(index+1).padStart(6,'0');
+  const invoiceNumber=doc.numbering&&root.CFInvoiceNumbering?root.CFInvoiceNumbering.format(doc.numbering,index+1,doc.fecha):'CF-'+String(index+1).padStart(6,'0');
   return {...doc,numeroFactura:invoiceNumber, facturaUrl:pdfs.get(invoiceNumber)||'',fila:index+1,emitida:true,tipo:'Facturación',estado:'EMITIDA',requestId:r[1],_tab:ISSUED_TAB};
  }).filter(Boolean);
 }
@@ -177,7 +177,20 @@ async function action(p){
    // corresponde a la posición de la fila que confirma Google Sheets.
    // No se sobrescriben las facturas previas y la serie CF es independiente
    // de los libros antiguos. No equivale a certificación RRSIF/VeriFactu.
-   const doc={id:ident('ISS'),fecha:now(),tipo:'Facturación',estado:'EMITIDA',requestId:key,
+   const preferences=(await config(s)).cf_invoice_numbering_v1;
+   const numbering=preferences?root.CFInvoiceNumbering?.normalize(preferences):null;
+   if(preferences&&!numbering)throw Error('La configuración de numeración no es válida. Corrígela antes de emitir.');
+   if(numbering){
+    // Protección ante reutilización de un código histórico, antes de emitir.
+    // Las filas emitidas son de solo añadir; no se cambian números antiguos.
+    const nextRow=(await maybeRead(s,ISSUED_TAB)).length+1;
+    const candidate=root.CFInvoiceNumbering.format(numbering,nextRow,now());
+    const historical=await all(s,['Facturas','Facturación']);
+    const already=await issuedRecords(s);
+    if([...historical,...already].some(x=>x.numeroFactura===candidate))
+     throw Error('El número '+candidate+' ya existe en tu historial. Cambia la serie o el número inicial en Ajustes antes de emitir.');
+   }
+   const doc={id:ident('ISS'),fecha:now(),tipo:'Facturación',estado:'EMITIDA',requestId:key,numbering,
     tercero:p.tercero||validation.client.nombre,concepto:p.concepto||'',
     base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),
     cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||''};
@@ -191,14 +204,15 @@ async function action(p){
    const row=Number(matched[1]);
    if(!Number.isInteger(row)||row<1)throw Error('Fila de numeración no válida. Consulta el libro de Google.');
    try{const draft=(await items(s,'Facturas')).find(x=>x.requestId===key&&x.estado==='BORRADOR');if(draft)await revision(s,'Facturas',draft._key,{},true);}catch(e){console.warn('La factura está emitida, pero el borrador anterior sigue visible',e);}
-   return {ok:true,numeroFactura:'CF-'+String(row).padStart(6,'0'),fecha:doc.fecha,facturaEmitida:true};
+   const invoiceNumber=numbering?root.CFInvoiceNumbering.format(numbering,row,doc.fecha):'CF-'+String(row).padStart(6,'0');
+   return {ok:true,numeroFactura:invoiceNumber,fecha:doc.fecha,facturaEmitida:true};
   })();
   inflightIssues.set(guard,issue);try{return await issue;}finally{inflightIssues.delete(guard);}
  }
  case 'listarFacturasEmitidas':return {ok:true,facturas:await issuedRecords(s)};
  case 'registrarDocumentoFactura':{
   const no=String(p.numeroFactura||'');const url=String(p.url||'');
-  if(!/^CF-\d{6,}$/.test(no)||!/^https:\/\/(drive\.google\.com|docs\.google\.com)\//.test(url))throw Error('Número o URL de PDF no válidos.');
+  if(!/^[A-Za-z0-9_\-/.]{1,64}$/.test(no)||!/^https:\/\/(drive\.google\.com|docs\.google\.com)\//.test(url))throw Error('Número o URL de PDF no válidos.');
   const exists=(await issuedRecords(s)).some(x=>x.numeroFactura===no);
   if(!exists)throw Error('No se encontró la factura emitida para guardar su PDF.');
   await append(s,ISSUED_DOC_TAB,['CF_PDF_1',no,url]);return {ok:true};
