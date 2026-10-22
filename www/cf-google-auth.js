@@ -6,7 +6,8 @@ const SCOPES=['openid','email','profile','https://www.googleapis.com/auth/drive.
 const BOOK_NAME='Control Fiscal - Datos fiscales';
 const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda','Ingresos','CF_Registros_v2'];
 const LAST_BOOK='cf_google_book_by_email_v76';
-let session=null,initialized=false,connecting=false,epoch=0;
+const PERSIST='cf_google_keep_session_v76';
+let session=null,initialized=false,connecting=false,epoch=0,accessMode='login';
 const element=id=>document.getElementById(id);
 const status=(m,ok=false)=>{const e=element('accountStatus');if(e){e.textContent=m;e.classList.toggle('ok',ok);}};
 const err=e=>String(e&&e.message||e||'Error desconocido');
@@ -85,6 +86,7 @@ async function useBook(token,email,id){
  if(previous!==email&&typeof root.clearUserLocalCaches==='function')root.clearUserLocalCaches();
  // Never share the previous user's local cached records.
  root.localStorage.setItem('cf_last_account_email_v76',email);
+ root.localStorage.setItem(PERSIST,element('accountKeepSession')?.checked?'1':'0');
  root.localStorage.setItem('cf_account_email_v76',email);
  root.localStorage.setItem('cf_account_sheet_url_v76','https://docs.google.com/spreadsheets/d/'+id+'/edit');
  root.localStorage.setItem(cacheKey(email),id);
@@ -119,12 +121,17 @@ async function connect(automatic=false){
   let response;
   if(automatic){
    // Do not show an interactive login automatically or accidentally select a different account.
-   if(typeof plugin.refresh!=='function')return;
-   try{response=await plugin.refresh({provider:'google'});}catch{return;}
+   if(typeof plugin.refresh!=='function')throw Error('Esta versión de Google no permite restablecer la sesión. Pulsa iniciar sesión.');
+   try{response=await plugin.refresh({provider:'google'});}catch{throw Error('La sesión de Google ha caducado. Pulsa iniciar sesión.');}
   }else{response=await plugin.login({provider:'google',options:{scopes:SCOPES}});}
   const token=getToken(response);
-  if(!token){if(automatic)return;throw Error('Google no devolvió un token de acceso. Vuelve a autorizar los permisos.');}
+  if(!token){throw Error('No hay autorización vigente de Google. Pulsa iniciar sesión para renovarla.');}
   const email=await verify(token);
+  const hint=String(element('accountEmailHint')?.value||'').trim().toLowerCase();
+  if(!automatic&&hint&&email!==hint){
+    try{await plugin.logout({provider:'google'});}catch{}
+    throw Error('Has elegido '+email+', pero escribiste '+hint+'. Elige la cuenta indicada o borra el correo opcional.');
+  }
   if(guard!==epoch)throw Error('La sesión cambió durante la verificación.');
   status('Cuenta verificada: '+email+'. Buscando libro existente…');
   const stored=bookId(root.localStorage.getItem(cacheKey(email)));
@@ -148,7 +155,7 @@ async function connect(automatic=false){
    status('Cuenta '+email+' verificada. No se encontró un libro. Puedes crearlo o pegar el enlace de uno existente.');
   }
  }catch(e){
-  if(!automatic)status(err(e));
+  status(err(e));
   if(!session?.id){clear();}
  }finally{connecting=false;if(login)login.disabled=false;}
 }
@@ -191,14 +198,38 @@ async function logout(){
  if(element('accountExistingBook'))element('accountExistingBook').value='';
  status(warning||'Sesión cerrada. Inicia sesión con otra cuenta de Google.',!warning);
 }
+function setAccessMode(mode){
+ accessMode=mode==='create'?'create':'login';
+ element('accountModeLogin')?.classList.toggle('active',accessMode==='login');
+ element('accountModeCreate')?.classList.toggle('active',accessMode==='create');
+ if(element('accountGoogleBtn'))element('accountGoogleBtn').hidden=accessMode==='create';
+ if(element('accountSignupBtn'))element('accountSignupBtn').hidden=accessMode!=='create';
+ status(accessMode==='create'?'Crearás la cuenta en Google dentro de una ventana segura. Al finalizar vuelve aquí e inicia sesión.':'Elige una cuenta de Google existente.');
+}
+async function createGoogleAccount(){
+ const url='https://accounts.google.com/signup';
+ try{
+  if(!root.CFBrowser?.open)throw Error('No está disponible la ventana de registro Google dentro de la aplicación.');
+  await root.CFBrowser.open({url,presentationStyle:'fullscreen'});
+  setAccessMode('login');
+  status('Cuando termines de crear tu cuenta, cierra la ventana de Google y pulsa INICIAR SESIÓN.');
+ }catch(e){status('No se ha podido abrir el registro de Google: '+err(e));}
+}
 async function start(){
  root.localStorage.removeItem('cf_account_session_token_v76');
  if(typeof root.clearUserLocalCaches==='function')root.clearUserLocalCaches();
  element('accountGate')?.classList.remove('hidden');
  element('securityLock')?.classList.add('hidden');
+ setAccessMode('login');
+ const keep=root.localStorage.getItem(PERSIST)==='1';
+ if(element('accountKeepSession'))element('accountKeepSession').checked=keep;
  status('Inicia sesión con Google para abrir tu Control Fiscal.');
- // No lanzamos operaciones nativas de red al arrancar: evita el cierre prematuro observado en V78.
- // Google conserva la cuenta elegida; el usuario pulsa entrar para renovar el token.
+ if(keep){
+   status('Comprobando si tu sesión de Google sigue abierta…');
+   // El arranque visual ya está listo antes de ejecutar la renovación del token.
+   await new Promise(resolve=>setTimeout(resolve,600));
+   if(!session&&!connecting)await connect(true);
+ }
 }
-root.CFGoogleAccount=Object.freeze({start,connect,openExisting,createBook,logout,active,http,bookId,clear,discover,prepare});
+root.CFGoogleAccount=Object.freeze({start,connect,setAccessMode,createGoogleAccount,openExisting,createBook,logout,active,http,bookId,clear,discover,prepare});
 })(window);
