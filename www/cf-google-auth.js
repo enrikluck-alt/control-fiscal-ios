@@ -7,7 +7,7 @@ const BOOK_NAME='Control Fiscal - Datos fiscales';
 const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda','Ingresos','CF_Registros_v2','CF_Facturas_Emitidas','CF_Facturas_Documentos'];
 const LAST_BOOK='cf_google_book_by_email_v76';
 const PERSIST='cf_google_keep_session_v76';
-let session=null,initialized=false,connecting=false,epoch=0,accessMode='login';
+let session=null,initialized=false,initInFlight=null,connecting=false,epoch=0,accessMode='login';
 const element=id=>document.getElementById(id);
 const status=(m,ok=false)=>{const e=element('accountStatus');if(e){e.textContent=m;e.classList.toggle('ok',ok);}};
 const err=e=>String(e&&e.message||e||'Error desconocido');
@@ -34,10 +34,14 @@ async function http(url,method='GET',data,tokenOverride){
 function bookId(text){const s=String(text||'').trim(), m=s.match(/\/spreadsheets\/d\/([\w-]+)/);const id=m?m[1]:s;return /^[\w-]{20,}$/.test(id)?id:null;}
 async function init(){
  if(initialized)return;
- const plugin=root.ControlFiscalSocialLogin;
- if(!plugin)throw Error('El módulo nativo de inicio de sesión no está instalado.');
- await plugin.initialize({google:{iOSClientId:CLIENT_ID,mode:'online'}});
- initialized=true;
+ if(initInFlight)return initInFlight;
+ initInFlight=(async()=>{
+  const plugin=root.ControlFiscalSocialLogin;
+  if(!plugin)throw Error('El módulo nativo de inicio de sesión no está instalado.');
+  await plugin.initialize({google:{iOSClientId:CLIENT_ID,mode:'online'}});
+  initialized=true;
+ })();
+ try{await initInFlight;}finally{initInFlight=null;}
 }
 function getToken(response){
  const possible=[response?.result?.accessToken,response?.accessToken,response?.result?.authentication?.accessToken];
@@ -77,7 +81,7 @@ async function prepare(token,id){
  if(requests.length){await http('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(id)+':batchUpdate','POST',{requests},token);}
  return true;
 }
-async function useBook(token,email,id){
+async function useBook(token,email,id,fromInteractiveLogin=false){
  const guard=epoch;
  await metadata(token,id);
  await prepare(token,id);
@@ -100,7 +104,7 @@ async function useBook(token,email,id){
  try {
    // securityStart muestra inmediatamente el bloqueo con PIN/Face ID. Solo
    // ocultamos el acceso Google una vez que el bloqueo está inicializado.
-   const securityReady=root.startLocalSecurityForAccount();
+   const securityReady=root.startLocalSecurityForAccount(fromInteractiveLogin);
    element('accountGate')?.classList.add('hidden');
    await securityReady;
  } catch (error) {
@@ -120,10 +124,24 @@ async function connect(automatic=false){
   await init();const plugin=root.ControlFiscalSocialLogin;
   let response;
   if(automatic){
-   // Do not show an interactive login automatically or accidentally select a different account.
-   if(typeof plugin.refresh!=='function')throw Error('Esta versión de Google no permite restablecer la sesión. Pulsa iniciar sesión.');
-   try{response=await plugin.refresh({provider:'google'});}catch{throw Error('La sesión de Google ha caducado. Pulsa iniciar sesión.');}
-  }else{response=await plugin.login({provider:'google',options:{scopes:SCOPES}});}
+   // On iOS the plugin can keep native credentials while its refresh() method
+   // returns void. Retrieve the existing authorization first, without a picker.
+   let cached;
+   if(typeof plugin.getAuthorizationCode==='function'){
+    try{cached=await plugin.getAuthorizationCode({provider:'google'});}catch(e){console.info('Autorización local no recuperable; comprobando Google',err(e));}
+   }
+   if(!getToken(cached)&&typeof plugin.refresh==='function'){
+    try{const result=await plugin.refresh({provider:'google'});cached=getToken(result)?result:cached;}catch(e){console.info('Renovación local no disponible',err(e));}
+    if(!getToken(cached)&&typeof plugin.getAuthorizationCode==='function'){
+      try{cached=await plugin.getAuthorizationCode({provider:'google'});}catch(e){console.info('Token no disponible tras renovar',err(e));}
+    }
+   }
+   if(!getToken(cached)){
+      // A reconnect is not proof that the user's Google session expired.
+      throw Error('No se ha podido recuperar la autorización de Google de forma automática. Pulsa INICIAR SESIÓN para reconectar tu cuenta. Tu libro no se ha borrado.');
+   }
+   response=cached;
+  }else{response=await plugin.login({provider:'google',options:{scopes:SCOPES,forcePrompt:false}});}
   const token=getToken(response);
   if(!token){throw Error('No hay autorización vigente de Google. Pulsa iniciar sesión para renovarla.');}
   const email=await verify(token);
@@ -135,7 +153,7 @@ async function connect(automatic=false){
   if(guard!==epoch)throw Error('La sesión cambió durante la verificación.');
   status('Cuenta verificada: '+email+'. Buscando libro existente…');
   const stored=bookId(root.localStorage.getItem(cacheKey(email)));
-  if(stored){try{await useBook(token,email,stored);return;}catch(e){console.warn('Libro anterior inaccesible',e);root.localStorage.removeItem(cacheKey(email));}}
+  if(stored){try{await useBook(token,email,stored,!automatic);return;}catch(e){console.warn('Libro anterior inaccesible',e);root.localStorage.removeItem(cacheKey(email));}}
   let candidates=[];
   try{candidates=await discover(token);}
   catch(e){
@@ -144,7 +162,7 @@ async function connect(automatic=false){
    status('Cuenta '+email+' verificada. No puedo buscar automáticamente libros en Drive ('+err(e)+'). Pega el enlace de tu Google Sheets existente.');
    return;
   }
-  if(candidates.length===1){await useBook(token,email,candidates[0].id);return;}
+  if(candidates.length===1){await useBook(token,email,candidates[0].id,!automatic);return;}
   // Account verified, but no workbook bound: keep the access gate until chosen.
   session={token,email,id:null};
   const existing=element('accountExistingBookField');if(existing)existing.hidden=false;
@@ -224,10 +242,12 @@ async function start(){
  const keep=root.localStorage.getItem(PERSIST)==='1';
  if(element('accountKeepSession'))element('accountKeepSession').checked=keep;
  status('Inicia sesión con Google para abrir tu Control Fiscal.');
+ // Initialize native Google once at the beginning, concurrently with UI paint.
+ const warmup=init().catch(e=>console.warn('Google no se pudo precargar',err(e)));
  if(keep){
    status('Comprobando si tu sesión de Google sigue abierta…');
    // El arranque visual ya está listo antes de ejecutar la renovación del token.
-   await new Promise(resolve=>setTimeout(resolve,600));
+   await warmup;
    if(!session&&!connecting)await connect(true);
  }
 }

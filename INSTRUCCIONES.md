@@ -1,66 +1,39 @@
-# Control Fiscal V76–Google R4 · Resumen, numeración y facturas
+# Control Fiscal V76–Google · R5 (correcciones de usabilidad)
 
-**Versión de prueba.** Conserva las pantallas originales V76 y el almacenamiento privado del usuario en Google Drive/Sheets. No utilizar con facturación fiscal real hasta comprobar requisitos normativos y emisión/registro en iPhone.
+**Proyecto de pruebas.** Conserva las ventanas V76 y la cuenta Google personal. No emitas facturas fiscales definitivas sin comprobar los requisitos legales y los datos de numeración.
 
 ## Instalar
 
-1. Descomprimir y subir **todo el contenido** del proyecto a la rama `v78-google-test`. Mantener `main` intacta.
-2. Incluir los ficheros ocultos `.github/workflows/build-ios.yml` y el nuevo `www/cf-invoice-numbering.js`.
-3. Ejecutar `Build unsigned iOS IPA` en GitHub Actions desde `v78-google-test`.
-4. Descargar **ControlFiscal-V76-Google-Resumen-PDF-R4-IPA** e instalar la IPA con Sideloadly.
-5. En Ajustes al final debe aparecer **UI76-20261022-R4**.
+1. Descomprime y sube **todos los archivos** a `v78-google-test` (no modificar `main`). Incluye `.github/workflows/build-ios.yml`.
+2. Ejecuta `Build unsigned iOS IPA` en GitHub Actions sobre esa rama.
+3. Descarga **ControlFiscal-V76-Google-Correcciones-UX-R5-IPA**. Instala `ControlFiscal_V76_Google_Correcciones_R5.ipa` mediante Sideloadly.
+4. Comprueba en la parte inferior de Ajustes `UI76-20261022-R5`.
 
-## Novedades
+## Correcciones de R5
 
-### Resumen
+- Blanco/negro: se ha extendido la paleta a tarjetas de gráficos, licitaciones, opciones de numeración, facturación y los ejemplos de la guía. Comprueba contraste de texto y botones en ambos temas.
+- Edición sin zoom automático: todos los campos `input`, `select` y `textarea` usan al menos 16 px; el zoom de accesibilidad del dispositivo sigue permitido. No se bloquea el pellizco voluntario.
+- Licitaciones: el enlace abre primero una página **HTTPS oficial del Gobierno de España** (`administracion.gob.es`) que explica cómo entrar a la plataforma pública. Si el destino gubernamental posterior muestra alerta de certificado, no aceptes el riesgo.
+- Google: se inicia el plugin nativo en cuanto carga la app y se quita la espera artificial de 600 ms. Si marcas mantener sesión, intenta recuperar la autorización guardada por el plugin; si Google no entrega un token válido, vuelve al acceso sin borrar el libro o afirmar falsamente que expiró. El inicio de sesión manual verificado no fuerza un segundo PIN/Face ID inmediato si ya existe PIN local; **al enviar la app a segundo plano y regresar se mantiene el bloqueo de seguridad**. En una cuenta sin PIN se solicitará configurarlo.
+- Editor de facturas: ahora explica con ejemplos visuales `texto fijo`, `año (2/4)` e `incremental (ancho:inicio)`; el ejemplo `F` + `4` + `-` + `3:1` se representa como `F2026-001`.
+- Guía: ampliada a 11 apartados con demostraciones visuales ilustrativas, sin datos reales.
+- Información: descripción de módulos, autor, funcionamiento y seguridad.
+- Comparar precios: Ajustes → Información y herramientas → Comparar precios. Permite introducir producto y abrir Idealo o Google Shopping, además de **ordenar de menor a mayor ofertas que el usuario haya verificado y añadido manualmente**. **No** hay extracción automática ni cobertura de todas las tiendas: requiere un servicio de datos comercial y autorización de los proveedores. Las ofertas no se guardan en Google Sheets.
 
-- Gráfico comparativo de **compras** y **facturación** con IVA.
-- Al elegir un año se dibujan los 12 meses; al elegir un mes, cuatro tramos (días 1–7, 8–14, 15–21 y 22–fin).
-- La diferencia no equivale al beneficio neto. Los borradores nuevos no cuentan como factura emitida.
-- Botón que abre el buscador público de licitaciones de la Plataforma de Contratación del Sector Público. **No descarga licitaciones en segundo plano**; la consulta se realiza en el portal oficial.
+## Comprobación en iPhone
 
-### Ajustes → Datos de facturación → Opciones de factura
+1. Abrir la app con **Mantener sesión** activado; si hay autorización nativa válida y libro previamente seleccionado, deberá verificar automáticamente, sin paso artificial de espera. Si no hay autorización, aparecerá «reconectar» con el libro intacto.
+2. Entrar manualmente con Google: si ya has configurado el PIN local, no debe solicitarlo por segunda vez inmediatamente. Salir de la app y volver: debe bloquear con Face ID o PIN.
+3. Cambiar entre **Negro/Blanco**. Comprueba Resumen (gráfico y licitaciones), Facturación (Crear factura / Registrar ingreso), Opciones de factura, Guía e Información.
+4. Tocar los campos de número en Opciones de factura: no debe ampliarse toda la interfaz; desliza en el modal sin desplazamiento horizontal.
+5. Comprobar que el enlace gubernamental abre una conexión segura. Si se ve una alerta de seguridad en el sitio enlazado desde el portal, no ignores el certificado.
+6. Abrir la nueva Guía desde Ajustes y comprobar los once apartados y ejemplos.
+7. Comparar precios: escribir un modelo, abrir buscadores oficiales y añadir varias ofertas de prueba: la tabla local debe ordenarlas de menor a mayor.
+8. Repetir una factura de ensayo R4, guardar y recuperar borrador, agenda e inventario.
 
-- Editor de hasta 10 segmentos: **texto fijo**, **año automático** y **número incremental**. Debe existir exactamente un segmento incremental.
-- Ejemplo: texto fijo `F` + año de 4 cifras + texto fijo `-` + incremento (`3:1`) = **F2026-001**.
-- Para `F-2026-001`, establece el texto fijo inicial como `F-`.
-- En la pieza incremental el valor `3:1` indica 3 dígitos y número inicial 1. Para continuar un historial que ya llega a 004, selecciona un inicio adecuado y comprueba la vista previa. La app impide algunos duplicados históricos, pero **no reemplaza una verificación fiscal independiente**.
-- El incremento sigue **el orden global de emisión** en la pestaña de facturas emitidas del libro, incluso al cambiar de año. **No hay reinicio automático anual** en esta versión.
-- Configuración y número anterior quedan asociados a cada factura en el libro personal; no se renumeran facturas emitidas al cambiar opciones.
-- **No borrar, reordenar ni modificar manualmente** filas de `CF_Facturas_Emitidas`. La numeración depende de su orden y debe conservarse íntegra.
+## Límites
 
-### Imagen de factura y PDF
-
-- La imagen de factura se configura por separado de la del menú principal, desde el mismo cuadro Opciones de factura. Se aceptan PNG/JPG de hasta 3 MB.
-- Se guarda en Google Drive con la cuenta actual y queda registrada en las opciones del libro personal. El PDF utiliza esa imagen; si no existe, usa la del menú o el logotipo incluido.
-- Nuevo PDF vectorial A4 siguiendo la plantilla aportada: imagen a la izquierda; fecha/número a la derecha; emisor y cliente a dos columnas; tabla de conceptos; importe base, IVA, descuento y total.
-- Los textos y líneas se generan como vectores nítidos. La calidad real de la imagen sigue limitada por su fichero original: una imagen de poca definición no gana detalle al ampliarla.
-- La plantilla visual no constituye por sí sola una validación fiscal ni de VERI*FACTU.
-
-### Adaptación a teléfonos/tablets y rendimiento
-
-- Para iPhone pequeño se ajustan márgenes, controles y tamaños mínimos.
-- Para iPad se amplía el ancho utilizable, conservando el diseño V76.
-- Ajustes → Rendimiento y pantalla permite **Máxima calidad** o **Ahorro de rendimiento**. El modo ahorro reduce efectos de desenfoque, sombras y animaciones, pero **no modifica la resolución física de la pantalla ni el framebuffer nativo**. Las fuentes y los gráficos utilizan el renderizado nativo/vectorial.
-
-## Pruebas locales ejecutadas
-
-- **38 pruebas automatizadas superadas**, incluidas numeración configurable, cambio de serie sin alterar facturas anteriores, prevención de coincidencia con números históricos, facturación/Calendar/Gmail de prueba, separación de cuentas y firmas de la interfaz V76.
-- Sintaxis de los JavaScript y de los scripts embebidos en HTML comprobada.
-- Estructura del ZIP y ruta de GitHub Actions comprobadas.
-- **No** se ha ejecutado una compilación nativa de Xcode, ni una autenticación real en tu iPhone. La búsqueda de licitaciones, el PDF con logos personalizados en otros dispositivos y los layouts de iPad requieren comprobación real.
-
-## Lista de pruebas en iPhone
-
-1. Accede con Google y observa la interfaz original V76. Abre Ajustes y verifica `UI76-20261022-R4`.
-2. Entra en Resumen: elige 2026, comprueba los 12 meses y elige un mes para mostrar las semanas. Compara importes con los registros reales de prueba.
-3. Pulsa **Buscar licitaciones oficiales** y verifica que abre el portal legítimo.
-4. En Ajustes → Opciones de factura configura `F` + año + `-` + incremento. Revisa vista previa y guarda.
-5. Sube una imagen propia de factura, vuelve a Facturación y crea una **factura de prueba con datos ficticios**. Comprueba número, formato y PDF.
-6. Reabre la factura y verifica que el número no cambia. Si hay facturas antiguas, comprueba que no se han renumerado.
-7. En Ajustes selecciona Ahorro de rendimiento y vuelve a Máxima calidad; verifica el uso del iPhone. En iPad comprueba márgenes y columnas.
-8. Comprueba que las funciones de R3 (cambio de cuenta, borradores, agenda, inventario, notificaciones, Face ID y compartir PDF) siguen operativas.
-
-## Precauciones sobre facturación
-
-España exige correlación de la numeración dentro de cada serie, documentación completa y otras obligaciones según el caso. Esta versión **no está certificada** conforme a RRSIF/VERI*FACTU ni garantiza ausencia de colisiones ante dos usuarios/dispositivos que emitan simultáneamente con configuraciones diferentes. No emitas facturas reales hasta validar ese punto y el resto de requisitos legales.
+- No se ha probado Xcode nativo en este entorno. Google OAuth, Face ID y sitios externos deben comprobarse en iPhone.
+- Restaurar una sesión depende de que Google conserve autorización nativa utilizable y de los permisos OAuth. No es correcto guardar un token permanente en `localStorage` para evitar volver a identificarse.
+- El buscador de precios **no tiene integración de tiendas ni precios en vivo dentro de la app**. Ningún programa puede asegurar precios de «todas las tiendas» sin cobertura de datos y acuerdos.
+- Las facturas numeradas, el PDF y Google Sheets conservan las limitaciones y advertencias legales de R4. No modificar a mano las filas de `CF_Facturas_Emitidas`.

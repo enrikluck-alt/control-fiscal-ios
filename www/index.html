@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261022-R4">
+<html lang="es" data-cf-ui-build="UI76-20261022-R5">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=overlays-content">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#0b1116">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1122,6 +1122,59 @@ body.lightTheme #accountGate input{background:#fff;color:#111820;border-color:#b
 body.cf-performance-low .hero,body.cf-performance-low .bottom,body.cf-performance-low .header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--bg)!important}
 body.cf-performance-low *,body.cf-performance-low *::before,body.cf-performance-low *::after{animation:none!important;transition:none!important;box-shadow:none!important;text-shadow:none!important}
 </style>
+<style id="cf-r5-theme-focus-guide">
+/* Override R4 fixed dark cards; inherit V76 user palette. */
+body.lightTheme .cfChartCard,body.lightTheme .cfTenderCard,
+body.lightTheme .cfExamplePanel,body.lightTheme .cfPriceCard,
+body.lightTheme .cfNumberHelp{background:#fff!important;color:#111820!important;border-color:#cbd3d9!important}
+body.lightTheme .cfChartCard *,body.lightTheme .cfTenderCard *,
+body.lightTheme .cfExamplePanel *,body.lightTheme .cfPriceCard *,
+body.lightTheme .cfNumberHelp *{color:inherit}
+body.lightTheme .cfChartDescription,body.lightTheme .cfTenderCard p,
+body.lightTheme .cfChartFoot,body.lightTheme .cfChartColumn small,
+body.lightTheme .cfNumberHelp p{color:#53616c!important}
+body.lightTheme .cfChartLegendBuy{color:#8c6800!important}
+body.lightTheme .cfChartLegendSales{color:#81308b!important}
+body.lightTheme .cfChartBar.buy{background:#d7a500!important}
+body.lightTheme .cfChartBar.sales{background:#994eaf!important}
+body.lightTheme .cfInvoiceNumberModalCard,
+body.lightTheme #cfInvoiceNumberModal .modalCard,
+body.lightTheme #guideModal .modalCard,
+body.lightTheme #infoModal .modalCard{background:#fff!important;color:#111820!important}
+body.lightTheme .cfInvoiceNumberModalCard h3,body.lightTheme .cfInvoiceNumberModalCard label,
+body.lightTheme .cfInvoiceNumberModalCard strong{color:#111820}
+body.lightTheme .cfInvoiceNumberModalCard .guideBtn{background:#f6f8fa;color:#111820;border-color:#cbd3d9}
+body.lightTheme #formBody .invoiceForm,
+body.lightTheme #formBody .invoiceCreateBox,
+body.lightTheme #formBody .pendingIncomeBoxText,
+body.lightTheme #formBody .invoiceSection,
+body.lightTheme #formBody .invoiceMeta,
+body.lightTheme #formBody .invoiceLine,
+body.lightTheme #formBody .invoiceTotals,
+body.lightTheme #formBody .invoiceDetails,
+body.lightTheme #formBody .invoiceTotalsPanel,
+body.lightTheme #formBody .invoiceLineRow{background:#fff!important;color:#111820!important;border-color:#cbd3d9!important}
+body.lightTheme #formBody .invoiceSection *,body.lightTheme #formBody .invoiceForm .field label{color:inherit}
+body.lightTheme #formBody .invoiceHint{color:#53616c!important}
+body.lightTheme .cfTenderCard .guideBtn,body.lightTheme .cfPriceCard .guideBtn{background:#f4f6f8!important;color:#111820!important;border:1px solid #cbd3d9!important}
+/* iOS focuses 13px controls by enlarging the WebView; do not constrain pinch-to-zoom. */
+input,select,textarea,.input,.select,.textarea,#cfInvoiceSegmentList input,#cfInvoiceSegmentList select{
+ font-size:16px!important;max-width:100%;min-width:0;
+}
+.cfNumberSegment{grid-template-columns:minmax(104px,36%) minmax(0,1fr) 34px}
+.cfNumberSegment input,.cfNumberSegment select{padding:10px 6px}
+.cfNumberHelp,.cfExamplePanel,.cfPriceCard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0;color:var(--white);line-height:1.55}
+.cfNumberHelp p,.cfNumberHelp li{font-size:13px;line-height:1.65}
+.cfNumberHelp code{font-size:13px;font-weight:800;color:inherit}
+.cfGuideMock{border-radius:12px;border:1px solid var(--line);padding:12px;margin-top:8px;background:var(--bg);max-width:400px}
+.cfGuideMock .cfGuideMockHead{font-size:11px;font-weight:900;color:var(--muted);margin-bottom:8px}
+.cfGuideMock .cfGuideMockRow{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 8px;margin:5px 0;background:var(--card);border-radius:7px;color:var(--white);font-size:12px}
+.cfGuideMock .cfGuideMockAction{display:block;background:var(--yellow);border-radius:7px;padding:8px;text-align:center;font-weight:900;color:#111;margin-top:9px}
+.cfPriceResults{display:grid;gap:8px;margin:10px 0}.cfPriceRow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px;border:1px solid var(--line);border-radius:9px}
+.cfPriceRow small{display:block;font-size:10px;color:var(--muted)}
+.cfPriceCard .field{margin:10px 0}.cfPriceCard .field input{width:100%}
+@media (max-width:400px){.cfNumberSegment{grid-template-columns:minmax(95px,40%) minmax(0,1fr) 32px}.cfNumberSegment input,.cfNumberSegment select{font-size:16px!important}}
+</style>
 </head>
 
 <body>
@@ -1366,8 +1419,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
     <div class="cfTenderCard">
       <h3>📑 LICITACIONES Y PROYECTOS PÚBLICOS</h3>
-      <p>Consulta convocatorias y pliegos oficiales de sonido, iluminación, escenarios y eventos. La búsqueda se realiza en la Plataforma de Contratación del Sector Público.</p>
-      <button class="guideBtn" type="button" onclick="openPublicTenders()">BUSCAR LICITACIONES OFICIALES ↗</button>
+      <p>Enlace seguro a la guía oficial del Gobierno de España, desde donde podrás abrir la Plataforma de Contratación y consultar pliegos. Si otro portal muestra un error de certificado, no lo ignores ni introduzcas datos.</p>
+      <button class="guideBtn" type="button" onclick="openPublicTenders()">ABRIR PORTAL OFICIAL DE LICITACIONES ↗</button>
     </div>
     <div class="pendingPanel" id="pendingPanel">
       <div class="pendingHead">
@@ -1562,12 +1615,13 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
       <div class="settingsGroup">
-        <div class="settingsTitle">ℹ️ INFORMACIÓN</div>
+        <div class="settingsTitle">ℹ️ INFORMACIÓN Y HERRAMIENTAS</div>
         <div class="guideGrid">
           <button class="guideBtn" type="button" onclick="openGuide()">
             <span class="guideIcon">📖</span>
             <span>GUÍA DE FUNCIONAMIENTO</span>
           </button>
+          <button class="guideBtn" type="button" onclick="openPriceSearch()"><span class="guideIcon">🔍</span><span>COMPARAR PRECIOS DE PRODUCTOS</span></button>
           <button class="guideBtn" type="button" onclick="openInfo()">
             <span class="guideIcon">ⓘ</span>
             <span>INFO</span>
@@ -1580,7 +1634,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="settingsHint">Vuelve a los colores y fondo originales de Control Fiscal.</div>
         <button class="resetSettings" type="button" onclick="resetAppSettings()">RESTABLECER AJUSTES</button>
       </div>
-      <div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R4</div>
+      <div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R5</div>
 
     </div>
   </div>
@@ -1699,6 +1753,7 @@ function cfSessionToken(){return window.CFGoogleAccount?.active()?.token||"";}
 function cfAccountEmail(){return window.CFGoogleAccount?.active()?.email||"";}
 function clearUserLocalCaches(){
   lastSavedInvoiceForShare=null;
+  if(typeof cfPriceOffers!=='undefined')cfPriceOffers=[];
   invoiceFormDraft=null;
   window.cfInvoiceNumberConfig=null;window.cfInvoiceBrandUrl='';
   ["cf_records","cf_clients","cf_inventory","cf_agenda","cf_pending_income","cf_stores","cf_providers","cf_store_list","cf_provider_list","cf_invoice_settings","cf_pending_records","cf_inventory_categories"].forEach(k=>localStorage.removeItem(k));
@@ -1717,7 +1772,16 @@ function updateAccountSettings(){
 }
 async function startAccountSystem(){return window.CFGoogleAccount.start();}
 async function logoutControlFiscal(){return window.CFGoogleAccount.logout();}
-async function startLocalSecurityForAccount(){cfInitialDataLoaded=false;updateAccountSettings();await securityStart();}
+async function startLocalSecurityForAccount(fromInteractiveLogin=false){
+ cfInitialDataLoaded=false;updateAccountSettings();
+ // Google has just authenticated this interaction. Avoid a second immediate
+ // Face ID/PIN request; on background/reopen normal local lock remains active.
+ if(fromInteractiveLogin){
+   await migrateLegacyPin();
+   if(securityHasPassword()){unlockSecurity();return;}
+ }
+ await securityStart();
+}
 let cfSecurityNativePrompt=false,cfResumeSecurityPending=false,cfResumeSecurityRunning=false;
 function cfHandleAppState(isActive){
   // Se ignoran los cambios de primer plano propios del cuadro nativo Face ID.
@@ -1960,7 +2024,7 @@ function cfDrawNumberSegments(){
    inp.value=type==='fixed'?(current.type==='fixed'?current.value:''):
      type==='year'?(current.type==='year'?String(current.digits||4):'4'):
      type==='sequence'?(current.type==='sequence'?String(current.width||3)+':'+String(current.start||1):'3:1'):'';
-   inp.placeholder=type==='fixed'?'F, -, /, 2026...':type==='year'?'4 o 2':'dígitos:inicio (ej. 3:1)';
+   inp.placeholder=type==='fixed'?'F, -, /, 2026...':type==='year'?'4 = 2026; 2 = 26':'3:1 = 001; 4:10 = 0010';
   };
   select.onchange=()=>{cfInvoiceSegments[index]={type:select.value};fill();cfNumberingUpdateForm();};
   inp.oninput=cfNumberingUpdateForm;
@@ -1975,7 +2039,7 @@ function cfNumberingUpdateForm(){
  try{const opts=cfNumberingReadForm();cfInvoiceSegments=opts.segments;
   const preview=window.CFInvoiceNumbering.format(opts,window.cfInvoiceNextRow||1,new Date().toISOString());
   e.textContent=preview;e.style.color='var(--green)';
-  if(records?.some(r=>r.numeroFactura===preview)){$('cfInvoiceNumberMessage').textContent='AVISO: El siguiente número ya existe en el historial. Cambia el inicio del contador o la serie antes de emitir.';}
+  if($('cfInvoiceNumberMessage'))$('cfInvoiceNumberMessage').textContent=records?.some(r=>r.numeroFactura===preview)?'AVISO: El siguiente número ya existe en el historial. Revisa la serie.':'';
  }catch(err){e.textContent=err.message;e.style.color='var(--red)';}
 }
 function addInvoiceNumberSegment(){
@@ -2047,6 +2111,34 @@ function openInfo(){
 function closeInfo(){
   const modal=$("infoModal");
   if(modal) modal.classList.add("hidden");
+}
+
+let cfPriceOffers=[];
+function openPriceSearch(){$('cfPriceSearchModal')?.classList.remove('hidden');cfRenderPriceOffers();}
+function closePriceSearch(){$('cfPriceSearchModal')?.classList.add('hidden');}
+async function cfOpenPriceSearch(provider){
+ const name=String($('cfPriceQuery')?.value||'').trim();
+ if(name.length<3){$('cfPriceMessage').textContent='Introduce al menos tres caracteres del producto.';return;}
+ const query=encodeURIComponent(name);
+ const url=provider==='idealo'?`https://www.idealo.es/resultados.html?q=${query}`:`https://www.google.com/search?tbm=shop&q=${query}`;
+ try{if(window.CFBrowser?.open)await window.CFBrowser.open({url});else window.open(url,'_blank','noopener');}
+ catch(e){$('cfPriceMessage').textContent='No se ha podido abrir el comparador: '+(e.message||e);}
+}
+function cfAddPriceOffer(){
+ const shop=String($('cfPriceShop')?.value||'').trim(),amount=Number($('cfPriceValue')?.value),url=String($('cfPriceLink')?.value||'').trim();
+ const msg=$('cfPriceMessage');
+ if(!shop||!Number.isFinite(amount)||amount<=0){msg.textContent='Introduce una tienda y un precio positivo.';return;}
+ if(url&&!/^https:\/\/[^/]+/i.test(url)){msg.textContent='El enlace debe usar HTTPS.';return;}
+ cfPriceOffers.push({shop:shop.slice(0,120),amount,url});msg.textContent='Oferta añadida al comparador local. No se guarda en Google Sheets.';cfRenderPriceOffers();
+}
+function cfRenderPriceOffers(){
+ const host=$('cfPriceResults');if(!host)return;host.replaceChildren();
+ if(!cfPriceOffers.length){const x=document.createElement('p');x.className='settingsHint';x.textContent='Todavía no has añadido ofertas verificadas.';host.append(x);return;}
+ cfPriceOffers.slice().sort((a,b)=>a.amount-b.amount).forEach((offer,index)=>{
+ const row=document.createElement('div');row.className='cfPriceRow';const lhs=document.createElement('span');lhs.textContent=(index+1)+'. '+offer.shop;
+ const rhs=document.createElement('strong');rhs.textContent=euro(offer.amount);row.append(lhs,rhs);
+ if(offer.url){const a=document.createElement('a');a.href=offer.url;a.textContent='Ver oferta ↗';a.target='_blank';a.rel='noopener noreferrer';a.style.gridColumn='span 2';row.append(a);}host.append(row);
+ });
 }
 
 
@@ -3787,7 +3879,7 @@ async function sendInvoicesByEmail(){
 }
 
 function openPublicTenders(){
- const url='https://contrataciondelestado.es/';
+ const url='https://administracion.gob.es/tu-espacio-europeo/derechos-obligaciones/empresas/contratacion-publica/participar-licitaciones/publicidad';
  if(window.CFBrowser?.open){window.CFBrowser.open({url}).catch(()=>window.open(url,'_blank','noopener'));}
  else window.open(url,'_blank','noopener');
 }
@@ -4359,7 +4451,13 @@ startAccountSystem();
  <div class="modalCard cfInvoiceNumberModalCard">
   <button class="modalClose" type="button" onclick="closeInvoiceNumberOptions()">×</button>
   <h3>OPCIONES DE FACTURA</h3>
-  <p class="settingsHint">Combina hasta ocho segmentos: texto fijo, año automático y número incremental. El consecutivo se basa en el orden de emisión del libro, sin reinicio automático anual.</p>
+  <div class="cfNumberHelp"><strong>Cómo construir un número de factura</strong>
+<p>Cada fila es una parte del número. Se juntan de izquierda a derecha, sin espacios añadidos.</p>
+<p><strong>Texto fijo:</strong> escribe exactamente lo que se repetirá en todas las facturas, por ejemplo <code>F</code>, <code>-</code> o <code>/</code>.</p>
+<p><strong>Año actual:</strong> escribe <code>4</code> para mostrar <code>2026</code> o <code>2</code> para mostrar <code>26</code>. Se actualiza al cambiar de año.</p>
+<p><strong>Incremental:</strong> escribe <code>3:1</code> para empezar en <code>001</code>, con tres cifras; <code>4:125</code> empezaría en <code>0125</code>. El contador se incrementa por cada factura emitida.</p>
+<div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO: letra F + año + guion + consecutivo</div><div class="cfGuideMockRow"><span>Texto fijo</span><b>F</b></div><div class="cfGuideMockRow"><span>Año actual</span><b>4</b></div><div class="cfGuideMockRow"><span>Texto fijo</span><b>-</b></div><div class="cfGuideMockRow"><span>Incremental</span><b>3:1</b></div><div class="cfGuideMockAction">F2026-001</div></div>
+<p>Este contador <strong>no se reinicia automáticamente cada año</strong>. Comprueba la siguiente numeración antes de emitir. Las facturas antiguas no cambian.</p></div>
   <div id="cfInvoiceSegmentList"></div>
   <button type="button" class="guideBtn" onclick="addInvoiceNumberSegment()">＋ AÑADIR SEGMENTO</button>
   <div class="settingsHint">Vista previa: <strong id="cfInvoiceNumberPreview"></strong></div>
@@ -4395,21 +4493,32 @@ startAccountSystem();
 </div>
 
 <div id="guideModal" class="modal hidden guideModal" onclick="if(event.target===this)closeGuide()">
-  <div class="modalCard">
-    <button class="modalClose" type="button" onclick="closeGuide()">×</button>
-    <div class="modalTitle">📖 Guía de Control Fiscal</div>
-    <div class="guideStep"><div class="guideNum">1</div><div><h4>Registrar una compra</h4><p>En Compras introduce proveedor, concepto, importe total con IVA y porcentaje de IVA. Puedes adjuntar el PDF o una foto de la factura.</p></div></div>
-    <div class="guideStep"><div class="guideNum">2</div><div><h4>Crear una factura</h4><p>En Facturación introduce los datos del cliente, añade tantos conceptos como necesites y la aplicación calcula la base, el IVA y el total. Tus datos de emisor se configuran en Ajustes.</p></div></div>
-    <div class="guideStep"><div class="guideNum">3</div><div><h4>Consultar el resumen</h4><p>Resumen muestra compras, facturación, IVA soportado, IVA repercutido y el resultado del IVA. Verde significa a tu favor, rojo significa a pagar y amarillo significa equilibrado.</p></div></div>
-    <div class="guideStep"><div class="guideNum">4</div><div><h4>Revisar documentos pendientes</h4><p>La aplicación cuenta las compras y facturas emitidas que todavía no tienen un archivo adjunto y permite verlas directamente.</p></div></div>
-    <div class="guideStep"><div class="guideNum">5</div><div><h4>Enviar documentación al gestor</h4><p>Selecciona compras, facturas emitidas o ambas, elige el período y pulsa Enviar documentación. Los archivos adjuntos se envían por correo.</p></div></div>
-    <div class="guideStep"><div class="guideNum">6</div><div><h4>Ajustes</h4><p>Puedes configurar tus datos de facturación, cambiar el fondo, los colores de Compras y Facturación y guardar la hora que prefieres para el recordatorio diario.</p></div></div>
-    <div class="guideStep"><div class="guideNum">7</div><div><h4>Agenda e inventario</h4><p>Agenda guarda eventos por fecha y hora, ubicación, qué llevar y comentarios. Inventario permite controlar cantidades con botones +1 y −1, editar y eliminar material, stock mínimo y ubicación.</p></div></div>
-    <div class="guideStep"><div class="guideNum">8</div><div><h4>Seguridad</h4><p>La aplicación se protege mediante código de 4 dígitos y autenticación del dispositivo cuando está disponible.</p></div></div>
-    <button class="modalAction" type="button" onclick="closeGuide()">CERRAR</button>
-  </div>
-</div>
+ <div class="modalCard"><button class="modalClose" type="button" onclick="closeGuide()">×</button>
+ <div class="modalTitle">📖 Guía completa · Control Fiscal</div>
+ <p class="settingsHint">Guía paso a paso con ejemplos ilustrativos. No contiene datos ni importes reales.</p>
+ <div class="guideStep"><div class="guideNum">1</div><div><h4>Primera sesión y Google Drive</h4><p>Elige Iniciar sesión con Google o Crear cuenta. Google valida el correo y la app busca tu libro personal. Si ya existe, lo recupera; si no, podrás crearlo tras confirmación. Mantener sesión permite intentar recuperar la autorización la próxima vez; si Google la revoca, tendrás que autorizarla nuevamente.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE ACCESO</div><div class="cfGuideMockRow"><span>Cuenta Google</span><b>usuario@gmail.com</b></div><div class="cfGuideMockRow"><span>Libro personal</span><b>Conectado ✓</b></div><div class="cfGuideMockAction">ABRIR INICIO</div></div></div></div>
+ <div class="guideStep"><div class="guideNum">2</div><div><h4>Registrar compras y adjuntar facturas</h4><p>En Compras añade fecha, proveedor, concepto, referencia, base e IVA. Adjunta PDF o foto de la compra. Si falta el justificante, aparecerá en Documentación pendiente y podrás activar el aviso diario desde Ajustes.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE COMPRA</div><div class="cfGuideMockRow"><span>Concepto</span><b>Cable DMX</b></div><div class="cfGuideMockRow"><span>Base imponible</span><b>100,00 €</b></div><div class="cfGuideMockRow"><span>IVA 21 %</span><b>21,00 €</b></div><div class="cfGuideMockAction">GUARDAR COMPRA</div></div></div></div>
+ <div class="guideStep"><div class="guideNum">3</div><div><h4>Clientes y datos del emisor</h4><p>En Facturación guarda clientes para reutilizar sus datos. En Ajustes → Datos de facturación introduce nombre fiscal, NIF/CIF, dirección, email, IBAN y demás datos. Usa ciudad o código postal para completar el resto cuando haya una coincidencia inequívoca.</p></div></div>
+ <div class="guideStep"><div class="guideNum">4</div><div><h4>Borrador, emisión y PDF de factura</h4><p>En Facturación añade cliente, fecha y conceptos con cantidad, precio e IVA. Guarda borrador para terminarlo más adelante: conserva lo que escribes al cambiar de pestaña. Emite solamente cuando hayas revisado los datos. Se genera un PDF con logotipo, emisor, cliente y totales; puedes compartirlo por WhatsApp o enviar copia por Gmail si está autorizado. Para documentos fiscales reales, comprueba requisitos legales y numeración antes de emitir.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE FACTURA</div><div class="cfGuideMockRow"><span>Sonido de evento × 1</span><b>500,00 €</b></div><div class="cfGuideMockRow"><span>IVA (21 %)</span><b>105,00 €</b></div><div class="cfGuideMockRow"><span>TOTAL</span><b>605,00 €</b></div><div class="cfGuideMockAction">EMITIR FACTURA Y PDF</div></div></div></div>
+ <div class="guideStep"><div class="guideNum">5</div><div><h4>Numeración personalizada de facturas</h4><p>Ajustes → Opciones de numeración: usa Texto fijo para letra y separadores; Año actual con valor 4 o 2; Incremental con formato cifras:inicio. Ejemplo: F + 4 + - + 3:1 produce F2026-001. El consecutivo no se reinicia automáticamente en enero; las facturas ya emitidas conservan su número.</p></div></div>
+ <div class="guideStep"><div class="guideNum">6</div><div><h4>Agenda y Google Calendar</h4><p>Crea un evento con fecha, horas, lugar y material necesario. Queda guardado en tu libro de Google; si has autorizado Google Calendar, se sincronizará. En caso de error de autorización, revisa el mensaje y vuelve a intentar sin duplicar el evento.</p></div></div>
+ <div class="guideStep"><div class="guideNum">7</div><div><h4>Inventario y tipos de materiales</h4><p>Da de alta equipos con nombre, categoría, unidad, cantidad y ubicación. Ajusta existencias con + y −; puedes crear una categoría nueva. Comprueba el mensaje de confirmación de Google Sheets antes de cerrar.</p></div></div>
+ <div class="guideStep"><div class="guideNum">8</div><div><h4>Resumen y gráfica por año o mes</h4><p>Selecciona un año para ver compras y facturación mensual, o un mes para ver semanas. Las cantidades reflejan los registros disponibles en el libro; los borradores de factura no se cuentan como emitidos.</p><div class="cfGuideMock"><div class="cfGuideMockHead">COMPARACIÓN ILUSTRATIVA</div><div class="cfGuideMockRow"><span>🟡 Compras</span><b>200 €</b></div><div class="cfGuideMockRow"><span>🟣 Facturado</span><b>650 €</b></div></div></div></div>
+ <div class="guideStep"><div class="guideNum">9</div><div><h4>Licitaciones públicas y precios</h4><p>Desde Resumen abre la página segura del Gobierno de España para localizar el acceso a la contratación pública. En Ajustes → Comparar precios puedes buscar un producto en comparadores; las ofertas deben verificarse en cada tienda. La app no promete cubrir todas las tiendas ni consultar sus precios automáticamente.</p></div></div>
+ <div class="guideStep"><div class="guideNum">10</div><div><h4>Notificaciones y seguridad</h4><p>Activa los avisos para revisar documentos pendientes. Si sales de la app, volverás a identificarte con Face ID o con el método local configurado. Puedes cerrar sesión y cambiar de cuenta desde Ajustes: nunca compartas el mismo libro entre usuarios sin revisar los permisos.</p></div></div>
+ <div class="guideStep"><div class="guideNum">11</div><div><h4>Imagen y optimización</h4><p>En Ajustes alterna tema negro o blanco, cambia la imagen del menú y la imagen de facturas. En pantallas antiguas usa Ahorro de rendimiento; el texto se mantiene nítido porque la interfaz usa elementos adaptativos.</p></div></div>
+ <button class="modalAction" type="button" onclick="closeGuide()">CERRAR GUÍA</button></div></div>
 
+<div id="cfPriceSearchModal" class="modal hidden" onclick="if(event.target===this)closePriceSearch()">
+ <div class="modalCard"><button class="modalClose" type="button" onclick="closePriceSearch()">×</button><h3>🔍 Comparador de precios</h3>
+ <p class="settingsHint">Introduce un producto exacto (por ejemplo, DAS Audio VANTEC-20A). Puedes abrir comparadores en el navegador seguro y registrar ofertas verificadas para ordenarlas de menor a mayor.</p>
+ <div class="cfPriceCard"><div class="field"><label for="cfPriceQuery">Modelo a buscar</label><input id="cfPriceQuery" class="input" value="DAS Audio VANTEC-20A" placeholder="Marca y modelo exactos"></div>
+ <button class="guideBtn" type="button" onclick="cfOpenPriceSearch('idealo')">🔎 BUSCAR EN IDEALO</button>
+ <button class="guideBtn" type="button" onclick="cfOpenPriceSearch('google')">🔎 BUSCAR EN GOOGLE SHOPPING</button></div>
+ <p class="settingsHint">No hay una API de precios de todas las tiendas conectada. Los resultados de las búsquedas se consultan en los comparadores; los precios de abajo solo aparecen si los añades tú.</p>
+ <div class="cfPriceCard"><h4>Añadir oferta comprobada</h4><div class="field"><label for="cfPriceShop">Tienda</label><input id="cfPriceShop" class="input" placeholder="Nombre de la tienda"></div><div class="field"><label for="cfPriceValue">Precio con IVA (€)</label><input id="cfPriceValue" type="number" min="0.01" step="0.01" class="input" placeholder="0,00"></div><div class="field"><label for="cfPriceLink">Enlace (https://)</label><input id="cfPriceLink" class="input" type="url" placeholder="https://..."></div><button type="button" class="guideBtn" onclick="cfAddPriceOffer()">＋ AÑADIR OFERTA</button><div id="cfPriceMessage" class="settingsHint" role="status"></div></div>
+ <div id="cfPriceResults" class="cfPriceResults"></div><button class="modalAction" type="button" onclick="closePriceSearch()">CERRAR</button></div>
+</div>
 <div id="infoModal" class="modal hidden" onclick="if(event.target===this)closeInfo()">
   <div class="modalCard">
     <button class="modalClose" type="button" onclick="closeInfo()">×</button>
@@ -4417,7 +4526,10 @@ startAccountSystem();
     <div class="infoBrand">
       <div class="creator">Enrique Lucas</div>
       <div class="brand">Chispas Sound</div>
-      <div class="year">2026 inc.</div>
+      <div class="year">© 2026 · Control Fiscal V76-Google · R5</div>
+      <p class="settingsHint" style="margin-top:14px;text-align:left">Control Fiscal permite organizar compras, facturas, clientes, inventario, agenda y resúmenes para tu actividad. Los registros personales se almacenan en el libro de Google Sheets autorizado de tu cuenta.</p>
+      <p class="settingsHint" style="text-align:left">Desarrollo y marca: Chispas Sound. Acceso protegido mediante la cuenta de Google y bloqueo local del dispositivo. No sustituyen al asesoramiento fiscal o contable profesional.</p>
+      <p class="settingsHint" style="text-align:left">Asistencia: consulta la guía desde Ajustes. Los problemas de sincronización se muestran en pantalla y no deben considerarse guardados hasta su confirmación.</p>
     </div>
     <button class="modalAction" type="button" onclick="closeInfo()">CERRAR</button>
   </div>
@@ -4449,20 +4561,8 @@ startAccountSystem();
 </script>
 
 <script>
-(function(){
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', function(event){
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-      event.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, {passive:false});
-
-  document.addEventListener('gesturestart', function(event){ event.preventDefault(); }, {passive:false});
-  document.addEventListener('gesturechange', function(event){ event.preventDefault(); }, {passive:false});
-  document.addEventListener('gestureend', function(event){ event.preventDefault(); }, {passive:false});
-})();
+/* Prevent involuntary zoom by using >=16px fields, without disabling
+   user accessibility gestures or the iOS magnifier. */
 </script>
 
 <script id="cf-v56-native-layout-js">

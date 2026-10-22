@@ -22,7 +22,7 @@ test('la edición mantiene los 11 estilos originales de V76 idénticos',()=>{
  const styles=[...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi)].map(m=>sha(m[1]));
  for(const digest of ref.v76StylesSha256)assert.ok(styles.includes(digest),'Falta estilo original V76 '+digest);
  // La única regla adicional está limitada a [hidden] del acceso Google.
- assert.equal(styles.length,ref.v76StylesSha256.length+4);
+ assert.equal(styles.length,ref.v76StylesSha256.length+5);
  assert.match(html,/<style id="cf-r3-accessibility">/);
  assert.match(html,/<style id="cf-v76-access-security-ui">/);
 });
@@ -51,7 +51,7 @@ test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=
  assert.match(html,new RegExp('data-cf-ui-build="'+ref.buildTag+'"'));
  assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*'+ref.buildTag));
  assert.match(auth,/if\(typeof root\.goHome==='function'\)root\.goHome\(\);/);
- assert.match(auth,/root\.startLocalSecurityForAccount\(\)/);
+ assert.match(auth,/root\.startLocalSecurityForAccount\(fromInteractiveLogin\)/);
  assert.match(auth,/element\('accountGate'\)\?\.classList\.add\('hidden'\)/);
  assert.match(auth,/function logout\(/);
 });
