@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261022-R2">
+<html lang="es" data-cf-ui-build="UI76-20261022-R3">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=overlays-content">
@@ -659,6 +659,15 @@ input, textarea, select {
   -webkit-user-select: text;
   user-select: text;
 }
+</style>
+<style id="cf-r3-accessibility">
+/* Los relojes y selectores de hora no deben quedar diminutos en iPhone. */
+input[type="time"],#notificationTime,#agendaEventStart,#agendaEventEnd{font-size:23px!important;line-height:1.4;min-height:54px!important;font-variant-numeric:tabular-nums;max-width:100%;}
+@media(max-width:390px){input[type="time"]{font-size:20px!important;}}
+.cfPostalHint{overflow-wrap:anywhere}
+.cfInvoiceWarning{margin:12px 0;padding:12px;border:1px solid #c09039;border-radius:10px;color:#f5d993;font-size:12px;line-height:1.5}
+.cfInvoiceEmailRow{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13px}
+.cfInvoiceEmailRow input{width:22px;height:22px;flex-shrink:0}
 </style>
 
 <style id="iva-result-styles">
@@ -1527,7 +1536,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="settingsHint">Vuelve a los colores y fondo originales de Control Fiscal.</div>
         <button class="resetSettings" type="button" onclick="resetAppSettings()">RESTABLECER AJUSTES</button>
       </div>
-      <div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R2</div>
+      <div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R3</div>
 
     </div>
   </div>
@@ -1633,6 +1642,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 <script src="cf-google-data.js"></script>
 <script src="cf-google-upload.js"></script>
 <script src="cf-invoice-share.js"></script>
+<script src="cf-google-extras.js"></script>
+<script src="cf-postal.js"></script>
 <script>
 /* ACCESO DE CUENTAS PERSONAL · Google OAuth y libro de Drive validado. */
 const CF_ACCOUNT_EMAIL_KEY="cf_account_email_v76";
@@ -1643,7 +1654,8 @@ function cfSessionToken(){return window.CFGoogleAccount?.active()?.token||"";}
 function cfAccountEmail(){return window.CFGoogleAccount?.active()?.email||"";}
 function clearUserLocalCaches(){
   lastSavedInvoiceForShare=null;
-  ["cf_records","cf_clients","cf_inventory","cf_agenda","cf_pending_income","cf_stores","cf_providers","cf_store_list","cf_provider_list","cf_invoice_settings","cf_pending_records"].forEach(k=>localStorage.removeItem(k));
+  invoiceFormDraft=null;
+  ["cf_records","cf_clients","cf_inventory","cf_agenda","cf_pending_income","cf_stores","cf_providers","cf_store_list","cf_provider_list","cf_invoice_settings","cf_pending_records","cf_inventory_categories"].forEach(k=>localStorage.removeItem(k));
   records=[];
   savedClients=[];
   inventoryItems=[];
@@ -1678,6 +1690,15 @@ function cfHandleAppState(isActive){
     }).finally(()=>{cfResumeSecurityRunning=false;});
   }
 }
+function cfTapFeedback(){
+ try{const p=window.CFHaptics?.impact({style:'Light'});if(p?.catch)p.catch(()=>{});}catch(e){try{navigator.vibrate?.(35);}catch{}}
+}
+const CF_HAPTIC_ACTIONS=new Set(['saveCurrentClient','saveSimpleClient','saveInvoice','emitInvoice','sendRecord','saveAgendaEvent','saveInvoiceSettings','saveInventoryItem']);
+document.addEventListener('click',e=>{
+ const btn=e.target.closest?.('button');if(!btn)return;
+ const code=btn.getAttribute('onclick')||'';
+ if([...CF_HAPTIC_ACTIONS].some(name=>code.includes(name+'('))||btn.id==='inventorySaveBtn')cfTapFeedback();
+},true);
 function cfRegisterSecurityLifecycle(){
   if(window.CFApp?.addListener){
     window.CFApp.addListener('appStateChange',s=>cfHandleAppState(!!s.isActive))
@@ -1690,7 +1711,7 @@ function cfRegisterSecurityLifecycle(){
 async function loadInitialDataForAccount(){
  if(cfInitialDataLoaded||!cfSessionToken())return;
  cfInitialDataLoaded=true;updateAccountSettings();
- const results=await Promise.allSettled([refreshData(false),loadSuppliersFromGoogle(false),loadInvoiceSettings(false),loadClients(false),loadInventory(false),loadAgenda(false),loadPendingIncome(false)]);
+ const results=await Promise.allSettled([refreshData(false),loadSuppliersFromGoogle(false),loadInvoiceSettings(false),loadClients(false),loadInventory(false),loadAgenda(false),loadPendingIncome(false),loadInventoryCategoriesFromGoogle()]);
  results.forEach(r=>{if(r.status==="rejected")console.warn("Error de carga inicial",r.reason);});
 }
 
@@ -1864,6 +1885,7 @@ function openInvoiceSettings(){
   const modal=$("invoiceSettingsModal");
   if(modal) modal.classList.remove("hidden");
   loadInvoiceSettings(false);
+  window.CFPostal?.attach('issuerPostalCode','issuerCity','issuerProvince');
 }
 function closeInvoiceSettings(){
   const modal=$("invoiceSettingsModal");
@@ -2321,6 +2343,7 @@ function openSimpleClientModal(){
   $("savedClientEmail").value="";
   $("clientSaveMsg").textContent="";
   modal.classList.remove("hidden");
+  window.CFPostal?.attach('savedClientPostalCode','savedClientCity','savedClientProvince');
 }
 function closeSimpleClientModal(){ $("clientSaveModal")?.classList.add("hidden"); }
 async function saveSimpleClient(){
@@ -2337,9 +2360,27 @@ async function saveSimpleClient(){
   }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el cliente.";}
 }
 
+let invoiceFormDraft=null;
+function captureInvoiceDraft(){
+ if($('formHeader')?.dataset.tipo!=='FacturaCompleta'||!$('invoiceLines'))return;
+ const ids=['invSavedClient','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invoiceEmailCopy'];
+ const values={};for(const id of ids){const el=$(id);if(el)values[id]=el.type==='checkbox'?el.checked:el.value;}
+ invoiceFormDraft={values,lines:Array.from(document.querySelectorAll('#invoiceLines .invoiceLine')).map(row=>({description:row.querySelector('.invoiceDesc')?.value||'',qty:row.querySelector('.invoiceQty')?.value||'1',price:row.querySelector('.invoicePrice')?.value||'0'})),requestId:invoiceRequestId};
+}
+function restoreInvoiceDraft(){
+ if(!invoiceFormDraft)return;
+ for(const [id,value] of Object.entries(invoiceFormDraft.values)){const el=$(id);if(el){if(el.type==='checkbox')el.checked=!!value;else el.value=value;}}
+ const lines=invoiceFormDraft.lines;if(lines?.length){$('invoiceLines').innerHTML='';lines.forEach(x=>{addInvoiceLine();const row=$('invoiceLines').lastElementChild;row.querySelector('.invoiceDesc').value=x.description;row.querySelector('.invoiceQty').value=x.qty;row.querySelector('.invoicePrice').value=x.price;});}
+ invoiceRequestId=invoiceFormDraft.requestId;recalcInvoice();
+}
+// Mantener los cambios al cambiar de pestaña, sin escribir datos sensibles en localStorage.
+document.addEventListener('input',e=>{if(e.target?.closest?.('#formBody .invoiceForm'))captureInvoiceDraft();},true);
+document.addEventListener('change',e=>{if(e.target?.closest?.('#formBody .invoiceForm'))captureInvoiceDraft();},true);
 function openInvoiceForm(){
+  // Si el formulario sigue montado no reconstruirlo al ir a otro menú.
+  if($('formHeader')?.dataset.tipo==='FacturaCompleta'&&$('invoiceLines')&&$('formBody .invoiceForm')){only('formPage');nav('sale');return;}
   lastSavedInvoiceForShare=null;
-  invoiceRequestId=null;
+  if(!invoiceFormDraft)invoiceRequestId=null;
   only("formPage");
   nav("sale");
   invoiceConfig=getInvoiceConfig();
@@ -2356,7 +2397,7 @@ function openInvoiceForm(){
   $("formBody").innerHTML=`
     <div class="invoiceForm">
       <div class="invoiceMeta">
-        <div class="metaBox"><small>IDENTIFICADOR DEL BORRADOR</small><strong>Único al guardar; no es numeración fiscal</strong></div>
+        <div class="metaBox"><small>NÚMERO DE FACTURA</small><strong>Se asignará al emitir (serie CF)</strong></div>
         <div class="metaBox"><small>FECHA</small><strong>${new Date().toLocaleDateString("es-ES")}</strong></div>
       </div>
 
@@ -2399,12 +2440,19 @@ function openInvoiceForm(){
         <div class="field"><label>Observaciones <span class="optional">(opcional)</span></label><textarea id="invoiceNotes" class="input" style="height:80px;padding-top:10px;resize:vertical" placeholder="Forma de pago, referencia, presupuesto..."></textarea></div>
       </div>
 
-      <button id="invoiceSaveBtn" class="save p" type="button" onclick="saveInvoice()">GUARDAR BORRADOR DE FACTURA</button>
-      <button id="invoiceShareBtn" class="save" type="button" hidden onclick="shareSavedInvoiceDraft()">📲 COMPARTIR PDF DEL BORRADOR (WHATSAPP)</button>
+      <div class="cfInvoiceWarning">La emisión creará una factura numerada en la serie CF y generará su PDF. Revisa la serie existente y la adaptación de tu sistema a los requisitos de facturación antes de usarlo con clientes reales.</div>
+      <label class="cfInvoiceEmailRow"><input type="checkbox" id="invoiceEmailCopy"><span>Enviar automáticamente una copia PDF al correo del cliente al emitir (requiere autorización Gmail y confirmación del correo).</span></label>
+      <button id="invoiceIssueBtn" class="save p" type="button" onclick="emitInvoice()">🧾 EMITIR FACTURA Y GENERAR PDF</button>
+      <button id="invoiceSaveBtn" class="save" type="button" onclick="saveInvoice()">GUARDAR SOLO BORRADOR</button>
+      <button id="invoiceShareBtn" class="save" type="button" hidden onclick="shareSavedInvoiceDraft()">📲 COMPARTIR PDF POR WHATSAPP / EMAIL</button>
+      <button id="invoiceResendBtn" class="save" type="button" hidden onclick="resendSavedInvoiceEmail()">✉️ ENVIAR COPIA AL EMAIL DEL CLIENTE</button>
+      <button id="invoiceNewBtn" class="save" type="button" hidden onclick="resetInvoiceForm()">➕ CREAR OTRA FACTURA</button>
       <div id="invoiceMsg" class="msg"></div>
     </div>`;
   addInvoiceLine();
   recalcInvoice();
+  restoreInvoiceDraft();
+  window.CFPostal?.attach('invClientPostalCode','invClientCity','invClientProvince');
   loadClients(false);
 }
 
@@ -2501,26 +2549,85 @@ async function saveInvoice(){
     const result=await callAction(payload);
     await syncFromSheets();
     msg.className="msg ok";
-    msg.textContent=`Borrador ${result.numeroFactura||""} guardado en Google Sheets ✓. No es una factura emitida: falta numeración fiscal y PDF.`;
+    msg.textContent=`Borrador ${result.numeroFactura||""} guardado en Google Sheets ✓. No es una factura emitida y no dispone de numeración fiscal.`;
     lastSavedInvoiceForShare={
       payload:{...payload},numero:result.numeroFactura||'BORRADOR',
       email:cfAccountEmail(),book:window.CFGoogleAccount.active()?.id||''
     };
     if($("invoiceShareBtn"))$("invoiceShareBtn").hidden=false;
-    invoiceRequestId=null;
+    try{
+      const pdf=await window.CFInvoiceShare.generate(lastSavedInvoiceForShare);
+      await window.CFGoogleUploads.upload(pdf.filename,'application/pdf',pdf.base64,window.CFGoogleAccount.active());
+      msg.textContent+=' PDF generado y guardado en tu Google Drive.';
+    }catch(pdfErr){msg.textContent+=' No se pudo guardar el PDF: '+(pdfErr.message||pdfErr)+'. Puedes usar Compartir PDF.';}
+    // Conservamos requestId para convertir este borrador en factura sin duplicar.
+    captureInvoiceDraft();
     setTimeout(()=>showInvoiceToast(result.numeroFactura||"Borrador"),250);
   }catch(e){
     console.error(e); msg.className="msg err"; msg.textContent=e.message||"No se pudo guardar la factura.";
   }finally{btn.disabled=false;}
 }
 
+function currentInvoicePayload(){
+ const client={nombre:$('invClientName')?.value.trim()||'',cif:$('invClientTaxId')?.value.trim()||'',direccion:$('invClientAddress')?.value.trim()||'',cp:$('invClientPostalCode')?.value.trim()||'',ciudad:$('invClientCity')?.value.trim()||'',provincia:$('invClientProvince')?.value.trim()||'',telefono:$('invClientPhone')?.value.trim()||'',email:$('invClientEmail')?.value.trim()||''};
+ const lines=readInvoiceLines(),calc=recalcInvoice();invoiceConfig=getInvoiceConfig();
+ if(!client.nombre||!client.cif||!client.direccion||!client.cp||!client.ciudad||!client.provincia)throw Error('Completa nombre, CIF/NIF, domicilio, CP, ciudad y provincia del cliente.');
+ if(!invoiceConfig.name||!invoiceConfig.taxId||!invoiceConfig.address||!invoiceConfig.postalCode||!invoiceConfig.city||!invoiceConfig.province)throw Error('Configura nombre, NIF/CIF y domicilio completo del emisor en Ajustes.');
+ if(!lines.length||lines.some(x=>!x.concepto||x.cantidad<=0||x.precio<0)||calc.total<=0)throw Error('Revisa los conceptos, cantidades y precios de la factura.');
+ return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig)};
+}
+async function emitInvoice(){
+ const msg=$('invoiceMsg'),btn=$('invoiceIssueBtn');if(!btn||btn.disabled)return;
+ let payload,client;
+ try{payload=currentInvoicePayload();client=JSON.parse(payload.cliente);}catch(e){msg.className='msg err';msg.textContent=e.message;return;}
+ const send=!!$('invoiceEmailCopy')?.checked;
+ if(send&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email||'')){msg.className='msg err';msg.textContent='Para enviar una copia marca un correo del cliente válido.';return;}
+ if(!confirm('¿Emitir la factura ahora? Se asignará un número definitivo en la serie CF y no podrá editarse ni eliminarse desde la aplicación. Comprueba importes, cliente y emisor.'))return;
+ if(send&&!confirm('Se enviará una copia del PDF desde tu Gmail a '+client.email+'. ¿Confirmas el destinatario?'))return;
+ btn.disabled=true;msg.className='msg';msg.textContent='Registrando emisión en tu Google Sheets…';
+ let issued;
+ try{issued=await callAction(payload);}catch(e){msg.className='msg err';msg.textContent='No se ha confirmado la emisión: '+(e.message||e)+'. Antes de reintentar, consulta el libro para evitar duplicados.';btn.disabled=false;return;}
+ lastSavedInvoiceForShare={numero:issued.numeroFactura,fecha:issued.fecha,emitida:true,payload,email:cfAccountEmail(),book:window.CFGoogleAccount.active()?.id||'',mailSent:false};
+ msg.className='msg ok';msg.textContent='Factura '+issued.numeroFactura+' registrada. Generando PDF…';
+ // Una emisión registrada no se revierte si Google Drive o Gmail fallan.
+ try{
+  const documentPdf=await window.CFInvoiceShare.generate(lastSavedInvoiceForShare);
+  if($('invoiceShareBtn'))$('invoiceShareBtn').hidden=false;
+  if($('invoiceResendBtn'))$('invoiceResendBtn').hidden=!client.email;
+  try{const url=await window.CFGoogleUploads.upload(documentPdf.filename,'application/pdf',documentPdf.base64,window.CFGoogleAccount.active());await callAction({accion:'registrarDocumentoFactura',numeroFactura:issued.numeroFactura,url});msg.textContent+=' PDF guardado en Google Drive y vinculado a la factura.';}
+  catch(e){msg.textContent+=' El PDF se ha generado, pero no se ha podido subir a Drive: '+e.message+'.';}
+  if(send){
+   try{await window.CFGoogleExtras.sendInvoice({recipient:client.email,number:issued.numeroFactura,pdfBase64:documentPdf.base64,issuer:invoiceConfig.name});lastSavedInvoiceForShare.mailSent=true;msg.textContent+=' Copia enviada correctamente a '+client.email+'.';}
+   catch(e){msg.className='msg err';msg.textContent+=' NO se ha enviado el correo: '+e.message+'. Puedes reintentarlo con el botón de envío.';}
+  }
+ }catch(e){msg.className='msg err';msg.textContent+=' La factura existe en Sheets, pero no se ha generado el PDF: '+e.message+'. Consulta el registro antes de volver a emitir.';}
+ invoiceFormDraft=null;invoiceRequestId=null;
+ btn.disabled=true;if($('invoiceNewBtn'))$('invoiceNewBtn').hidden=false;
+ try{await syncFromSheets();}catch(e){console.warn('Emisión guardada; lista sin actualizar',e);}
+}
+function resetInvoiceForm(){
+ invoiceFormDraft=null;invoiceRequestId=null;lastSavedInvoiceForShare=null;
+ if($('formHeader'))$('formHeader').dataset.tipo='';
+ openInvoiceForm();
+}
+async function resendSavedInvoiceEmail(){
+ const saved=lastSavedInvoiceForShare,s=window.CFGoogleAccount?.active(),msg=$('invoiceMsg');
+ if(!saved?.emitida||saved.email!==s?.email||saved.book!==s?.id){msg.className='msg err';msg.textContent='No hay una factura emitida de esta cuenta para enviar.';return;}
+ const client=JSON.parse(saved.payload.cliente||'{}');
+ if(saved.mailSent){if(!confirm('Ya se envió una copia. ¿Quieres enviar otra?'))return;}
+ if(!confirm('¿Enviar factura '+saved.numero+' a '+client.email+'?'))return;
+ const btn=$('invoiceResendBtn');btn.disabled=true;
+ try{const pdf=await window.CFInvoiceShare.generate(saved);await window.CFGoogleExtras.sendInvoice({recipient:client.email,number:saved.numero,pdfBase64:pdf.base64,issuer:invoiceConfig.name});saved.mailSent=true;msg.className='msg ok';msg.textContent='Gmail ha confirmado el envío a '+client.email+'.';}
+ catch(e){msg.className='msg err';msg.textContent='No enviado: '+(e.message||e);}
+ finally{btn.disabled=false;}
+}
 async function shareSavedInvoiceDraft(){
   const msg=$("invoiceMsg"),s=window.CFGoogleAccount?.active();
   if(!lastSavedInvoiceForShare||!s?.id||s.id!==lastSavedInvoiceForShare.book||s.email!==lastSavedInvoiceForShare.email){
     if(msg){msg.className="msg err";msg.textContent="Guarda primero el borrador con la cuenta actual.";}
     return;
   }
-  if(!confirm("Se va a compartir un PDF marcado como BORRADOR, no una factura fiscal emitida. ¿Continuar?"))return;
+  if(!confirm(lastSavedInvoiceForShare.emitida?'¿Compartir la factura '+lastSavedInvoiceForShare.numero+'?':'Se va a compartir un borrador sin emitir. ¿Continuar?'))return;
   const btn=$("invoiceShareBtn");if(btn)btn.disabled=true;
   try{
     await window.CFInvoiceShare.share(lastSavedInvoiceForShare);
@@ -2533,7 +2640,7 @@ async function shareSavedInvoiceDraft(){
 function showInvoiceToast(numero){
   const old=$("toast"); if(old)old.remove();
   const d=document.createElement("div"); d.id="toast"; d.className="toast p";
-  d.innerHTML=`<div class="check">✓</div><h3>¡Borrador ${esc(numero)} guardado!</h3><p>No es una factura emitida. Requiere numeración legal y PDF antes de entregarla.</p><button onclick="document.getElementById('toast').remove()">Aceptar</button>`;
+  d.innerHTML=`<div class="check">✓</div><h3>¡Borrador ${esc(numero)} guardado!</h3><p>No es una factura emitida. Utiliza «Emitir factura» para asignar el número definitivo y generar su PDF.</p><button onclick="document.getElementById('toast').remove()">Aceptar</button>`;
   document.body.appendChild(d);
 }
 
@@ -2715,6 +2822,14 @@ async function sendRecord(tipo){
 
     await new Promise(resolve=>setTimeout(resolve,350));
     const data=await syncFromSheets();
+    // Solicitar permiso SOLO una vez por cuenta después de guardar una compra sin justificante.
+    if(tipo==='Compra'&&!file){
+      const k='cf_purchase_notification_asked_'+encodeURIComponent(cfAccountEmail());
+      if(!localStorage.getItem(k)){
+        localStorage.setItem(k,'1');
+        await enablePendingNotifications();
+      }
+    }
 
     const encontrado=(data.compras||[]).concat(data.facturacion||[]).some(r=>
       r.tipo===tipo &&
@@ -3039,16 +3154,32 @@ function updateAgendaMapHint(){
 function closeAgendaEventModal(){$("agendaEventModal")?.classList.add("hidden");agendaEditingId=null;}
 async function saveAgendaEvent(){
   const msg=$("agendaMsg");
-  const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim()};
+  const previousEvent=agendaEvents.find(x=>String(x.id)===String(agendaEditingId));
+  const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),googleCalendarId:previousEvent?.googleCalendarId||'',evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim()};
   if(!obj.evento||!obj.fecha){msg.className="msg err";msg.textContent="Indica al menos el evento y la fecha.";return;}
   msg.className="msg";msg.textContent="Guardando...";
-  try{await callAction({accion:"guardarEvento",evento:JSON.stringify(obj)});await loadAgenda(false);msg.className="msg ok";msg.textContent="Evento guardado ✓";setTimeout(closeAgendaEventModal,400);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el evento.";}
+  try{
+    await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
+    agendaEditingId=obj.id; // Si Calendar falla, reintentar mantiene el mismo ID en Sheets.
+    msg.className='msg';msg.textContent='Guardado en Google Sheets. Sincronizando Google Calendar…';
+    try{
+      const result=await window.CFGoogleExtras.upsertCalendar(obj);
+      obj.googleCalendarId=result.id;
+      await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
+      msg.className='msg ok';msg.textContent='Evento guardado en Sheets y Google Calendar ✓';
+      await loadAgenda(false);setTimeout(closeAgendaEventModal,650);
+    }catch(calendarError){await loadAgenda(false);msg.className='msg err';msg.textContent='Evento guardado en Sheets, pero NO en Google Calendar: '+calendarError.message+'. Comprueba los permisos y vuelve a pulsar Guardar.';}
+  }catch(e){msg.className='msg err';msg.textContent=e.message||'No se pudo guardar el evento.';}
 }
 async function deleteAgendaEvent(){
   if(!agendaEditingId)return;
   if(!confirm("¿Eliminar este evento?"))return;
   const msg=$("agendaMsg");msg.className="msg";msg.textContent="Eliminando...";
-  try{await callAction({accion:"eliminarEvento",id:agendaEditingId});await loadAgenda(false);closeAgendaEventModal();}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo eliminar el evento.";}
+  try{
+    const ev=agendaEvents.find(x=>String(x.id)===String(agendaEditingId));
+    if(ev?.googleCalendarId)await window.CFGoogleExtras.deleteCalendar(ev);
+    await callAction({accion:'eliminarEvento',id:agendaEditingId});await loadAgenda(false);closeAgendaEventModal();
+  }catch(e){msg.className='msg err';msg.textContent='No se pudo eliminar de Calendar o Sheets: '+(e.message||e);}
 }
 
 /* =========================================================
@@ -3070,15 +3201,24 @@ function buildInventoryCategoryControls(selected){
   const sel=$("invItemCategory");
   if(sel){const prev=selected!==undefined?selected:(sel.value||"Otros");sel.innerHTML=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("")+`<option value="__new__">＋ Crear nuevo tipo</option>`;sel.value=cats.includes(prev)?prev:"Otros";}
 }
-function inventoryCategoryChanged(){
-  const sel=$("invItemCategory");if(!sel||sel.value!=="__new__")return;
-  const value=window.prompt("Escribe el nuevo tipo de material:","");const clean=String(value||"").trim();
-  if(!clean){sel.value="Otros";return;}
-  buildInventoryCategoryControls(clean);sel.value=clean;
+async function loadInventoryCategoriesFromGoogle(){
+ if(!cfSessionToken())return;
+ try{const data=await callAction({accion:'listarTiposInventario'});const server=Array.isArray(data.tipos)?data.tipos:[];
+  saveInventoryCategories([...getInventoryCategories(),...server]);buildInventoryCategoryControls();
+ }catch(e){console.warn('Tipos de inventario sin sincronizar',e);}
+}
+async function inventoryCategoryChanged(){
+ const sel=$('invItemCategory');if(!sel||sel.value!=='__new__')return;
+ const value=window.prompt('Escribe el nuevo tipo de material:','');const clean=String(value||'').trim();
+ if(!clean){sel.value='Otros';return;}
+ const previous=sel.disabled;sel.disabled=true;
+ try{await callAction({accion:'guardarTipoInventario',tipo:clean});saveInventoryCategories([...getInventoryCategories(),clean]);buildInventoryCategoryControls(clean);sel.value=clean;cfTapFeedback();showToastMessage('Tipo guardado',clean);}
+ catch(e){sel.value='Otros';showToastMessage('No se guardó el tipo de material',e.message||'Error de Google Sheets');}
+ finally{sel.disabled=previous;}
 }
 function openInventory(){only("inventoryPage");nav("inventory");buildInventoryCategoryControls();renderInventory();loadInventory(false);}
 async function loadInventory(showError=false){
-  try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));buildInventoryCategoryControls();renderInventory();}
+  try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));buildInventoryCategoryControls();renderInventory();await loadInventoryCategoriesFromGoogle();}
   catch(e){try{inventoryItems=JSON.parse(localStorage.getItem("cf_inventory")||"[]")}catch(_){inventoryItems=[]}buildInventoryCategoryControls();renderInventory();if(showError)showToastMessage("Sin conexión","No se pudo cargar el inventario.");}
 }
 function renderInventory(){
@@ -3116,6 +3256,8 @@ function syncFromSheets(){
     records=server;
     localStorage.setItem("cf_records",JSON.stringify(records.slice(0,200)));
     updatePendingDocuments();
+    // iOS programa el recordatorio local una vez cada día; se cancela si no hay compras pendientes.
+    schedulePendingNotificationFromCurrentState().catch(e=>console.warn('Aviso diario',e));
     renderLatest();
     if(!$('recordsPage').classList.contains('hidden')){
       buildRecordPeriods();
@@ -3195,7 +3337,7 @@ function notificationTimeParts(){
 async function schedulePendingNotificationFromCurrentState(){
   const plugin=await nativeLocalNotifications();
   if(!plugin) return;
-  const total=(records||[]).filter(r=>!r.facturaUrl && (r.tipo==="Compra" || r.tipo==="Facturado" || r.tipo==="Facturación")).length;
+  const total=(records||[]).filter(r=>r.tipo==='Compra'&&!r.facturaUrl).length;
   try{await plugin.cancel({notifications:[{id:60001}]});}catch(e){}
   if(!total) return;
   try{
@@ -3205,7 +3347,7 @@ async function schedulePendingNotificationFromCurrentState(){
     await plugin.schedule({notifications:[{
       id:60001,
       title:"Control Fiscal",
-      body:"Tienes documentación pendiente de subir en Control Fiscal.",
+      body:"Tienes compras sin factura adjunta. Entra en Control Fiscal para revisarlas.",
       schedule:{on:{hour,minute},repeats:true},
       extra:{kind:"pending-documents"}
     }]});

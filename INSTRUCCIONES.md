@@ -1,40 +1,58 @@
-# Control Fiscal V76-Google — Seguridad, sesión y facturas (UI76-20261022-R2)
+# Control Fiscal V76-Google · R3 (UI76-20261022-R3)
 
-Proyecto completo para **rama `v78-google-test`**. No modificar `main`.
+**Proyecto para pruebas en iPhone, no certificado para facturación reglamentaria.** Conserva el diseño de V76. Trabajar en la rama **`v78-google-test`**, **sin modificar `main`**. El proyecto contiene un solo `INSTRUCCIONES.md`.
 
-## Cambios frente a R1
+## Compilación
 
-1. Se conserva el diseño de los formularios y la barra inferior de **V76**. La tarjeta de Facturación de Inicio y el botón `Fact.` de abajo llaman al mismo `openFacturacionPage()`; allí están las opciones «Crear factura» e «Ingreso independiente».
-2. Acceso inicial con dos opciones: **INICIAR SESIÓN** o **CREAR CUENTA**. El correo es **opcional** y sirve para verificar que se eligió la cuenta pretendida; **Google** gestiona la contraseña y el selector de cuentas, no Control Fiscal. Crear cuenta abre la página oficial de Google en una ventana interna de iOS (SFSafariViewController), sin entregar credenciales a la app; después se vuelve a Iniciar sesión. Google podría requerir completar alguna acción fuera de esa ventana.
-3. **Mantener sesión iniciada**: si se marca, al volver a arrancar se intenta recuperar de forma silenciosa el acceso desde el plugin de Google; si Google pide volver a autorizar, aparecerá el acceso. Nunca se guarda el token OAuth en `localStorage`.
-4. **Face ID / PIN al reentrar:** al mandar la aplicación a segundo plano se muestra inmediatamente el bloqueo. Al regresar debe pedir Face ID; si iOS no dispone de biometría, se utiliza el código configurado previamente. La app **no** está certificada con controles de seguridad bancaria.
-5. En Ajustes se corrige el texto de las **notificaciones**: selector de hora en una fila propia, sin encoger la descripción. Se elimina **ABRIR MIS GOOGLE SHEETS**.
-6. Tras guardar una **factura como borrador**, aparece «COMPARTIR PDF DEL BORRADOR (WHATSAPP)». El iPhone abre Compartir para elegir WhatsApp u otra aplicación instalada. **NO ENVÍA AUTOMÁTICAMENTE**: el usuario selecciona destinatario y confirma el envío. El PDF incluye la mención **«BORRADOR - NO EMITIDA»** y NO cuenta como factura fiscal emitida. El archivo PDF temporal se borra de caché al terminar.
-7. El almacenamiento respeta filas antiguas: los cambios se guardan en la pestaña auxiliar `CF_Registros_v2`, sin reescribir columnas legacy. Se mantiene Google OAuth por usuario y comprobación de titularidad del libro.
+1. Extrae el ZIP y sube **su contenido**, no la carpeta contenedora, a `v78-google-test`. Asegúrate de reemplazar los archivos anteriores, incluida `.github/workflows/build-ios.yml`.
+2. En GitHub Actions selecciona `Build unsigned iOS IPA`, rama `v78-google-test`.
+3. Descarga el artefacto **`ControlFiscal-V76-Google-Emision-Calendar-R3-IPA`** y la IPA **`ControlFiscal_V76_Google_Emision_Calendar_R3.ipa`**.
+4. Instálala en el iPhone mediante Sideloadly. Comprueba en Ajustes, al final, que pone **`UI76-20261022-R3`**. Si pone R2, has instalado una compilación anterior.
+5. No utilices información fiscal real en las primeras pruebas. Utiliza una cuenta y libro de ensayo y guarda una copia del libro original.
 
-## Compilar desde GitHub Actions
+La compilación requiere conexión a npm y Google. El flujo de GitHub valida archivos de `www`, ejecuta `npm test`, compila el JS de OAuth con esbuild, sincroniza los plugins y comprueba el HTML incluido en la IPA. **Aquí se verificaron 34 pruebas locales, sintaxis y simulación visual de navegación; no se ha compilado ni ejecutado la aplicación de forma nativa en iOS.**
 
-1. Descomprime el ZIP; sube **todo el contenido de su raíz** a la rama `v78-google-test`, incluyendo `.github/workflows/build-ios.yml`, `google-login-entry.js`, `package.json`, `tests`, y `www`. No añadas los proyectos de V78 previos.
-2. En Actions lanza **Build unsigned iOS IPA** sobre esa rama. Workflow instala dependencias, corre las pruebas y prepara el bundle nativo. Necesita Internet para obtener los paquetes npm.
-3. Si termina, descarga el artefacto **`ControlFiscal-V76-Seguridad-Google-Facturas-20261022-IPA`**.
-4. Instala con Sideloadly el archivo **`ControlFiscal_V76_Seguridad_Google_Facturas_20261022.ipa`**.
-5. Comprueba en Ajustes, al final, la etiqueta de compilación **`UI76-20261022-R2`**. Si no aparece, prueba de nuevo la rama y el artefacto correctos.
+## Nueva funcionalidad
 
-## Prueba rápida en iPhone
+- **V76 intacta:** menú y formularios originales, sin interfaz de diagnóstico de V78.
+- **Facturas a medias:** la información y las líneas se mantienen en memoria al pasar de Facturación a Inicio/Compras/Agenda/Stock y volver. No se guarda el formulario inacabado en Drive ni garantiza recuperarlo al cerrar totalmente la app, reiniciar o reinstalar. «Nueva factura» limpia el formulario deliberadamente.
+- **Direcciones de España:** ciudad ↔ código postal ↔ provincia mediante el directorio de municipios del INE elaborado por `regi-es/ds-codigos-postales-ine-es`. Requiere Internet. Si hay varios municipios o CP, pide elección en lugar de adivinar. Se puede editar manualmente. Fuente: sitio web del INE, `www.ine.es`.
+- **Vibración breve al pulsar:** guardar cliente, borrador, emitir factura, compra, evento, datos de facturación, material, tipo de inventario y cerrar sesión (si está permitido en el dispositivo).
+- **Facturación:** se mantienen «Guardar solo borrador» y «Emitir factura y generar PDF». El PDF de emisión contiene número serie `CF`, fecha, emisor, NIF/CIF, dirección, datos del cliente, conceptos, cantidades, precios, descuento, IVA, total y logotipo. Una vez emitida, la factura queda en una pestaña dedicada **`CF_Facturas_Emitidas`** sin sobrescribir el historial; el PDF se sube a Drive y su enlace se almacena en **`CF_Facturas_Documentos`** si ambas operaciones funcionan. Se conserva el PDF del borrador marcado **NO EMITIDA**.
+- **Correo del cliente:** checkbox opcional «Enviar copia por correo». Requiere correo válido y confirmación expresa. Gmail solo se considera enviado si la API devuelve identificador. Si falla, se notifica; **la emisión ya registrada NO se revierte**.
+- **WhatsApp:** al compartir el PDF, iOS muestra su menú nativo para seleccionar WhatsApp y destinatario. No envía nada automáticamente.
+- **Agenda:** guardar evento en Sheets y sincronizar con el Google Calendar principal mediante Calendar API. Cuando falla, el mensaje indica que el evento existe en Sheets pero no se sincronizó, y permite reintentar. La eliminación intenta retirarlo de Calendar antes de eliminarlo de Sheets.
+- **Inventario:** tipos personalizados persistidos en Configuracion (`cf_inventory_categories`) del Google Sheets individual.
+- **Notificaciones:** tras la primera compra sin adjunto puede solicitar permiso; con permiso concedido, programa aviso local diario a la hora elegida, cancelándolo cuando no quedan compras sin justificante. Es una notificación local de iOS: no sirve como garantía de entrega diaria si el sistema la limita.
+- **Horas:** inputs de recordatorio, inicio y final de eventos con tipografía aumentada; el selector nativo de hora lo controla iOS.
+- **Seguridad:** mismo inicio con Google, recuperar libro propio, mantenimiento de sesión opcional y Face ID/PIN al volver a primer plano.
 
-- Cuenta nueva: inicia sin sesión; pulsa **CREAR CUENTA**, crea una cuenta Google con la ventana del proveedor y vuelve a **INICIAR SESIÓN**. Si no hay libro, ofrece crearlo.
-- Cuenta existente: inicia con Google, comprueba que recupera tu libro y que entra directamente en Inicio después del desbloqueo.
-- Sesión: marca **Mantener sesión iniciada**, cierra la app y vuelve a abrirla. Google puede requerir volver a autorizar si la sesión caducó.
-- Protección: abre Compras o Ajustes, pasa a otra aplicación y vuelve. Debe aparecer Face ID o el PIN de respaldo, **sin mostrar los importes antes**.
-- Ajustes: verifica el texto del recordatorio, la hora y que no aparece «Abrir mis Google Sheets».
-- Facturación: entra desde la tarjeta del Inicio y desde `Fact.`; ambas deben ofrecer «Crear factura» e «Ingreso independiente». Crea un **borrador de ensayo** con clientes y conceptos ficticios. Al guardar, comparte el PDF de borrador por WhatsApp y comprueba que diga «BORRADOR - NO EMITIDA».
-- Cerrar sesión: toca el botón al final de Ajustes, observa la vibración y comprueba que vuelve a Google; utiliza una segunda cuenta Google y verifica que no muestra datos de la primera.
+## Configuración de Google Cloud para esta versión
 
-## Límites conocidos — NO USAR PARA EMITIR FACTURAS FISCALES
+**IMPORTANTE: nuevos permisos OAuth.** La app solicita, además de los permisos ya usados de Google Drive/Sheets:
 
-- **La emisión fiscal numerada, el PDF oficial definitivo, Verifactu y envío fiscal están pendientes.** Las facturas creadas en esta versión son borradores no emitidos; el PDF de compartir sirve como documento de ensayo y queda marcado como borrador. No lo presentes como factura fiscal.
-- Sin pruebas automatizadas de un iPhone real no puede certificarse Face ID, el selector Google, las sesiones persistentes ni WhatsApp. Si el dispositivo bloquea la creación de Google dentro de la ventana integrada, habrá que crear la cuenta en la interfaz oficial y regresar a la app.
-- La notificación y sincronización de Google Sheets siguen pendientes de verificación con servicios reales. No uses información fiscal sensible para la primera prueba; utiliza un libro y datos de ensayo.
-- La aplicación conserva un PIN local de respaldo. No alcanza por sí sola las garantías de una aplicación bancaria auditada.
+- `https://www.googleapis.com/auth/calendar.events`
+- `https://www.googleapis.com/auth/gmail.send`
 
-**Archivos en `www`:** `index.html`, `chispas-logo.png`, `cf-google-auth.js`, `cf-google-data.js`, `cf-google-upload.js`, `cf-invoice-share.js`; el workflow genera `google-login.bundle.js` en compilación.
+Habilita **Google Calendar API** y **Gmail API** en el mismo proyecto de Google Cloud que usa el cliente OAuth iOS. Configura pantalla de consentimiento, scopes y usuarios de prueba si la aplicación sigue en modo Testing. Google podría exigir verificación adicional antes de permitir a usuarios fuera de la lista de pruebas. Si OAuth rechaza un permiso, el inicio de sesión completo podría fallar hasta configurar el proyecto. **No introduzcas contraseñas de Gmail en la app.**
+
+## Orden recomendado para la comprobación en el iPhone
+
+1. Comprueba la marca R3 y el diseño V76; inicia sesión, elige libro y desbloquea con Face ID/PIN.
+2. Crea una **factura ficticia** con tres conceptos. Cambia a Inicio, Compras y vuelve: cantidades, precios y datos del cliente deben conservarse. Comprueba «Nueva factura» después de emitir.
+3. Escribe CP `02001` y verifica provincia Albacete. Escribe otra ciudad con varios CP y comprueba que te pide elegir sin asignar uno incorrecto.
+4. Guarda cliente, compra sin adjunto, material y tipo nuevo. Comprueba vibración y que el tipo se conserva tras volver a entrar.
+5. Con permiso de notificaciones, comprueba en Ajustes la hora diaria. No presupongas que el aviso ya se entregó antes de llegar la hora configurada.
+6. Crea un evento con hora y revisa su presencia en Google Calendar. Edita y elimina otro evento de ensayo.
+7. Guarda primero **borrador** y prueba su PDF. Después, con **otra factura ficticia**, prueba **Emitir factura** y abre el PDF; verifica el logo, datos, artículo e IVA. Comprueba la pestaña `CF_Facturas_Emitidas`. **No pulses emitir repetidamente si Google o Drive están fallando**: puede existir una emisión aunque el PDF o la respuesta fallaran.
+8. Prueba el checkbox de correo solo con un correo tuyo de prueba. Comprueba el Gmail del emisor y el mensaje en la bandeja de destino. Comparte otra copia por WhatsApp usando un contacto de prueba.
+9. Cierra sesión y entra con otra cuenta; confirma que no muestra la información de la primera. Verifica Face ID al salir y volver de la app.
+
+## Limitaciones y advertencia de facturación
+
+- **La generación de una factura numerada y su PDF no equivale a certificación fiscal ni a software conforme a RRSIF/VERI*FACTU.** No se han implementado mecanismos legales como encadenamiento/huella de registros, declaraciones responsables, gestión fiscal de rectificativas y todos los supuestos de IVA/retenciones. Consulta a tu asesor fiscal antes de emitir facturas reales o distribuir esta versión.
+- La numeración `CF-000001...` se deriva de las posiciones de filas **añadidas** a una pestaña exclusiva. No borres, muevas ni ordenes esa pestaña directamente y no la uses como sistema certificado de facturación. Conserva una copia de seguridad. Si la subida del PDF o correo falla, la factura podría constar registrada sin adjunto o sin envío.
+- No se garantizan compatibilidad del nuevo sistema con plantillas PDF históricas, emisiones entre varios dispositivos simultáneos, tamaños de adjunto superiores a 5 MB, ni la entrega de notificaciones a hora exacta. La autocompletación postal requiere red y depende de disponibilidad de fuente de datos externa.
+- No se ha realizado compilación de Xcode ni acceso real con Google, Gmail y Calendar en este entorno. Las 34 pruebas incluidas simulan las API y comprueban la lógica, pero **no sustituyen las pruebas de la IPA**.
+
+En caso de error, envía **captura + función + mensaje exacto** y comprueba la marca `UI76-20261022-R3` antes de reportarlo.

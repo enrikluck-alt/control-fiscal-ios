@@ -2,9 +2,9 @@
 (function (root) {
 'use strict';
 const CLIENT_ID='429272495544-72rmbs21hjds0fqb2hjlskbojr6gmi4g.apps.googleusercontent.com';
-const SCOPES=['openid','email','profile','https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/drive.metadata.readonly','https://www.googleapis.com/auth/spreadsheets'];
+const SCOPES=['openid','email','profile','https://www.googleapis.com/auth/drive.file','https://www.googleapis.com/auth/drive.metadata.readonly','https://www.googleapis.com/auth/spreadsheets','https://www.googleapis.com/auth/calendar.events','https://www.googleapis.com/auth/gmail.send'];
 const BOOK_NAME='Control Fiscal - Datos fiscales';
-const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda','Ingresos','CF_Registros_v2'];
+const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda','Ingresos','CF_Registros_v2','CF_Facturas_Emitidas','CF_Facturas_Documentos'];
 const LAST_BOOK='cf_google_book_by_email_v76';
 const PERSIST='cf_google_keep_session_v76';
 let session=null,initialized=false,connecting=false,epoch=0,accessMode='login';

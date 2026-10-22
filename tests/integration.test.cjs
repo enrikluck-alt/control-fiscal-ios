@@ -155,6 +155,7 @@ test('OAuth/auth module uses WebKit fetch rather than direct native CapacitorHtt
  assert.doesNotMatch(auth,/native\.request\(/);
  assert.match(auth,/ownedByMe/);
  const html=fs.readFileSync('www/index.html','utf8');
- assert.match(html,/GUARDAR BORRADOR DE FACTURA/);
+ assert.match(html,/GUARDAR SOLO BORRADOR/);
+ assert.match(html,/EMITIR FACTURA Y GENERAR PDF/);
  assert.doesNotMatch(html,/ENVIAR Y GUARDAR FACTURA/);
 });

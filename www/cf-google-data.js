@@ -1,11 +1,13 @@
 /* Control Fiscal V76 — datos personales en Google Sheets.
    V2: diario de cambios APEND-ONLY en CF_Registros_v2.
    NO reescribe, limpia ni cambia el esquema de ninguna hoja antigua.
-   Las facturas nuevas se guardan como BORRADORES, nunca como emitidas. */
+   Las facturas nuevas pueden guardarse como BORRADORES o registrarse como EMITIDAS
+   en pestañas nuevas separadas. La app NO certifica cumplimiento de sistemas de facturación. */
 (function(root){
 'use strict';
 const MARK='CFV76_GOOGLE_2', OLD_MARK='CFV76_GOOGLE_1', LEDGER='CF_Registros_v2';
 const API='https://sheets.googleapis.com/v4/spreadsheets/';
+const ISSUED_TAB='CF_Facturas_Emitidas',ISSUED_DOC_TAB='CF_Facturas_Documentos';
 const has=v=>v!==undefined&&v!==null&&String(v)!=='';
 const num=v=>Number(v)||0;
 const now=()=>new Date().toISOString();
@@ -108,11 +110,33 @@ async function putConfig(s,object){
  }
 }
 const inflightDrafts=new Map();
+const inflightIssues=new Map();
+async function issuedRecords(s){
+ const [rows,files]=await Promise.all([maybeRead(s,ISSUED_TAB),maybeRead(s,ISSUED_DOC_TAB)]);
+ const pdfs=new Map();for(const f of files)if(f[0]==='CF_PDF_1'&&f[1]&&/^https:\/\//.test(f[2]||''))pdfs.set(f[1],f[2]);
+ return rows.map((r,index)=>{
+  if(r[0]!=='CF_FACTURA_EMITIDA_1'||!r[1])return null;
+  const doc=parseJSON(r[2],null);if(!doc||typeof doc!=='object')return null;
+  const invoiceNumber='CF-'+String(index+1).padStart(6,'0');
+  return {...doc,numeroFactura:invoiceNumber, facturaUrl:pdfs.get(invoiceNumber)||'',fila:index+1,emitida:true,tipo:'Facturación',estado:'EMITIDA',requestId:r[1],_tab:ISSUED_TAB};
+ }).filter(Boolean);
+}
+function verifyEmissionDoc(p){
+ const issuer=parseJSON(p.emisor),client=parseJSON(p.cliente),lines=parseJSON(p.lineas,[]);
+ for(const [name,obj] of [['Emisor',issuer],['Cliente',client]]){
+  const fields=name==='Emisor'?['name','taxId','address','postalCode','city','province']:['nombre','cif','direccion','cp','ciudad','provincia'];
+  if(fields.some(k=>!String(obj?.[k]||'').trim()))throw Error('Completa nombre, NIF/CIF, dirección, CP, ciudad y provincia del '+name.toLowerCase()+' antes de emitir.');
+ }
+ if(!Array.isArray(lines)||!lines.length||lines.some(x=>!x.concepto||!(num(x.cantidad)>0)||num(x.precio)<0))throw Error('La factura requiere conceptos, cantidades y precios correctos.');
+ if(!(num(p.total)>0))throw Error('La factura debe tener un importe positivo.');
+ return {issuer,client,lines};
+}
+
 async function action(p){
  const s=session(),a=String(p.accion||'');
  switch(a){
  case 'syncRecords':{
-  const result=await all(s,['Compras','Facturas','Facturación']);
+  const result=[...await all(s,['Compras','Facturas','Facturación']),...await issuedRecords(s)];
   const normalized=result.map(x=>({...x,fila:x._row,fecha:x.fecha||now(),tipo:x.tipo||((x._tab==='Compras')?'Compra':'Facturación')}));
   return {ok:true,compras:normalized.filter(x=>x.tipo==='Compra'),facturacion:normalized.filter(x=>x.tipo!=='Compra')};
  }
@@ -140,6 +164,56 @@ async function action(p){
   })();
   inflightDrafts.set(guard,operation);
   try{return await operation;}finally{inflightDrafts.delete(guard);}
+ }
+ case 'emitirFactura':{
+  const key=String(p.requestId||'');if(key.length<10)throw Error('Falta el identificador de emisión.');
+  const validation=verifyEmissionDoc(p);
+  const guard=s.id+':ISSUE:'+key;
+  if(inflightIssues.has(guard))return inflightIssues.get(guard);
+  const issue=(async()=>{
+   const existing=(await issuedRecords(s)).find(x=>x.requestId===key);
+   if(existing)return {ok:true,numeroFactura:existing.numeroFactura,fecha:existing.fecha,facturaEmitida:true,repetida:true};
+   // Solo una fila anexada en una pestaña DEDICADA por emisión. El número
+   // corresponde a la posición de la fila que confirma Google Sheets.
+   // No se sobrescriben las facturas previas y la serie CF es independiente
+   // de los libros antiguos. No equivale a certificación RRSIF/VeriFactu.
+   const doc={id:ident('ISS'),fecha:now(),tipo:'Facturación',estado:'EMITIDA',requestId:key,
+    tercero:p.tercero||validation.client.nombre,concepto:p.concepto||'',
+    base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),
+    cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||''};
+   const resp=await append(s,ISSUED_TAB,['CF_FACTURA_EMITIDA_1',key,JSON.stringify(doc)]);
+   const matched=String(resp.updates?.updatedRange||'').match(/![A-Z]+(\d+)(?::|$)/);
+   if(!matched){
+    const reread=(await issuedRecords(s)).find(x=>x.requestId===key);
+    if(!reread)throw Error('Google no devolvió la fila de la factura; comprueba el libro antes de reintentar para evitar duplicados.');
+    return {ok:true,numeroFactura:reread.numeroFactura,fecha:reread.fecha,facturaEmitida:true};
+   }
+   const row=Number(matched[1]);
+   if(!Number.isInteger(row)||row<1)throw Error('Fila de numeración no válida. Consulta el libro de Google.');
+   try{const draft=(await items(s,'Facturas')).find(x=>x.requestId===key&&x.estado==='BORRADOR');if(draft)await revision(s,'Facturas',draft._key,{},true);}catch(e){console.warn('La factura está emitida, pero el borrador anterior sigue visible',e);}
+   return {ok:true,numeroFactura:'CF-'+String(row).padStart(6,'0'),fecha:doc.fecha,facturaEmitida:true};
+  })();
+  inflightIssues.set(guard,issue);try{return await issue;}finally{inflightIssues.delete(guard);}
+ }
+ case 'listarFacturasEmitidas':return {ok:true,facturas:await issuedRecords(s)};
+ case 'registrarDocumentoFactura':{
+  const no=String(p.numeroFactura||'');const url=String(p.url||'');
+  if(!/^CF-\d{6,}$/.test(no)||!/^https:\/\/(drive\.google\.com|docs\.google\.com)\//.test(url))throw Error('Número o URL de PDF no válidos.');
+  const exists=(await issuedRecords(s)).some(x=>x.numeroFactura===no);
+  if(!exists)throw Error('No se encontró la factura emitida para guardar su PDF.');
+  await append(s,ISSUED_DOC_TAB,['CF_PDF_1',no,url]);return {ok:true};
+ }
+
+ case 'listarTiposInventario':{
+  const cfg=await config(s);const arr=parseJSON(cfg.cf_inventory_categories,[]);
+  return {ok:true,tipos:Array.isArray(arr)?arr:[]};
+ }
+ case 'guardarTipoInventario':{
+  const tipo=String(p.tipo||'').trim();if(!tipo||tipo.length>65)throw Error('El tipo de material debe tener entre 1 y 65 caracteres.');
+  const cfg=await config(s),list=parseJSON(cfg.cf_inventory_categories,[]);
+  const out=[...new Set([...(Array.isArray(list)?list:[]),tipo])];
+  await putConfig(s,{cf_inventory_categories:JSON.stringify(out)});
+  return {ok:true,tipos:out};
  }
  case 'editar':{
   const tabs=p.tab?[p.tab]:(p.tipo==='Compra'?['Compras']:['Facturas','Facturación']);
