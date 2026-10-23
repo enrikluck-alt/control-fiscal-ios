@@ -3,8 +3,17 @@
  */
 (function(root){'use strict';
  const account=()=>{const s=root.CFGoogleAccount?.active();if(!s?.id||!s.token)throw Error('Conecta tu cuenta de Google antes de continuar.');return s;};
- function same(s){const x=root.CFGoogleAccount?.active();if(!x||x.email!==s.email||x.id!==s.id||x.token!==s.token)throw Error('La cuenta cambió durante la operación: vuelve a iniciar sesión.');}
- async function request(s,url,method,body){same(s);const response=await root.fetch(url,{method,headers:{Authorization:'Bearer '+s.token,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const data=await response.json().catch(()=>({}));same(s);if(!response.ok)throw Error('Google HTTP '+response.status+': '+String(data.error?.message||'permisos insuficientes; revisa las API activadas y vuelve a iniciar sesión').slice(0,220));return data;}
+ function same(s){const x=root.CFGoogleAccount?.active();if(!x||x.email!==s.email||x.id!==s.id)throw Error('La cuenta cambió durante la operación: vuelve a iniciar sesión.');s.token=x.token;}
+ async function request(s,url,method,body){
+  same(s);
+  if(typeof root.CFGoogleAccount?.http==='function'){
+    const out=await root.CFGoogleAccount.http(url,method,body,s.token);same(s);return out;
+  }
+  // Fallback exclusivo para entornos que simulan la autorización sin el puente completo.
+  const response=await root.fetch(url,{method,headers:{Authorization:'Bearer '+s.token,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
+  const out=await response.json().catch(()=>({}));same(s);
+  if(!response.ok)throw Error('Google HTTP '+response.status+': '+String(out.error?.message||'permisos insuficientes').slice(0,220));return out;
+ }
  function calendarBody(ev){
   if(!/^\d{4}-\d\d-\d\d$/.test(String(ev.fecha||'')))throw Error('Fecha de evento incorrecta.');
   const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Madrid';
@@ -20,6 +29,8 @@
     const until=String(Math.floor(ends/60)).padStart(2,'0')+':'+String(ends%60).padStart(2,'0');
     body.start={dateTime:ev.fecha+'T'+from+':00',timeZone:tz};body.end={dateTime:date+'T'+until+':00',timeZone:tz};
   }else{const d=new Date(ev.fecha+'T12:00:00');d.setDate(d.getDate()+1);const next=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');body.start={date:ev.fecha};body.end={date:next};}
+  // Aviso antes del evento: dentro de Google Calendar, asociado al evento.
+  body.reminders={useDefault:false,overrides:[{method:'popup',minutes:1440},{method:'popup',minutes:60}]};
   return body;
  }
  async function deterministicCalendarId(s,id){
@@ -65,5 +76,17 @@
   const out=await request(s,'https://gmail.googleapis.com/gmail/v1/users/me/messages/send','POST',{raw:base64url(body)});
   if(!out.id)throw Error('Gmail no ha confirmado el envío.');return {id:out.id};
  }
- root.CFGoogleExtras=Object.freeze({calendarBody,upsertCalendar,deleteCalendar,sendInvoice});
+ async function sendSupport({recipient,kind,message,appVersion}){
+  const s=account();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(recipient||'')))throw Error('El destinatario del soporte no está configurado.');
+  if(!['Sugerencia','Error','Consulta'].includes(kind))throw Error('Tipo de mensaje incorrecto.');
+  if(String(message||'').trim().length<12||String(message).length>3000)throw Error('Escribe un mensaje de 12 a 3000 caracteres.');
+  const raw=['MIME-Version: 1.0','To: '+recipient,'From: '+s.email,
+    'Subject: =?UTF-8?B?'+utf8base64('Control Fiscal · '+kind)+'?=',
+    'Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: base64','',
+    utf8base64('Mensaje de soporte enviado voluntariamente desde Control Fiscal.\nVersión: '+String(appVersion||'')+'\nTipo: '+kind+'\n\n'+message+'\n')].join('\r\n');
+  const out=await request(s,'https://gmail.googleapis.com/gmail/v1/users/me/messages/send','POST',{raw:base64url(raw)});
+  if(!out.id)throw Error('El correo no ha confirmado la recepción.');return {id:out.id};
+ }
+ root.CFGoogleExtras=Object.freeze({calendarBody,upsertCalendar,deleteCalendar,sendInvoice,sendSupport});
 })(window);

@@ -5,6 +5,9 @@ window.ControlFiscalSocialLogin = SocialLogin;
 
 window.CFHaptics = Haptics;
 
+import { LocalNotifications } from '@capacitor/local-notifications';
+window.CFLocalNotifications = LocalNotifications;
+
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { BiometricAuth } from '@aparajita/capacitor-biometric-auth';

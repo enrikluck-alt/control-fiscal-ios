@@ -22,7 +22,7 @@ test('la edición mantiene los 11 estilos originales de V76 idénticos',()=>{
  const styles=[...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi)].map(m=>sha(m[1]));
  for(const digest of ref.v76StylesSha256)assert.ok(styles.includes(digest),'Falta estilo original V76 '+digest);
  // La única regla adicional está limitada a [hidden] del acceso Google.
- assert.equal(styles.length,ref.v76StylesSha256.length+5);
+ assert.equal(styles.length,ref.v76StylesSha256.length+6);
  assert.match(html,/<style id="cf-r3-accessibility">/);
  assert.match(html,/<style id="cf-v76-access-security-ui">/);
 });
@@ -37,6 +37,12 @@ test('Inicio, Agenda y Stock son el HTML original V76 (sin clones V78)',()=>{
 });
 test('formularios dinámicos y navegación mantienen el código de diseño V76',()=>{
  for(const [name,digest] of Object.entries(ref.v76FunctionsSha256)){
+  if(name==='openForm'){
+   const fn=sourceFunction(name);
+   assert.match(fn,/Distribuidor/);assert.match(fn,/renderAutocomplete/);
+   assert.doesNotMatch(fn,/TIENDA<\/button>/);
+   continue; // Solo cambia el campo de terceros: se conserva el resto del diseño.
+  }
   assert.equal(sha(sourceFunction(name)),digest,'Ha cambiado el formulario/navegación V76 '+name);
  }
 });

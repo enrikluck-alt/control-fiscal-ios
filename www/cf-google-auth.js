@@ -22,8 +22,19 @@ async function http(url,method='GET',data,tokenOverride){
  // nativos previos de URLSession. Google APIs admiten CORS con OAuth Bearer.
  const headers={Authorization:'Bearer '+token,Accept:'application/json'};
  if(data!==undefined)headers['Content-Type']='application/json';
- let response;try{response=await root.fetch(url,{method,headers,...(data===undefined?{}:{body:JSON.stringify(data)})});}
+ let response;
+ const makeRequest=async()=>root.fetch(url,{method,headers,...(data===undefined?{}:{body:JSON.stringify(data)})});
+ try{response=await makeRequest();}
  catch(e){throw Error('Error de conexión HTTPS con Google (verifica Internet y permisos): '+err(e).slice(0,160));}
+ // Google devuelve 401 al caducar un access token (normalmente 1 hora).
+ // Reintentar solo una vez y solo si la petición pertenece a la sesión actual.
+ if(response.status===401 && !refreshPending && session?.token===token && session?.email){
+   try{
+     const fresh=await refreshAuthorization(token);
+     headers.Authorization='Bearer '+fresh;
+     response=await makeRequest();
+   }catch(refreshError){throw Error('La autorización de Google necesita renovarse. Ve a Cuenta y vuelve a conectar; los datos no se han borrado. '+err(refreshError).slice(0,130));}
+ }
  const body=normalize(await response.text());
  if(!response.ok){
   const desc=String(body.error?.message||body.message||body.raw||'sin detalle').slice(0,260);
@@ -53,6 +64,32 @@ async function verify(token){
  if(!info.email_verified||!info.email)throw Error('Google no ha verificado el correo de la cuenta.');
  return String(info.email).toLowerCase();
 }
+let refreshPending=null;
+async function refreshAuthorization(expiredToken){
+ if(session?.token && session.token!==expiredToken)return session.token;
+ if(refreshPending)return refreshPending;
+ const activeAtStart=session;
+ if(!activeAtStart?.email||!activeAtStart.id)throw Error('No hay una sesión de Google que renovar.');
+ refreshPending=(async()=>{
+   await init();const plugin=root.ControlFiscalSocialLogin;
+   let candidate=null;
+   if(typeof plugin.refresh==='function'){
+     try{candidate=await plugin.refresh({provider:'google',options:{}});}catch(error){console.info('Renovación nativa no disponible',err(error));}
+   }
+   if(!getToken(candidate)&&typeof plugin.getAuthorizationCode==='function'){
+     try{candidate=await plugin.getAuthorizationCode({provider:'google'});}catch(error){console.info('Autorización nativa no disponible',err(error));}
+   }
+   const newToken=getToken(candidate);
+   if(!newToken)throw Error('Google requiere iniciar sesión de nuevo.');
+   // No aceptamos cambiar de cuenta accidentalmente durante una renovación.
+   const email=await verify(newToken);
+   if(session!==activeAtStart||email!==activeAtStart.email)throw Error('La sesión cambió mientras se renovaba Google.');
+   activeAtStart.token=newToken;
+   return newToken;
+ })();
+ try{return await refreshPending;}finally{refreshPending=null;}
+}
+
 async function metadata(token,id){
  // Verificar Sheets Y propiedad del archivo antes de permitir acceso.
  const sheet=await http('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(id)+'?fields=spreadsheetId','GET',undefined,token);
@@ -87,7 +124,11 @@ async function useBook(token,email,id,fromInteractiveLogin=false){
  await prepare(token,id);
  if(guard!==epoch)throw Error('Se ha cancelado la conexión porque la sesión cambió.');
  const previous=root.localStorage.getItem('cf_last_account_email_v76')||'';
- if(previous!==email&&typeof root.clearUserLocalCaches==='function')root.clearUserLocalCaches();
+ if(previous!==email){
+  // Cancelar avisos del usuario anterior al cambiar de cuenta, no al abrir la app.
+  try{if(typeof root.cfCancelEventRemindersOnLogout==='function')await root.cfCancelEventRemindersOnLogout();}catch(e){console.warn('Avisos antiguos',err(e));}
+  if(typeof root.clearUserLocalCaches==='function')root.clearUserLocalCaches();
+ }
  // Never share the previous user's local cached records.
  root.localStorage.setItem('cf_last_account_email_v76',email);
  root.localStorage.setItem(PERSIST,element('accountKeepSession')?.checked?'1':'0');
@@ -131,7 +172,7 @@ async function connect(automatic=false){
     try{cached=await plugin.getAuthorizationCode({provider:'google'});}catch(e){console.info('Autorización local no recuperable; comprobando Google',err(e));}
    }
    if(!getToken(cached)&&typeof plugin.refresh==='function'){
-    try{const result=await plugin.refresh({provider:'google'});cached=getToken(result)?result:cached;}catch(e){console.info('Renovación local no disponible',err(e));}
+    try{const result=await plugin.refresh({provider:'google',options:{}});cached=getToken(result)?result:cached;}catch(e){console.info('Renovación local no disponible',err(e));}
     if(!getToken(cached)&&typeof plugin.getAuthorizationCode==='function'){
       try{cached=await plugin.getAuthorizationCode({provider:'google'});}catch(e){console.info('Token no disponible tras renovar',err(e));}
     }
@@ -199,6 +240,7 @@ async function createBook(){
 async function logout(){
  try{if(root.CFHaptics?.impact)await root.CFHaptics.impact({style:'LIGHT'});else navigator.vibrate?.(40);}catch(e){try{navigator.vibrate?.(40);}catch{}}
  if(!root.confirm('¿Quieres cerrar la sesión de Google y volver a la pantalla de acceso?'))return;
+ try{if(typeof root.cfCancelEventRemindersOnLogout==='function')await root.cfCancelEventRemindersOnLogout();}catch(e){console.warn('Avisos de agenda',err(e));}
  clear();
  const plugin=root.ControlFiscalSocialLogin;
  let warning='';
@@ -212,6 +254,7 @@ async function logout(){
  element('accountCreateBtn')?.setAttribute('hidden','');
  element('accountGate')?.classList.remove('hidden');
  if(element('accountExistingBook'))element('accountExistingBook').value='';
+ try{await root.cfSuccessFeedback?.();}catch(e){}
  status(warning||'Sesión cerrada. Inicia sesión con otra cuenta de Google.',!warning);
 }
 function setAccessMode(mode){
@@ -249,5 +292,5 @@ async function start(){
    if(!session&&!connecting)await connect(true);
  }
 }
-root.CFGoogleAccount=Object.freeze({start,connect,setAccessMode,createGoogleAccount,openExisting,createBook,logout,active,http,bookId,clear,discover,prepare});
+root.CFGoogleAccount=Object.freeze({start,connect,setAccessMode,createGoogleAccount,openExisting,createBook,logout,active,http,refreshAuthorization,bookId,clear,discover,prepare});
 })(window);

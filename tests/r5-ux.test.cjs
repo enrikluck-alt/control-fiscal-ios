@@ -11,7 +11,7 @@ test('R5: evita zoom por foco con campos de 16 px y conserva accesibilidad',()=>
  assert.doesNotMatch(html,/maximum-scale=1|user-scalable=no/);
 });
 test('R5: numeración explicada y guía ampliada con ejemplos visuales',()=>{
- for(const x of ['Cómo construir un número de factura','3:1','Año actual','cfGuideMock','Guía completa','COMPARACIÓN ILUSTRATIVA','UI76-20261022-R6'])assert.ok(html.includes(x),x);
+ for(const x of ['Cómo construir un número de factura','3:1','Año actual','cfGuideMock','Guía completa','COMPARACIÓN ILUSTRATIVA','UI76-20261023-R8'])assert.ok(html.includes(x),x);
  assert.match(html,/id="guideModal"/);
 });
 test('R5: abre portal gubernamental HTTPS y no ignora errores TLS',()=>{
@@ -30,7 +30,7 @@ test('R5: comparador seguro y orden local de ofertas verificadas',()=>{
  assert.match(html,/if\(url&&!\/\^https:/);
 });
 test('R5: IPA de GitHub y marcador comparten versión',()=>{
- for(const t of ['UI76-20261022-R6','ControlFiscal-V76-Google-Diseno-Cuenta-R6-IPA','build/ControlFiscal_V76_Google_Diseno_Cuenta_R6.ipa'])assert.ok(w.includes(t),t);
+ for(const t of ['UI76-20261023-R8','ControlFiscal-V76-Google-R8-Integridad-Guia-IPA','build/ControlFiscal_V76_Google_R8_Integridad_Guia.ipa'])assert.ok(w.includes(t),t);
 });
 
 test('R5: restauración con token nativo evita abrir selector Google y abre Inicio con bloqueo',async()=>{

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261022-R6">
+<html lang="es" data-cf-ui-build="UI76-20261023-R8">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1186,6 +1186,50 @@ input,select,textarea,.input,.select,.textarea,#cfInvoiceSegmentList input,#cfIn
 #settingsPage .cfLogoutDanger:active{background:#991b1b!important;transform:scale(.99)}
 body.lightTheme #settingsPage .cfDesignPanel{background:#fff}
 @media(max-width:420px){#settingsPage .cfDesignToggle{padding:11px!important}#settingsPage .cfDesignPanel{padding:2px 9px}}
+
+</style>
+<style id="cf-r7-directory-styles">
+.cfDirectoryLaunches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.cfDirectoryLaunches button{min-width:0}
+.cfDirectoryList{display:grid;gap:9px;margin:12px 0;max-height:45dvh;overflow-y:auto}
+.cfDirectoryRow{display:flex;align-items:center;gap:12px;justify-content:space-between;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.cfDirectoryRow .cfDirectoryName{font-weight:700;min-width:0;overflow-wrap:anywhere;flex:1}
+.cfDirectoryRow button{width:auto;flex:0 0 auto;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--white);padding:10px 15px;font-weight:800}
+.cfDirectorySearch{width:100%;max-width:none}
+.cfDirectoryEditor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.cfDirectoryEditor .full{grid-column:1/-1}
+.cfDirectoryEditor .field{min-width:0}
+.cfDirectoryActions{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0}
+.cfDirectoryActions button{flex:1 1 140px}
+.cfAutocompleteMenu{max-height:220px;overflow-y:auto;position:absolute;top:100%;left:0;right:0;z-index:35;background:var(--card);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 25px #0004;display:grid}
+.cfAutocompleteMenu:empty{display:none}
+.cfAutocompleteMenu button{font:inherit;color:var(--white);background:transparent;text-align:left;white-space:normal;padding:12px;border:0;border-bottom:1px solid var(--line)}
+.cfAutocompleteMenu button:focus,.cfAutocompleteMenu button:active{background:var(--line)}
+.cfClientSearchWrap{position:relative;min-width:0}
+body.lightTheme .cfDirectoryRow button{background:#fff;color:#17212e}
+@media(max-width:460px){.cfDirectoryLaunches{grid-template-columns:1fr}.cfDirectoryEditor{grid-template-columns:1fr}.cfDirectoryEditor .full{grid-column:auto}}
+
+/* R8: controles añadidos sin alterar los estilos originales de V76. */
+.cfInventoryTypeButtons{display:flex;gap:9px;overflow-x:auto;padding:8px 2px 14px;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.cfInventoryTypeButtons button{white-space:nowrap;flex:0 0 auto;border:1px solid #526371;color:var(--text,#eaeaea);background:#1e2832;border-radius:14px;padding:12px 13px;font-weight:800;font-size:15px}
+.cfInventoryTypeButtons button.active{background:var(--yellow);border-color:var(--yellow);color:#151515}
+body.lightTheme .cfInventoryTypeButtons button:not(.active){color:#18212a;background:#f2f4f6;border-color:#c5d2d8}
+.cfTutorialOverlay{position:fixed;inset:0;z-index:25000;background:rgba(0,0,0,.68);display:flex;align-items:flex-end;justify-content:center;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+.cfTutorialOverlay.hidden{display:none}
+.cfTutorialCard{width:min(100%,600px);position:relative;z-index:25002;background:#172334;border:1px solid #6181a3;border-radius:18px;padding:20px;color:#fff;box-shadow:0 16px 45px #0009}
+.cfTutorialCard h3{font-size:23px;margin:8px 0}.cfTutorialCard p{font-size:16px;line-height:1.55;color:#d7e2ec;margin:8px 0 18px}
+.cfTutorialProgress{font-size:12px;font-weight:900;color:#ffdf18;letter-spacing:.08em}
+.cfTutorialActions{display:flex;gap:10px}.cfTutorialActions button{font-size:16px;padding:13px 18px;border-radius:12px;background:#31455b;color:#fff;border:1px solid #617b93;flex:1;font-weight:800}
+.cfTutorialActions button:last-child{background:#ffdf18;color:#15191e;border-color:#ffdf18}
+.cfTourHighlight{position:relative!important;z-index:25001!important;outline:3px solid #ffdf18!important;outline-offset:5px!important;box-shadow:0 0 0 7px rgba(255,223,24,.25)!important}
+body.lightTheme .cfTutorialCard{background:#172334;color:#fff}
+
+.cfInventoryPhotoChoices{display:flex;gap:10px;overflow:auto;margin:10px 0}
+.cfPhotoChoice{min-width:135px;max-width:170px;display:flex;flex-direction:column;gap:5px;flex:0 0 135px;color:inherit;background:transparent;border:1px solid #6a7d92;border-radius:12px;padding:7px}
+.cfPhotoChoice img{width:100%;height:92px;object-fit:contain;background:#e9edf0;border-radius:7px}
+.cfPhotoChoice span{font-size:12px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cfInventoryPhotoPreview{max-height:150px;max-width:100%;object-fit:contain;margin:12px auto;border-radius:10px}
+.cfInventoryThumb{width:75px;height:65px;object-fit:contain;background:#f0f1f3;border-radius:8px;float:left;margin:0 10px 5px 0}
 </style>
 </head>
 
@@ -1605,17 +1649,13 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
       
       </div>
-      <div class="settingsGroup">
-        <div class="settingsTitle">🏪 TIENDAS / PROVEEDORES</div>
-        <div class="settingsHint">
-          Las tiendas y proveedores se guardan por separado. En una compra puedes escribir unas letras, por ejemplo <strong>Ma</strong>, y seleccionar directamente la coincidencia.
+      <div class="settingsGroup" id="cfDirectorySettingsGroup">
+        <div class="settingsTitle">👥 CLIENTES Y DISTRIBUIDORES</div>
+        <div class="settingsHint">Gestiona tus contactos por separado. Selecciona Editar para cambiar sus datos. Las listas se sincronizan con el libro de tu cuenta Google.</div>
+        <div class="cfDirectoryLaunches">
+          <button class="guideBtn" type="button" onclick="openContactDirectory('clientes')">👤 MIS CLIENTES</button>
+          <button class="guideBtn" type="button" onclick="openContactDirectory('distribuidores')">🏢 MIS DISTRIBUIDORES</button>
         </div>
-        <div class="supplierTabs">
-          <button id="supplierTabStores" class="supplierTab active" type="button" onclick="showSupplierCategory('tiendas')">🏪 TIENDAS</button>
-          <button id="supplierTabProviders" class="supplierTab" type="button" onclick="showSupplierCategory('proveedores')">👤 PROVEEDORES</button>
-        </div>
-        <div id="supplierPanel" class="supplierPanel"></div>
-        <button class="resetSettings" type="button" onclick="clearSupplierCategory()">BORRAR LISTA MOSTRADA</button>
       </div>
 
       <div class="settingsGroup">
@@ -1636,6 +1676,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <div class="settingsGroup">
         <div class="settingsTitle">ℹ️ INFORMACIÓN Y HERRAMIENTAS</div>
         <div class="guideGrid">
+          <button class="guideBtn" type="button" onclick="startCFTutorial()"><span class="guideIcon">✨</span><span>INICIAR TUTORIAL INTERACTIVO</span></button>
           <button class="guideBtn" type="button" onclick="openGuide()">
             <span class="guideIcon">📖</span>
             <span>GUÍA DE FUNCIONAMIENTO</span>
@@ -1648,6 +1689,11 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         </div>
       </div>
 
+      <div class="settingsGroup" id="cfSupportGroup">
+        <div class="settingsTitle">💬 SUGERENCIAS Y ERRORES</div>
+        <p class="settingsHint">Puedes escribir al equipo de Control Fiscal. Solo se enviará el texto que redactes y la dirección desde la que lo mandes. Nunca se adjuntan automáticamente compras, facturas ni tu libro de Drive.</p>
+        <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
+      </div>
       <div class="settingsGroup" id="accountSettingsGroup">
         <div class="settingsTitle">👤 CUENTA</div>
         <div class="settingsHint">Cuenta conectada a Control Fiscal y hoja de datos asociada.</div>
@@ -1656,7 +1702,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261022-R6</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R8</div>
 
     </div>
   </div>
@@ -1695,6 +1741,28 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     <div id="all" class="records"></div>
   </div>
 </section>
+
+
+<div id="cfDirectoryModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfDirectoryTitle" onclick="if(event.target===this)closeContactDirectory()">
+ <div class="modalCard" style="max-width:650px;max-height:92dvh;overflow:auto">
+  <button type="button" class="modalClose" aria-label="Cerrar" onclick="closeContactDirectory()">×</button>
+  <div class="modalTitle" id="cfDirectoryTitle">CLIENTES</div>
+  <div id="cfDirectoryListView">
+   <p class="settingsHint">Busca un contacto y pulsa Editar a su derecha.</p>
+   <input class="input cfDirectorySearch" id="cfDirectorySearch" placeholder="Buscar por nombre..." oninput="renderContactDirectory()" autocomplete="off">
+   <div id="cfDirectoryList" class="cfDirectoryList" aria-live="polite"></div>
+   <button type="button" class="guideBtn" onclick="editContactDirectory(-1)">＋ AÑADIR NUEVO</button>
+  </div>
+  <div id="cfDirectoryEditView" class="hidden">
+    <div id="cfDirectoryEditor" class="cfDirectoryEditor"></div>
+    <div class="cfDirectoryActions">
+      <button class="save" type="button" id="cfDirectorySaveBtn" onclick="saveContactDirectory()">GUARDAR CAMBIOS</button>
+      <button class="resetSettings" type="button" onclick="cancelContactDirectoryEdit()">VOLVER A LA LISTA</button>
+    </div>
+  </div>
+  <div id="cfDirectoryMessage" class="msg" role="status"></div>
+ </div>
+</div>
 
 <div id="recordModal" class="modal hidden" aria-hidden="true">
   <div class="modalCard">
@@ -1774,9 +1842,11 @@ let cfInitialDataLoaded=false;
 function cfSessionToken(){return window.CFGoogleAccount?.active()?.token||"";}
 function cfAccountEmail(){return window.CFGoogleAccount?.active()?.email||"";}
 function clearUserLocalCaches(){
+  try{cfClearPrivateInventoryPhotos();}catch(e){}
   lastSavedInvoiceForShare=null;
   if(typeof cfPriceOffers!=='undefined')cfPriceOffers=[];
   invoiceFormDraft=null;
+  cfDistributorDetails={};
   window.cfInvoiceNumberConfig=null;window.cfInvoiceBrandUrl='';
   ["cf_records","cf_clients","cf_inventory","cf_agenda","cf_pending_income","cf_stores","cf_providers","cf_store_list","cf_provider_list","cf_invoice_settings","cf_pending_records","cf_inventory_categories"].forEach(k=>localStorage.removeItem(k));
   records=[];
@@ -1834,6 +1904,18 @@ function cfTapFeedback(){
  }catch(e){console.warn('Respuesta háptica no disponible:',e);}
  try{navigator.vibrate?.(45);}catch(_){ /* iOS no soporta vibración web genérica */ }
 }
+async function cfSuccessFeedback(){
+  // Dos pulsos perceptibles solamente después de recibir confirmación.
+  // iOS puede ignorar la duración solicitada: usar impacto nativo.
+  try{
+    const h=window.CFHaptics;
+    if(h?.notification){await h.notification({type:'SUCCESS'});return;}
+    if(h?.impact){await h.impact({style:'MEDIUM'});await new Promise(r=>setTimeout(r,115));await h.impact({style:'MEDIUM'});return;}
+    if(h?.vibrate){await h.vibrate({duration:200});return;}
+  }catch(e){console.warn('Vibración de confirmación no disponible',e);}
+  try{navigator.vibrate?.([90,60,140]);}catch(_){}
+}
+
 const CF_HAPTIC_ACTIONS=new Set([
  'saveCurrentClient','saveSimpleClient','saveInvoice','emitInvoice','sendRecord',
  'saveAgendaEvent','saveInvoiceSettings','saveInventoryItem','saveEditedRecord',
@@ -2109,7 +2191,7 @@ async function saveInvoiceNumberOptions(){
  const msg=$('cfInvoiceNumberMessage');let schema;
  try{schema=cfNumberingReadForm();}catch(e){msg.textContent=e.message;return;}
  if(!confirm('¿Guardar esta plantilla de numeración? Las facturas anteriores conservan sus números. Evita modificar la serie de un ejercicio en curso.'))return;
- msg.textContent='Guardando en tu Google Sheets…';
+ msg.textContent='Guardando opciones…';
  try{await callAction({accion:'guardarConfiguracion',configuracion:JSON.stringify({cf_invoice_numbering_v1:JSON.stringify(schema)})});
   window.cfInvoiceNumberConfig=schema;msg.textContent='Opciones de numeración guardadas. No se modificaron facturas anteriores.';
  }catch(e){msg.textContent='No guardado: '+(e.message||e);}
@@ -2126,7 +2208,7 @@ async function saveInvoiceLogo(input){
   const url=await window.CFGoogleUploads.upload('Imagen_factura_'+Date.now()+'.'+(file.type==='image/png'?'png':'jpg'),file.type,base64,s);
   await callAction({accion:'guardarConfiguracion',configuracion:JSON.stringify({cf_invoice_logo_url:url})});
   window.cfInvoiceBrandUrl=url;try{localStorage.setItem('cf_invoice_brand_image_v1_'+s.id,String(data));}catch(quotaError){console.warn('Imagen disponible desde Drive; sin caché local por falta de espacio',quotaError);}
-  $('cfInvoiceLogoPreview').src=String(data);status.textContent='Imagen de factura guardada en Google Drive y disponible para este usuario.';
+  $('cfInvoiceLogoPreview').src=String(data);status.textContent='Imagen de factura guardada.';
  }catch(e){status.textContent='No se ha guardado: '+(e.message||e);}
 }
 function openInvoiceSettings(){
@@ -2175,7 +2257,7 @@ function cfAddPriceOffer(){
  const msg=$('cfPriceMessage');
  if(!shop||!Number.isFinite(amount)||amount<=0){msg.textContent='Introduce una tienda y un precio positivo.';return;}
  if(url&&!/^https:\/\/[^/]+/i.test(url)){msg.textContent='El enlace debe usar HTTPS.';return;}
- cfPriceOffers.push({shop:shop.slice(0,120),amount,url});msg.textContent='Oferta añadida al comparador local. No se guarda en Google Sheets.';cfRenderPriceOffers();
+ cfPriceOffers.push({shop:shop.slice(0,120),amount,url});msg.textContent='Oferta añadida al comparador local. No se sincroniza con tu libro personal.';cfRenderPriceOffers();
 }
 function cfRenderPriceOffers(){
  const host=$('cfPriceResults');if(!host)return;host.replaceChildren();
@@ -2190,18 +2272,22 @@ function cfRenderPriceOffers(){
 
 const STORE_KEY="cf_stores";
 const PROVIDER_KEY="cf_providers";
-let supplierCategoryView="tiendas";
-let formThirdPartyCategory="tiendas";
+let supplierCategoryView="distribuidores";
+let formThirdPartyCategory="distribuidores";
 let supplierSyncInProgress=false;
 
 function getListKey(category){
   return category==="proveedores" ? PROVIDER_KEY : STORE_KEY;
 }
 
-function getSuppliers(category="tiendas"){
+function getSuppliers(category="distribuidores"){
   try{
-    const arr=JSON.parse(localStorage.getItem(getListKey(category))||"[]");
-    return Array.isArray(arr) ? arr.filter(Boolean) : [];
+    const get=k=>{const a=JSON.parse(localStorage.getItem(k)||"[]");return Array.isArray(a)?a.filter(Boolean):[];};
+    // Antes las compras dividían tiendas y proveedores. Ahora son distribuidores,
+    // pero no se pierde ningún nombre histórico de Google Sheets.
+    const arr=category==="distribuidores"?[...get(STORE_KEY),...get(PROVIDER_KEY)]:get(getListKey(category));
+    return [...new Map(arr.map(n=>[String(n).trim().toLocaleLowerCase('es'),String(n).trim()])).values()]
+      .filter(Boolean).sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
   }catch(e){ return []; }
 }
 
@@ -2221,11 +2307,12 @@ async function loadSuppliersFromGoogle(showError=false){
     const proveedores=Array.isArray(data.proveedores)?data.proveedores:[];
     setCachedSuppliers(tiendas,"tiendas");
     setCachedSuppliers(proveedores,"proveedores");
-    renderSupplierPanel();
+    cfDistributorDetails=data.detalles&&typeof data.detalles==='object'?data.detalles:{};
+    renderContactDirectory();
     renderAutocomplete();
   }catch(e){
     console.error("No se pudieron cargar las listas desde Google Sheets:",e);
-    if(showError) showToastMessage("Sin conexión","No se pudieron cargar las tiendas y proveedores desde Google Sheets.");
+    if(showError) showToastMessage("Sin conexión","No se pudo cargar la lista de distribuidores.");
   }finally{
     supplierSyncInProgress=false;
   }
@@ -2234,14 +2321,9 @@ async function loadSuppliersFromGoogle(showError=false){
 async function addSupplier(name,category=formThirdPartyCategory){
   const value=String(name||"").trim();
   if(!value) return;
-  const categoria=category==="proveedores" ? "proveedores" : "tiendas";
-  const list=getSuppliers(categoria);
-  if(list.some(x=>x.localeCompare(value,"es",{sensitivity:"base"})===0)) return;
-
-  // Actualizamos la caché inmediatamente y guardamos también en Google Sheets.
-  setCachedSuppliers([...list,value],categoria);
-  renderSupplierPanel();
-
+  const categoria="proveedores";
+  const list=getSuppliers('distribuidores');
+  if(list.some(x=>x.localeCompare(value,"es",{sensitivity:"base"})===0))return true;
   try{
     await callAction({
       accion:"guardarTercero",
@@ -2249,33 +2331,26 @@ async function addSupplier(name,category=formThirdPartyCategory){
       nombre:value
     });
     await loadSuppliersFromGoogle(false);
+    return true;
   }catch(e){
-    console.error("No se pudo guardar la lista en Google Sheets:",e);
-    showToastMessage("Aviso","El registro se guardó, pero no se pudo actualizar la lista en Google Sheets.");
+    console.error("No se pudo guardar el distribuidor en Google Sheets:",e);
+    showToastMessage("Error","No se pudo guardar el distribuidor.");
+    return false;
   }
 }
 
-function showSupplierCategory(category){
-  supplierCategoryView=category==="proveedores" ? "proveedores" : "tiendas";
-  renderSupplierPanel();
+function showSupplierCategory(){
+  openContactDirectory('distribuidores');
 }
 
 function renderSupplierPanel(){
-  const box=$("supplierPanel");
-  if(!box) return;
-  $("supplierTabStores")?.classList.toggle("active",supplierCategoryView==="tiendas");
-  $("supplierTabProviders")?.classList.toggle("active",supplierCategoryView==="proveedores");
-  const list=getSuppliers(supplierCategoryView);
-  if(!list.length){
-    box.innerHTML='<div class="supplierEmpty">Todavía no hay '+(supplierCategoryView==="tiendas"?"tiendas":"proveedores")+' guardados.</div>';
-    return;
-  }
-  box.innerHTML='<div class="supplierList">'+list.map((x,i)=>`<div class="supplierRow"><span>${esc(x)}</span><button class="supplierDelete" type="button" onclick="deleteSupplier(${i},'${supplierCategoryView}')" aria-label="Eliminar">×</button></div>`).join("")+'</div>';
+ // La gestión ha pasado a la pantalla separada Mis distribuidores.
+ renderContactDirectory();
 }
 
 async function deleteSupplier(index,category=supplierCategoryView){
-  const categoria=category==="proveedores" ? "proveedores" : "tiendas";
-  const list=getSuppliers(categoria);
+  const categoria="proveedores";
+  const list=getSuppliers('distribuidores');
   const value=list[index];
   if(!value) return;
   if(!confirm("¿Eliminar "+value+" de la lista?")) return;
@@ -2292,7 +2367,7 @@ async function deleteSupplier(index,category=supplierCategoryView){
     await loadSuppliersFromGoogle(false);
   }catch(e){
     console.error("No se pudo eliminar de Google Sheets:",e);
-    showToastMessage("Aviso","No se pudo eliminar de Google Sheets.");
+    showToastMessage("Aviso","No se pudo eliminar el registro.");
     await loadSuppliersFromGoogle(false);
   }
 }
@@ -2315,7 +2390,7 @@ async function clearSupplierCategory(){
     await loadSuppliersFromGoogle(false);
   }catch(e){
     console.error(e);
-    showToastMessage("Aviso","No se pudo completar el borrado en Google Sheets.");
+    showToastMessage("Aviso","No se pudo completar el borrado.");
     await loadSuppliersFromGoogle(false);
   }
 }
@@ -2339,9 +2414,9 @@ function renderAutocomplete(){
   if(!input || !menu) return;
   const query=input.value.trim().toLocaleLowerCase("es");
   if(!query){ hideAutocomplete(); return; }
-  const source=getSuppliers(formThirdPartyCategory);
-  const starts=source.filter(x=>x.toLocaleLowerCase("es").startsWith(query));
-  const contains=source.filter(x=>!x.toLocaleLowerCase("es").startsWith(query) && x.toLocaleLowerCase("es").includes(query));
+  const source=$('formHeader')?.dataset.tipo==='Compra'?getSuppliers('distribuidores'):savedClients.map(c=>c.nombre).filter(Boolean);
+  const starts=source.filter(x=>cfNormalName(x).startsWith(cfNormalName(query)));
+  const contains=source.filter(x=>!cfNormalName(x).startsWith(cfNormalName(query)) && cfNormalName(x).includes(cfNormalName(query)));
   const matches=[...starts,...contains].slice(0,10);
   menu.innerHTML=matches.map(x=>`<button type="button" class="autocompleteItem" data-value="${esc(x)}">${esc(x)}</button>`).join("");
   menu.querySelectorAll(".autocompleteItem").forEach(btn=>{
@@ -2393,7 +2468,7 @@ async function loadInvoiceSettings(showError=false){
       window.cfInvoiceBrandUrl=data.configuracion.cf_invoice_logo_url||'';
     }
   }catch(e){
-    if(showError) showToastMessage("Aviso","No se pudieron cargar los datos de facturación de Google Sheets.");
+    if(showError) showToastMessage("Aviso","No se pudieron cargar los datos de facturación.");
   }
 }
 
@@ -2539,7 +2614,7 @@ async function savePendingIncome(){
     }
     await loadPendingIncome(false);
     msg.className="msg ok";msg.textContent="Ingreso independiente registrado ✓";
-    showToastMessage("Ingreso independiente registrado","Se ha guardado en Google Sheets y queda separado de la facturación con IVA.");
+    showToastMessage("Ingreso independiente registrado","Se ha registrado como ingreso independiente.");
     setTimeout(()=>openFacturacionPage(),700);
   }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el ingreso.";}
   finally{btn.disabled=false;}
@@ -2564,12 +2639,108 @@ async function loadClients(showError=false){
     const data=await callAction({accion:"listarClientes"});
     savedClients=Array.isArray(data.clientes)?data.clientes:[];
     localStorage.setItem("cf_clients",JSON.stringify(savedClients));
-    refreshInvoiceClientSelect();
+    refreshInvoiceClientSelect();renderInvoiceClientSuggestions();
   }catch(e){
     try{ savedClients=JSON.parse(localStorage.getItem("cf_clients")||"[]"); }catch(_){ savedClients=[]; }
     refreshInvoiceClientSelect();
     if(showError) showToastMessage("Sin conexión","No se pudieron cargar los clientes guardados.");
   }finally{ clientSyncInProgress=false; }
+}
+
+
+// R7: gestión de clientes y distribuidores en una pantalla propia.
+let cfDirectoryKind='clientes';
+let cfDirectoryOriginal=null;
+let cfDistributorDetails={};
+const cfClientFields=[['nombre','Nombre / Empresa'],['cif','NIF / CIF'],['direccion','Dirección'],['cp','Código postal'],['ciudad','Ciudad'],['provincia','Provincia'],['telefono','Teléfono'],['email','Correo electrónico']];
+const cfDistributorFields=[['nombre','Nombre del distribuidor'],['cif','NIF / CIF (opcional)'],['direccion','Dirección (opcional)'],['telefono','Teléfono (opcional)'],['email','Correo (opcional)']];
+function cfNormalName(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').trim();}
+async function openContactDirectory(kind){
+  cfDirectoryKind=kind==='distribuidores'?'distribuidores':'clientes';
+  cfDirectoryOriginal=null;
+  $('cfDirectoryTitle').textContent=cfDirectoryKind==='clientes'?'MIS CLIENTES':'MIS DISTRIBUIDORES';
+  $('cfDirectorySearch').value='';
+  $('cfDirectoryMessage').textContent='';
+  $('cfDirectoryModal').classList.remove('hidden');
+  cancelContactDirectoryEdit();
+  try{if(cfDirectoryKind==='clientes')await loadClients(false);else await loadSuppliersFromGoogle(false);}
+  catch(e){console.warn('Error cargando contactos',e);}
+  renderContactDirectory();
+}
+function closeContactDirectory(){$('cfDirectoryModal')?.classList.add('hidden');}
+function cfContactItems(){return cfDirectoryKind==='clientes'?savedClients:getSuppliers('distribuidores').map(nombre=>({nombre,...(cfDistributorDetails[nombre]||{})}));}
+function renderContactDirectory(){
+  const host=$('cfDirectoryList');if(!host || $('cfDirectoryModal')?.classList.contains('hidden'))return;
+  host.replaceChildren();
+  const query=cfNormalName($('cfDirectorySearch')?.value);
+  const items=cfContactItems().map((item,i)=>({item,i})).filter(({item})=>!query||cfNormalName(item.nombre).includes(query)||cfNormalName(item.cif).includes(query));
+  if(!items.length){const empty=document.createElement('div');empty.className='settingsHint';empty.textContent='No hay coincidencias. Puedes añadir un contacto nuevo.';host.append(empty);return;}
+  for(const {item,i} of items){
+    const row=document.createElement('div');row.className='cfDirectoryRow';
+    const label=document.createElement('div');label.className='cfDirectoryName';label.textContent=item.nombre||'(Sin nombre)';
+    const sub=document.createElement('small');sub.style.display='block';sub.style.color='var(--muted)';sub.textContent=item.cif||'';label.append(sub);
+    const btn=document.createElement('button');btn.type='button';btn.textContent='Editar';btn.setAttribute('aria-label','Editar '+item.nombre);
+    btn.onclick=()=>editContactDirectory(i);
+    row.append(label,btn);host.append(row);
+  }
+}
+function editContactDirectory(index){
+  const items=cfContactItems();const existing=items[index]||{};
+  cfDirectoryOriginal=index>=0?{...existing}:null;
+  const fields=cfDirectoryKind==='clientes'?cfClientFields:cfDistributorFields;
+  const host=$('cfDirectoryEditor');host.replaceChildren();
+  for(const [key,title] of fields){
+    const wrapper=document.createElement('div');wrapper.className='field'+(key==='nombre'||key==='direccion'?' full':'');
+    const lab=document.createElement('label');lab.textContent=title;lab.htmlFor='cfDirectoryField_'+key;
+    const input=document.createElement('input');input.className='input';input.id='cfDirectoryField_'+key;input.dataset.key=key;
+    input.value=String(existing[key]||'');input.autocomplete='off';
+    wrapper.append(lab,input);host.append(wrapper);
+  }
+  $('cfDirectoryListView').classList.add('hidden');$('cfDirectoryEditView').classList.remove('hidden');
+  $('cfDirectoryMessage').textContent='';
+  $('cfDirectoryField_nombre')?.focus({preventScroll:true});
+}
+function cancelContactDirectoryEdit(){
+  $('cfDirectoryEditView')?.classList.add('hidden');$('cfDirectoryListView')?.classList.remove('hidden');
+  cfDirectoryOriginal=null;renderContactDirectory();
+}
+async function saveContactDirectory(){
+  const fields=Object.fromEntries([...document.querySelectorAll('#cfDirectoryEditor [data-key]')].map(el=>[el.dataset.key,el.value.trim()]));
+  const msg=$('cfDirectoryMessage'),btn=$('cfDirectorySaveBtn');
+  if(!fields.nombre){msg.className='msg err';msg.textContent='Escribe un nombre.';return;}
+  if(cfDirectoryKind==='clientes'&&!fields.cif){msg.className='msg err';msg.textContent='El cliente necesita NIF/CIF.';return;}
+  if(btn)btn.disabled=true;
+  try{
+    if(cfDirectoryKind==='clientes'){
+      const data=await callAction({accion:cfDirectoryOriginal?'editarCliente':'guardarCliente',originalKey:cfDirectoryOriginal?._key||'',originalCif:cfDirectoryOriginal?.cif||'',cliente:JSON.stringify(fields)});
+      savedClients=Array.isArray(data.clientes)?data.clientes:savedClients;
+      localStorage.setItem('cf_clients',JSON.stringify(savedClients));refreshInvoiceClientSelect();
+    }else{
+      const result=await callAction({accion:cfDirectoryOriginal?'editarTercero':'guardarTercero',categoria:'Distribuidor',nombre:fields.nombre,original:cfDirectoryOriginal?.nombre||'',detalles:fields});
+      await loadSuppliersFromGoogle(false);
+      if(result.detalles&&typeof result.detalles==='object')cfDistributorDetails=result.detalles;
+    }
+    cfTapFeedback();msg.className='msg ok';msg.textContent='Cambios guardados.';
+    cancelContactDirectoryEdit();
+  }catch(e){msg.className='msg err';msg.textContent=e.message||'No se han podido guardar los cambios.';}
+  finally{if(btn)btn.disabled=false;}
+}
+function renderInvoiceClientSuggestions(){
+  const input=$('cfInvoiceClientSearch'),host=$('cfInvoiceClientSuggestions');if(!input||!host)return;
+  const value=cfNormalName(input.value);host.replaceChildren();if(!value)return;
+  const ranked=savedClients.map((client,i)=>({client,i})).filter(x=>cfNormalName(x.client.nombre).includes(value)||cfNormalName(x.client.cif).includes(value))
+    .sort((a,b)=>Number(cfNormalName(b.client.nombre).startsWith(value))-Number(cfNormalName(a.client.nombre).startsWith(value))).slice(0,12);
+  for(const {client,i} of ranked){
+    const button=document.createElement('button');button.type='button';button.textContent=client.nombre+(client.cif?' · '+client.cif:'');
+    button.addEventListener('pointerdown',e=>e.preventDefault());
+    button.onclick=()=>{if($('invSavedClient'))$('invSavedClient').value=String(i);loadSavedClient(i);input.value=client.nombre;host.replaceChildren();captureInvoiceDraft();};
+    host.append(button);
+  }
+}
+async function savePurchaseDistributor(){
+  const name=$('tercero')?.value.trim();if(!name){showToastMessage('Faltan datos','Indica el nombre del distribuidor.');return;}
+  if(getSuppliers('distribuidores').some(x=>cfNormalName(x)===cfNormalName(name))){showToastMessage('Distribuidor existente','Ya está guardado en la lista.');return;}
+  if(await addSupplier(name,'proveedores')){cfTapFeedback();showToastMessage('Distribuidor guardado','El nombre está disponible para próximas compras.');}
 }
 
 function refreshInvoiceClientSelect(){
@@ -2582,10 +2753,14 @@ function refreshInvoiceClientSelect(){
 }
 
 function loadSavedClient(index){
+  if(index===''||index===null||index===undefined)return;
   const c=savedClients[Number(index)];
   if(!c) return;
   const map={invClientName:c.nombre,invClientTaxId:c.cif,invClientAddress:c.direccion,invClientPostalCode:c.cp,invClientCity:c.ciudad,invClientProvince:c.provincia,invClientPhone:c.telefono,invClientEmail:c.email};
   Object.entries(map).forEach(([id,v])=>{if($(id))$(id).value=v||"";});
+  if($('cfInvoiceClientSearch'))$('cfInvoiceClientSearch').value=c.nombre||'';
+  $('cfInvoiceClientSuggestions')?.replaceChildren();
+  captureInvoiceDraft();
 }
 
 async function saveCurrentClient(){
@@ -2643,7 +2818,7 @@ async function saveSimpleClient(){
 let invoiceFormDraft=null;
 function captureInvoiceDraft(){
  if($('formHeader')?.dataset.tipo!=='FacturaCompleta'||!$('invoiceLines'))return;
- const ids=['invSavedClient','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invoiceEmailCopy'];
+ const ids=['invSavedClient','cfInvoiceClientSearch','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invoiceEmailCopy'];
  const values={};for(const id of ids){const el=$(id);if(el)values[id]=el.type==='checkbox'?el.checked:el.value;}
  invoiceFormDraft={values,lines:Array.from(document.querySelectorAll('#invoiceLines .invoiceLine')).map(row=>({description:row.querySelector('.invoiceDesc')?.value||'',qty:row.querySelector('.invoiceQty')?.value||'1',price:row.querySelector('.invoicePrice')?.value||'0'})),requestId:invoiceRequestId};
 }
@@ -2684,7 +2859,13 @@ function openInvoiceForm(){
       <div class="invoiceSection">
         <h3>👤 DATOS DEL CLIENTE</h3>
         <div class="two" style="margin-bottom:10px">
-          <div class="field"><label>Cliente guardado</label><select id="invSavedClient" class="select" onchange="loadSavedClient(this.value)"><option value="">Seleccionar cliente guardado...</option></select></div>
+          <div class="field"><label>Buscar cliente guardado</label>
+              <div class="cfClientSearchWrap">
+                <input id="cfInvoiceClientSearch" class="input" placeholder="Escribe parte del nombre: cast..." autocomplete="off" oninput="renderInvoiceClientSuggestions()" onfocus="renderInvoiceClientSuggestions()">
+                <div id="cfInvoiceClientSuggestions" class="cfAutocompleteMenu"></div>
+              </div>
+              <select id="invSavedClient" class="select" onchange="loadSavedClient(this.value)" style="margin-top:7px"><option value="">O elegir de la lista completa...</option></select>
+            </div>
           <div class="field" style="display:flex;align-items:end"><button class="invoiceAdd" type="button" onclick="saveCurrentClient()">💾 GUARDAR CLIENTE</button></div>
         </div>
         <div class="invoiceGrid">
@@ -2824,12 +3005,12 @@ async function saveInvoice(){
     observaciones:$("invoiceNotes")?.value.trim()||"",
     emisor:JSON.stringify(invoiceConfig)
   };
-  btn.disabled=true; msg.className="msg"; msg.textContent="Guardando borrador de factura en Google Sheets...";
+  btn.disabled=true; msg.className="msg"; msg.textContent="Guardando borrador de factura…";
   try{
     const result=await callAction(payload);
     await syncFromSheets();
     msg.className="msg ok";
-    msg.textContent=`Borrador ${result.numeroFactura||""} guardado en Google Sheets ✓. No es una factura emitida y no dispone de numeración fiscal.`;
+    msg.textContent=`Borrador ${result.numeroFactura||""} guardado ✓. No es una factura emitida y no dispone de numeración fiscal.`;
     lastSavedInvoiceForShare={
       payload:{...payload},numero:result.numeroFactura||'BORRADOR',
       email:cfAccountEmail(),book:window.CFGoogleAccount.active()?.id||''
@@ -2840,9 +3021,14 @@ async function saveInvoice(){
       await window.CFGoogleUploads.upload(pdf.filename,'application/pdf',pdf.base64,window.CFGoogleAccount.active());
       msg.textContent+=' PDF generado y guardado en tu Google Drive.';
     }catch(pdfErr){msg.textContent+=' No se pudo guardar el PDF: '+(pdfErr.message||pdfErr)+'. Puedes usar Compartir PDF.';}
-    // Conservamos requestId para convertir este borrador en factura sin duplicar.
-    captureInvoiceDraft();
-    setTimeout(()=>showInvoiceToast(result.numeroFactura||"Borrador"),250);
+    // Confirmado por Sheets: formulario nuevo, sin arriesgar un duplicado accidental.
+    invoiceFormDraft=null;invoiceRequestId=null;
+    await cfSuccessFeedback();
+    if($('formHeader'))$('formHeader').dataset.tipo='';
+    openInvoiceForm();
+    const n=$('invoiceMsg');if(n){n.className='msg ok';n.textContent='Borrador guardado. Puedes crear otro.';}
+    if($('invoiceShareBtn'))$('invoiceShareBtn').hidden=false;
+    showInvoiceToast(result.numeroFactura||'Borrador');
   }catch(e){
     console.error(e); msg.className="msg err"; msg.textContent=e.message||"No se pudo guardar la factura.";
   }finally{btn.disabled=false;}
@@ -2864,7 +3050,7 @@ async function emitInvoice(){
  if(send&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email||'')){msg.className='msg err';msg.textContent='Para enviar una copia marca un correo del cliente válido.';return;}
  if(!confirm('¿Emitir la factura ahora? Se asignará un número definitivo en la serie CF y no podrá editarse ni eliminarse desde la aplicación. Comprueba importes, cliente y emisor.'))return;
  if(send&&!confirm('Se enviará una copia del PDF desde tu Gmail a '+client.email+'. ¿Confirmas el destinatario?'))return;
- btn.disabled=true;msg.className='msg';msg.textContent='Registrando emisión en tu Google Sheets…';
+ btn.disabled=true;msg.className='msg';msg.textContent='Registrando emisión…';
  let issued;
  try{issued=await callAction(payload);}catch(e){msg.className='msg err';msg.textContent='No se ha confirmado la emisión: '+(e.message||e)+'. Antes de reintentar, consulta el libro para evitar duplicados.';btn.disabled=false;return;}
  lastSavedInvoiceForShare={numero:issued.numeroFactura,fecha:issued.fecha,emitida:true,payload,email:cfAccountEmail(),book:window.CFGoogleAccount.active()?.id||'',mailSent:false};
@@ -2880,10 +3066,19 @@ async function emitInvoice(){
    try{await window.CFGoogleExtras.sendInvoice({recipient:client.email,number:issued.numeroFactura,pdfBase64:documentPdf.base64,issuer:invoiceConfig.name});lastSavedInvoiceForShare.mailSent=true;msg.textContent+=' Copia enviada correctamente a '+client.email+'.';}
    catch(e){msg.className='msg err';msg.textContent+=' NO se ha enviado el correo: '+e.message+'. Puedes reintentarlo con el botón de envío.';}
   }
- }catch(e){msg.className='msg err';msg.textContent+=' La factura existe en Sheets, pero no se ha generado el PDF: '+e.message+'. Consulta el registro antes de volver a emitir.';}
+ }catch(e){msg.className='msg err';msg.textContent+=' La factura está registrada, pero no se ha generado el PDF: '+e.message+'. Consulta el registro antes de volver a emitir.';}
  invoiceFormDraft=null;invoiceRequestId=null;
+ await cfSuccessFeedback();
  btn.disabled=true;if($('invoiceNewBtn'))$('invoiceNewBtn').hidden=false;
  try{await syncFromSheets();}catch(e){console.warn('Emisión guardada; lista sin actualizar',e);}
+ // Crear un formulario limpio después del éxito; conservar solo la referencia
+ // al PDF emitido para permitir compartirlo sin crear otra factura.
+ const issuedLabel=String(issued.numeroFactura||'');
+ if($('formHeader'))$('formHeader').dataset.tipo='';
+ openInvoiceForm();
+ const notification=$('invoiceMsg');if(notification){notification.className='msg ok';notification.textContent='Factura '+issuedLabel+' emitida correctamente. Formulario listo para una nueva factura.';}
+ if($('invoiceShareBtn'))$('invoiceShareBtn').hidden=false;
+ if($('invoiceResendBtn'))$('invoiceResendBtn').hidden=!client.email;
 }
 function resetInvoiceForm(){
  invoiceFormDraft=null;invoiceRequestId=null;lastSavedInvoiceForShare=null;
@@ -2949,21 +3144,17 @@ function openForm(tipo){
   $("formBody").innerHTML=`
     <div class="form">
       <div class="field">
-        <label>${c?"Tienda / Proveedor":"Cliente"}</label>
-        ${c?`<div class="supplierTabs">
-          <button id="thirdPartyStoreBtn" class="supplierTab active" type="button" onclick="setFormThirdPartyCategory('tiendas')">🏪 TIENDA</button>
-          <button id="thirdPartyProviderBtn" class="supplierTab" type="button" onclick="setFormThirdPartyCategory('proveedores')">👤 PROVEEDOR</button>
-        </div>`:""}
+        <label>${c?"Distribuidor":"Cliente"}</label>
         <div class="autocompleteWrap" style="margin-top:${c?"8px":"0"}">
           <input id="tercero" class="input" placeholder="${c?"Ej. MadridHifi":"Ej. Ayuntamiento, empresa, particular"}" autocomplete="off">
-          ${c?'<div id="thirdPartyAutocomplete" class="autocompleteMenu"></div>':""}
+          <div id="thirdPartyAutocomplete" class="autocompleteMenu"></div>
         </div>
-        <button class="invoiceAdd" type="button" style="margin-top:8px" onclick="openSimpleClientModal()">💾 GUARDAR DATOS DEL CLIENTE</button>
+        ${c?'<button class="invoiceAdd" type="button" style="margin-top:8px" onclick="savePurchaseDistributor()">💾 GUARDAR DISTRIBUIDOR</button>':'<button class="invoiceAdd" type="button" style="margin-top:8px" onclick="openSimpleClientModal()">💾 GUARDAR CLIENTE</button>'}
       </div>
 
       <div class="field">
         <label>Concepto</label>
-        <input id="concepto" class="input" placeholder="${c?"Ej. Cable DMX, estructura, etc.":"Ej. Sonido e iluminación, pantalla LED, etc."}">
+        <input id="concepto" class="input" placeholder="${c?"Ej. Material de oficina, suministro, servicio...":"Ej. Sonido e iluminación, pantalla LED, etc."}">
       </div>
 
       <div class="two">
@@ -3001,14 +3192,16 @@ function openForm(tipo){
       <div id="msg" class="msg"></div>
     </div>`;
 
-  if(c){
-    formThirdPartyCategory="tiendas";
-    const input=$("tercero");
-    input.addEventListener("input",renderAutocomplete);
-    input.addEventListener("focus",()=>{ renderAutocomplete(); loadSuppliersFromGoogle(false).finally(renderAutocomplete); });
-    input.addEventListener("blur",()=>setTimeout(hideAutocomplete,180));
-    loadSuppliersFromGoogle(false);
-  }
+  if(c)formThirdPartyCategory="distribuidores";
+  const input=$("tercero");
+  input.addEventListener("input",renderAutocomplete);
+  input.addEventListener("focus",()=>{
+    renderAutocomplete();
+    const load=c?loadSuppliersFromGoogle(false):loadClients(false);
+    Promise.resolve(load).finally(renderAutocomplete);
+  });
+  input.addEventListener("blur",()=>setTimeout(hideAutocomplete,180));
+  if(c)loadSuppliersFromGoogle(false);else loadClients(false);
 }
 
 function calcRecord(tipo,importe,iva){
@@ -3044,6 +3237,7 @@ function readFileAsBase64(file){
   });
 }
 
+let cfRecordRequestId=null;
 async function sendRecord(tipo){
   const tercero=$("tercero").value.trim();
   const concepto=$("concepto").value.trim();
@@ -3077,6 +3271,7 @@ async function sendRecord(tipo){
   const c=calcRecord(tipo,t,i);
   const payload={
     sessionToken:cfSessionToken(),
+    requestId:(cfRecordRequestId||=(window.crypto?.randomUUID?.()||('REQ-'+Date.now()+'-'+Math.random()))),
     tipo,
     tercero,
     concepto,
@@ -3088,7 +3283,7 @@ async function sendRecord(tipo){
 
   b.disabled=true;
   m.className="msg";
-  m.textContent=file ? "Subiendo factura y guardando..." : "Guardando en Google Sheets...";
+  m.textContent=file ? "Guardando justificante y registro…" : "Guardando registro…";
 
   try{
     if(file){
@@ -3100,8 +3295,9 @@ async function sendRecord(tipo){
     const result=await callAction({...payload,accion:"guardarRegistro"});
     if(result&&result.ok===false)throw new Error(result.error||"No se pudo guardar el registro.");
 
-    await new Promise(resolve=>setTimeout(resolve,350));
-    const data=await syncFromSheets();
+    // La confirmación de la API es la fuente de verdad. Un retraso de lectura
+    // nunca debe convertir un alta correcta en error ni provocar dos altas.
+    const data=await syncFromSheets().catch(e=>{console.warn('Registro guardado; la lista se actualizará después',e);return null;});
     // Solicitar permiso SOLO una vez por cuenta después de guardar una compra sin justificante.
     if(tipo==='Compra'&&!file){
       const k='cf_purchase_notification_asked_'+encodeURIComponent(cfAccountEmail());
@@ -3111,27 +3307,17 @@ async function sendRecord(tipo){
       }
     }
 
-    const encontrado=(data.compras||[]).concat(data.facturacion||[]).some(r=>
-      r.tipo===tipo &&
-      String(r.tercero||"")===tercero &&
-      String(r.concepto||"")===concepto &&
-      Math.abs(Number(r.total||0)-Number(payload.total||0))<0.01
-    );
-
-    if(!encontrado){
-      throw new Error("El registro no aparece todavía en Google Sheets.");
-    }
-
-    // Guardar el proveedor SOLO cuando Google Sheets ha confirmado la compra.
-    if(tipo==="Compra"){
-      await addSupplier(tercero,formThirdPartyCategory);
-    }
-
-    m.className="msg ok";
-    m.textContent=file
-      ? (tipo==="Compra" ? "Compra y factura guardadas correctamente ✓" : "Factura y archivo guardados correctamente ✓")
-      : "Guardado correctamente ✓";
-    setTimeout(()=>showToast(tipo),250);
+    // Guardar el distribuidor no debe anular una compra ya registrada.
+    if(tipo==='Compra')addSupplier(tercero,formThirdPartyCategory).catch(e=>console.warn('Distribuidor pendiente de guardar',e));
+    // Limpiar solo después de la confirmación real del servidor.
+    ['tercero','concepto','total'].forEach(id=>{const el=$(id);if(el)el.value='';});
+    if(fileInput)fileInput.value='';
+    if($('iva'))$('iva').value='21';
+    cfRecordRequestId=null;
+    recalc();
+    await cfSuccessFeedback();
+    m.className='msg ok';m.textContent=(tipo==='Compra'?'Compra':'Registro')+' guardado correctamente.';
+    showToast(tipo);
   }catch(e){
     m.className="msg err";
     m.textContent=e?.message || (tipo==="Compra"?"No se ha podido guardar la compra.":"No se ha podido guardar la factura.");
@@ -3142,6 +3328,7 @@ async function sendRecord(tipo){
 }
 
 function showToast(tipo){
+  document.querySelectorAll('#toast').forEach(node=>node.remove());
   const p=tipo==="Compra";
   const d=document.createElement("div");
   d.id="toast";
@@ -3149,7 +3336,7 @@ function showToast(tipo){
   d.innerHTML=`
     <div class="check">✓</div>
     <h3>¡${p?"Compra":"Factura"} registrada!</h3>
-    <p>El registro se ha guardado en Google Sheets.</p>
+    <p>Ya puedes crear otro registro.</p>
     <button onclick="document.getElementById('toast').remove()">Aceptar</button>`;
   document.body.appendChild(d);
 }
@@ -3218,7 +3405,9 @@ function openRecord(fila,tipo){
 function openRecordData(r){
   editingRecord=r;
   const tipo=r.tipo;
-  $("modalTitle").textContent=tipo==="Compra"?"Editar compra":"Editar factura";
+  $("modalTitle").textContent=tipo==="Compra"?"Editar compra":(r.emitida?'Consultar factura emitida':'Editar factura');
+  const actions=$('recordModal').querySelectorAll('.modalActions button');
+  actions.forEach(b=>{b.hidden=!!r.emitida;b.disabled=!!r.emitida;});
   $("modalThirdLabel").textContent=tipo==="Compra"?"Tienda / Proveedor":"Cliente";
   $("modalAmountLabel").textContent=tipo==="Compra"?"Importe total (IVA incluido)":"Base imponible (sin IVA)";
   $("modalIvaLabel").textContent=tipo==="Compra"?"IVA soportado":"IVA repercutido";
@@ -3230,7 +3419,7 @@ function openRecordData(r){
     ?Number(r.total||0).toFixed(2)
     :Number(r.base||0).toFixed(2);
   $("modalMsg").className="msg";
-  $("modalMsg").textContent="";
+  $("modalMsg").textContent=r.emitida?'Esta factura está emitida y no se puede borrar ni modificar desde este menú. Para corregirla se requiere el procedimiento fiscal correspondiente.':'';
   $("recordModal").classList.remove("hidden");
   $("recordModal").setAttribute("aria-hidden","false");
   calcModal();
@@ -3258,6 +3447,7 @@ function callAction(payload){
 
 async function saveEditedRecord(){
   if(!editingRecord)return;
+  if(editingRecord.emitida)throw Error('Las facturas emitidas no se editan desde este formulario.');
 
   const tercero=$("modalTercero").value.trim();
   const concepto=$("modalConcepto").value.trim();
@@ -3272,7 +3462,7 @@ async function saveEditedRecord(){
   }
 
   const compra=editingRecord.tipo==="Compra";
-  const payload={accion:"editar",tipo:editingRecord.tipo,tab:editingRecord._tab,fila:Number(editingRecord.fila),tercero,concepto,ivaPorcentaje:ivaPct};
+  const payload={accion:'editar',tipo:editingRecord.tipo,tab:editingRecord._tab,key:editingRecord._key,fila:Number(editingRecord.fila),tercero,concepto,ivaPorcentaje:ivaPct};
   if(compra) payload.total=+amount.toFixed(2);
   else payload.base=+amount.toFixed(2);
 
@@ -3286,7 +3476,8 @@ async function saveEditedRecord(){
     await callAction(payload);
     await syncFromSheets().catch(e=>console.warn("Actualización visual tras editar:",e));
     closeRecordModal();
-    showToastMessage("Registro actualizado","Los cambios se han guardado en Google Sheets.");
+    await cfSuccessFeedback();
+    showToastMessage("Registro actualizado","Los cambios se han guardado.");
   }catch(e){
     console.error(e);
     m.className="msg err";
@@ -3296,7 +3487,8 @@ async function saveEditedRecord(){
 
 async function deleteCurrentRecord(){
   if(!editingRecord)return;
-  if(!confirm("¿Seguro que quieres eliminar este registro? Esta acción también lo eliminará de Google Sheets.")) return;
+  if(editingRecord.emitida){showToastMessage('Factura emitida','No se puede borrar una factura emitida desde este menú. Consulta la opción de rectificación.');return;}
+  if(!confirm("¿Eliminar este registro? No aparecerá en tu historial.")) return;
 
   const m=$("modalMsg");
   m.className="msg";
@@ -3305,13 +3497,17 @@ async function deleteCurrentRecord(){
   try{
     const fila=Number(editingRecord.fila);
     const tipo=editingRecord.tipo;
-    await callAction({accion:"eliminar",tipo,fila,tab:editingRecord._tab});
-    await syncFromSheets();
-    if(records.some(r=>Number(r.fila)===fila && r.tipo===tipo && r._tab===editingRecord._tab)){
-      throw new Error("No se pudo confirmar la eliminación.");
-    }
+    const removed=editingRecord;
+    await callAction({accion:'eliminar',tipo,fila,tab:removed._tab,key:removed._key});
+    // No volver a usar números de fila para identificar un borrado: son inestables.
+    records=records.filter(x=>removed._key?!(x._key===removed._key&&x._tab===removed._tab):!(x.fila===fila&&x.tipo===tipo&&x._tab===removed._tab));
+    localStorage.setItem('cf_records',JSON.stringify(records.slice(0,200)));
+    renderLatest();renderAll();
     closeRecordModal();
-    showToastMessage("Registro eliminado","El registro se ha eliminado de Google Sheets.");
+    await cfSuccessFeedback();
+    showToastMessage('Registro eliminado','El registro ya no aparece en el historial.');
+    // Si falla la consulta posterior, el éxito del borrado confirmado no se revierte.
+    syncFromSheets().catch(e=>console.warn('Actualización de lista pendiente',e));
   }catch(e){
     console.error(e);
     m.className="msg err";
@@ -3402,7 +3598,7 @@ function renderAgendaUpcoming(){
   }).join(""): '<div style="padding:20px;text-align:center;color:#66717b">No hay próximos eventos.</div>';
 }
 async function loadAgenda(showError=false){
-  try{const data=await callAction({accion:"listarAgenda"});agendaEvents=Array.isArray(data.eventos)?data.eventos:[];localStorage.setItem("cf_agenda",JSON.stringify(agendaEvents));renderAgenda();}
+  try{const data=await callAction({accion:"listarAgenda"});agendaEvents=Array.isArray(data.eventos)?data.eventos:[];localStorage.setItem("cf_agenda",JSON.stringify(agendaEvents));renderAgenda();cfScheduleEventReminders().catch(e=>console.warn('Agenda: no se han programado todos los avisos',e));}
   catch(e){try{agendaEvents=JSON.parse(localStorage.getItem("cf_agenda")||"[]")}catch(_){agendaEvents=[]}renderAgenda();if(showError)showToastMessage("Sin conexión","No se pudo cargar la agenda.");}
 }
 function openAgendaEventModal(id=null,dateStr=null){
@@ -3441,14 +3637,14 @@ async function saveAgendaEvent(){
   try{
     await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
     agendaEditingId=obj.id; // Si Calendar falla, reintentar mantiene el mismo ID en Sheets.
-    msg.className='msg';msg.textContent='Guardado en Google Sheets. Sincronizando Google Calendar…';
+    msg.className='msg';msg.textContent='Evento guardado. Sincronizando calendario…';
     try{
       const result=await window.CFGoogleExtras.upsertCalendar(obj);
       obj.googleCalendarId=result.id;
       await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
-      msg.className='msg ok';msg.textContent='Evento guardado en Sheets y Google Calendar ✓';
+      msg.className='msg ok';msg.textContent='Evento guardado y sincronizado con Google Calendar ✓';
       await loadAgenda(false);setTimeout(closeAgendaEventModal,650);
-    }catch(calendarError){await loadAgenda(false);msg.className='msg err';msg.textContent='Evento guardado en Sheets, pero NO en Google Calendar: '+calendarError.message+'. Comprueba los permisos y vuelve a pulsar Guardar.';}
+    }catch(calendarError){await loadAgenda(false);msg.className='msg err';msg.textContent='Evento guardado, pero NO sincronizado con Google Calendar: '+calendarError.message+'. Comprueba los permisos y vuelve a pulsar Guardar.';}
   }catch(e){msg.className='msg err';msg.textContent=e.message||'No se pudo guardar el evento.';}
 }
 async function deleteAgendaEvent(){
@@ -3458,16 +3654,49 @@ async function deleteAgendaEvent(){
   try{
     const ev=agendaEvents.find(x=>String(x.id)===String(agendaEditingId));
     if(ev?.googleCalendarId)await window.CFGoogleExtras.deleteCalendar(ev);
-    await callAction({accion:'eliminarEvento',id:agendaEditingId});await loadAgenda(false);closeAgendaEventModal();
-  }catch(e){msg.className='msg err';msg.textContent='No se pudo eliminar de Calendar o Sheets: '+(e.message||e);}
+    await callAction({accion:'eliminarEvento',id:agendaEditingId});await loadAgenda(false);closeAgendaEventModal();await cfSuccessFeedback();showToastMessage('Evento eliminado','El evento ya no aparece en tu agenda.');
+  }catch(e){msg.className='msg err';msg.textContent='No se pudo eliminar el evento: '+(e.message||e);}
 }
 
+// Avisos nativos de agenda: título, fecha y ubicación. No se envían datos fiscales.
+async function cfCancelEventRemindersOnLogout(){
+ const email=cfAccountEmail()||localStorage.getItem('cf_last_account_email_v76');
+ if(!email)return;
+ const key='cf_agenda_notification_ids_'+email;let ids=[];
+ try{ids=JSON.parse(localStorage.getItem(key)||'[]')}catch(_){}
+ const plugin=await nativeLocalNotifications();
+ if(plugin&&ids.length)await plugin.cancel({notifications:ids.map(id=>({id}))}).catch(()=>{});
+ localStorage.removeItem(key);
+}
+async function cfScheduleEventReminders(){
+ const plugin=await nativeLocalNotifications();const s=window.CFGoogleAccount?.active();
+ if(!plugin||!s?.email)return;
+ const perms=await plugin.checkPermissions();if(perms.display!=='granted')return;
+ const storageKey='cf_agenda_notification_ids_'+s.email;
+ let old=[];try{old=JSON.parse(localStorage.getItem(storageKey)||'[]')}catch(_){old=[]}
+ if(old.length)await plugin.cancel({notifications:old.map(id=>({id}))}).catch(()=>{});
+ const now=Date.now(),future=now+90*86400000;const notifications=[];let serial=0;
+ for(const event of agendaEvents){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(event.fecha||''))continue;
+  const hasTime=/^\d\d:\d\d$/.test(event.horaInicio||'');
+  const start=new Date(event.fecha+'T'+(hasTime?event.horaInicio+':00':'09:00:00'));
+  const alertAt=new Date(start.getTime()-(hasTime?60*60000:0));
+  if(alertAt.getTime()<=now||alertAt.getTime()>future)continue;
+  const id=700000+serial++;const loc=String(event.ubicacion||'').trim();
+  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:(hasTime?'Empieza en 1 hora. ':'Hoy tienes un evento. ')+(loc?'Ubicación: '+loc.slice(0,110):'Revisa tu agenda.'),schedule:{at:alertAt},extra:{kind:'agenda',eventId:String(event.id||'')}});
+  if(notifications.length>=40)break;
+ }
+ if(notifications.length)await plugin.schedule({notifications});
+ localStorage.setItem(storageKey,JSON.stringify(notifications.map(x=>x.id)));
+}
 /* =========================================================
    INVENTARIO
    ========================================================= */
 let inventoryItems=[];
 let inventoryEditingId=null;
-const INVENTORY_DEFAULT_CATEGORIES=["Audio","Iluminación","Pantallas LED","Estructuras","Cableado","Otros"];
+const INVENTORY_DEFAULT_CATEGORIES=["General","Herramientas","Consumibles","Oficina","Mobiliario","Otros"];
+const CF_TYPE_ICON_RULES=[[/(altavoz|speaker|audio|sonido|subwoofer|line array|monitor)/i,"🔊"],[/(luz|ilumin|foco|cabeza|beam|led|laser)/i,"💡"],[/(pantalla|video|televisor|display)/i,"🖥️"],[/(estructura|truss|escenario|soporte)/i,"🏗️"],[/(cable|conector|adaptador)/i,"🔌"],[/(camara|foto)/i,"📷"],[/(ordenador|portatil|tablet)/i,"💻"],[/(microfono)/i,"🎤"],[/(herramienta|taladro)/i,"🧰"]];
+function cfCategoryIcon(name){return (CF_TYPE_ICON_RULES.find(([r])=>r.test(String(name||"")))||[null,"📦"])[1];}
 function getInventoryCategories(){
   let cached=[];try{cached=JSON.parse(localStorage.getItem("cf_inventory_categories")||"[]")}catch(_){cached=[]}
   const fromItems=inventoryItems.map(i=>String(i.categoria||"").trim()).filter(Boolean);
@@ -3478,6 +3707,10 @@ function buildInventoryCategoryControls(selected){
   const cats=getInventoryCategories();saveInventoryCategories(cats);
   const filter=$("inventoryCategoryFilter");
   if(filter){const prev=selected!==undefined?selected:(filter.value||"all");filter.innerHTML='<option value="all">Todos los tipos</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");filter.value=cats.includes(prev)?prev:"all";}
+  const host=$('inventoryList');
+  let buttons=$('cfInventoryTypeButtons');
+  if(host&&!buttons){buttons=document.createElement('div');buttons.id='cfInventoryTypeButtons';buttons.className='cfInventoryTypeButtons';host.parentNode.insertBefore(buttons,host);}
+  if(buttons){const active=filter?.value||'all';buttons.innerHTML=`<button type="button" class="${active==='all'?'active':''}" data-cf-inv-cat="all">📋 Todos</button>`+cats.map(c=>`<button type="button" class="${active===c?'active':''}" data-cf-inv-cat="${esc(c)}">${cfCategoryIcon(c)} ${esc(c)}</button>`).join('');}
   const sel=$("invItemCategory");
   if(sel){const prev=selected!==undefined?selected:(sel.value||"Otros");sel.innerHTML=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("")+`<option value="__new__">＋ Crear nuevo tipo</option>`;sel.value=cats.includes(prev)?prev:"Otros";}
 }
@@ -3493,7 +3726,7 @@ async function inventoryCategoryChanged(){
  if(!clean){sel.value='Otros';return;}
  const previous=sel.disabled;sel.disabled=true;
  try{await callAction({accion:'guardarTipoInventario',tipo:clean});saveInventoryCategories([...getInventoryCategories(),clean]);buildInventoryCategoryControls(clean);sel.value=clean;cfTapFeedback();showToastMessage('Tipo guardado',clean);}
- catch(e){sel.value='Otros';showToastMessage('No se guardó el tipo de material',e.message||'Error de Google Sheets');}
+ catch(e){sel.value='Otros';showToastMessage('No se guardó el tipo de material',e.message||'Error al guardar los datos');}
  finally{sel.disabled=previous;}
 }
 function openInventory(){only("inventoryPage");nav("inventory");buildInventoryCategoryControls();renderInventory();loadInventory(false);}
@@ -3501,6 +3734,15 @@ async function loadInventory(showError=false){
   try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));buildInventoryCategoryControls();renderInventory();await loadInventoryCategoriesFromGoogle();}
   catch(e){try{inventoryItems=JSON.parse(localStorage.getItem("cf_inventory")||"[]")}catch(_){inventoryItems=[]}buildInventoryCategoryControls();renderInventory();if(showError)showToastMessage("Sin conexión","No se pudo cargar el inventario.");}
 }
+function cfUpdateInventoryButtons(){
+ const cat=$('inventoryCategoryFilter')?.value||'all';
+ document.querySelectorAll('[data-cf-inv-cat]').forEach(b=>b.classList.toggle('active',b.dataset.cfInvCat===cat));
+}
+document.addEventListener('click',e=>{
+ const btn=e.target.closest?.('[data-cf-inv-cat]');if(!btn)return;
+ const filter=$('inventoryCategoryFilter');if(!filter)return;
+ filter.value=btn.dataset.cfInvCat;cfUpdateInventoryButtons();renderInventory();
+});
 function renderInventory(){
   const wrap=$("inventoryList");if(!wrap)return;
   const q=($("inventorySearch")?.value||"").trim().toLowerCase();const cat=$("inventoryCategoryFilter")?.value||"all";
@@ -3516,18 +3758,18 @@ function openInventoryModal(id=null){
 }
 function closeInventoryModal(){$("inventoryModal")?.classList.add("hidden");inventoryEditingId=null;}
 async function saveInventoryItem(){
-  const msg=$("inventoryMsg");const obj={id:inventoryEditingId||( "INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim()};
+  const msg=$("inventoryMsg");const obj={id:inventoryEditingId||( "INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim(),imagenUrl:cfInventorySelectedPhoto?.url||'',imagenOrigen:cfInventorySelectedPhoto?.source||'',imagenLicencia:cfInventorySelectedPhoto?.license||''};
   if(obj.categoria==="__new__"){inventoryCategoryChanged();obj.categoria=$("invItemCategory").value;}
   if(!obj.articulo){msg.className="msg err";msg.textContent="Indica el nombre del material.";return;}
   if(!obj.categoria||obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Indica el tipo de material.";return;}
   saveInventoryCategories([...getInventoryCategories(),obj.categoria]);msg.className="msg";msg.textContent="Guardando...";
-  try{await callAction({accion:"guardarInventario",item:JSON.stringify(obj)});await loadInventory(false);msg.className="msg ok";msg.textContent="Material guardado ✓";showToastMessage("Material guardado",`${obj.articulo} · ${obj.categoria}`);setTimeout(closeInventoryModal,350);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el material.";}
+  try{await callAction({accion:"guardarInventario",item:JSON.stringify(obj)});await loadInventory(false);await cfSuccessFeedback();msg.className="msg ok";msg.textContent="Material guardado ✓";showToastMessage("Material guardado",`${obj.articulo} · ${obj.categoria}`);setTimeout(closeInventoryModal,350);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el material.";}
 }
 async function adjustInventory(id,delta){
   const current=inventoryItems.find(x=>String(x.id)===String(id));if(!current)return;const before={...current};const updated={...current,cantidad:Math.max(0,(Number(current.cantidad)||0)+Number(delta||0))};const idx=inventoryItems.findIndex(x=>String(x.id)===String(id));if(idx<0)return;inventoryItems[idx]=updated;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();
   try{await callAction({accion:"guardarInventario",item:JSON.stringify(updated)});await loadInventory(false);}catch(err){inventoryItems[idx]=before;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();showToastMessage("Error",err.message||"No se pudo actualizar el stock.");}
 }
-async function deleteInventoryItem(id){const item=inventoryItems.find(x=>String(x.id)===String(id));if(!item)return;if(!confirm(`¿Eliminar "${item.articulo}" del inventario?`))return;const before=[...inventoryItems];inventoryItems=inventoryItems.filter(x=>String(x.id)!==String(id));localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();try{await callAction({accion:"eliminarInventario",id:String(id)});showToastMessage("Material eliminado",item.articulo);await loadInventory(false);}catch(err){inventoryItems=before;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();showToastMessage("Error",err.message||"No se pudo eliminar el material.");}}
+async function deleteInventoryItem(id){const item=inventoryItems.find(x=>String(x.id)===String(id));if(!item)return;if(!confirm(`¿Eliminar "${item.articulo}" del inventario?`))return;const before=[...inventoryItems];inventoryItems=inventoryItems.filter(x=>String(x.id)!==String(id));localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();try{await callAction({accion:"eliminarInventario",id:String(id)});await cfSuccessFeedback();showToastMessage("Material eliminado",item.articulo);await loadInventory(false);}catch(err){inventoryItems=before;localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));renderInventory();showToastMessage("Error",err.message||"No se pudo eliminar el material.");}}
 
 function syncFromSheets(){
   return callAction({accion:"syncRecords"}).then(data=>{
@@ -3551,11 +3793,11 @@ function syncFromSheets(){
 async function refreshData(showMessage=false){
   try{
     await syncFromSheets();
-    if(showMessage) showToastMessage("Datos actualizados", "Los registros se han cargado desde Google Sheets.");
+    if(showMessage) showToastMessage("Datos actualizados", "Los registros están actualizados.");
     return true;
   }catch(e){
     console.error(e);
-    if(showMessage) showToastMessage("Sin conexión", "No se pudo leer Google Sheets. Se mantienen los últimos datos guardados.");
+    if(showMessage) showToastMessage("Sin conexión", "No se pudo actualizar la lista. Se mantienen los últimos datos disponibles.");
     return false;
   }
 }
@@ -3588,7 +3830,7 @@ let recordFilter="all";
 let pendingOnly=false;
 
 async function nativeLocalNotifications(){
-  return window.__CF_NATIVE_SECURITY__?.LocalNotifications || null;
+  return window.CFLocalNotifications || window.__CF_NATIVE_SECURITY__?.LocalNotifications || null;
 }
 
 async function refreshNotificationStatus(){
@@ -3645,6 +3887,7 @@ async function enablePendingNotifications(){
       return;
     }
     await schedulePendingNotificationFromCurrentState();
+    await cfScheduleEventReminders();
     await refreshNotificationStatus();
     showToastMessage("Recordatorios activados","Recibirás una notificación cuando queden documentos pendientes.");
   }catch(e){
@@ -4235,7 +4478,6 @@ async function unlockWithBiometric(){
   try{
     // No bloqueamos el intento por el resultado previo de checkBiometry().
     // La llamada nativa devuelve el motivo real cuando iOS no puede autenticar.
-    await securityWait(300);
     await auth.authenticate({
       reason:"Desbloquear Control Fiscal",
       cancelTitle:"Cancelar",
@@ -4366,6 +4608,7 @@ function unlockSecurity(){
   if(lock) lock.classList.add("hidden");
   securitySetStatus("");
   if(cfSessionToken()) loadInitialDataForAccount().catch(e=>console.warn("No se pudieron cargar todos los datos iniciales",e));
+  cfMaybeStartFirstTutorial();
 }
 
 function lockSecurity(){
@@ -4384,6 +4627,7 @@ async function securityWait(ms){
 }
 
 async function securityStart(){
+  if(cfSecurityNativePrompt)return; // Evita dos avisos biométricos a la vez.
   lockSecurity();
   await migrateLegacyPin();
 
@@ -4409,9 +4653,7 @@ async function securityStart(){
   if(pinButton) pinButton.style.display="block";
 
   securitySetStatus("Preparando Face ID…");
-  // Deja que el WebView y el puente nativo terminen de iniciar.
-  await securityWait(1500);
-
+  // Evitar demoras artificiales: el puente nativo ya está cargado al entrar en la app.
   const auth=nativeBiometric();
   if(!auth || typeof auth.authenticate!=="function"){
     const bridge=window.__CF_BIOMETRIC_BRIDGE_STATUS||{};
@@ -4427,18 +4669,195 @@ async function securityStart(){
 }
 
 
+// Envío de comentarios con consentimiento explícito; no registra usuarios a escondidas.
+const CF_SUPPORT_EMAIL='Electrochispas@outlook.es'; // Dirección de contacto publicada en la factura facilitada; verificar antes de distribución.
+function openCFSupport(){$('cfSupportModal')?.classList.remove('hidden');}
+function closeCFSupport(){$('cfSupportModal')?.classList.add('hidden');}
+async function sendCFSupport(){
+ const message=String($('cfSupportText')?.value||'').trim(),kind=$('cfSupportKind')?.value||'Sugerencia',el=$('cfSupportStatus');
+ if(message.length<12){if(el)el.textContent='Describe el problema o la sugerencia con algo más de detalle.';return;}
+ if(!CF_SUPPORT_EMAIL){if(el)el.textContent='Correo del administrador pendiente de configurar. No se ha enviado.';return;}
+ if(!confirm('¿Enviar tu mensaje al equipo de Control Fiscal? No se adjuntará información fiscal.'))return;
+ if(el)el.textContent='Enviando…';
+ try{
+  const result=await window.CFGoogleExtras.sendSupport({recipient:CF_SUPPORT_EMAIL,kind,message,appVersion:'UI76-20261023-R8'});
+  if(!result?.id)throw Error('No se ha confirmado el envío.');
+  await cfSuccessFeedback();
+  $('cfSupportText').value='';if(el)el.textContent='Mensaje enviado correctamente. Gracias por tu ayuda.';
+ }catch(e){if(el)el.textContent='No se ha enviado: '+(e.message||e);}
+}
+const CF_TOUR_STEPS=[
+ {title:'Bienvenido a Control Fiscal',text:'Tus compras, clientes, facturas, inventario y agenda se guardan en tu espacio de Google. Empezaremos por Inicio.',page:'home',target:'#home .hero'},
+ {title:'Accesos de Inicio',text:'Usa estas tarjetas para entrar a Compras, Facturación, Agenda y Stock; también puedes utilizar la barra inferior.',page:'home',target:'#home .homegrid'},
+ {title:'Compras',text:'Indica el distribuidor, concepto, importe con IVA y justificante opcional. Al confirmar el guardado, el formulario se limpia para evitar duplicados.',page:'buy',target:'#formBody .form'},
+ {title:'Facturación',text:'Selecciona un cliente, incorpora conceptos y cantidades y guarda un borrador o emite una factura definitiva. Revisa los datos fiscales antes de emitir.',page:'sale',target:'#formBody .invoiceForm'},
+ {title:'Agenda',text:'Registra fecha, horario y ubicación. Los eventos autorizados se sincronizan con Calendar y permiten recordatorios.',page:'agenda',target:'#agendaPage .calendar'},
+ {title:'Inventario',text:'Crea materiales, cantidades y ubicación. Las categorías generan botones con iconos; puedes filtrar por tipo.',page:'inventory',target:'#inventoryCategoryFilter'},
+ {title:'Resumen',text:'Filtra por año o mes para comparar compras, facturas emitidas e IVA. Consulta los registros antes de utilizarlos fiscalmente.',page:'summary',target:'#cfSummaryChart'},
+ {title:'Ajustes y ayuda',text:'Personaliza Diseño, gestiona Clientes y Distribuidores y configura las facturas. Puedes volver a ejecutar este tutorial cuando quieras.',page:'settings',target:'#settingsPage .settingsCard'},
+ {title:'Soporte y privacidad',text:'En Ajustes puedes enviar sugerencias o fallos al administrador. Solo se envía lo que escribas: tus libros fiscales siguen siendo privados.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Seguridad',text:'Al volver a la aplicación se pedirá Face ID o tu código. Para cambiar de cuenta, pulsa el botón rojo Cerrar sesión.',page:'settings',target:'#accountSettingsGroup'}
+];
+let cfTourIndex=-1,cfTourFocused=null;
+function cfTutorialSeenKey(){return 'cf_tutorial_seen_v1_'+(cfAccountEmail()||'sin_cuenta');}
+function startCFTutorial(){
+ if(!cfAccountEmail())return;
+ document.querySelectorAll('.modal:not(.hidden)').forEach(m=>m.classList.add('hidden'));
+ cfTourIndex=0;cfShowTourStep();
+}
+function cfShowTourStep(){
+ const step=CF_TOUR_STEPS[cfTourIndex],overlay=$('cfTutorialOverlay');if(!step||!overlay)return finishCFTutorial();
+ if(cfTourFocused){cfTourFocused.classList.remove('cfTourHighlight');cfTourFocused=null;}
+ try{
+  switch(step.page){case 'home':goHome();break;case 'buy':openForm('Compra');break;case 'sale':openForm('Facturado');break;case 'agenda':openAgenda();break;case 'inventory':openInventory();break;case 'summary':openSummary();break;case 'settings':openSettings();break;}
+ }catch(e){console.warn('Tutorial sin poder abrir sección',e);}
+ overlay.classList.remove('hidden');
+ $('cfTutorialProgress').textContent='PASO '+(cfTourIndex+1)+' DE '+CF_TOUR_STEPS.length;
+ $('cfTutorialTitle').textContent=step.title;
+ $('cfTutorialBody').textContent=step.text;
+ $('cfTutorialNext').textContent=cfTourIndex===CF_TOUR_STEPS.length-1?'TERMINAR ✓':'SIGUIENTE ›';
+ setTimeout(()=>{
+  const target=document.querySelector(step.target);
+  if(target&&!overlay.classList.contains('hidden')){
+   cfTourFocused=target;target.classList.add('cfTourHighlight');
+   target.scrollIntoView({block:'center',behavior:'instant'});
+  }
+ },100);
+}
+function advanceCFTutorial(){if(cfTourIndex<0)return;cfTourIndex++;cfShowTourStep();}
+function finishCFTutorial(){
+ if(cfTourFocused){cfTourFocused.classList.remove('cfTourHighlight');cfTourFocused=null;}
+ cfTourIndex=-1;$('cfTutorialOverlay')?.classList.add('hidden');
+ if(cfAccountEmail())localStorage.setItem(cfTutorialSeenKey(),'1');
+ goHome();
+}
+function cfMaybeStartFirstTutorial(){
+ if(!cfAccountEmail()||localStorage.getItem(cfTutorialSeenKey())==='1')return;
+ if(!$('securityLock')?.classList.contains('hidden'))return;
+ setTimeout(()=>{if(cfAccountEmail()&&$('securityLock')?.classList.contains('hidden')&&cfTourIndex<0)startCFTutorial();},800);
+}
+// Decoración visual no invasiva: el render original V76 permanece intacto.
+const cfV76RenderInventory=renderInventory;
+renderInventory=function(){
+ cfV76RenderInventory();cfUpdateInventoryButtons();
+ document.querySelectorAll('#inventoryList .stockCard').forEach(card=>{
+  const label=card.querySelector('.stockName')?.textContent||'';
+  const entry=inventoryItems.find(x=>String(x.articulo)===label);
+  const url=cfSafeCommonsImage(entry?.imagenUrl);
+  const driveId=cfDrivePhotoId(entry?.imagenUrl);
+  if((url||driveId)&&!card.querySelector('.cfInventoryThumb')){
+    const img=document.createElement('img');img.className='cfInventoryThumb';img.alt='Foto de '+label;img.loading='lazy';img.referrerPolicy='no-referrer';
+    if(url)img.src=url;
+    else {img.src='control-fiscal-logo.jpg';cfLoadPrivateInventoryPhoto(img,entry.imagenUrl,window.CFGoogleAccount?.active()?.id);}
+    card.querySelector('.stockHead > div')?.prepend(img);
+  }
+ });
+};
+const cfV76OpenInventoryModal=openInventoryModal;
+openInventoryModal=function(id=null){
+ cfV76OpenInventoryModal(id);
+ const item=id?inventoryItems.find(x=>String(x.id)===String(id)):null;
+ cfInventorySelectedPhoto=item?.imagenUrl?{url:item.imagenUrl,source:item.imagenOrigen||'',license:item.imagenLicencia||''}:null;
+ if($('cfInventoryPhotoChoices'))$('cfInventoryPhotoChoices').replaceChildren();
+ if($('cfInventoryPhotoUpload'))$('cfInventoryPhotoUpload').value='';
+ if($('cfInventoryPhotoStatus'))$('cfInventoryPhotoStatus').textContent=item?.imagenUrl?'Imagen anterior conservada.':'';
+ const pic=$('cfInventoryPhotoPreview');if(pic){pic.src=cfSafeCommonsImage(item?.imagenUrl)||'';pic.hidden=!pic.src;}
+};
+let cfInventorySelectedPhoto=null;
+function cfSafeCommonsImage(url){
+ try{const u=new URL(String(url||''));return u.protocol==='https:'&&u.hostname==='upload.wikimedia.org'?u.href:'';}catch{return '';}
+}
+function cfDrivePhotoId(url){
+ try{const u=new URL(String(url||''));if(u.protocol!=='https:'||u.hostname!=='drive.google.com')return '';
+  const match=u.pathname.match(/^\/file\/d\/([A-Za-z0-9_-]{15,})\/view/);return match?match[1]:'';
+ }catch{return '';}
+}
+const cfInventoryPrivateImages=new Map();
+async function cfLoadPrivateInventoryPhoto(img,driveUrl,accountId){
+ const id=cfDrivePhotoId(driveUrl),s=window.CFGoogleAccount?.active();
+ if(!id||!s?.token||s.id!==accountId)return;
+ const key=s.id+':'+id;
+ const cached=cfInventoryPrivateImages.get(key);if(cached){img.src=cached;return;}
+ try{
+  const request=token=>fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media',{headers:{Authorization:'Bearer '+token}});
+  let result=await request(s.token);
+  if(result.status===401&&typeof window.CFGoogleAccount.refreshAuthorization==='function'){
+   await window.CFGoogleAccount.refreshAuthorization(s.token);
+   const newer=window.CFGoogleAccount.active();if(!newer||newer.id!==accountId)return;
+   result=await request(newer.token);
+  }
+  if(!result.ok)return;
+  const blob=await result.blob();if(!/^image\/(png|jpeg|webp)/.test(blob.type)||blob.size>2*1024*1024)return;
+  const current=window.CFGoogleAccount?.active();if(!current||current.id!==accountId)return;
+  const objectUrl=URL.createObjectURL(blob);cfInventoryPrivateImages.set(key,objectUrl);img.src=objectUrl;
+ }catch(e){console.info('Fotografía privada no disponible',e.message||e);}
+}
+function cfClearPrivateInventoryPhotos(){for(const url of cfInventoryPrivateImages.values())try{URL.revokeObjectURL(url)}catch(e){}cfInventoryPrivateImages.clear();}
+
+async function cfFindInventoryPhotos(){
+ const status=$('cfInventoryPhotoStatus'),wrap=$('cfInventoryPhotoChoices'),name=String($('invItemName')?.value||'').trim();
+ if(name.length<4){status.textContent='Escribe antes el nombre o modelo exacto del artículo.';return;}
+ status.textContent='Buscando imágenes con licencia abierta…';wrap.innerHTML='';
+ try{
+  const u=new URL('https://commons.wikimedia.org/w/api.php');
+  u.search=new URLSearchParams({action:'query',generator:'search',gsrsearch:name,gsrnamespace:'6',gsrlimit:'8',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'250',format:'json',origin:'*'}).toString();
+  const response=await fetch(u.href,{method:'GET'});if(!response.ok)throw Error('Servicio de imágenes temporalmente no disponible.');
+  const doc=await response.json(),entries=Object.values(doc.query?.pages||{}).filter(x=>x.imageinfo?.[0]);
+  const result=entries.map(x=>({title:String(x.title||'').replace(/^File:/,''),url:cfSafeCommonsImage(x.imageinfo[0].thumburl||x.imageinfo[0].url),original:cfSafeCommonsImage(x.imageinfo[0].url),license:String(x.imageinfo[0].extmetadata?.LicenseShortName?.value||'').replace(/<[^>]*>/g,'').slice(0,80),page:'https://commons.wikimedia.org/wiki/'+encodeURIComponent(x.title||'')})).filter(x=>x.url&&x.original);
+  if(!result.length){status.textContent='No hay imágenes verificables en Wikimedia Commons para ese nombre. Puedes usar una imagen propia.';return;}
+  result.forEach(photo=>{
+   const button=document.createElement('button');button.type='button';button.className='cfPhotoChoice';
+   const img=document.createElement('img');img.src=photo.url;img.alt=photo.title;img.loading='lazy';img.referrerPolicy='no-referrer';
+   const text=document.createElement('span');text.textContent=photo.title+' · '+(photo.license||'Revisar licencia');
+   button.append(img,text);button.onclick=()=>{
+    cfInventorySelectedPhoto={url:photo.url,source:photo.page,license:photo.license};
+    $('cfInventoryPhotoPreview').src=photo.url;$('cfInventoryPhotoPreview').hidden=false;
+    status.textContent='Imagen seleccionada. Verifica que sea tu modelo exacto y su licencia antes de guardar.';
+   };wrap.append(button);
+  });
+  status.textContent='Selecciona la foto que corresponda exactamente a tu producto. Las sugerencias no se asignan automáticamente.';
+ }catch(e){status.textContent='No se pudo buscar: '+(e.message||e)+'. El artículo puede guardarse sin imagen.';}
+}
+async function cfSelectInventoryPhotoFile(input){
+ const status=$('cfInventoryPhotoStatus'),file=input?.files?.[0];if(!file)return;
+ if(!/^image\/(png|jpeg)$/.test(file.type)||file.size>1024*1024){status.textContent='Elige JPG/PNG de hasta 1 MB.';return;}
+ const img=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=reject;reader.readAsDataURL(file);});
+ const info=window.CFGoogleAccount?.active();if(!info){status.textContent='Conecta Google primero.';return;}
+ status.textContent='Guardando imagen en tu Drive personal…';
+ try{
+  const url=await window.CFGoogleUploads.upload('material_'+Date.now()+'.'+(file.type==='image/png'?'png':'jpg'),file.type,img.split(',')[1],info);
+  cfInventorySelectedPhoto={url,source:'drive-personal',license:'propia',localPreview:img};
+  $('cfInventoryPhotoPreview').src=img;$('cfInventoryPhotoPreview').hidden=false;
+  status.textContent='Imagen subida. Quedará enlazada al artículo al guardarlo.';
+ }catch(e){status.textContent='No se ha podido guardar la imagen: '+(e.message||e);}
+}
+
 // Los datos privados se cargan después de iniciar sesión y desbloquear la app.
 cfRegisterSecurityLifecycle();
 startAccountSystem();
 
 </script>
 
+<div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
+ <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>
+  <h3>✉️ SUGERENCIAS Y ERRORES</h3>
+  <p class="settingsHint">Tu mensaje se enviará desde la cuenta Google que hayas autorizado. El administrador recibe el correo, pero nunca tus registros fiscales.</p>
+  <div class="field"><label>Tipo de mensaje</label><select id="cfSupportKind" class="select"><option value="Sugerencia">Sugerencia</option><option value="Error">Informar de un error</option><option value="Consulta">Consulta</option></select></div>
+  <div class="field"><label>Describe lo ocurrido o tu propuesta</label><textarea id="cfSupportText" class="textarea" rows="6" maxlength="3000" placeholder="Indica qué ventana estabas utilizando, qué pulsaste y qué sucedió. No incluyas contraseñas ni datos bancarios."></textarea></div>
+  <div class="settingsHint" id="cfSupportStatus"></div>
+  <button class="save p" type="button" onclick="sendCFSupport()">ENVIAR MENSAJE</button>
+ </div>
+</div>
+<div id="cfTutorialOverlay" class="cfTutorialOverlay hidden" role="dialog" aria-modal="true" aria-label="Tutorial de Control Fiscal">
+ <div class="cfTutorialCard"><div class="cfTutorialProgress" id="cfTutorialProgress"></div><h3 id="cfTutorialTitle"></h3><p id="cfTutorialBody"></p>
+ <div class="cfTutorialActions"><button type="button" onclick="finishCFTutorial()">SALTAR</button><button type="button" onclick="advanceCFTutorial()" id="cfTutorialNext">SIGUIENTE ›</button></div></div>
+</div>
 <div id="inventoryModal" class="modal hidden" onclick="if(event.target===this)closeInventoryModal()">
   <div class="modalCard">
     <button class="modalClose" type="button" onclick="closeInventoryModal()">×</button>
     <div class="modalTitle">📦 <span id="inventoryModalTitle">Nuevo material</span></div>
     <div class="inventoryModalGrid">
-      <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. DAS Event 28A"></div>
+      <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. Artículo o referencia"></div>
       <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option>Audio</option><option>Iluminación</option><option>Pantallas LED</option><option>Estructuras</option><option>Cableado</option><option>Otros</option><option value="__new__">＋ Crear nuevo tipo</option></select></div>
       <div class="field"><label>Unidad</label><select id="invItemUnit" class="select"><option>unidades</option><option>metros</option><option>pares</option><option>juegos</option><option>cajas</option></select></div>
       <div class="field"><label>Cantidad</label><input id="invItemQty" class="input" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
@@ -4446,6 +4865,14 @@ startAccountSystem();
       <div class="field"><label>Ubicación</label><input id="invItemLocation" class="input" placeholder="Ej. Almacén 1"></div>
       <div class="field"><label>Estado</label><select id="invItemStatus" class="select"><option>Disponible</option><option>En reparación</option><option>No disponible</option></select></div>
       <div class="field full"><label>Notas</label><textarea id="invItemNotes" class="textarea" placeholder="Opcional"></textarea></div>
+      <div class="field full cfInventoryPhoto"><label>Imagen del artículo (opcional)</label>
+        <p class="settingsHint">Busca imágenes con licencia abierta para seleccionar la del modelo correcto. Si no aparece, puedes elegir un archivo propio.</p>
+        <button class="guideBtn" type="button" onclick="cfFindInventoryPhotos()">🖼️ BUSCAR FOTOS SUGERIDAS</button>
+        <div id="cfInventoryPhotoChoices" class="cfInventoryPhotoChoices"></div>
+        <input id="cfInventoryPhotoUpload" class="input" type="file" accept="image/jpeg,image/png" onchange="cfSelectInventoryPhotoFile(this)">
+        <img id="cfInventoryPhotoPreview" class="cfInventoryPhotoPreview" alt="Vista previa del producto" hidden>
+        <div id="cfInventoryPhotoStatus" class="settingsHint" role="status"></div>
+      </div>
     </div>
     <button id="inventorySaveBtn" class="save y" type="button">GUARDAR MATERIAL</button>
     <div id="inventoryMsg" class="msg"></div>
@@ -4462,8 +4889,8 @@ startAccountSystem();
       <div class="field"><label>Hora de inicio</label><input id="agendaEventStart" class="input" type="time"></div>
       <div class="field"><label>Hora de fin</label><input id="agendaEventEnd" class="input" type="time"></div>
       <div class="field"><label>Cliente / contacto</label><input id="agendaEventClient" class="input" placeholder="Opcional"></div>
-      <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Ej. Piscina municipal, Castillejo de Iniesta"></div>
-      <div class="field full"><label>Qué tengo que llevar</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Pantalla 6x2, 2 subs, 4 cabezas, cableado..."></textarea></div>
+      <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Ej. Dirección del evento, ciudad"></div>
+      <div class="field full"><label>Qué tengo que llevar</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Documentación, equipos y herramientas..."></textarea></div>
       <div class="field full"><label>Comentarios</label><textarea id="agendaEventComments" class="textarea" placeholder="Montaje, horario de llegada, contacto, instrucciones..."></textarea></div>
     </div>
     <div id="agendaMapPreview" class="settingsHint" style="margin:4px 0 10px"></div>
@@ -4507,7 +4934,7 @@ startAccountSystem();
   <div id="cfInvoiceSegmentList"></div>
   <button type="button" class="guideBtn" onclick="addInvoiceNumberSegment()">＋ AÑADIR SEGMENTO</button>
   <div class="settingsHint">Vista previa: <strong id="cfInvoiceNumberPreview"></strong></div>
-  <button type="button" class="save" onclick="saveInvoiceNumberOptions()">GUARDAR NUMERACIÓN EN GOOGLE SHEETS</button>
+  <button type="button" class="save" onclick="saveInvoiceNumberOptions()">GUARDAR NUMERACIÓN</button>
   <div id="cfInvoiceNumberMessage" class="settingsHint"></div>
   <hr style="margin:22px 0;border:0;border-top:1px solid var(--line)">
   <h3>IMAGEN PARA FACTURAS (PDF)</h3>
@@ -4543,17 +4970,24 @@ startAccountSystem();
  <div class="modalTitle">📖 Guía completa · Control Fiscal</div>
  <p class="settingsHint">Guía paso a paso con ejemplos ilustrativos. No contiene datos ni importes reales.</p>
  <div class="guideStep"><div class="guideNum">1</div><div><h4>Primera sesión y Google Drive</h4><p>Elige Iniciar sesión con Google o Crear cuenta. Google valida el correo y la app busca tu libro personal. Si ya existe, lo recupera; si no, podrás crearlo tras confirmación. Mantener sesión permite intentar recuperar la autorización la próxima vez; si Google la revoca, tendrás que autorizarla nuevamente.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE ACCESO</div><div class="cfGuideMockRow"><span>Cuenta Google</span><b>usuario@gmail.com</b></div><div class="cfGuideMockRow"><span>Libro personal</span><b>Conectado ✓</b></div><div class="cfGuideMockAction">ABRIR INICIO</div></div></div></div>
- <div class="guideStep"><div class="guideNum">2</div><div><h4>Registrar compras y adjuntar facturas</h4><p>En Compras añade fecha, proveedor, concepto, referencia, base e IVA. Adjunta PDF o foto de la compra. Si falta el justificante, aparecerá en Documentación pendiente y podrás activar el aviso diario desde Ajustes.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE COMPRA</div><div class="cfGuideMockRow"><span>Concepto</span><b>Cable DMX</b></div><div class="cfGuideMockRow"><span>Base imponible</span><b>100,00 €</b></div><div class="cfGuideMockRow"><span>IVA 21 %</span><b>21,00 €</b></div><div class="cfGuideMockAction">GUARDAR COMPRA</div></div></div></div>
+ <div class="guideStep"><div class="guideNum">2</div><div><h4>Registrar compras y adjuntar facturas</h4><p>En Compras añade fecha, proveedor, concepto, referencia, base e IVA. Adjunta PDF o foto de la compra. Si falta el justificante, aparecerá en Documentación pendiente y podrás activar el aviso diario desde Ajustes.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE COMPRA</div><div class="cfGuideMockRow"><span>Concepto</span><b>Material de oficina</b></div><div class="cfGuideMockRow"><span>Base imponible</span><b>100,00 €</b></div><div class="cfGuideMockRow"><span>IVA 21 %</span><b>21,00 €</b></div><div class="cfGuideMockAction">GUARDAR COMPRA</div></div></div></div>
  <div class="guideStep"><div class="guideNum">3</div><div><h4>Clientes y datos del emisor</h4><p>En Facturación guarda clientes para reutilizar sus datos. En Ajustes → Datos de facturación introduce nombre fiscal, NIF/CIF, dirección, email, IBAN y demás datos. Usa ciudad o código postal para completar el resto cuando haya una coincidencia inequívoca.</p></div></div>
  <div class="guideStep"><div class="guideNum">4</div><div><h4>Borrador, emisión y PDF de factura</h4><p>En Facturación añade cliente, fecha y conceptos con cantidad, precio e IVA. Guarda borrador para terminarlo más adelante: conserva lo que escribes al cambiar de pestaña. Emite solamente cuando hayas revisado los datos. Se genera un PDF con logotipo, emisor, cliente y totales; puedes compartirlo por WhatsApp o enviar copia por Gmail si está autorizado. Para documentos fiscales reales, comprueba requisitos legales y numeración antes de emitir.</p><div class="cfGuideMock"><div class="cfGuideMockHead">EJEMPLO DE FACTURA</div><div class="cfGuideMockRow"><span>Sonido de evento × 1</span><b>500,00 €</b></div><div class="cfGuideMockRow"><span>IVA (21 %)</span><b>105,00 €</b></div><div class="cfGuideMockRow"><span>TOTAL</span><b>605,00 €</b></div><div class="cfGuideMockAction">EMITIR FACTURA Y PDF</div></div></div></div>
  <div class="guideStep"><div class="guideNum">5</div><div><h4>Numeración personalizada de facturas</h4><p>Ajustes → Opciones de numeración: usa Texto fijo para letra y separadores; Año actual con valor 4 o 2; Incremental con formato cifras:inicio. Ejemplo: F + 4 + - + 3:1 produce F2026-001. El consecutivo no se reinicia automáticamente en enero; las facturas ya emitidas conservan su número.</p></div></div>
  <div class="guideStep"><div class="guideNum">6</div><div><h4>Agenda y Google Calendar</h4><p>Crea un evento con fecha, horas, lugar y material necesario. Queda guardado en tu libro de Google; si has autorizado Google Calendar, se sincronizará. En caso de error de autorización, revisa el mensaje y vuelve a intentar sin duplicar el evento.</p></div></div>
- <div class="guideStep"><div class="guideNum">7</div><div><h4>Inventario y tipos de materiales</h4><p>Da de alta equipos con nombre, categoría, unidad, cantidad y ubicación. Ajusta existencias con + y −; puedes crear una categoría nueva. Comprueba el mensaje de confirmación de Google Sheets antes de cerrar.</p></div></div>
+ <div class="guideStep"><div class="guideNum">7</div><div><h4>Inventario y tipos de materiales</h4><p>Da de alta equipos con nombre, categoría, unidad, cantidad y ubicación. Ajusta existencias con + y −; puedes crear una categoría nueva. Espera a la confirmación de guardado antes de cerrar.</p></div></div>
  <div class="guideStep"><div class="guideNum">8</div><div><h4>Resumen y gráfica por año o mes</h4><p>Selecciona un año para ver compras y facturación mensual, o un mes para ver semanas. Las cantidades reflejan los registros disponibles en el libro; los borradores de factura no se cuentan como emitidos.</p><div class="cfGuideMock"><div class="cfGuideMockHead">COMPARACIÓN ILUSTRATIVA</div><div class="cfGuideMockRow"><span>🟡 Compras</span><b>200 €</b></div><div class="cfGuideMockRow"><span>🟣 Facturado</span><b>650 €</b></div></div></div></div>
  <div class="guideStep"><div class="guideNum">9</div><div><h4>Licitaciones públicas y precios</h4><p>Desde Resumen abre la página segura del Gobierno de España para localizar el acceso a la contratación pública. En Ajustes → Comparar precios puedes buscar un producto en comparadores; las ofertas deben verificarse en cada tienda. La app no promete cubrir todas las tiendas ni consultar sus precios automáticamente.</p></div></div>
  <div class="guideStep"><div class="guideNum">10</div><div><h4>Notificaciones y seguridad</h4><p>Activa los avisos para revisar documentos pendientes. Si sales de la app, volverás a identificarte con Face ID o con el método local configurado. Puedes cerrar sesión y cambiar de cuenta desde Ajustes: nunca compartas el mismo libro entre usuarios sin revisar los permisos.</p></div></div>
  <div class="guideStep"><div class="guideNum">11</div><div><h4>Imagen y optimización</h4><p>En Ajustes alterna tema negro o blanco, cambia la imagen del menú y la imagen de facturas. En pantallas antiguas usa Ahorro de rendimiento; el texto se mantiene nítido porque la interfaz usa elementos adaptativos.</p></div></div>
- <button class="modalAction" type="button" onclick="closeGuide()">CERRAR GUÍA</button></div></div>
+ <div class="guideStep"><div class="guideNum">12</div><div><h4>Editar o eliminar registros sin duplicados</h4><p>Desde Inicio pulsa Ver todos, selecciona un registro y elige editar o borrar. Confirma los cambios; cuando aparece el mensaje de éxito, los datos se actualizarán. El botón Guardar queda bloqueado durante el envío y los campos se vacían únicamente si Google confirma el alta. Si aparece un error 401, la app intentará renovar la autorización automáticamente; si no es posible, reconecta en Cuenta.</p></div></div>
+<div class="guideStep"><div class="guideNum">13</div><div><h4>Distribuidores y clientes anteriores</h4><p>En Compras escribe parte del nombre de un distribuidor y selecciona una coincidencia. En Facturación ocurre lo mismo con clientes. Para corregir NIF, dirección o teléfono ve a Ajustes → Mis clientes o Mis distribuidores y pulsa Editar.</p></div></div>
+<div class="guideStep"><div class="guideNum">14</div><div><h4>Iconos y fotografías del inventario</h4><p>Los iconos de tipo se escogen automáticamente según palabras como altavoz, iluminación, ordenador, cable o cámara. Las categorías que ya hayas guardado siguen disponibles. Puedes filtrar por esos botones. No se asignan fotografías de productos sin verificar que correspondan al modelo, para evitar mostrar material equivocado.</p></div></div>
+<div class="guideStep"><div class="guideNum">15</div><div><h4>Recordatorios de eventos</h4><p>Si autorizas las notificaciones en iOS, los eventos próximos permiten avisos en el móvil con el nombre y la ubicación. En Google Calendar se crean recordatorios un día y una hora antes. Comprueba que las notificaciones del sistema estén activadas.</p></div></div>
+<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. Si Gmail rechaza el envío, verás el error para corregirlo.</p></div></div>
+<div class="guideStep"><div class="guideNum">17</div><div><h4>Permisos de Google, avisos y privacidad</h4><p>Google puede pedir de nuevo autorización tras un tiempo o cuando cambian los permisos. No compartas los accesos ni otorgues permisos a otras cuentas sin revisarlos. El administrador no puede abrir tus libros ni eliminar tus facturas desde el panel de soporte. Para controles centrales de cuentas se requiere un servidor independiente y una política de privacidad.</p></div></div>
+<div class="guideStep"><div class="guideNum">18</div><div><h4>Tutorial interactivo</h4><p>La primera vez que accedas se mostrará el tutorial. Avanza por las ventanas usando Siguiente; puedes saltarlo en cualquier momento. Vuelve a iniciarlo desde Ajustes → Información y herramientas → Iniciar tutorial interactivo.</p></div></div>
+<button class="modalAction" type="button" onclick="closeGuide()">CERRAR GUÍA</button></div></div>
 
 <div id="cfPriceSearchModal" class="modal hidden" onclick="if(event.target===this)closePriceSearch()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closePriceSearch()">×</button><h3>🔍 Comparador de precios</h3>

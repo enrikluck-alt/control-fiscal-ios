@@ -16,7 +16,7 @@ const parseJSON=(s,f={})=>{try{return typeof s==='string'?JSON.parse(s):s??f;}ca
 const quote=t=>"'"+String(t).replace(/'/g,"''")+"'";
 const range=(t,addr='A:U')=>encodeURIComponent(quote(t)+'!'+addr);
 function session(){const s=root.CFGoogleAccount?.active();if(!s?.token||!s.id)throw Error('Inicia sesión con Google y selecciona un libro.');return s;}
-function check(s){const current=root.CFGoogleAccount?.active();if(!current||current.email!==s.email||current.id!==s.id||current.token!==s.token)throw Error('La cuenta ha cambiado. No se aplicaron los datos de otra sesión.');}
+function check(s){const current=root.CFGoogleAccount?.active();if(!current||current.email!==s.email||current.id!==s.id)throw Error('La cuenta ha cambiado. No se aplicaron los datos de otra sesión.');if(current.token!==s.token)s.token=current.token;}
 async function api(s,path,method='GET',data){check(s);const result=await root.CFGoogleAccount.http(API+encodeURIComponent(s.id)+path,method,data,s.token);check(s);return result;}
 async function read(s,tab){const r=await api(s,'/values/'+range(tab));return Array.isArray(r.values)?r.values:[];}
 async function append(s,tab,row){return api(s,'/values/'+range(tab,'A:C')+':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS','POST',{values:[row]});}
@@ -142,9 +142,13 @@ async function action(p){
  }
  case 'guardarRegistro':{
   const t=p.tipo==='Compra'?'Compras':'Facturas';
+  const requestId=String(p.requestId||ident('REQ'));
+  // Idempotencia: si un reintento sigue a una respuesta de red perdida, no crear dos compras.
+  const existing=(await items(s,t)).find(x=>x.requestId===requestId);
+  if(existing)return {ok:true,id:existing.id||'',repetida:true};
   let url='';if(p.archivoBase64)url=await root.CFGoogleUploads.upload(p.archivoNombre,p.archivoMime,p.archivoBase64,s);
-  const obj={id:ident('REG'),fecha:now(),tipo:p.tipo==='Compra'?'Compra':'Facturación',tercero:p.tercero,concepto:p.concepto,base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),facturaUrl:url};
-  await upsert(s,t,obj);return {ok:true};
+  const obj={id:ident('REG'),requestId,fecha:now(),tipo:p.tipo==='Compra'?'Compra':'Facturación',tercero:p.tercero,concepto:p.concepto,base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),facturaUrl:url};
+  await upsert(s,t,obj);return {ok:true,id:obj.id};
  }
  case 'crearFactura':{
   const key=String(p.requestId||ident('REQ'));
@@ -232,7 +236,7 @@ async function action(p){
  case 'editar':{
   const tabs=p.tab?[p.tab]:(p.tipo==='Compra'?['Compras']:['Facturas','Facturación']);
   for(const tab of tabs){
-   const old=(await items(s,tab)).find(x=>x._row===num(p.fila));if(!old)continue;
+   const old=(await items(s,tab)).find(x=>p.key?x._key===String(p.key):x._row===num(p.fila));if(!old)continue;
    const tipo=old.tipo||p.tipo,ivaPorcentaje=num(p.ivaPorcentaje||old.ivaPorcentaje);
    const base=tipo==='Compra'?num(p.total||old.total)/(1+ivaPorcentaje/100):num(p.base||old.base);
    const total=tipo==='Compra'?num(p.total||old.total):base*(1+ivaPorcentaje/100);
@@ -244,13 +248,29 @@ async function action(p){
  }
  case 'eliminar':{
   const tabs=p.tab?[p.tab]:(p.tipo==='Compra'?['Compras']:['Facturas','Facturación']);
-  for(const tab of tabs){const old=(await items(s,tab)).find(x=>x._row===num(p.fila));if(old){await revision(s,tab,old._key,{},true);return {ok:true};}}
-  throw Error('El registro ya no existe.');
+  for(const tab of tabs){
+   const old=(await items(s,tab)).find(x=>p.key?x._key===String(p.key):x._row===num(p.fila));
+   if(old){await revision(s,tab,old._key,{},true);return {ok:true,key:old._key};}
+  }
+  // Un registro borrado previamente devuelve éxito idempotente si la tumba existe.
+  if(p.key){const changes=await ledger(s);const gone=changes.get(String(p.key));if(gone?.deleted&&tabs.includes(gone.tab))return {ok:true,alreadyDeleted:true};}
+  throw Error('El registro no aparece en este libro. Actualiza la lista antes de intentar borrarlo de nuevo.');
  }
  case 'listarClientes':return {ok:true,clientes:await items(s,'Clientes')};
  case 'guardarCliente':{
   const c=parseJSON(p.cliente);if(!c.nombre||!c.cif)throw Error('Indica nombre y CIF/NIF del cliente.');
   await upsert(s,'Clientes',c,'cif',x=>Boolean(x.cif)&&String(x.cif).toLowerCase()===String(c.cif).toLowerCase());
+  return {ok:true,clientes:await items(s,'Clientes')};
+ }
+ case 'editarCliente':{
+  const c=parseJSON(p.cliente);
+  if(!c.nombre||!c.cif)throw Error('El cliente necesita nombre y NIF/CIF.');
+  const clients=await items(s,'Clientes');
+  const original=clients.find(x=>(p.originalKey&&x._key===p.originalKey)||(p.originalCif&&String(x.cif||'').toLocaleLowerCase('es')===String(p.originalCif).toLocaleLowerCase('es')));
+  if(!original)throw Error('No se encontró el cliente original. Actualiza la lista antes de editar.');
+  if(clients.some(x=>x._key!==original._key&&String(x.cif||'').toLocaleLowerCase('es')===String(c.cif).toLocaleLowerCase('es')))
+    throw Error('Ya existe otro cliente con ese NIF/CIF.');
+  await revision(s,'Clientes',original._key,{...original,...c});
   return {ok:true,clientes:await items(s,'Clientes')};
  }
  case 'eliminarCliente':return remove(s,'Clientes',x=>x.cif===p.cif||x.nombre===p.nombre);
@@ -278,17 +298,50 @@ async function action(p){
   await putConfig(s,parseJSON(p.configuracion));return {ok:true,configuracion:await config(s)};
  }
  case 'listarTerceros':{
-  const conf=await config(s),tiendas=parseJSON(conf.cf_tiendas,[]),proveedores=parseJSON(conf.cf_proveedores,[]);
+  const conf=await config(s);
+  const tiendas=parseJSON(conf.cf_tiendas,[]),proveedores=parseJSON(conf.cf_proveedores,[]);
+  const ocultos=parseJSON(conf.cf_distribuidores_ocultos_v1,[]);
+  const hidden=new Set((Array.isArray(ocultos)?ocultos:[]).map(v=>String(v).trim().toLocaleLowerCase('es')));
   try{const rows=await maybeRead(s,'Listas');for(const r of rows.slice(1)){
    if(!r[0])continue;const cat=String(r[0]).toLowerCase(),name=String(r[1]||'').trim();
    if(name){if(cat.startsWith('prov'))proveedores.push(name);else tiendas.push(name);}
   }}catch(e){if(!missing(e))throw e;}
-  return {ok:true,tiendas:[...new Set(tiendas)],proveedores:[...new Set(proveedores)]};
+  const unique=arr=>[...new Map((Array.isArray(arr)?arr:[]).map(v=>String(v||'').trim()).filter(Boolean)
+       .filter(v=>!hidden.has(v.toLocaleLowerCase('es'))).map(v=>[v.toLocaleLowerCase('es'),v])).values()];
+  const detalles=parseJSON(conf.cf_distribuidores_detalles_v1,{});
+  return {ok:true,tiendas:unique(tiendas),proveedores:unique(proveedores),detalles:detalles&&typeof detalles==='object'?detalles:{}};
  }
- case 'guardarTercero':case 'eliminarTercero':{
-  const cat=/prov/i.test(String(p.categoria))?'cf_proveedores':'cf_tiendas',conf=await config(s);let arr=parseJSON(conf[cat],[]);
-  if(a==='guardarTercero')arr=[...new Set([...arr,p.nombre])];else arr=arr.filter(x=>x!==p.nombre);
-  await putConfig(s,{[cat]:JSON.stringify(arr)});return {ok:true};
+ case 'guardarTercero':case 'eliminarTercero':case 'editarTercero':{
+  const conf=await config(s);
+  const categories={cf_proveedores:[...(parseJSON(conf.cf_proveedores,[])||[])],cf_tiendas:[...(parseJSON(conf.cf_tiendas,[])||[])]};
+  const hidden=new Set(parseJSON(conf.cf_distribuidores_ocultos_v1,[])||[]);
+  const details=parseJSON(conf.cf_distribuidores_detalles_v1,{})||{};
+  const value=String(p.nombre||'').trim(),original=String(p.original||'').trim();
+  if(a!=='eliminarTercero'&&!value)throw Error('Escribe el nombre del distribuidor.');
+  if(value.length>150)throw Error('Nombre demasiado largo.');
+  const old= a==='editarTercero'?original:value;
+  const target=/prov|distribu/i.test(String(p.categoria||''))?'cf_proveedores':'cf_tiendas';
+  if(a==='editarTercero'&&!old)throw Error('Falta el distribuidor original.');
+  if(a!=='guardarTercero'){
+    for(const arr of Object.values(categories))for(let i=arr.length-1;i>=0;i--)if(String(arr[i]).toLocaleLowerCase('es')===old.toLocaleLowerCase('es'))arr.splice(i,1);
+    // Compatibilidad con la antigua pestaña de Listas, que es de solo lectura.
+    if(old)hidden.add(old);
+    if(details[old])delete details[old];
+  }
+  if(a!=='eliminarTercero'){
+    if([...categories.cf_proveedores,...categories.cf_tiendas].some(v=>String(v).toLocaleLowerCase('es')===value.toLocaleLowerCase('es'))&&a==='editarTercero')
+      throw Error('Ya existe un distribuidor con ese nombre.');
+    if(!categories[target].some(v=>String(v).toLocaleLowerCase('es')===value.toLocaleLowerCase('es')))categories[target].push(value);
+    // Editar permite devolver a la lista un nombre anteriormente oculto.
+    hidden.delete(value);
+    if(p.detalles){const obj=typeof p.detalles==='string'?parseJSON(p.detalles,{}):p.detalles;
+      if(obj&&typeof obj==='object')details[value]={nombre:value,cif:String(obj.cif||''),direccion:String(obj.direccion||''),telefono:String(obj.telefono||''),email:String(obj.email||'')};}
+  }
+  await putConfig(s,{
+    cf_proveedores:JSON.stringify(categories.cf_proveedores),cf_tiendas:JSON.stringify(categories.cf_tiendas),
+    cf_distribuidores_ocultos_v1:JSON.stringify([...hidden]),cf_distribuidores_detalles_v1:JSON.stringify(details)
+  });
+  return {ok:true,detalles:details};
  }
  case 'enviarFacturas':throw Error('Enviar documentación por correo no está disponible. No se ha enviado ningún correo.');
  default:throw Error('Operación no implementada: '+a);

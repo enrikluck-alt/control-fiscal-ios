@@ -27,7 +27,7 @@ test('Google: crear cuenta, elegir cuenta, correo opcional y recordar sesión',(
  assert.match(auth,/https:\/\/accounts\.google\.com\/signup/);
  assert.match(auth,/CFBrowser\.open/);
  assert.match(auth,/PERSIST='cf_google_keep_session_v76'/);
- assert.match(auth,/plugin\.refresh\(\{provider:'google'\}\)/);
+ assert.match(auth,/plugin\.refresh\(\{provider:'google'(?:,options:\{\})?\}\)/);
  assert.doesNotMatch(auth,/hint&&email!==hint/);
  assert.match(auth,/element\('accountEmailHint'\)\)element\('accountEmailHint'\)\.value=email/);
  assert.match(auth,/element\('accountKeepSession'\)\?\.checked/);
@@ -81,8 +81,8 @@ test('el PDF se comparte con bytes y el destinatario se elige manualmente',async
 });
 test('workflow empaqueta el PDF, protege la UI V76 y genera IPA distinguible',()=>{
  assert.match(work,/cf-invoice-share\.js/);
- assert.match(work,/UI76-20261022-R6/);
- assert.match(work,/ControlFiscal-V76-Google-Diseno-Cuenta-R6-IPA/);
+ assert.match(work,/UI76-20261023-R8/);
+ assert.match(work,/ControlFiscal-V76-Google-R8-Integridad-Guia-IPA/);
 });
 
 test('sesión recordada restaura Google solo con checkbox marcado; reentrada abre Face ID',async()=>{
