@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R10">
+<html lang="es" data-cf-ui-build="UI76-20261023-R12">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1269,7 +1269,67 @@ body.lightTheme #cfDocumentViewer .cfDocumentInfo{color:#53616c}
 .cfDocNodeName{min-width:0;flex:1;font-size:15px;font-weight:700;overflow-wrap:anywhere}
 .cfDocNode button{font-size:13px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:9px}
 @media(max-width:460px){.cfDocToolbar{grid-template-columns:1fr}.cfDocNode button{padding:8px}}
+
+/* R11 estilos adicionales de tema, categorías y numeración */
+/* R11: colores explícitos: R10 usaba --text sin definir y heredaba blanco en fondo blanco. */
+:root {--text:var(--white)}
+body.lightTheme {--text:#111820}
+body.lightTheme #settingsPage .cfSettingsNavBtn,
+body.lightTheme #settingsPage .cfSettingsNavigator,
+body.lightTheme #settingsPage .cfDesignToggle,
+body.lightTheme #settingsPage .cfDirectoryRow,
+body.lightTheme #settingsPage .cfDirectoryName,
+body.lightTheme #settingsPage .cfDesignPanel,
+body.lightTheme #settingsPage .cfDesignPanel .settingsHint,
+body.lightTheme #settingsPage .cfDesignPanel .settingsLabel,
+body.lightTheme .cfArchiveToggle,
+body.lightTheme .cfDocTrail button,
+body.lightTheme .cfDocNode,
+body.lightTheme .cfDocNode button,
+body.lightTheme #settingsPage .settingsHint{color:#18232c!important}
+body.lightTheme #settingsPage .cfSettingsNavBtn{background:#fff;border-color:#b9c6cf}
+body.lightTheme #settingsPage .cfDesignToggle small,
+body.lightTheme #settingsPage .settingsHint {color:#4f5f69!important}
+body.lightTheme #settingsPage .cfLogoutDanger {color:#fff!important;background:#b91c1c!important}
+.cfInvoiceCustomNumberHelp{font-size:12px;color:var(--muted);line-height:1.45;margin-top:4px}
+.cfInventoryNewTypeInline[hidden]{display:none!important}
+.cfInventoryNewTypeInline{margin-top:9px;display:grid;gap:8px;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.cfInventoryNewTypeInline input{min-width:0;width:100%}
+.cfInventoryNewTypeInline button{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:var(--white);border-radius:9px;padding:12px;font-weight:700}
+body.lightTheme .cfInventoryNewTypeInline button{background:#fff;color:#111820}
+.cfInventoryPhotoResultsInfo{color:var(--muted);font-size:12px;margin:10px 0}
+
+/* R12: la navegación principal de Ajustes hereda blanco en modo claro desde V76.
+   Unificar color de título, texto y contenido de cada tarjeta, sin forzar botones de color. */
+body.lightTheme #settingsPage .settingsCard,
+body.lightTheme #settingsPage .cfSettingsNavigator,
+body.lightTheme #settingsPage .cfSettingsNavigator .cfSettingsNavBtn,
+body.lightTheme #settingsPage .cfSettingsNavigator .cfSettingsNavBtn *,
+body.lightTheme #settingsPage .cfSettingsNavigator h2,
+body.lightTheme #settingsPage .cfSettingsNavigator span,
+body.lightTheme #settingsPage .cfSettingsNavigator strong,
+body.lightTheme #settingsPage .settingsTitle,
+body.lightTheme #settingsPage .settingsLabel {color:#15232e!important}
+body.lightTheme #settingsPage .cfSettingsNavigator .cfSettingsNavBtn {background:#fff!important;border:1px solid #b8c8d3!important}
+body.lightTheme #settingsPage .cfSettingsNavigator .cfSettingsNavBtn:active {background:#e7edf2!important}
+.cfInventoryTypeButtons {display:grid!important;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));overflow:visible!important;scroll-snap-type:none!important;gap:10px!important}
+.cfInventoryTypeButtons button {white-space:normal!important;flex:auto!important;min-height:58px;line-height:1.3;overflow-wrap:anywhere}
+.cfInventoryListImage {width:70px;height:68px;object-fit:contain;background:rgba(127,145,160,.12);border-radius:10px;float:left;margin:0 12px 8px 0}
+.cfInventoryTypeButtons button:focus-visible{outline:3px solid #f3c313}
+.cfNoticeSettings {display:grid;gap:12px;margin:10px 0}
+.cfNoticeToggle{display:flex;align-items:center;gap:12px;font-weight:750;font-size:15px;line-height:1.4}
+.cfNoticeToggle input{width:22px;height:22px;flex-shrink:0;accent-color:#f5c518}
+.cfNoticeAudioActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:9px}
+.cfNoticeAudioActions button{flex:1;min-width:110px}
+body.lightTheme #settingsPage .cfNoticeSettings,body.lightTheme #settingsPage .cfNoticeSettings label{color:#15232e!important}
+.cfPhotoChoice{min-height:155px}
+.cfInventoryPhotoChoices{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));overflow:visible!important;gap:9px}
+.cfPhotoChoice{max-width:unset!important;min-width:0!important;width:100%;flex:auto!important}
+.cfPhotoChoice img{height:110px!important}
+@media(max-width:360px){.cfInventoryTypeButtons{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
+
+
 </head>
 
 <body>
@@ -1616,14 +1676,37 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
           <input id="notificationTime" class="input notificationTimeInput" type="time" aria-label="Hora del recordatorio">
         </div>
 
+        <div class="cfNoticeSettings">
+          <label class="cfNoticeToggle"><input id="cfDailyReminderEnabled" type="checkbox" onchange="cfSetDailyReminderEnabled(this.checked)"> Aviso diario de documentación pendiente</label>
+          <div class="settingsHint">A la hora elegida, avisa si hay compras sin factura o facturas sin documentación. Puedes desactivarlo en cualquier momento. La app debe tener permiso de notificaciones.</div>
+        </div>
         <button id="notificationPermissionBtn" class="guideBtn notificationPermissionBtn" type="button" onclick="enablePendingNotifications()">
           <span class="guideIcon">🔔</span>
           <span>ACTIVAR / ACTUALIZAR RECORDATORIO</span>
         </button>
-        <div id="notificationStatus" class="settingsHint"></div>
+        <div id="notificationStatus" class="settingsHint" role="status"></div>
+        <div class="cfNoticeAudioActions"><button class="guideBtn" type="button" onclick="cfSendTestNotification()">📲 ENVIAR AVISO DE PRUEBA</button></div>
       </div>
 
 
+
+      <div class="settingsGroup" id="cfNotificationAudioGroup">
+        <div class="settingsTitle">🎵 AUDIO DE NOTIFICACIONES</div>
+        <p class="settingsHint">Elige entre tres avisos originales de Control Fiscal o el sonido de iOS. El sonido se reproduce cuando iOS entrega una notificación y está permitido el sonido en Ajustes del teléfono.</p>
+        <div class="field"><label>Sonido para eventos y documentación pendiente</label>
+          <select class="select" id="cfNotificationSound" onchange="cfSaveNoticeSound(this.value)">
+            <option value="default">Sonido de iOS</option>
+            <option value="cf_claro.wav">Claro · campanilla</option>
+            <option value="cf_pulso.wav">Pulso · doble aviso</option>
+            <option value="cf_calma.wav">Calma · suave</option>
+          </select>
+        </div>
+        <div class="cfNoticeAudioActions">
+          <button type="button" class="guideBtn" onclick="cfPreviewNoticeSound()">▶ ESCUCHAR SONIDO</button>
+          <button type="button" class="guideBtn" onclick="cfSendTestNotification()">📲 PROBAR EN EL IPHONE</button>
+        </div>
+        <div id="cfNotificationSoundStatus" class="settingsHint" role="status"></div>
+      </div>
 
       <div class="cfDesignToggleWrapper">
         <button id="cfDesignToggle" type="button" class="guideBtn cfDesignToggle" onclick="toggleDesignSettings()" aria-controls="cfDesignPanel" aria-expanded="false">
@@ -1750,7 +1833,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
       <div class="settingsGroup" id="cfSupportGroup">
         <div class="settingsTitle">💬 SUGERENCIAS Y ERRORES</div>
-        <p class="settingsHint">Puedes escribir al equipo de Control Fiscal. Solo se enviará el texto que redactes y la dirección desde la que lo mandes. Nunca se adjuntan automáticamente compras, facturas ni tu libro de Drive.</p>
+        <p class="settingsHint">Escribe al equipo de Control Fiscal desde la aplicación de correo del iPhone. Se preparará el destinatario y el texto; deberás pulsar Enviar en tu correo. No se adjuntan compras, facturas ni tu libro.</p>
         <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
       </div>
       <div class="settingsGroup" id="accountSettingsGroup">
@@ -1761,7 +1844,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R10</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R12</div>
 
     </div>
   </div>
@@ -1796,7 +1879,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </select>
     </div>
 
-    <label class="cfArchiveToggle"><input id="cfShowArchivedIssued" type="checkbox" onchange="renderAll()"> Mostrar facturas emitidas retiradas del listado</label><div id="recordInfo" class="recordInfo"></div>
+    <label class="cfArchiveToggle"><input id="cfShowArchivedIssued" type="checkbox" onchange="renderAll()"> Mostrar facturas emitidas retiradas del listado (archivo recuperable)</label><div id="recordInfo" class="recordInfo"></div>
     <div id="all" class="records"></div>
   </div>
 </section>
@@ -2908,7 +2991,7 @@ async function saveSimpleClient(){
 let invoiceFormDraft=null;
 function captureInvoiceDraft(){
  if($('formHeader')?.dataset.tipo!=='FacturaCompleta'||!$('invoiceLines'))return;
- const ids=['invSavedClient','cfInvoiceClientSearch','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invoiceEmailCopy'];
+ const ids=['invSavedClient','cfInvoiceClientSearch','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invoiceEmailCopy','invoiceManualNumber'];
  const values={};for(const id of ids){const el=$(id);if(el)values[id]=el.type==='checkbox'?el.checked:el.value;}
  invoiceFormDraft={values,lines:Array.from(document.querySelectorAll('#invoiceLines .invoiceLine')).map(row=>({description:row.querySelector('.invoiceDesc')?.value||'',qty:row.querySelector('.invoiceQty')?.value||'1',price:row.querySelector('.invoicePrice')?.value||'0'})),requestId:invoiceRequestId};
 }
@@ -2992,12 +3075,18 @@ function openInvoiceForm(){
       </div>
 
       <div class="cfInvoiceWarning">La emisión creará una factura numerada en la serie CF y generará su PDF. Revisa la serie existente y la adaptación de tu sistema a los requisitos de facturación antes de usarlo con clientes reales.</div>
+      <div class="field full cfInvoiceManualNumber">
+        <label for="invoiceManualNumber">Número de factura solicitado (opcional)</label>
+        <input id="invoiceManualNumber" class="input" type="text" autocomplete="off" autocapitalize="characters" maxlength="64" placeholder="Vacío = siguiente automático (ej. F2026-001)">
+        <p class="cfInvoiceCustomNumberHelp">Antes de emitir, puedes indicar un número de tu serie. Se comprobará si coincide con la serie configurada y si otra factura ya lo utiliza. Los números emitidos no se modifican y los saltos en la secuencia pueden incumplir tus obligaciones fiscales.</p>
+      </div>
       <label class="cfInvoiceEmailRow"><input type="checkbox" id="invoiceEmailCopy"><span>Enviar automáticamente una copia PDF al correo del cliente al emitir (requiere autorización Gmail y confirmación del correo).</span></label>
       <button id="invoiceIssueBtn" class="save p" type="button" onclick="emitInvoice()">🧾 EMITIR FACTURA Y GENERAR PDF</button>
       <button id="invoiceSaveBtn" class="save" type="button" onclick="saveInvoice()">GUARDAR SOLO BORRADOR</button>
       <button id="invoiceShareBtn" class="save" type="button" hidden onclick="shareSavedInvoiceDraft()">📲 COMPARTIR PDF POR WHATSAPP / EMAIL</button>
       <button id="invoiceResendBtn" class="save" type="button" hidden onclick="resendSavedInvoiceEmail()">✉️ ENVIAR COPIA AL EMAIL DEL CLIENTE</button>
       <button id="invoiceNewBtn" class="save" type="button" hidden onclick="resetInvoiceForm()">➕ CREAR OTRA FACTURA</button>
+      <button id="cfViewArchivedInvoices" class="guideBtn" type="button" onclick="openArchivedInvoices()">🗂️ VER FACTURAS RETIRADAS / RESTAURAR</button>
       <div id="invoiceMsg" class="msg"></div>
     </div>`;
   addInvoiceLine();
@@ -3130,7 +3219,7 @@ function currentInvoicePayload(){
  if(!client.nombre||!client.cif||!client.direccion||!client.cp||!client.ciudad||!client.provincia)throw Error('Completa nombre, CIF/NIF, domicilio, CP, ciudad y provincia del cliente.');
  if(!invoiceConfig.name||!invoiceConfig.taxId||!invoiceConfig.address||!invoiceConfig.postalCode||!invoiceConfig.city||!invoiceConfig.province)throw Error('Configura nombre, NIF/CIF y domicilio completo del emisor en Ajustes.');
  if(!lines.length||lines.some(x=>!x.concepto||x.cantidad<=0||x.precio<0)||calc.total<=0)throw Error('Revisa los conceptos, cantidades y precios de la factura.');
- return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig)};
+ return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig),numeroSolicitado:String($('invoiceManualNumber')?.value||'').trim()};
 }
 async function emitInvoice(){
  const msg=$('invoiceMsg'),btn=$('invoiceIssueBtn');if(!btn||btn.disabled)return;
@@ -3138,7 +3227,9 @@ async function emitInvoice(){
  try{payload=currentInvoicePayload();client=JSON.parse(payload.cliente);}catch(e){msg.className='msg err';msg.textContent=e.message;return;}
  const send=!!$('invoiceEmailCopy')?.checked;
  if(send&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email||'')){msg.className='msg err';msg.textContent='Para enviar una copia marca un correo del cliente válido.';return;}
- if(!confirm('¿Emitir la factura ahora? Se asignará un número definitivo en la serie CF y no podrá editarse ni eliminarse desde la aplicación. Comprueba importes, cliente y emisor.'))return;
+ if(payload.numeroSolicitado){
+   if(!confirm('Solicitas el número '+payload.numeroSolicitado+'. La aplicación comprobará la serie y los duplicados, pero los saltos de numeración tienen implicaciones fiscales. ¿Continuar?'))return;
+ }else if(!confirm('¿Emitir con el siguiente número de la serie configurada? No se podrá modificar el número ya emitido.'))return;
  if(send&&!confirm('Se enviará una copia del PDF desde tu Gmail a '+client.email+'. ¿Confirmas el destinatario?'))return;
  btn.disabled=true;msg.className='msg';msg.textContent='Registrando emisión…';
  let issued;
@@ -3511,7 +3602,7 @@ function openRecordData(r){
   $("modalMsg").className="msg";
   const archiveBtn=$("cfArchiveInvoiceBtn");if(archiveBtn){archiveBtn.hidden=!r.emitida;archiveBtn.textContent=r.archivada?"RESTAURAR FACTURA EN LA LISTA":"RETIRAR FACTURA DE LA LISTA";}
   for(const id of ['modalTercero','modalConcepto','modalTotal','modalIva'])$(id).disabled=!!r.emitida;
-  $("modalMsg").textContent=r.emitida?'Factura emitida. Puedes retirarla de las listas de trabajo sin eliminar el documento fiscal original; seguirá contando en los resúmenes y podrás restaurarla.':'';
+  $("modalMsg").textContent=r.emitida?'Factura emitida. Puedes retirarla de las listas de trabajo. Esta factura ya fue emitida. Puedes retirarla del listado (sin destruir el registro), y recuperarla desde Inicio → Registros → «Mostrar facturas emitidas retiradas». Para anularla fiscalmente, sigue el procedimiento legal aplicable.':'';
   $("recordModal").classList.remove("hidden");
   $("recordModal").setAttribute("aria-hidden","false");
   calcModal();
@@ -3523,7 +3614,7 @@ async function cfToggleIssuedArchive(){
  if(!confirm(hide?'¿Retirar esta factura de las listas de trabajo? El documento fiscal y su PDF se conservarán y seguirá computando en los resúmenes.':'¿Volver a mostrar esta factura emitida en las listas?'))return;
  const btn=$('cfArchiveInvoiceBtn');if(btn)btn.disabled=true;
  try{await callAction({accion:hide?'ocultarFacturaEmitida':'restaurarFacturaEmitida',requestId:r.requestId});
-  closeRecordModal();await syncFromSheets();await cfSuccessFeedback();showToastMessage(hide?'Factura retirada de la lista':'Factura restaurada',hide?'Conservada en el archivo fiscal.':'Visible en los registros.');
+  closeRecordModal();await syncFromSheets();await cfSuccessFeedback();showToastMessage(hide?'Factura retirada del listado':'Factura restaurada',hide?'Para verla: Inicio → Registros → activa «Mostrar facturas retiradas».':'Vuelve a aparecer en Registros.');
  }catch(e){showToastMessage('No se pudo cambiar la visibilidad',e.message||String(e));}
  finally{if(btn)btn.disabled=false;}
 }
@@ -3790,22 +3881,26 @@ async function saveAgendaEvent(){
     await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
     agendaEditingId=obj.id; // Si Calendar falla, reintentar mantiene el mismo ID en Sheets.
     await loadAgenda(false);
-    await cfScheduleEventReminders().catch(e=>console.warn('Aviso local no programado',e));
+    let localReminderMessage='';
+    if(obj.reminderMinutes!=='none'){
+      try{await cfEnsureNoticePermission();await cfScheduleEventReminders();localReminderMessage=' Aviso local programado.';}
+      catch(e){localReminderMessage=' AVISO NO PROGRAMADO: '+(e.message||e);console.warn('Aviso local no programado',e);}
+    }
     if(!$('agendaSyncGoogle')?.checked){
-      msg.className='msg ok';msg.textContent='Evento guardado. Aviso de iPhone programado si has autorizado las notificaciones.';
+      msg.className='msg ok';msg.textContent='Evento guardado.'+localReminderMessage;
       await cfSuccessFeedback();setTimeout(closeAgendaEventModal,1200);
     }else try{
       msg.className='msg';msg.textContent='Evento guardado. Sincronizando Google Calendar…';
       const result=await window.CFGoogleExtras.upsertCalendar(obj);
       obj.googleCalendarId=result.id;
       await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
-      msg.className='msg ok';msg.textContent='Evento guardado y sincronizado con Google Calendar ✓';
+      msg.className='msg ok';msg.textContent='Evento guardado y sincronizado con Google Calendar ✓'+localReminderMessage;
       await cfSuccessFeedback();await loadAgenda(false);setTimeout(closeAgendaEventModal,850);
     }catch(calendarError){
       await cfSuccessFeedback();
       const reason=cfCalendarPermissionError(calendarError);
       if(/403|insufficient|scope|disabled|accessNotConfigured/i.test(String(calendarError?.message||calendarError))){localStorage.setItem('cf_agenda_calendar_optin','0');$('agendaSyncGoogle').checked=false;}
-      msg.className='msg err';msg.textContent='✅ Evento guardado en Control Fiscal. ⚠️ Google Calendar NO sincronizado: '+reason+' Puedes seguir usando Agenda y el aviso local del iPhone.';
+      msg.className='msg err';msg.textContent='✅ Evento guardado en Control Fiscal. ⚠️ Google Calendar NO sincronizado: '+reason+localReminderMessage;
     }
   }catch(e){msg.className='msg err';msg.textContent=e.message||'No se pudo guardar el evento.';}
 }
@@ -3849,7 +3944,7 @@ async function cfScheduleEventReminders(){
   if(alertAt.getTime()<=now||alertAt.getTime()>future)continue;
   const id=700000+serial++;const loc=String(event.ubicacion||'').trim();
   const notice=minutes===0?'El evento comienza ahora. ':minutes>=1440?'Evento dentro de '+Math.round(minutes/1440)+' día(s). ':'Evento dentro de '+minutes+' minutos. ';
-  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,110):'Revisa tu agenda.'),schedule:{at:alertAt},extra:{kind:'agenda',eventId:String(event.id||'')}});
+  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,110):'Revisa tu agenda.'),schedule:{at:alertAt},sound:cfNoticePayloadSound(),extra:{kind:'agenda',eventId:String(event.id||'')}});
   if(notifications.length>=40)break;
  }
  if(notifications.length)await plugin.schedule({notifications});
@@ -3887,15 +3982,30 @@ async function loadInventoryCategoriesFromGoogle(){
   saveInventoryCategories([...getInventoryCategories(),...server]);buildInventoryCategoryControls();
  }catch(e){console.warn('Tipos de inventario sin sincronizar',e);}
 }
-async function inventoryCategoryChanged(){
- const sel=$('invItemCategory');if(!sel||sel.value!=='__new__')return;
- const value=window.prompt('Escribe el nuevo tipo de material:','');const clean=String(value||'').trim();
- if(!clean){sel.value=getInventoryCategories()[0]||'__new__';return;}
- const previous=sel.disabled;sel.disabled=true;
- try{await callAction({accion:'guardarTipoInventario',tipo:clean});saveInventoryCategories([...getInventoryCategories(),clean]);buildInventoryCategoryControls(clean);sel.value=clean;cfTapFeedback();showToastMessage('Tipo guardado',clean);}
- catch(e){sel.value=getInventoryCategories()[0]||'__new__';showToastMessage('No se guardó el tipo de material',e.message||'Error al guardar los datos');}
- finally{sel.disabled=previous;}
+function cfHideInventoryNewType(){
+ const block=$('cfInventoryNewTypeInline');if(block)block.hidden=true;
+ const field=$('cfInventoryNewTypeName');if(field)field.value='';
 }
+function inventoryCategoryChanged(){
+ const sel=$('invItemCategory'),block=$('cfInventoryNewTypeInline');
+ if(!sel||!block)return;
+ block.hidden=sel.value!=='__new__';
+ if(!block.hidden)setTimeout(()=>$('cfInventoryNewTypeName')?.focus(),0);
+}
+async function cfConfirmNewInventoryType(){
+ const field=$('cfInventoryNewTypeName'),sel=$('invItemCategory'),btn=$('cfInventoryConfirmType');
+ const clean=String(field?.value||'').trim();
+ if(!clean){$('inventoryMsg').textContent='Introduce un nombre para el nuevo tipo.';return;}
+ if(getInventoryCategories().some(c=>c.toLowerCase()===clean.toLowerCase())){
+   const existing=getInventoryCategories().find(c=>c.toLowerCase()===clean.toLowerCase());
+   buildInventoryCategoryControls(existing);sel.value=existing;cfHideInventoryNewType();return;
+ }
+ if(btn)btn.disabled=true;
+ try{await callAction({accion:'guardarTipoInventario',tipo:clean});saveInventoryCategories([...getInventoryCategories(),clean]);buildInventoryCategoryControls(clean);sel.value=clean;cfHideInventoryNewType();await cfSuccessFeedback();showToastMessage('Tipo guardado',clean);}
+ catch(e){$('inventoryMsg').textContent='No se guardó el tipo: '+(e.message||e);}
+ finally{if(btn)btn.disabled=false;}
+}
+
 function openInventory(){only("inventoryPage");nav("inventory");buildInventoryCategoryControls();renderInventory();loadInventory(false);}
 async function loadInventory(showError=false){
   try{const data=await callAction({accion:"listarInventario"});inventoryItems=Array.isArray(data.items)?data.items:[];localStorage.setItem("cf_inventory",JSON.stringify(inventoryItems));buildInventoryCategoryControls();renderInventory();await loadInventoryCategoriesFromGoogle();}
@@ -3917,16 +4027,25 @@ function renderInventory(){
   $("inventoryCount").textContent=inventoryItems.length;$("inventoryLowCount").textContent=inventoryItems.filter(i=>(Number(i.cantidad)||0)<=(Number(i.minimo)||0)).length;
   if(!arr.length){wrap.innerHTML='<div style="padding:22px;text-align:center;color:#66717b">No hay material registrado con este filtro.</div>';return;}
   const groups=new Map();arr.forEach(i=>{const key=String(i.categoria||"Otros").trim()||"Otros";if(!groups.has(key))groups.set(key,[]);groups.get(key).push(i);});
-  wrap.innerHTML=[...groups.entries()].map(([category,items])=>{const cards=items.map(i=>{const qty=Number(i.cantidad)||0,min=Number(i.minimo)||0,low=qty<=min;return `<div class="stockCard"><div class="stockHead"><div><div class="stockName">${esc(i.articulo)}</div><div class="stockMeta">${esc(i.categoria||"Otros")} · ${esc(i.ubicacion||"Sin ubicación")} · ${esc(i.estado||"Disponible")}</div></div><div class="stockQty ${low?"low":"ok"}">${qty} <span style="font-size:9px;color:#9da7b0;font-weight:700">${esc(i.unidad||"unidades")}</span></div></div>${i.notas?`<div class="stockMeta" style="margin-top:8px">${esc(i.notas)}</div>`:""}<div class="stockActions"><button class="minus" type="button" data-inv-action="minus" data-inv-id="${esc(i.id)}">− 1</button><button class="plus" type="button" data-inv-action="plus" data-inv-id="${esc(i.id)}">＋ 1</button><button class="edit" type="button" data-inv-action="edit" data-inv-id="${esc(i.id)}">EDITAR</button><button class="delete" type="button" data-inv-action="delete" data-inv-id="${esc(i.id)}">ELIMINAR</button></div></div>`;}).join("");return `<div class="stockCategoryGroup"><div class="stockCategoryTitle">${esc(category)} <span>${items.length}</span></div>${cards}</div>`;}).join("");
+  wrap.innerHTML=[...groups.entries()].map(([category,items])=>{const cards=items.map(i=>{const qty=Number(i.cantidad)||0,min=Number(i.minimo)||0,low=qty<=min;
+ const safePhoto=cfSafeCommonsImage(i.imagenUrl||'');
+ const privatePhotoId=cfDrivePhotoId(safePhoto);
+ const preview=safePhoto?`<img class="cfInventoryListImage" loading="lazy" alt="Foto de ${esc(i.articulo)}" ${privatePhotoId?`data-cf-private-photo="${esc(safePhoto)}" data-cf-user="${esc(window.CFGoogleAccount?.active()?.id||'')}"`:`src="${esc(safePhoto)}"`} onerror="this.style.display='none'">`:'';
+ return `<div class="stockCard">${preview}<div class="stockHead"><div><div class="stockName">${esc(i.articulo)}</div><div class="stockMeta">${esc(i.categoria||"Otros")} · ${esc(i.ubicacion||"Sin ubicación")} · ${esc(i.estado||"Disponible")}</div></div><div class="stockQty ${low?"low":"ok"}">${qty} <span style="font-size:9px;color:#9da7b0;font-weight:700">${esc(i.unidad||"unidades")}</span></div></div>${i.notas?`<div class="stockMeta" style="margin-top:8px">${esc(i.notas)}</div>`:""}<div class="stockActions"><button class="minus" type="button" data-inv-action="minus" data-inv-id="${esc(i.id)}">− 1</button><button class="plus" type="button" data-inv-action="plus" data-inv-id="${esc(i.id)}">＋ 1</button><button class="edit" type="button" data-inv-action="edit" data-inv-id="${esc(i.id)}">EDITAR</button><button class="delete" type="button" data-inv-action="delete" data-inv-id="${esc(i.id)}">ELIMINAR</button></div></div>`;}).join("");return `<div class="stockCategoryGroup"><div class="stockCategoryTitle">${esc(category)} <span>${items.length}</span></div>${cards}</div>`;}).join("");
+  wrap.querySelectorAll('img[data-cf-private-photo]').forEach(img=>cfLoadPrivateInventoryPhoto(img,img.dataset.cfPrivatePhoto,img.dataset.cfUser));
 }
 function openInventoryModal(id=null){
-  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;buildInventoryCategoryControls(e?.categoria||getInventoryCategories()[0]||'__new__');
-  $("inventoryModalTitle").textContent=e?"Editar material":"Nuevo material";$("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||getInventoryCategories()[0]||"__new__";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad??1);$("invItemMin").value=Number(e?.minimo??0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");
+  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;
+  cfInventorySelectedPhoto=e?.imagenUrl?{url:e.imagenUrl,source:e.imagenOrigen||'',license:e.imagenLicencia||''}:null;
+  buildInventoryCategoryControls(e?.categoria||getInventoryCategories()[0]||'__new__');cfHideInventoryNewType();
+  const preview=$('cfInventoryPhotoPreview');if(preview){preview.src=cfSafeCommonsImage(e?.imagenUrl)||'';preview.hidden=!preview.src;}
+  if(preview&&cfDrivePhotoId(e?.imagenUrl)){preview.hidden=false;cfLoadPrivateInventoryPhoto(preview,e.imagenUrl,window.CFGoogleAccount?.active()?.id);}
+  $('inventoryModalTitle').textContent=e?"Editar material":"Nuevo material";$("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||getInventoryCategories()[0]||"__new__";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad??1);$("invItemMin").value=Number(e?.minimo??0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");inventoryCategoryChanged();
 }
 function closeInventoryModal(){$("inventoryModal")?.classList.add("hidden");inventoryEditingId=null;}
 async function saveInventoryItem(){
   const msg=$("inventoryMsg");const obj={id:inventoryEditingId||( "INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim(),imagenUrl:cfInventorySelectedPhoto?.url||'',imagenOrigen:cfInventorySelectedPhoto?.source||'',imagenLicencia:cfInventorySelectedPhoto?.license||''};
-  if(obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Pulsa CREAR TIPO antes de guardar.";return;}
+  if(obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Escribe y guarda el nuevo tipo dentro del desplegable antes de guardar el artículo.";return;}
   if(!obj.articulo){msg.className="msg err";msg.textContent="Indica el nombre del material.";return;}
   if(!obj.categoria||obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Crea o selecciona un tipo de material antes de guardar.";return;}
   saveInventoryCategories([...getInventoryCategories(),obj.categoria]);msg.className="msg";msg.textContent="Guardando...";
@@ -3985,6 +4104,14 @@ function renderLatest(){
     :'<div style="padding:22px;text-align:center;color:#66717b">Todavía no hay registros</div>';
 }
 
+function openArchivedInvoices(){
+ const checkbox=$('cfShowArchivedIssued');if(checkbox)checkbox.checked=true;
+ const search=$('search');if(search)search.value='';
+ const period=$('recordPeriod');if(period)period.value='all';
+ recordFilter='all';pendingOnly=false;
+ openRecords();
+ showToastMessage('Archivo de facturas','Las facturas retiradas se muestran en Registros. Abre una para restaurarla.');
+}
 function openRecords(){
   only("recordsPage");
   nav("home");
@@ -3996,71 +4123,112 @@ function openRecords(){
 let recordFilter="all";
 let pendingOnly=false;
 
-async function nativeLocalNotifications(){
-  return window.CFLocalNotifications || window.__CF_NATIVE_SECURITY__?.LocalNotifications || null;
+const CF_NOTICE_ENABLED_KEY='cf_daily_notice_enabled_r12';
+const CF_NOTICE_SOUND_KEY='cf_notification_sound_r12';
+const CF_NOTICE_SOUNDS=new Set(['default','cf_claro.wav','cf_pulso.wav','cf_calma.wav']);
+function cfSelectedNoticeSound(){const s=localStorage.getItem(CF_NOTICE_SOUND_KEY)||'default';return CF_NOTICE_SOUNDS.has(s)?s:'default';}
+function cfNoticePayloadSound(){const s=cfSelectedNoticeSound();return s==='default'?'default':s;}
+function cfDailyReminderEnabled(){return localStorage.getItem(CF_NOTICE_ENABLED_KEY)==='1';}
+function cfSyncNotificationControls(){
+ const check=$('cfDailyReminderEnabled'),sound=$('cfNotificationSound');
+ if(check)check.checked=cfDailyReminderEnabled();
+ if(sound)sound.value=cfSelectedNoticeSound();
 }
-
+async function nativeLocalNotifications(){return window.CFLocalNotifications||window.__CF_NATIVE_SECURITY__?.LocalNotifications||null;}
+async function cfEnsureNoticePermission(){
+ const p=await nativeLocalNotifications();
+ if(!p)throw Error('Plugin de notificaciones no disponible; reinstala la IPA completa.');
+ let perm=await p.checkPermissions();
+ if(perm.display!=='granted')perm=await p.requestPermissions();
+ if(perm.display!=='granted')throw Error('iOS no ha autorizado las notificaciones. Actívalas en Ajustes del iPhone → Control Fiscal → Notificaciones.');
+ return p;
+}
 async function refreshNotificationStatus(){
-  const el=$("notificationStatus");
-  const btn=$("notificationPermissionBtn");
-  const plugin=await nativeLocalNotifications();
-  if(!plugin){
-    if(el) el.textContent="Los recordatorios del iPhone están disponibles en la versión nativa.";
-    if(btn) btn.style.display="none";
-    return;
-  }
-  try{
-    const enabled=await plugin.areEnabled();
-    if(el) el.textContent=enabled.enabled ? "✅ Recordatorios del iPhone activados." : "⚠️ Activa los recordatorios para recibir una tira/banner en el iPhone.";
-    if(btn) btn.textContent=enabled.enabled ? "🔔 ACTUALIZAR RECORDATORIO" : "🔔 ACTIVAR RECORDATORIOS";
-  }catch(e){ console.warn("No se pudo comprobar las notificaciones",e); }
+ cfSyncNotificationControls();
+ const el=$('notificationStatus'),btn=$('notificationPermissionBtn'),p=await nativeLocalNotifications();
+ if(!p){if(el)el.textContent='No está disponible el plugin de notificaciones. Comprueba que has instalado la IPA R12.';if(btn)btn.disabled=true;return;}
+ try{
+  const perm=await p.checkPermissions();
+  if(el)el.textContent=(perm.display==='granted'?'✅ iOS permite notificaciones. ':'⚠️ Necesitas conceder permiso a iOS. ')+(cfDailyReminderEnabled()?'Aviso diario ACTIVADO.':'Aviso diario DESACTIVADO.');
+  if(btn)btn.textContent=perm.display==='granted'?'🔔 COMPROBAR Y ACTUALIZAR AVISOS':'🔔 PERMITIR NOTIFICACIONES';
+ }catch(e){if(el)el.textContent='No se pudo consultar el permiso: '+(e.message||e);}
 }
-
 function notificationTimeParts(){
-  const raw=localStorage.getItem(SETTINGS_KEYS.notificationTime)||"09:00";
-  const m=String(raw).match(/^(\d{2}):(\d{2})$/);
-  if(!m) return {hour:9,minute:0};
-  return {hour:Math.min(23,Math.max(0,Number(m[1]))),minute:Math.min(59,Math.max(0,Number(m[2])))};
+ const raw=localStorage.getItem(SETTINGS_KEYS.notificationTime)||'09:00';
+ const m=String(raw).match(/^(\d{2}):(\d{2})$/);
+ if(!m)return {hour:9,minute:0};
+ return {hour:Math.min(23,Math.max(0,Number(m[1]))),minute:Math.min(59,Math.max(0,Number(m[2])))};
 }
-
+function cfDocumentationPendingCounts(){
+ let buys=0,issued=0;
+ for(const r of (records||[])){
+  if(r.tipo==='Compra'&&!r.facturaUrl)buys++;
+  if((r.tipo==='Facturado'||r.tipo==='Facturación')&&!r.facturaUrl&&!r.pdfUrl&&!r.archivoUrl)issued++;
+ }
+ return {buys,issued};
+}
 async function schedulePendingNotificationFromCurrentState(){
-  const plugin=await nativeLocalNotifications();
-  if(!plugin) return;
-  const total=(records||[]).filter(r=>r.tipo==='Compra'&&!r.facturaUrl).length;
-  try{await plugin.cancel({notifications:[{id:60001}]});}catch(e){}
-  if(!total) return;
-  try{
-    const perms=await plugin.checkPermissions();
-    if(perms.display!=="granted") return;
-    const {hour,minute}=notificationTimeParts();
-    await plugin.schedule({notifications:[{
-      id:60001,
-      title:"Control Fiscal",
-      body:"Tienes compras sin factura adjunta. Entra en Control Fiscal para revisarlas.",
-      schedule:{on:{hour,minute},repeats:true},
-      extra:{kind:"pending-documents"}
-    }]});
-  }catch(e){console.warn("No se pudo programar el recordatorio",e);}
+ const p=await nativeLocalNotifications();if(!p)return;
+ try{await p.cancel({notifications:[{id:60001}]});}catch(e){}
+ if(!cfDailyReminderEnabled())return;
+ const {buys,issued}=cfDocumentationPendingCounts();
+ if(!buys&&!issued)return;
+ try{
+  const perm=await p.checkPermissions();if(perm.display!=='granted')return;
+  const {hour,minute}=notificationTimeParts();
+  const text=[buys?buys+' compra(s) sin factura':'',issued?issued+' factura(s) sin documentación':''].filter(Boolean).join(' y ');
+  await p.schedule({notifications:[{
+   id:60001,title:'Control Fiscal · Documentación pendiente',
+   body:'Tienes '+text+'. Abre Control Fiscal para revisar lo pendiente.',
+   schedule:{on:{hour,minute},repeats:true},sound:cfNoticePayloadSound(),
+   extra:{kind:'pending-documents'}
+  }]});
+ }catch(e){const el=$('notificationStatus');if(el)el.textContent='Error al programar aviso diario: '+(e.message||e);console.error(e);}
 }
-
+async function cfSetDailyReminderEnabled(value){
+ const status=$('notificationStatus');
+ if(value){
+  try{await cfEnsureNoticePermission();localStorage.setItem(CF_NOTICE_ENABLED_KEY,'1');}
+  catch(e){localStorage.setItem(CF_NOTICE_ENABLED_KEY,'0');if(status)status.textContent=e.message||String(e);cfSyncNotificationControls();return;}
+ }else localStorage.setItem(CF_NOTICE_ENABLED_KEY,'0');
+ await schedulePendingNotificationFromCurrentState();await refreshNotificationStatus();cfTapFeedback();
+}
 async function enablePendingNotifications(){
-  const plugin=await nativeLocalNotifications();
-  const status=$("notificationStatus");
-  if(!plugin){if(status) status.textContent="Los recordatorios del iPhone solo están disponibles en la app nativa.";return;}
-  try{
-    const perm=await plugin.requestPermissions();
-    if(perm.display!=="granted"){
-      if(status) status.textContent="Notificaciones no permitidas. Actívalas en Ajustes del iPhone → Control Fiscal → Notificaciones.";
-      return;
-    }
-    await schedulePendingNotificationFromCurrentState();
-    await cfScheduleEventReminders();
-    await refreshNotificationStatus();
-    showToastMessage("Recordatorios activados","Recibirás una notificación cuando queden documentos pendientes.");
-  }catch(e){
-    console.error(e);
-    if(status) status.textContent=e.message||"No se pudieron activar los recordatorios.";
-  }
+ const status=$('notificationStatus');
+ try{
+  await cfEnsureNoticePermission();
+  await schedulePendingNotificationFromCurrentState();
+  await cfScheduleEventReminders();
+  await refreshNotificationStatus();cfTapFeedback();
+  if(status)status.textContent='✅ Permiso concedido. Se han actualizado los avisos de Agenda y la opción de aviso diario.';
+ }catch(e){if(status)status.textContent=e.message||String(e);cfSyncNotificationControls();}
+}
+function cfSaveNoticeSound(s){
+ const el=$('cfNotificationSoundStatus');
+ if(!CF_NOTICE_SOUNDS.has(s)){if(el)el.textContent='Sonido no válido.';return;}
+ localStorage.setItem(CF_NOTICE_SOUND_KEY,s);
+ cfTapFeedback();
+ Promise.all([schedulePendingNotificationFromCurrentState(),cfScheduleEventReminders()]).then(()=>{if(el)el.textContent='Sonido seleccionado y avisos actualizados. Utiliza la prueba en el iPhone.';}).catch(e=>{if(el)el.textContent='Guardado, pero no se pudieron actualizar todos los avisos: '+(e.message||e);});
+}
+function cfPreviewNoticeSound(){
+ const el=$('cfNotificationSoundStatus'),name=cfSelectedNoticeSound();
+ if(name==='default'){if(el)el.textContent='Para escuchar el sonido del sistema, pulsa PROBAR EN EL IPHONE.';return;}
+ try{
+  const a=new Audio('sounds/'+name);a.volume=.75;a.play().then(()=>{if(el)el.textContent='Reproduciendo '+name+'.';}).catch(e=>{if(el)el.textContent='No se puede reproducir: '+(e.message||e);});
+ }catch(e){if(el)el.textContent=e.message||String(e);}
+}
+async function cfSendTestNotification(){
+ const status=$('cfNotificationSoundStatus')||$('notificationStatus');
+ try{
+  const p=await cfEnsureNoticePermission();
+  const when=new Date(Date.now()+8000);
+  await p.schedule({notifications:[{
+   id:60009,title:'🔔 Prueba · Control Fiscal',body:'La notificación funciona en este iPhone.',
+   schedule:{at:when},sound:cfNoticePayloadSound(),extra:{kind:'test-notification'}
+  }]});
+  await cfSuccessFeedback();
+  if(status)status.textContent='✅ Prueba programada para dentro de 8 segundos. Bloquea el iPhone para comprobar el sonido y la notificación.';
+ }catch(e){if(status)status.textContent='No se pudo programar la prueba: '+(e.message||e);}
 }
 
 function updatePendingDocuments(){
@@ -4839,21 +5007,32 @@ async function securityStart(){
 
 // Envío de comentarios con consentimiento explícito; no registra usuarios a escondidas.
 const CF_SUPPORT_EMAIL='Electrochispas@outlook.es'; // Dirección de contacto publicada en la factura facilitada; verificar antes de distribución.
-function openCFSupport(){$('cfSupportModal')?.classList.remove('hidden');}
+function openCFSupport(){cfTapFeedback();$('cfSupportModal')?.classList.remove('hidden');}
 function closeCFSupport(){$('cfSupportModal')?.classList.add('hidden');}
 async function sendCFSupport(){
- const message=String($('cfSupportText')?.value||'').trim(),kind=$('cfSupportKind')?.value||'Sugerencia',el=$('cfSupportStatus');
- if(message.length<12){if(el)el.textContent='Describe el problema o la sugerencia con algo más de detalle.';return;}
- if(!CF_SUPPORT_EMAIL){if(el)el.textContent='Correo del administrador pendiente de configurar. No se ha enviado.';return;}
- if(!confirm('¿Enviar tu mensaje al equipo de Control Fiscal? No se adjuntará información fiscal.'))return;
- if(el)el.textContent='Enviando…';
+ const message=String($('cfSupportText')?.value||'').trim();
+ const kind=$('cfSupportKind')?.value||'Sugerencia',el=$('cfSupportStatus');
+ cfTapFeedback();
+ if(message.length<12){if(el)el.textContent='Describe el problema o la sugerencia con al menos 12 caracteres.';return;}
+ if(message.length>2700){if(el)el.textContent='Reduce el mensaje a 2700 caracteres antes de enviarlo.';return;}
+ const subject='Control Fiscal · '+kind;
+ const body='Destinatario: '+CF_SUPPORT_EMAIL+'\nTipo: '+kind+'\nVersión: UI76-20261023-R12\n\n'+message;
+ if(!confirm('Abrir el menú del iPhone para compartir la sugerencia con el administrador. Tendrás que seleccionar Mail y confirmar el envío.'))return;
+ const share=window.CFShare;
  try{
-  const result=await window.CFGoogleExtras.sendSupport({recipient:CF_SUPPORT_EMAIL,kind,message,appVersion:'UI76-20261023-R10'});
-  if(!result?.id)throw Error('No se ha confirmado el envío.');
+  if(!share?.share)throw Error('No se ha encontrado el menú nativo para compartir.');
+  await share.share({title:subject,text:body,dialogTitle:'Enviar sugerencia o incidencia'});
+  if(el)el.textContent='El menú de compartir se ha abierto. Selecciona Mail e indica '+CF_SUPPORT_EMAIL+' como destinatario; pulsa Enviar. Control Fiscal no puede confirmar el envío desde aquí.';
   await cfSuccessFeedback();
-  $('cfSupportText').value='';if(el)el.textContent='Mensaje enviado correctamente. Gracias por tu ayuda.';
- }catch(e){if(el)el.textContent='No se ha enviado: '+(e.message||e);}
+ }catch(e){
+  console.warn('Compartir no disponible',e);
+  if(el){el.replaceChildren();el.append(document.createTextNode('No se ha podido abrir el menú de compartir. '));
+   const a=document.createElement('a');a.href='mailto:'+CF_SUPPORT_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);a.textContent='Abrir correo manualmente';el.append(a);
+   const b=document.createElement('button');b.type='button';b.textContent='Copiar mensaje';b.onclick=async()=>{try{await navigator.clipboard.writeText(body);el.append(document.createTextNode(' · Mensaje copiado.'));}catch(_){prompt('Copia tu mensaje:',body);}};el.append(b);
+  }
+ }
 }
+
 const CF_TOUR_STEPS=[
  {title:'Bienvenido a Control Fiscal',text:'Tus compras, clientes, facturas, inventario y agenda se guardan en tu espacio de Google. Empezaremos por Inicio.',page:'home',target:'#home .hero'},
  {title:'Accesos de Inicio',text:'Usa estas tarjetas para entrar a Compras, Facturación, Agenda y Stock; también puedes utilizar la barra inferior.',page:'home',target:'#home .homegrid'},
@@ -4914,10 +5093,10 @@ renderInventory=function(){
   const entry=inventoryItems.find(x=>String(x.articulo)===label);
   const url=cfSafeCommonsImage(entry?.imagenUrl);
   const driveId=cfDrivePhotoId(entry?.imagenUrl);
-  if((url||driveId)&&!card.querySelector('.cfInventoryThumb')){
+  if((url||driveId)&&!card.querySelector('.cfInventoryThumb')&&!card.querySelector('.cfInventoryListImage')){
     const img=document.createElement('img');img.className='cfInventoryThumb';img.alt='Foto de '+label;img.loading='lazy';img.referrerPolicy='no-referrer';
-    if(url)img.src=url;
-    else {img.src='control-fiscal-logo.jpg';cfLoadPrivateInventoryPhoto(img,entry.imagenUrl,window.CFGoogleAccount?.active()?.id);}
+    if(driveId){img.src='control-fiscal-logo.jpg';cfLoadPrivateInventoryPhoto(img,entry.imagenUrl,window.CFGoogleAccount?.active()?.id);}
+    else if(url)img.src=url;
     card.querySelector('.stockHead > div')?.prepend(img);
   }
  });
@@ -4930,7 +5109,7 @@ openInventoryModal=function(id=null){
  if($('cfInventoryPhotoChoices'))$('cfInventoryPhotoChoices').replaceChildren();
  if($('cfInventoryPhotoUpload'))$('cfInventoryPhotoUpload').value='';
  if($('cfInventoryPhotoStatus'))$('cfInventoryPhotoStatus').textContent=item?.imagenUrl?'Imagen anterior conservada.':'';
- const pic=$('cfInventoryPhotoPreview');if(pic){pic.src=cfSafeCommonsImage(item?.imagenUrl)||'';pic.hidden=!pic.src;}
+ const pic=$('cfInventoryPhotoPreview');if(pic){const drive=cfDrivePhotoId(item?.imagenUrl);pic.src=drive?'control-fiscal-logo.jpg':cfSafeCommonsImage(item?.imagenUrl)||'';pic.hidden=!pic.src;if(drive)cfLoadPrivateInventoryPhoto(pic,item.imagenUrl,window.CFGoogleAccount?.active()?.id);}
 };
 let cfInventorySelectedPhoto=null;
 function cfSafeCommonsImage(url){
@@ -4964,34 +5143,75 @@ async function cfLoadPrivateInventoryPhoto(img,driveUrl,accountId){
 function cfClearPrivateInventoryPhotos(){for(const url of cfInventoryPrivateImages.values())try{URL.revokeObjectURL(url)}catch(e){}cfInventoryPrivateImages.clear();}
 
 function cfOpenGoogleImageSearch(){const model=String($('invItemName')?.value||'').trim();if(model.length<3){$('cfInventoryPhotoStatus').textContent='Escribe primero el nombre exacto del producto.';return;}const url='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(model);if(window.CFBrowser?.open)window.CFBrowser.open({url}).catch(e=>{$('cfInventoryPhotoStatus').textContent=e.message||String(e)});else window.open(url,'_blank','noopener');}
+async function cfImageFetchJson(endpoint){
+ const c=typeof AbortController!=='undefined'?new AbortController():null;
+ const timeout=c?setTimeout(()=>c.abort(),8500):null;
+ try{
+  const res=await fetch(endpoint,{headers:{Accept:'application/json'},...(c?{signal:c.signal}:{})});
+  if(!res.ok)throw Error('HTTP '+res.status);
+  return await res.json();
+ }finally{if(timeout)clearTimeout(timeout);}
+}
 async function cfFindInventoryPhotos(){
  const status=$('cfInventoryPhotoStatus'),wrap=$('cfInventoryPhotoChoices'),name=String($('invItemName')?.value||'').trim();
- if(name.length<3){status.textContent='Escribe el nombre o modelo del artículo.';return;}
- status.textContent='Buscando fotografías con licencia indicada…';wrap.replaceChildren();
+ if(name.length<3){status.textContent='Introduce primero el nombre o modelo del artículo.';return;}
+ status.textContent='Buscando fotografías para elegir dentro de Control Fiscal…';wrap.replaceChildren();
+ const options=[];
  try{
-  // Openverse permite elegir fotografías de distintas fuentes; Google Imágenes no publica
-  // una API nueva de resultados utilizable libremente sin proveedor autorizado.
-  const url='https://api.openverse.org/v1/images/?'+new URLSearchParams({q:name,page_size:'15'});
-  const resp=await fetch(url,{headers:{Accept:'application/json'}});
-  if(!resp.ok)throw Error('La búsqueda no está disponible (HTTP '+resp.status+').');
-  const doc=await resp.json(),results=(doc.results||[]).filter(x=>{
-   try{const u=new URL(x.thumbnail||x.url);return u.protocol==='https:';}catch{return false;}
-  }).slice(0,15);
-  if(!results.length){status.textContent='Sin fotografías apropiadas. Usa Google Imágenes para localizarla y después súbela desde Fotos o Archivos.';return;}
-  for(const photo of results){
-   const url=photo.thumbnail||photo.url;
-   const button=document.createElement('button');button.className='cfPhotoChoice';button.type='button';
-   const img=document.createElement('img');img.alt=String(photo.title||name);img.src=url;img.loading='lazy';img.referrerPolicy='no-referrer';
-   const label=document.createElement('span');label.textContent=String(photo.title||name).slice(0,65)+' · '+String(photo.license||'Licencia por revisar');
-   button.append(img,label);button.onclick=()=>{
-    cfInventorySelectedPhoto={url:photo.url||url,source:photo.foreign_landing_url||photo.url,license:String(photo.license||'')};
-    $('cfInventoryPhotoPreview').src=url;$('cfInventoryPhotoPreview').hidden=false;
-    status.textContent='Seleccionada. Comprueba que coincida con el modelo y que tengas derecho a usarla.';
-   };wrap.append(button);
+  const endpoint='https://api.openverse.org/v1/images/?'+new URLSearchParams({q:name,page_size:'15'});
+  const data=await cfImageFetchJson(endpoint);
+  for(const x of data.results||[]){
+    const url=x.thumbnail||x.url,full=x.url||url;
+    if(!cfIsPublicImageHttps(url)||!cfIsPublicImageHttps(full))continue;
+    options.push({url,full,title:String(x.title||name),source:String(x.foreign_landing_url||full),license:String(x.license||'')});
   }
-  status.textContent='Elige una fotografía del modelo exacto. Si no aparece, usa Google Imágenes y súbela desde tu dispositivo.';
- }catch(e){status.textContent='No se pudieron cargar sugerencias. Puedes usar Google Imágenes y luego subir la foto: '+(e.message||e);}
+ }catch(e){console.info('Openverse no disponible, probando Wikimedia Commons:',e.message||e);}
+ if(options.length<4){
+  try{
+   const endpoint='https://commons.wikimedia.org/w/api.php?'+new URLSearchParams({action:'query',generator:'search',gsrsearch:name,gsrnamespace:'6',gsrlimit:'16',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'200',format:'json',origin:'*'});
+   const data=await cfImageFetchJson(endpoint);
+   for(const page of Object.values(data.query?.pages||{}) ){
+    const image=page.imageinfo?.[0];if(!image)continue;
+    const url=image.thumburl||image.url,full=image.url||url;
+    if(!cfIsPublicImageHttps(url)||!cfIsPublicImageHttps(full))continue;
+    options.push({url,full,title:String(page.title||name).replace(/^File:/,''),source:String(image.descriptionurl||full),license:String(image.extmetadata?.LicenseShortName?.value||'Comprobar licencia')});
+   }
+  }catch(e){console.info('Wikimedia Commons no disponible:',e.message||e);}
+ }
+ if(options.length<4){
+  const fallback=cfGenericPhotoQuery(name);
+  if(fallback&&fallback.toLowerCase()!==name.toLowerCase()){
+   try{
+    const ep='https://commons.wikimedia.org/w/api.php?'+new URLSearchParams({action:'query',generator:'search',gsrsearch:fallback,gsrnamespace:'6',gsrlimit:'18',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'240',format:'json',origin:'*'});
+    const data=await cfImageFetchJson(ep);
+    for(const page of Object.values(data.query?.pages||{})){
+     const info=page.imageinfo?.[0];if(!info)continue;
+     const url=info.thumburl||info.url,full=info.url||url;
+     if(cfIsPublicImageHttps(url)&&cfIsPublicImageHttps(full))options.push({url,full,title:String(page.title||fallback).replace(/^File:/,''),source:String(info.descriptionurl||full),license:String(info.extmetadata?.LicenseShortName?.value||'Consultar licencia'),generic:true});
+    }
+   }catch(e){console.info('Sin imágenes genéricas',e.message||e);}
+  }
+ }
+ const results=[...new Map(options.map(x=>[x.full,x])).values()].slice(0,25);
+ if(!results.length){status.textContent='No se encontraron fotos del modelo en las fuentes disponibles. Puedes añadir tu propia foto desde el iPhone.';return;}
+ for(const item of results){
+  const button=document.createElement('button');button.className='cfPhotoChoice';button.type='button';
+  const img=document.createElement('img');img.alt=item.title;img.src=item.url;img.loading='lazy';img.referrerPolicy='no-referrer';
+  const label=document.createElement('span');label.textContent=item.title.slice(0,65)+' · '+item.license.slice(0,42);
+  button.append(img,label);button.onclick=()=>{
+   cfInventorySelectedPhoto={url:item.full,source:item.source,license:item.license};
+   $('cfInventoryPhotoPreview').src=item.url;$('cfInventoryPhotoPreview').hidden=false;
+   status.textContent='Foto seleccionada. Comprueba que corresponde al modelo y revisa los derechos de reutilización.';
+  };wrap.append(button);
+ }
+ status.textContent=results.length+' imágenes disponibles. Algunas son genéricas: elige solo una que corresponda a tu artículo y comprueba su licencia.';
 }
+function cfGenericPhotoQuery(name){
+ const text=String(name||'').toLowerCase();
+ const rules=[[/(alte?a|altavoz|speaker|subwoofer|audio|line array|van[tc]ec)/i,'loudspeaker audio equipment'],[/(pantalla|tv|televisor|monitor)/i,'flat screen television'],[/(laser|luz|foco|beam|iluminacion)/i,'stage spotlight lighting'],[/(microfono|micrófono)/i,'handheld microphone'],[/(camara|cámara)/i,'digital camera'],[/(mesa.*sonido|mezclador)/i,'audio mixing console'],[/(cable)/i,'electrical cable'],[/(truss|estructura)/i,'stage truss']];
+ return rules.find(([pattern])=>pattern.test(text))?.[1]||'';
+}
+function cfIsPublicImageHttps(url){try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&u.hostname.includes('.');}catch{return false;}}
 
 function cfUseCustomImageUrl(){
  const status=$('cfInventoryPhotoStatus'),link=String($('cfInventoryCustomImageUrl')?.value||'').trim();
@@ -5027,11 +5247,11 @@ startAccountSystem();
 <div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>
   <h3>✉️ SUGERENCIAS Y ERRORES</h3>
-  <p class="settingsHint">Tu mensaje se enviará desde la cuenta Google que hayas autorizado. El administrador recibe el correo, pero nunca tus registros fiscales.</p>
+  <p class="settingsHint">Abriremos el correo del teléfono con el destinatario y el mensaje preparados. Confirma el envío en Mail (u otra aplicación de correo). No enviaremos tus datos fiscales.</p>
   <div class="field"><label>Tipo de mensaje</label><select id="cfSupportKind" class="select"><option value="Sugerencia">Sugerencia</option><option value="Error">Informar de un error</option><option value="Consulta">Consulta</option></select></div>
   <div class="field"><label>Describe lo ocurrido o tu propuesta</label><textarea id="cfSupportText" class="textarea" rows="6" maxlength="3000" placeholder="Indica qué ventana estabas utilizando, qué pulsaste y qué sucedió. No incluyas contraseñas ni datos bancarios."></textarea></div>
   <div class="settingsHint" id="cfSupportStatus"></div>
-  <button class="save p" type="button" onclick="sendCFSupport()">ENVIAR MENSAJE</button>
+  <button class="save p" type="button" onclick="sendCFSupport()">PREPARAR CORREO PARA ENVIAR</button>
  </div>
 </div>
 <div id="cfTutorialOverlay" class="cfTutorialOverlay hidden" role="dialog" aria-modal="true" aria-label="Tutorial de Control Fiscal">
@@ -5044,7 +5264,11 @@ startAccountSystem();
     <div class="modalTitle">📦 <span id="inventoryModalTitle">Nuevo material</span></div>
     <div class="inventoryModalGrid">
       <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. Artículo o referencia"></div>
-      <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option value="__new__">＋ Crear nuevo tipo</option></select><button class="guideBtn" type="button" onclick="document.getElementById('invItemCategory').value='__new__';inventoryCategoryChanged()">＋ CREAR TIPO</button></div>
+      <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option value="__new__">＋ Crear nuevo tipo…</option></select>
+        <div id="cfInventoryNewTypeInline" class="cfInventoryNewTypeInline" hidden>
+          <input id="cfInventoryNewTypeName" class="input" maxlength="65" autocomplete="off" placeholder="Nombre del tipo (ej. Televisores)" onkeydown="if(event.key==='Enter'){event.preventDefault();cfConfirmNewInventoryType();}">
+          <button id="cfInventoryConfirmType" type="button" onclick="cfConfirmNewInventoryType()">GUARDAR TIPO</button>
+        </div></div>
       <div class="field"><label>Unidad</label><select id="invItemUnit" class="select"><option>unidades</option><option>metros</option><option>pares</option><option>juegos</option><option>cajas</option></select></div>
       <div class="field"><label>Cantidad</label><input id="invItemQty" class="input" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
       <div class="field"><label>Stock mínimo</label><input id="invItemMin" class="input" type="number" min="0" step="1" inputmode="numeric" value="0"></div>
@@ -5053,8 +5277,8 @@ startAccountSystem();
       <div class="field full"><label>Notas</label><textarea id="invItemNotes" class="textarea" placeholder="Opcional"></textarea></div>
       <div class="field full cfInventoryPhoto"><label>Imagen del artículo (opcional)</label>
         <p class="settingsHint">Busca imágenes de fuentes abiertas y elige la del modelo correcto. Google Imágenes se puede abrir para localizar y guardar una fotografía en el teléfono. Si no aparece, puedes elegir un archivo propio.</p>
-        <button class="guideBtn" type="button" onclick="cfFindInventoryPhotos()">🖼️ BUSCAR FOTOS SUGERIDAS (OPENVERSE)</button>
-        <button class="guideBtn" type="button" onclick="cfOpenGoogleImageSearch()">🔍 BUSCAR MODELO EN GOOGLE IMÁGENES</button><small class="settingsHint">Google Imágenes se abre para identificar el modelo. Por licencias y seguridad, Control Fiscal no importa automáticamente las fotos: selecciona una con permiso de uso o sube tu propia foto.</small>
+        <button class="guideBtn" type="button" onclick="cfFindInventoryPhotos()">🖼️ VER GALERÍA DE FOTOGRAFÍAS</button>
+        <small class="settingsHint">La galería muestra imágenes de Openverse y Wikimedia Commons que puedes seleccionar sin salir de Control Fiscal. Por licencias y seguridad, Control Fiscal no extrae fotografías automáticamente de Google. Google no ofrece su buscador de imágenes a apps nuevas mediante una API pública. Para modelos comerciales sin resultados, sube una foto propia del producto.</small>
         <div id="cfInventoryPhotoChoices" class="cfInventoryPhotoChoices"></div>
         <div class="field"><label>Enlace directo de imagen elegida (opcional)</label>
           <input id="cfInventoryCustomImageUrl" class="input" inputmode="url" type="url" placeholder="https://.../foto.jpg">
@@ -5176,9 +5400,9 @@ startAccountSystem();
  <div class="guideStep"><div class="guideNum">11</div><div><h4>Imagen y optimización</h4><p>En Ajustes alterna tema negro o blanco, cambia la imagen del menú y la imagen de facturas. En pantallas antiguas usa Ahorro de rendimiento; el texto se mantiene nítido porque la interfaz usa elementos adaptativos.</p></div></div>
  <div class="guideStep"><div class="guideNum">12</div><div><h4>Editar o eliminar registros sin duplicados</h4><p>Las facturas emitidas se muestran en modo consulta: no se borran ni modifican. Para corregirlas es necesario el procedimiento de factura rectificativa. Desde Inicio pulsa Ver todos, selecciona un registro y elige editar o borrar. Confirma los cambios; cuando aparece el mensaje de éxito, los datos se actualizarán. El botón Guardar queda bloqueado durante el envío y los campos se vacían únicamente si Google confirma el alta. Si aparece un error 401, la app intentará renovar la autorización automáticamente; si no es posible, reconecta en Cuenta.</p></div></div>
 <div class="guideStep"><div class="guideNum">13</div><div><h4>Distribuidores y clientes anteriores</h4><p>En Compras escribe parte del nombre de un distribuidor y selecciona una coincidencia. En Facturación ocurre lo mismo con clientes. Para corregir NIF, dirección o teléfono ve a Ajustes → Mis clientes o Mis distribuidores y pulsa Editar.</p></div></div>
-<div class="guideStep"><div class="guideNum">14</div><div><h4>Iconos y fotografías del inventario</h4><p>Los iconos de tipo se escogen automáticamente según palabras como altavoz, iluminación, ordenador, cable o cámara. Las categorías que ya hayas guardado siguen disponibles. Puedes filtrar por esos botones. No se asignan fotografías de productos sin verificar que correspondan al modelo, para evitar mostrar material equivocado.</p></div></div>
+<div class="guideStep"><div class="guideNum">14</div><div><h4>Iconos y fotografías del inventario</h4><p>Desde el desplegable Tipo de material elige «Crear nuevo tipo…» y aparecerá un campo para escribirlo. Sus categorías generan botones con iconos. La galería muestra fotografías seleccionables de fuentes abiertas; si no encuentra el modelo comercial exacto, sube su fotografía.</p></div></div>
 <div class="guideStep"><div class="guideNum">15</div><div><h4>Recordatorios de eventos</h4><p>Si autorizas las notificaciones en iOS, los eventos próximos permiten avisos en el móvil con el nombre y la ubicación. En la ficha del evento eliges avisar al empezar, 15 minutos, 30 minutos, 1 hora, 2 horas, 1 día o 2 días antes. El aviso local no requiere Google Calendar. Comprueba que las notificaciones del sistema estén activadas.</p></div></div>
-<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. Si Gmail rechaza el envío, verás el error para corregirlo.</p></div></div>
+<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. Se abre la aplicación de correo del teléfono para que revises y envíes el mensaje; no necesitas autorizar Gmail API.</p></div></div>
 <div class="guideStep"><div class="guideNum">17</div><div><h4>Permisos de Google, avisos y privacidad</h4><p>Google puede pedir de nuevo autorización tras un tiempo o cuando cambian los permisos. No compartas los accesos ni otorgues permisos a otras cuentas sin revisarlos. El administrador no puede abrir tus libros ni eliminar tus facturas desde el panel de soporte. Para controles centrales de cuentas se requiere un servidor independiente y una política de privacidad.</p></div></div>
 <div class="guideStep"><div class="guideNum">19</div><div><h4>Documentos: carpetas y subcarpetas privadas</h4><p>En Inicio pulsa DOCUMENTOS. Crea una carpeta Certificados; ábrela y añade la subcarpeta Certificados de sonido. Dentro sube PDF o imágenes con el botón Subir. La app mostrará los archivos en una lista y los abrirá sin salir. Los documentos se guardan en tu Google Drive; quitar un registro de la app no destruye el archivo de Drive.</p></div></div>
 <div class="guideStep"><div class="guideNum">20</div><div><h4>Retirar facturas emitidas de la lista</h4><p>Una factura emitida sigue siendo un documento fiscal y no se debe destruir como una compra. Desde Registros, abre la factura y selecciona Retirar de la lista; desaparecerá de las listas normales pero seguirá en el historial fiscal y computando en el resumen. Marca Mostrar facturas retiradas para consultarla y restaurarla. Para corregir importes fiscalmente debe emitirse una rectificativa cuando corresponda.</p></div></div>

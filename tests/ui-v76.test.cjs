@@ -40,12 +40,13 @@ test('Inicio, Agenda y Stock son el HTML original V76 (sin clones V78)',()=>{
 });
 test('formularios dinámicos y navegación mantienen el código de diseño V76',()=>{
  for(const [name,digest] of Object.entries(ref.v76FunctionsSha256)){
-  if(['openSettings','only','openInventoryModal','saveInventoryItem'].includes(name)){
+  if(['openSettings','only','openInventoryModal','saveInventoryItem','renderInventory'].includes(name)){
    const fn=sourceFunction(name);
    if(name==='openSettings')assert.match(fn,/cfSettingsHome\(\)/);
    if(name==='only')assert.match(fn,/documentsPage/);
    if(name==='openInventoryModal')assert.match(fn,/getInventoryCategories/);
    if(name==='saveInventoryItem')assert.match(fn,/guardarInventario/);
+   if(name==='renderInventory'){assert.match(fn,/cfInventoryListImage/);assert.match(fn,/cfLoadPrivateInventoryPhoto/);}
    continue; // Navegación R10: mantiene la interfaz de V76, añade Documentos y Ajustes aislados.
   }
   if(name==='openForm'){
@@ -65,8 +66,8 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
  assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
- assert.match(html,new RegExp('data-cf-ui-build="UI76-20261023-R10"'));
- assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261023-R10'));
+ assert.match(html,new RegExp('data-cf-ui-build="UI76-20261023-R12"'));
+ assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261023-R12'));
  assert.match(auth,/if\(typeof root\.goHome==='function'\)root\.goHome\(\);/);
  assert.match(auth,/root\.startLocalSecurityForAccount\(fromInteractiveLogin\)/);
  assert.match(auth,/element\('accountGate'\)\?\.classList\.add\('hidden'\)/);

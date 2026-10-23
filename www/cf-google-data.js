@@ -118,7 +118,7 @@ async function issuedRecords(s){
  return rows.map((r,index)=>{
   if(r[0]!=='CF_FACTURA_EMITIDA_1'||!r[1])return null;
   const doc=parseJSON(r[2],null);if(!doc||typeof doc!=='object')return null;
-  const invoiceNumber=doc.numbering&&root.CFInvoiceNumbering?root.CFInvoiceNumbering.format(doc.numbering,index+1,doc.fecha):'CF-'+String(index+1).padStart(6,'0');
+  const invoiceNumber=doc.numeroAsignado|| (doc.numbering&&root.CFInvoiceNumbering?root.CFInvoiceNumbering.format(doc.numbering,doc.sequenceIndex||index+1,doc.fecha):'CF-'+String(index+1).padStart(6,'0'));
   return {...doc,numeroFactura:invoiceNumber, facturaUrl:pdfs.get(invoiceNumber)||'',fila:index+1,emitida:true,archivada:!!archived.get(r[1]),tipo:'Facturación',estado:'EMITIDA',requestId:r[1],_tab:ISSUED_TAB};
  }).filter(Boolean);
 }
@@ -185,17 +185,33 @@ async function action(p){
    const preferences=(await config(s)).cf_invoice_numbering_v1;
    const numbering=preferences?root.CFInvoiceNumbering?.normalize(preferences):null;
    if(preferences&&!numbering)throw Error('La configuración de numeración no es válida. Corrígela antes de emitir.');
-   if(numbering){
-    // Protección ante reutilización de un código histórico, antes de emitir.
-    // Las filas emitidas son de solo añadir; no se cambian números antiguos.
-    const nextRow=(await maybeRead(s,ISSUED_TAB)).length+1;
-    const candidate=root.CFInvoiceNumbering.format(numbering,nextRow,now());
-    const historical=await all(s,['Facturas','Facturación']);
-    const already=await issuedRecords(s);
-    if([...historical,...already].some(x=>x.numeroFactura===candidate))
-     throw Error('El número '+candidate+' ya existe en tu historial. Cambia la serie o el número inicial en Ajustes antes de emitir.');
+   // Serie y número son decisiones anteriores a la emisión. Si el usuario pide
+   // un número personalizado, debe pertenecer al patrón configurado.
+   const issuedAt=now(),history=await all(s,['Facturas','Facturación']),already=await issuedRecords(s);
+   const issuedRows=await maybeRead(s,ISSUED_TAB);
+   const currentNumbering=numbering||root.CFInvoiceNumbering?.DEFAULT;
+   let nextIndex=issuedRows.length+1;
+   if(currentNumbering&&root.CFInvoiceNumbering?.parseIndex){
+    for(const invoice of already){
+     const parsed=root.CFInvoiceNumbering.parseIndex(currentNumbering,invoice.numeroFactura,issuedAt);
+     if(parsed!==null)nextIndex=Math.max(nextIndex,parsed+1);
+    }
    }
-   const doc={id:ident('ISS'),fecha:now(),tipo:'Facturación',estado:'EMITIDA',requestId:key,numbering,
+   const requested=String(p.numeroSolicitado||'').trim();
+   if(requested&&!/^[A-Za-z0-9_\-/.]{1,64}$/.test(requested))throw Error('Número solicitado no válido. Usa letras, números, guion, barra o punto.');
+   let manualIndex=null;
+   if(requested){
+    if(!currentNumbering||!root.CFInvoiceNumbering?.parseIndex)throw Error('Configura la numeración en Ajustes antes de elegir un número.');
+    manualIndex=root.CFInvoiceNumbering.parseIndex(currentNumbering,requested,issuedAt);
+    if(manualIndex===null)throw Error('El número '+requested+' no coincide con la serie configurada en Ajustes ni con el año actual.');
+   }
+   const selectedIndex=manualIndex||nextIndex;
+   const candidate=requested|| (numbering?root.CFInvoiceNumbering.format(numbering,selectedIndex,issuedAt):'CF-'+String(selectedIndex).padStart(6,'0'));
+   const conflict=[...history,...already].find(x=>String(x.numeroFactura||'').toUpperCase()===candidate.toUpperCase());
+   if(conflict)throw Error('El número '+candidate+' ya existe y está asignado a otra factura: '+String(conflict.tercero||'cliente no indicado').slice(0,80)+' ('+String(conflict.fecha||'sin fecha').slice(0,10)+'). No se ha emitido una factura duplicada.');
+   if(manualIndex!==null&&manualIndex<nextIndex)throw Error('El número '+requested+' retrocede respecto a la siguiente numeración de la serie. No se pueden reutilizar posiciones de la secuencia.');
+   const doc={id:ident('ISS'),fecha:issuedAt,tipo:'Facturación',estado:'EMITIDA',requestId:key,numbering,
+    numeroAsignado:candidate,sequenceIndex:selectedIndex,
     tercero:p.tercero||validation.client.nombre,concepto:p.concepto||'',
     base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),
     cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||''};
@@ -209,7 +225,7 @@ async function action(p){
    const row=Number(matched[1]);
    if(!Number.isInteger(row)||row<1)throw Error('Fila de numeración no válida. Consulta el libro de Google.');
    try{const draft=(await items(s,'Facturas')).find(x=>x.requestId===key&&x.estado==='BORRADOR');if(draft)await revision(s,'Facturas',draft._key,{},true);}catch(e){console.warn('La factura está emitida, pero el borrador anterior sigue visible',e);}
-   const invoiceNumber=numbering?root.CFInvoiceNumbering.format(numbering,row,doc.fecha):'CF-'+String(row).padStart(6,'0');
+   const invoiceNumber=doc.numeroAsignado;
    return {ok:true,numeroFactura:invoiceNumber,fecha:doc.fecha,facturaEmitida:true};
   })();
   inflightIssues.set(guard,issue);try{return await issue;}finally{inflightIssues.delete(guard);}

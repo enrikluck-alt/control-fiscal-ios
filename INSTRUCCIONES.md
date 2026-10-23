@@ -1,72 +1,67 @@
-# Control Fiscal V76-Google — R10 (Documentos y mejoras de interfaz)
+# Control Fiscal V76-Google — R12 · Notificaciones, sonido y correcciones de interfaz
 
-**Identificador:** `UI76-20261023-R10` · **Proyecto:** `1.16.0`.
+**Identificador visible en Ajustes:** `UI76-20261023-R12`
+
+Esta entrega conserva las pantallas originales V76 y los módulos de la R11; modifica principalmente Ajustes, notificaciones, soporte e Inventario. No se ha probado aún la IPA en un iPhone real ni se ha ejecutado Xcode en este entorno. Los datos fiscales reales requieren las precauciones de las versiones anteriores, especialmente con facturas emitidas y numeración concurrente.
 
 ## Instalación
 
-1. Descomprime **todo el ZIP** en la rama `v78-google-test` del repositorio de GitHub, sustituyendo los archivos anteriores, también `.github/workflows/build-ios.yml`. **No modifiques `main`.**
-2. Ejecuta GitHub Actions → **Build unsigned iOS IPA**, seleccionando esa misma rama.
-3. Descarga el artefacto **`ControlFiscal-V76-Google-R10-Documentos-IPA`** y dentro la IPA **`ControlFiscal_V76_Google_R10_Documentos.ipa`**.
-4. Firma e instala con Sideloadly. En Ajustes comprueba la versión `UI76-20261023-R10`.
-5. Prueba **solo con datos ficticios** hasta validar el acceso Google, emisión fiscal, integración con Drive y notificaciones en el iPhone.
+1. Extrae el ZIP y sube su contenido **completo**, incluida la carpeta oculta `.github`, a la rama **`v78-google-test`**. No modifiques `main`.
+2. Abre GitHub Actions → `Build unsigned iOS IPA` → `Run workflow` y elige dicha rama.
+3. Descarga el artefacto **`ControlFiscal-V76-Google-R12-Notificaciones-IPA`** y dentro la IPA `ControlFiscal_V76_Google_R12_Notificaciones_Imagenes.ipa`.
+4. Instálala con Sideloadly y verifica la marca `UI76-20261023-R12` al final de Ajustes.
+5. Comprueba que en la IPA aparecen los archivos de sonido `cf_claro.wav`, `cf_pulso.wav` y `cf_calma.wav` en la raíz de `Payload/ControlFiscal.app/` (el workflow valida que estén).
 
-## R10: qué cambia
+## Ajustes — tema blanco
 
-### 1. Nueva ventana «Documentos»
+Se refuerza el contraste en el **índice principal de Ajustes**: los títulos y los botones de navegación pasan a oscuro sobre blanco. Prueba tanto el índice como Diseño, Notificaciones, Audio y Cuenta. Las preferencias existentes se conservan.
 
-Desde el icono **DOCUMENTOS** del menú Inicio entra en tu archivador personal. Pulsa **Crear carpeta** para añadir, por ejemplo, «Certificados». Entra en esa carpeta y crea la subcarpeta «Certificados de altavoces»; desde ella pulsa **Subir PDF o imagen** para añadir archivos PDF/JPG/PNG de hasta **5 MB por archivo**.
+## Sugerencias — menú nativo de compartir
 
-Cada archivo se guarda **privado en el Drive del usuario conectado**. Control Fiscal guarda su nombre, jerarquía y enlace autorizado en el diario de cambios del mismo libro (`CF_Registros_v2`). Los archivos aparecen en una lista por carpetas y se abren con el visor interno. Si se elimina un archivo del listado, **se elimina su referencia, no el archivo original de Drive**, para evitar pérdida accidental. No se pueden eliminar carpetas que contengan elementos.
+En Ajustes → Sugerencias y errores se mantiene el formulario. Al pulsar «Preparar correo» hay una vibración corta; tras confirmar se abre la hoja nativa de compartir de iOS. Elige Mail o tu aplicación de correo y envía la sugerencia a **Electrochispas@outlook.es** (es el destinatario provisional que ya figuraba en versiones anteriores). La app incluye esta dirección en el texto compartido, **pero debes indicarla como destinatario en tu aplicación de correo si ésta no la rellena**. Control Fiscal no tiene servidor de recepción ni puede verificar automáticamente que el correo se haya enviado.
 
-### 2. Facturas emitidas: retirar y restaurar sin destruir el justificante
+Si el menú de compartir no se abre, se ofrece un enlace a Mail y la opción de copiar el texto. No se adjuntan automáticamente documentos, compras o facturas de la cuenta.
 
-En **Inicio → Ver todos → Facturación**, abre una factura marcada como **emitida**. Ahora aparece **«Retirar factura de la lista»**. Tras confirmar, ya no sale en las listas ordinarias, pero se conserva su número, PDF, fila original y trazabilidad en el Drive. **Sigue computando en el resumen fiscal**: ocultar no equivale a anular una factura legalmente emitida.
+## Notificaciones iOS — configurar y comprobar
 
-Para recuperarla entra en **Ver todos**, activa **«Mostrar facturas emitidas retiradas del listado»**, abre la factura y pulsa **«Restaurar factura en la lista»**. Esta operación reversible se guarda en una hoja nueva `CF_Facturas_Archivadas`. La factura emitida original permanece inalterada en `CF_Facturas_Emitidas`.
+En Ajustes → **Notificaciones**:
 
-**Importante:** esta función NO rectifica facturas; la rectificación, cuando proceda, necesita su propio flujo fiscal, aún no implementado. Para documentos reales, consulta a tu asesoría antes de ocultar/anular/rectificar registros.
+- Elige la **hora del recordatorio** (por ejemplo, 09:00).
+- Marca **«Aviso diario de documentación pendiente»** para activarlo; desmárcalo para cancelarlo. Esta preferencia se conserva al cerrar la aplicación.
+- Pulsa **«Permitir notificaciones»** si aún no has concedido el permiso de iOS. Para funcionar, iOS debe autorizar alertas y, para oír sonidos, tener el sonido permitido. El modo Silencio o Concentración puede afectar a su presentación.
+- Pulsa **«Enviar aviso de prueba»**: se programa una notificación local para **8 segundos más tarde**. Bloquea el iPhone para comprobar que aparece. Esto prueba el funcionamiento real del plugin nativo; si falla, la app muestra el motivo.
+- Las notificaciones de compras/facturas pendientes se programan a diario **solo cuando hay documentación pendiente y la casilla está activada**. Al actualizar la información o desactivar la casilla se reprograman o cancelan. Si cambias datos externamente en Drive, abre la app para que recalcule el estado.
 
-### 3. Inventario sin categorías iniciales de ejemplo
+En **Agenda**, al guardar un evento que tenga aviso seleccionado, la aplicación pide autorización de iOS si aún no la tiene y programa el aviso. Si no se concede, el evento queda guardado y aparece una advertencia de que **no se ha programado** la notificación. No es necesario conceder permiso a Google Calendar para estos avisos locales. Los avisos cubren eventos de los próximos 90 días y se actualizan al cargar Agenda.
 
-Las cuentas nuevas no recibirán tipos de material preestablecidos. Para crear el primer artículo pulsa Inventario → «+» → **CREAR TIPO** y escribe, por ejemplo, «Televisores» o «Altavoces». Aparecerá un botón con un icono aproximado (📺/🔊 u otro según el nombre), y al pulsarlo verás los artículos de ese tipo. Se mantienen las categorías y los artículos que el usuario **ya tenía** guardados en su Google Sheets. Las categorías locales nuevas se almacenan por libro personal, no se comparten por error entre distintas cuentas.
+### Audio de notificaciones
 
-### 4. Fotografías: Openverse, Google Imágenes y carga privada
+Nuevo apartado **Ajustes → Audio de notificaciones** con cuatro opciones: sonido del sistema o tres sonidos propios cortos (Claro, Pulso y Calma). Puedes pulsar **Escuchar sonido** y **Probar en el iPhone**. Los archivos WAV se incluyen tanto en `www/sounds/` como en la raíz de la aplicación iOS al construir la IPA. Son sonidos originales de esta entrega, no archivos copiados de terceros. Apple exige que los sonidos personalizados estén en el paquete de la app y duren menos de 30 segundos.
 
-**Buscar fotos sugeridas** utiliza Openverse (catálogo de diversas fuentes con datos de licencia) y permite seleccionar una miniatura. **Buscar modelo en Google Imágenes** abre Google para localizar el modelo exacto. Si eliges una foto, puedes guardarla en Fotos/Archivos y después subirla desde el formulario a tu Drive; también puedes pegar una **URL HTTPS directa** en «Usar esta foto», revisando licencia, modelo exacto y que el enlace no caduque. Las miniaturas de terceras páginas pueden bloquear cargas directas.
+**Limitación:** iOS puede silenciar las alertas por los ajustes del dispositivo, el modo Concentración o los permisos. Ninguna app puede imponer una notificación o sonido si el sistema los bloquea. No se incluyen Live Activities en esta versión.
 
-**No se incluye una galería automática de resultados de Google Imágenes dentro de Control Fiscal**: la API oficial de búsqueda de imágenes de Google requiere un servicio autorizado y su antigua Custom Search JSON API está cerrada a nuevos clientes. No se ha introducido scraping ni una clave secreta en la app.
+## Inventario
 
-### 5. Ajustes por pantallas independientes
+- Los botones de **tipos de material** se disponen en **cuadrícula** de ancho adaptable; ya no es necesario desplazarse horizontalmente para cambiar de tipo.
+- Las fichas de inventario muestran las fotos asociadas. Las imágenes privadas subidas a Drive se descargan para su visualización usando la cuenta Google activa; no se publican los archivos.
+- El editor conserva la imagen asociada al reabrir un artículo, evitando perderla al cambiar otros campos.
+- «Ver galería de fotografías» busca en Openverse/Wikimedia, añade una búsqueda **genérica** cuando el modelo exacto no arroja resultados y corta las peticiones que tarden demasiado. Muestra imágenes seleccionables con sus licencias. Si no hay imágenes, permite subir tu propia foto.
+- Esta galería **no es Google Imágenes** y las imágenes genéricas pueden no corresponder al producto. Comprueba siempre que es la foto correcta antes de guardarla. Fuentes externas pueden bloquear miniaturas y no se garantiza que todas estén disponibles.
 
-Ajustes ahora presenta una lista de opciones. Al pulsar **Notificaciones, Diseño, Clientes y distribuidores, Datos de facturación, Opciones de factura, Información, Sugerencias o Cuenta**, **solo se ve el contenido de esa sección**. La flecha superior vuelve al índice de Ajustes; una segunda pulsación vuelve a Inicio. Dentro de Diseño siguen estando tema blanco/negro, imagen del menú, colores, rendimiento y restablecimiento.
+## Pruebas de regresión y límites
 
-### 6. Tutorial mejorado
+- **81/81 pruebas automatizadas locales superadas**: 75 de versiones anteriores y 6 adicionales de activación/desactivación del aviso, hora, cuenta de pendientes, WAV, imágenes y envío de sugerencias.
+- Comprobada la sintaxis JavaScript de los scripts incrustados y externos, y la estructura YAML de GitHub Actions.
+- La comprobación visual automatizada con Chromium no pudo ejecutarse: `net::ERR_BLOCKED_BY_ADMINISTRATOR`. No se declara superada.
+- **Pendiente de iPhone y GitHub Actions:** compilar Xcode, permiso real de notificaciones, sonido mientras la app está en segundo plano, mostrar imágenes externas, hoja de compartir y contraste en dispositivos físicos.
+- **Facturación:** sigue existiendo el riesgo conocido de numeración concurrente en Google Sheets. No emitas facturas reales simultáneamente desde varios dispositivos hasta incorporar numeración atómica y validación fiscal. Las facturas emitidas continúan protegidas; no se ha alterado su histórico en este parche.
 
-El tutorial tiene un fondo mucho más transparente y resalta el campo correspondiente. Incluye un paso «Documentos» y puede volver a iniciarse desde Ajustes → Información y herramientas. Puede que algunas secciones requieran desplazarse por la pantalla para ver todo el contenido.
+### Orden de prueba propuesto
 
-### 7. Agenda y Live Activities
-
-Se mantienen los avisos de eventos por **notificaciones locales de iOS** (desde 2 días antes hasta el comienzo), con fecha, hora y ubicación. Para habilitar la sincronización con Google Calendar asegúrate de **volver a autorizar la cuenta con el alcance `calendar.events`**, además de habilitar Calendar API en el proyecto correcto de Google Cloud; activar solamente la API no garantiza que un token anterior tenga el nuevo permiso.
-
-**Live Activity aún NO está incluida funcionalmente en esta IPA**. Para visualizar un evento antes/durante su celebración en pantalla bloqueada y Dynamic Island hay que construir, integrar y firmar una **Widget Extension nativa** con ActivityKit/WidgetKit en el proyecto iOS; Capacitor ni las notificaciones habituales crean esa extensión por sí solos. Añadirla sin validación de Xcode/sideloading pondría en riesgo la compilación que ya te funciona. No es posible establecer el fondo de pantalla del usuario automáticamente. Esta función queda pendiente de una compilación nativa específica.
-
-## Pruebas realizadas
-
-- **70 pruebas automatizadas** con Node: integridad de datos de V76 y R7–R9, CRUD de documentos y subcarpetas, separación de cuentas y retirada/restauración de facturas sin borrar ni renumerar.
-- Todos los scripts JS, incluidos los bloques del HTML, pasan `node --check`.
-- Estructura del ZIP y referencias de archivos comprobadas.
-- **Limitación:** no se pudo navegar con Chromium en este entorno (bloqueo `ERR_BLOCKED_BY_ADMINISTRATOR`); la visualización final y las funciones nativas deberán probarse en el iPhone. No se ha ejecutado una compilación Xcode completa aquí.
-
-## Orden de pruebas sugerido
-
-1. Inicia Google, desbloquea y comprueba los menús.
-2. Ajustes → Diseño y flecha Atrás; comprueba que otras secciones no se mezclan.
-3. Inventario nuevo: crea «Altavoces», añade un artículo, cambia de categoría y vuelve. Prueba la carga de una imagen propia.
-4. Documentos: crea una carpeta, dentro una subcarpeta, sube un PDF y comprueba la previsualización; elimina solo una referencia y confirma que el PDF original sigue en Drive.
-5. Con factura **ficticia** previamente emitida: «Retirar de lista» y luego «Mostrar retiradas» → «Restaurar». Comprueba que el resumen no cambia.
-6. Agenda: recordatorio local 1 hora antes. Comprueba por separado Calendar, que requiere autorización OAuth real.
-7. Tutorial desde Ajustes: revisa contraste, fondo y resaltados.
-
-## Seguridad y limitaciones
-
-El administrador no recibe acceso a facturas, compras, archivos ni Google Sheets privados del usuario. El proyecto no incluye un panel central de cuentas. La numeración y el PDF generado no acreditan por sí solos cumplimiento de Veri*Factu o de todos los requisitos de facturación electrónica.
+1. Tema **blanco** → índice de Ajustes (comprueba títulos); negro → compara.
+2. Sugerencias → escribe 20 caracteres → pulsa Enviar → confirma → comprueba que aparece el menú nativo de compartir; prueba la vibración.
+3. Notificaciones → elige 09:15, activa casilla, permite notificaciones → **Enviar aviso de prueba** → bloquea el iPhone y comprueba el sonido a los 8 segundos.
+4. Audio → selecciona Claro, Pulso y Calma → Escuchar; pulsa Probar en el iPhone y verifica que cambia el sonido.
+5. Agenda → guarda un evento ficticio próximo, con aviso 15 min antes; confirma que no sale error de programación. Si Calendar falla por OAuth, el aviso local debe seguir disponible.
+6. Inventario → crea un tipo Altavoces → verifica cuadrícula → añade un artículo con foto propia → guarda → vuelve y comprueba miniatura y vista previa.
+7. Compras y Facturación → comprueba que la navegación y registros antiguos siguen igual.

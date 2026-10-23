@@ -31,5 +31,18 @@
   if(!value||value.length>64)throw Error('Código de factura vacío o demasiado largo.');
   return value;
  }
- root.CFInvoiceNumbering=Object.freeze({DEFAULT,normalize,format});
+ function parseIndex(schema,code,issuedAt){
+  const config=normalize(schema),date=new Date(issuedAt);
+  if(Number.isNaN(date.getTime()))return null;
+  const year=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric'}).format(date);
+  const esc=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const pattern=config.segments.map(x=>x.type==='fixed'?esc(x.value):x.type==='year'?(x.digits===2?year.slice(-2):year):'(\\d{'+x.width+',})').join('');
+  const matched=String(code||'').match(new RegExp('^'+pattern+'$'));
+  if(!matched)return null;
+  const sequence=config.segments.find(x=>x.type==='sequence');
+  const sequenceValue=Number(matched[1]);const index=sequenceValue-sequence.start+1;
+  if(!Number.isSafeInteger(index)||index<1)return null;
+  return format(config,index,issuedAt)===code?index:null;
+ }
+ root.CFInvoiceNumbering=Object.freeze({DEFAULT,normalize,format,parseIndex});
 })(window);
