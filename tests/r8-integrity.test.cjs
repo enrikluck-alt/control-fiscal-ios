@@ -53,7 +53,7 @@ test('R8: Calendar crea avisos antes de eventos y los mensajes de soporte no adj
  const root={CFGoogleAccount:{active:()=>({...account}),http:async(url,method,data)=>{requests.push({url,method,data});return{id:'MESSAGE_ID'}}},crypto:global.crypto,btoa:s=>Buffer.from(s,'binary').toString('base64')};root.window=root;
  vm.runInNewContext(fs.readFileSync('www/cf-google-extras.js','utf8'),{window:root,console,TextEncoder,Uint8Array,Date,Intl});
  const cal=root.CFGoogleExtras.calendarBody({fecha:'2026-12-11',horaInicio:'18:00',horaFin:'19:00',evento:'Prueba',ubicacion:'Albacete'});
- assert.equal(cal.reminders.useDefault,false);assert.deepEqual(Array.from(cal.reminders.overrides.map(x=>x.minutes)),[1440,60]);
+ assert.equal(cal.reminders.useDefault,false);assert.deepEqual(Array.from(cal.reminders.overrides.map(x=>x.minutes)),[60]);
  assert.equal(cal.location,'Albacete');
  const delivered=await root.CFGoogleExtras.sendSupport({recipient:'soporte@example.com',kind:'Error',message:'El botón del menú no funciona.',appVersion:'R8'});
  assert.equal(delivered.id,'MESSAGE_ID');assert.ok(requests[0].url.includes('gmail.googleapis.com'));
@@ -64,5 +64,5 @@ test('R8: UI contiene tutorial, avisos, contactos, feedback y no muestra mensaje
  const check=['cfTutorialOverlay','startCFTutorial','cfSupportModal','cfSuccessFeedback','cfScheduleEventReminders','cfFindInventoryPhotos','cfInventoryTypeButtons','requestId:(cfRecordRequestId','key:removed._key','cfMaybeStartFirstTutorial'];
  for(const text of check)assert.ok(html.includes(text),'Falta '+text);
  assert.doesNotMatch(html,/<p>El registro se ha guardado en Google Sheets<\/p>/);
- assert.ok(html.includes('UI76-20261023-R8'));
+ assert.ok(html.includes('UI76-20261023-R10'));
 });

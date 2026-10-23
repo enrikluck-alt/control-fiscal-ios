@@ -30,7 +30,8 @@
     body.start={dateTime:ev.fecha+'T'+from+':00',timeZone:tz};body.end={dateTime:date+'T'+until+':00',timeZone:tz};
   }else{const d=new Date(ev.fecha+'T12:00:00');d.setDate(d.getDate()+1);const next=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');body.start={date:ev.fecha};body.end={date:next};}
   // Aviso antes del evento: dentro de Google Calendar, asociado al evento.
-  body.reminders={useDefault:false,overrides:[{method:'popup',minutes:1440},{method:'popup',minutes:60}]};
+  const minutes=ev.reminderMinutes===undefined?60:ev.reminderMinutes;
+  body.reminders=minutes==='none'?{useDefault:false,overrides:[]}:{useDefault:false,overrides:[{method:'popup',minutes:Math.max(0,Number(minutes)||0)}]};
   return body;
  }
  async function deterministicCalendarId(s,id){

@@ -7,7 +7,7 @@
 'use strict';
 const MARK='CFV76_GOOGLE_2', OLD_MARK='CFV76_GOOGLE_1', LEDGER='CF_Registros_v2';
 const API='https://sheets.googleapis.com/v4/spreadsheets/';
-const ISSUED_TAB='CF_Facturas_Emitidas',ISSUED_DOC_TAB='CF_Facturas_Documentos';
+const ISSUED_TAB='CF_Facturas_Emitidas',ISSUED_DOC_TAB='CF_Facturas_Documentos',ISSUED_ARCHIVE_TAB='CF_Facturas_Archivadas';
 const has=v=>v!==undefined&&v!==null&&String(v)!=='';
 const num=v=>Number(v)||0;
 const now=()=>new Date().toISOString();
@@ -112,13 +112,14 @@ async function putConfig(s,object){
 const inflightDrafts=new Map();
 const inflightIssues=new Map();
 async function issuedRecords(s){
- const [rows,files]=await Promise.all([maybeRead(s,ISSUED_TAB),maybeRead(s,ISSUED_DOC_TAB)]);
+ const [rows,files,archivedRows]=await Promise.all([maybeRead(s,ISSUED_TAB),maybeRead(s,ISSUED_DOC_TAB),maybeRead(s,ISSUED_ARCHIVE_TAB)]);
+ const archived=new Map();for(const r of archivedRows)if(r[0]==='CF_ISSUED_ARCHIVE_1'&&r[1])archived.set(r[1],r[2]==='ocultar');
  const pdfs=new Map();for(const f of files)if(f[0]==='CF_PDF_1'&&f[1]&&/^https:\/\//.test(f[2]||''))pdfs.set(f[1],f[2]);
  return rows.map((r,index)=>{
   if(r[0]!=='CF_FACTURA_EMITIDA_1'||!r[1])return null;
   const doc=parseJSON(r[2],null);if(!doc||typeof doc!=='object')return null;
   const invoiceNumber=doc.numbering&&root.CFInvoiceNumbering?root.CFInvoiceNumbering.format(doc.numbering,index+1,doc.fecha):'CF-'+String(index+1).padStart(6,'0');
-  return {...doc,numeroFactura:invoiceNumber, facturaUrl:pdfs.get(invoiceNumber)||'',fila:index+1,emitida:true,tipo:'Facturación',estado:'EMITIDA',requestId:r[1],_tab:ISSUED_TAB};
+  return {...doc,numeroFactura:invoiceNumber, facturaUrl:pdfs.get(invoiceNumber)||'',fila:index+1,emitida:true,archivada:!!archived.get(r[1]),tipo:'Facturación',estado:'EMITIDA',requestId:r[1],_tab:ISSUED_TAB};
  }).filter(Boolean);
 }
 function verifyEmissionDoc(p){
@@ -214,6 +215,66 @@ async function action(p){
   inflightIssues.set(guard,issue);try{return await issue;}finally{inflightIssues.delete(guard);}
  }
  case 'listarFacturasEmitidas':return {ok:true,facturas:await issuedRecords(s)};
+ case 'ocultarFacturaEmitida':case 'restaurarFacturaEmitida':{
+  const requestId=String(p.requestId||'');
+  if(!requestId)throw Error('No se puede identificar la factura.');
+  const invoice=(await issuedRecords(s)).find(x=>x.requestId===requestId);
+  if(!invoice)throw Error('Factura no encontrada en la cuenta actual.');
+  const hide=a==='ocultarFacturaEmitida';
+  if(!!invoice.archivada===hide)return {ok:true,repetido:true};
+  await append(s,ISSUED_ARCHIVE_TAB,['CF_ISSUED_ARCHIVE_1',requestId,hide?'ocultar':'restaurar']);
+  return {ok:true,archivada:hide};
+ }
+ case 'listarDocumentos':{
+  return {ok:true,documentos:await items(s,'Documentos')};
+ }
+ case 'guardarDocumento':{
+  const doc=typeof p.documento==='string'?parseJSON(p.documento):p.documento;
+  if(!doc||!['carpeta','archivo'].includes(doc.tipo)||!String(doc.nombre||'').trim())throw Error('Nombre y tipo de documento obligatorios.');
+  const nodes=await items(s,'Documentos');
+  if(doc.parentId){const parent=nodes.find(x=>x.id===doc.parentId&&x.tipo==='carpeta');if(!parent)throw Error('La carpeta de destino ya no existe.');}
+  if(doc.tipo==='archivo'&&!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]{15,}\/view/.test(doc.url||''))throw Error('Adjunta un documento válido de tu Drive.');
+  doc.id=String(doc.id||ident('DOC'));doc.nombre=String(doc.nombre).trim().slice(0,120);
+  await upsert(s,'Documentos',doc);
+  return {ok:true,id:doc.id};
+ }
+ case 'eliminarDocumento':{
+  const id=String(p.id||''),nodes=await items(s,'Documentos');const target=nodes.find(x=>x.id===id);
+  if(!target)return {ok:true,alreadyDeleted:true};
+  if(nodes.some(x=>x.parentId===id))throw Error('Esta carpeta contiene elementos. Vacíala antes de eliminarla.');
+  await revision(s,'Documentos',target._key,{},true);return {ok:true};
+ }
+
+ case 'ocultarFacturaEmitida':case 'restaurarFacturaEmitida':{
+  const requestId=String(p.requestId||'');
+  if(!requestId)throw Error('No se puede identificar la factura.');
+  const invoice=(await issuedRecords(s)).find(x=>x.requestId===requestId);
+  if(!invoice)throw Error('Factura no encontrada en la cuenta actual.');
+  const hide=a==='ocultarFacturaEmitida';
+  if(!!invoice.archivada===hide)return {ok:true,repetido:true};
+  await append(s,ISSUED_ARCHIVE_TAB,['CF_ISSUED_ARCHIVE_1',requestId,hide?'ocultar':'restaurar']);
+  return {ok:true,archivada:hide};
+ }
+ case 'listarDocumentos':{
+  return {ok:true,documentos:await items(s,'Documentos')};
+ }
+ case 'guardarDocumento':{
+  const doc=typeof p.documento==='string'?parseJSON(p.documento):p.documento;
+  if(!doc||!['carpeta','archivo'].includes(doc.tipo)||!String(doc.nombre||'').trim())throw Error('Nombre y tipo de documento obligatorios.');
+  const nodes=await items(s,'Documentos');
+  if(doc.parentId){const parent=nodes.find(x=>x.id===doc.parentId&&x.tipo==='carpeta');if(!parent)throw Error('La carpeta de destino ya no existe.');}
+  if(doc.tipo==='archivo'&&!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]{15,}\/view/.test(doc.url||''))throw Error('Adjunta un documento válido de tu Drive.');
+  doc.id=String(doc.id||ident('DOC'));doc.nombre=String(doc.nombre).trim().slice(0,120);
+  await upsert(s,'Documentos',doc);
+  return {ok:true,id:doc.id};
+ }
+ case 'eliminarDocumento':{
+  const id=String(p.id||''),nodes=await items(s,'Documentos');const target=nodes.find(x=>x.id===id);
+  if(!target)return {ok:true,alreadyDeleted:true};
+  if(nodes.some(x=>x.parentId===id))throw Error('Esta carpeta contiene elementos. Vacíala antes de eliminarla.');
+  await revision(s,'Documentos',target._key,{},true);return {ok:true};
+ }
+
  case 'registrarDocumentoFactura':{
   const no=String(p.numeroFactura||'');const url=String(p.url||'');
   if(!/^[A-Za-z0-9_\-/.]{1,64}$/.test(no)||!/^https:\/\/(drive\.google\.com|docs\.google\.com)\//.test(url))throw Error('Número o URL de PDF no válidos.');

@@ -50,6 +50,6 @@ test('R4: impide emisión con número que ya aparece en facturas antiguas',async
 test('R4: el workflow conserva el módulo nuevo, el gráfico no requiere API externa, y usa diseño adaptable',()=>{
  const html=fs.readFileSync('www/index.html','utf8'),w=fs.readFileSync('.github/workflows/build-ios.yml','utf8');
  for(const word of ['cfSummaryChart','renderSummaryChart','cfInvoiceNumberModal','cfGraphicsMode','cfInvoiceLogoInput','@media(min-width:700px)','@media(max-width:390px)','ABRIR PORTAL OFICIAL DE LICITACIONES'])assert.ok(html.includes(word),word);
- assert.match(w,/cf-invoice-numbering.js/);assert.match(w,/UI76-20261023-R8/);
+ assert.match(w,/cf-invoice-numbering.js/);assert.match(w,/UI76-20261023-R10/);
  assert.doesNotMatch(html,/data-cf-ui-build="UI76-20261022-R3"/);
 });

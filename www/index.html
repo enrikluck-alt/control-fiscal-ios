@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R8">
+<html lang="es" data-cf-ui-build="UI76-20261023-R10">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1230,6 +1230,45 @@ body.lightTheme .cfTutorialCard{background:#172334;color:#fff}
 .cfPhotoChoice span{font-size:12px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .cfInventoryPhotoPreview{max-height:150px;max-width:100%;object-fit:contain;margin:12px auto;border-radius:10px}
 .cfInventoryThumb{width:75px;height:65px;object-fit:contain;background:#f0f1f3;border-radius:8px;float:left;margin:0 10px 5px 0}
+
+/* R9: campos de Agenda compatibles con iPhone estrecho, sin solapamientos. */
+#agendaEventModal .agendaFormGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#agendaEventModal .agendaFormGrid .field{min-width:0;max-width:100%;overflow:hidden}
+#agendaEventModal input[type=date],#agendaEventModal input[type=time]{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;font-size:clamp(16px,4.5vw,21px)!important;padding:12px 7px;line-height:1.3}
+#agendaEventModal .field label{display:block;white-space:normal;line-height:1.35;margin-bottom:5px}
+#agendaEventModal .modalCard{width:min(calc(100vw - 22px),600px);max-height:calc(100dvh - 28px);overflow-y:auto;overscroll-behavior:contain;padding:clamp(12px,3vw,22px)}
+#agendaEventModal .cfReminderChoice{font-size:17px;min-height:48px}
+@media(max-width:440px){#agendaEventModal .agendaFormGrid{grid-template-columns:1fr}#agendaEventModal .agendaFormGrid .full{grid-column:auto}#agendaEventModal input[type=date],#agendaEventModal input[type=time]{font-size:20px!important}}
+/* R9: fondo del tutorial más legible, la zona resaltada queda por encima. */
+.cfTutorialOverlay{background:rgba(5,9,14,.10)!important;pointer-events:auto}
+.cfTourHighlight{z-index:25001!important;position:relative!important;outline:4px solid #ffdc21!important;outline-offset:5px!important;box-shadow:0 0 0 5px rgba(255,220,33,.65)!important}
+.cfTutorialCard{box-shadow:0 14px 35px rgba(0,0,0,.6)!important}
+/* R9: lector embebido de documentos privados, no abre el navegador sin permiso. */
+#cfDocumentViewer .modalCard{width:min(calc(100vw - 14px),1000px);max-width:1000px;height:min(94dvh,1100px);max-height:94dvh;display:flex;flex-direction:column;gap:10px;padding:12px}
+#cfDocumentViewer .cfDocumentFrame{width:100%;height:100%;min-height:0;flex:1;border:1px solid var(--line);background:#fff;border-radius:9px}
+#cfDocumentViewer .cfDocumentInfo{font-size:13px;line-height:1.4;color:#dce1e6}
+#cfDocumentViewer .cfViewerActions{display:flex;gap:10px;flex-wrap:wrap}
+#cfDocumentViewer .cfViewerActions button{padding:12px;border:1px solid #667886;border-radius:10px;background:#22364a;color:white;font-weight:700}
+body.lightTheme #cfDocumentViewer .modalCard{background:white;color:#111820}
+body.lightTheme #cfDocumentViewer .cfDocumentInfo{color:#53616c}
+
+</style>
+<style id="cf-r10-documents-settings">
+/* R10: documentos y ajustes de navegación independiente */
+.cfSettingsNavigator{display:flex;flex-direction:column;gap:10px}
+.cfSettingsNavigator[hidden],#settingsPage .settingsGroup[hidden],#cfDesignPanel[hidden],#settingsPage .cfDesignToggleWrapper[hidden]{display:none!important}
+.cfSettingsNavBtn{width:100%;background:var(--card,#14212e);border:1px solid var(--line,#455361);color:var(--text,#fff);font-size:17px;font-weight:800;text-align:left;border-radius:14px;padding:18px 14px}
+.cfArchiveToggle{display:flex;align-items:center;gap:9px;margin:10px 0 17px;font-size:14px;color:var(--text)}
+.cfArchiveBtn{background:#955a0a;color:white;border:1px solid #d89924;border-radius:10px;padding:12px;margin:10px 0;width:100%;font-size:15px;font-weight:800}
+.cfDocToolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:15px}
+.cfDocToolbar .guideBtn{display:flex;align-items:center;justify-content:center;font-size:13px;white-space:normal}
+.cfDocTrail{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.cfDocTrail button{font-size:13px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px;color:var(--text)}
+.cfDocLibraryItems{display:flex;flex-direction:column;gap:9px}
+.cfDocNode{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:13px;padding:13px;background:var(--card);color:var(--text);min-width:0}
+.cfDocNodeName{min-width:0;flex:1;font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.cfDocNode button{font-size:13px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:9px}
+@media(max-width:460px){.cfDocToolbar{grid-template-columns:1fr}.cfDocNode button{padding:8px}}
 </style>
 </head>
 
@@ -1347,6 +1386,12 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="chev">›</div>
       </button>
 
+      <button class="home full" onclick="CFDocuments.open()">
+        <div class="icon"><span style="font-size:28px">📁</span></div>
+        <div class="text"><b>DOCUMENTOS</b><small>CERTIFICADOS, LICENCIAS Y CARPETAS</small></div>
+        <div class="chev">›</div>
+      </button>
+
       <button class="home full" onclick="openSummary()">
         <div class="icon">
           <svg viewBox="0 0 48 48" fill="currentColor">
@@ -1417,6 +1462,19 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <div class="stockStat"><small>STOCK BAJO</small><strong id="inventoryLowCount">0</strong></div>
     </div>
     <div id="inventoryList" class="stockList"></div>
+  </div>
+</section>
+
+<section id="documentsPage" class="hidden">
+  <div class="header"><button class="back" onclick="CFDocuments.back()">‹</button><div class="headericon">📁</div><div><h2>DOCUMENTOS</h2><p>Archivo privado en tu Google Drive</p></div></div>
+  <div class="page">
+    <div id="cfDocTrail" class="cfDocTrail"></div>
+    <div class="cfDocToolbar">
+      <button type="button" class="guideBtn" onclick="CFDocuments.newFolder()">＋ CREAR CARPETA</button>
+      <label class="guideBtn">📄 SUBIR PDF O IMAGEN <input type="file" id="cfDocUpload" accept="application/pdf,image/jpeg,image/png" hidden onchange="CFDocuments.upload(this.files?.[0])"></label>
+    </div>
+    <div id="cfDocLibraryStatus" role="status" class="settingsHint"></div>
+    <div id="cfDocLibraryItems" class="cfDocLibraryItems"></div>
   </div>
 </section>
 
@@ -1534,7 +1592,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
 <section id="settingsPage" class="hidden">
   <div class="header">
-    <button class="back" onclick="goHome()">‹</button>
+    <button class="back" onclick="cfSettingsBack()">‹</button>
     <div class="headericon">
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
         <circle cx="24" cy="24" r="7"/>
@@ -1546,6 +1604,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
   <div class="page">
     <div class="settingsCard">
+      <div id="cfSettingsNavigator" class="cfSettingsNavigator"></div>
       <div class="settingsGroup">
         <div class="settingsTitle">🔔 NOTIFICACIONES</div>
 
@@ -1702,7 +1761,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R8</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R10</div>
 
     </div>
   </div>
@@ -1737,7 +1796,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </select>
     </div>
 
-    <div id="recordInfo" class="recordInfo"></div>
+    <label class="cfArchiveToggle"><input id="cfShowArchivedIssued" type="checkbox" onchange="renderAll()"> Mostrar facturas emitidas retiradas del listado</label><div id="recordInfo" class="recordInfo"></div>
     <div id="all" class="records"></div>
   </div>
 </section>
@@ -1764,6 +1823,14 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
  </div>
 </div>
 
+<div id="cfDocumentViewer" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfDocumentTitle" onclick="if(event.target===this)closeCFDocumentViewer()">
+ <div class="modalCard">
+  <div class="row" style="display:flex;justify-content:space-between;align-items:center"><h3 id="cfDocumentTitle" style="margin:0">📄 Documento adjunto</h3><button class="modalClose" type="button" onclick="closeCFDocumentViewer()" aria-label="Cerrar documento">×</button></div>
+  <div id="cfDocumentStatus" class="cfDocumentInfo">Cargando documento…</div>
+  <iframe id="cfDocumentFrame" class="cfDocumentFrame" title="Vista del documento" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
+  <div class="cfViewerActions"><button type="button" onclick="closeCFDocumentViewer()">Volver a Control Fiscal</button><button type="button" id="cfDocumentOpenExternal" onclick="cfDocumentOpenExternal()">Abrir externamente (opcional)</button></div>
+ </div>
+</div>
 <div id="recordModal" class="modal hidden" aria-hidden="true">
   <div class="modalCard">
     <button class="modalClose" type="button" onclick="closeRecordModal()">×</button>
@@ -1803,6 +1870,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
     <div id="modalMsg" class="msg"></div>
 
+    <button id="cfArchiveInvoiceBtn" type="button" class="cfArchiveBtn" hidden onclick="cfToggleIssuedArchive()">RETIRAR FACTURA DE LA LISTA</button>
     <div class="modalActions">
       <button class="save" type="button" onclick="saveEditedRecord()">Guardar cambios</button>
       <button class="deleteBtn" type="button" onclick="deleteCurrentRecord()">Eliminar registro</button>
@@ -1965,7 +2033,7 @@ function calc(total,iva){
 }
 
 function only(id){
-  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage"].forEach(x=>{
+  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage","documentsPage"].forEach(x=>{
     $(x).classList.toggle("hidden",x!==id);
   });
   setTimeout(updateScrollIndicator,0);
@@ -2092,6 +2160,7 @@ function toggleDesignSettings(forceOpen){
 
 function openSettings(){
   only("settingsPage");
+  cfSettingsHome();
   nav("settings");
   updateAccountSettings();
   applyAppSettings();
@@ -2102,6 +2171,27 @@ function openSettings(){
   refreshNotificationStatus();
   schedulePendingNotificationFromCurrentState();
 }
+
+let cfSettingsCurrent=null;
+function cfSettingsGroups(){const card=document.querySelector('#settingsPage .settingsCard');return [...card.children].filter(x=>x.classList.contains('settingsGroup')||x.classList.contains('cfDesignToggleWrapper')||x.id==='cfDesignPanel');}
+function cfSettingsHome(){
+ const nav=$('cfSettingsNavigator');if(!nav)return;cfSettingsCurrent=null;nav.hidden=false;nav.replaceChildren();
+ const groups=cfSettingsGroups();
+ groups.forEach((el,index)=>{
+   el.hidden=true;if(el.id==='cfDesignPanel')return;
+   const title=(el.querySelector('.settingsTitle')?.textContent|| (el.classList.contains('cfDesignToggleWrapper')?'🎨 DISEÑO':'' )).trim();if(!title)return;
+   const b=document.createElement('button');b.type='button';b.className='cfSettingsNavBtn';b.textContent=title+'  ›';b.onclick=()=>cfSettingsShow(index);nav.appendChild(b);
+ });
+ document.querySelector('#settingsPage .header h2').textContent='AJUSTES';
+}
+function cfSettingsShow(index){
+ const groups=cfSettingsGroups(),el=groups[index];if(!el||el.id==='cfDesignPanel')return;
+ cfSettingsCurrent=index;$('cfSettingsNavigator').hidden=true;groups.forEach(x=>x.hidden=true);el.hidden=false;
+ if(el.classList.contains('cfDesignToggleWrapper')){el.hidden=true;const panel=$('cfDesignPanel');panel.hidden=false;}
+ document.querySelector('#settingsPage .header h2').textContent=(el.querySelector('.settingsTitle')?.textContent||'🎨 DISEÑO').replace(/^[^a-zA-ZÁÉÍÓÚÜÑ]+/,'').trim();
+ document.querySelector('#settingsPage .page').scrollTop=0;window.scrollTo(0,0);
+}
+function cfSettingsBack(){if(cfSettingsCurrent!==null)cfSettingsHome();else goHome();}
 
 function saveSetting(key,value){
   localStorage.setItem(key,value);
@@ -3359,7 +3449,7 @@ function row(r){
         <div class="rtitle">${compra?"Compra":(r.numeroFactura?"Factura "+esc(r.numeroFactura):"Factura")}</div>
         <div class="rdesc">${esc(r.tercero)} - ${esc(r.concepto)}</div>
         <div class="rdate">${dateText(r.fecha)}</div>
-        ${r.facturaUrl ? `<div class="attachment"><a href="${esc(r.facturaUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 Ver ${compra ? "factura / justificante" : "factura emitida"}</a></div>` : ""}
+        ${r.facturaUrl ? `<div class="attachment"><button type="button" class="cfDocViewLink" data-cf-doc-url="${esc(r.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver ${compra ? "factura / justificante" : "factura emitida"} dentro de la app</button></div>` : ""}
       </div>
       <div class="ramount">${euro(r.total)}</div>
       <div class="rarrow">›</div>
@@ -3419,13 +3509,26 @@ function openRecordData(r){
     ?Number(r.total||0).toFixed(2)
     :Number(r.base||0).toFixed(2);
   $("modalMsg").className="msg";
-  $("modalMsg").textContent=r.emitida?'Esta factura está emitida y no se puede borrar ni modificar desde este menú. Para corregirla se requiere el procedimiento fiscal correspondiente.':'';
+  const archiveBtn=$("cfArchiveInvoiceBtn");if(archiveBtn){archiveBtn.hidden=!r.emitida;archiveBtn.textContent=r.archivada?"RESTAURAR FACTURA EN LA LISTA":"RETIRAR FACTURA DE LA LISTA";}
+  for(const id of ['modalTercero','modalConcepto','modalTotal','modalIva'])$(id).disabled=!!r.emitida;
+  $("modalMsg").textContent=r.emitida?'Factura emitida. Puedes retirarla de las listas de trabajo sin eliminar el documento fiscal original; seguirá contando en los resúmenes y podrás restaurarla.':'';
   $("recordModal").classList.remove("hidden");
   $("recordModal").setAttribute("aria-hidden","false");
   calcModal();
 }
 
+async function cfToggleIssuedArchive(){
+ const r=editingRecord;if(!r?.emitida)return;
+ const hide=!r.archivada;
+ if(!confirm(hide?'¿Retirar esta factura de las listas de trabajo? El documento fiscal y su PDF se conservarán y seguirá computando en los resúmenes.':'¿Volver a mostrar esta factura emitida en las listas?'))return;
+ const btn=$('cfArchiveInvoiceBtn');if(btn)btn.disabled=true;
+ try{await callAction({accion:hide?'ocultarFacturaEmitida':'restaurarFacturaEmitida',requestId:r.requestId});
+  closeRecordModal();await syncFromSheets();await cfSuccessFeedback();showToastMessage(hide?'Factura retirada de la lista':'Factura restaurada',hide?'Conservada en el archivo fiscal.':'Visible en los registros.');
+ }catch(e){showToastMessage('No se pudo cambiar la visibilidad',e.message||String(e));}
+ finally{if(btn)btn.disabled=false;}
+}
 function closeRecordModal(){
+  for(const id of ['modalTercero','modalConcepto','modalTotal','modalIva'])$(id).disabled=false;
   editingRecord=null;
   $("recordModal").classList.add("hidden");
   $("recordModal").setAttribute("aria-hidden","true");
@@ -3433,6 +3536,44 @@ function closeRecordModal(){
 
 $("modalTotal").addEventListener("input",calcModal);
 $("modalIva").addEventListener("change",calcModal);
+
+// R9: lectura privada desde Drive. Solo mostraremos archivos recibidos como bytes
+// del usuario autenticado; no incrustamos páginas de terceros en el WebView.
+let cfDocumentObjectUrl=null,cfDocumentOriginalLink='';
+function cfDocumentDriveId(url){
+ const u=String(url||'');
+ let m=u.match(/^https:\/\/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]{15,})\/(?:view|edit|preview)?/);
+ if(!m)m=u.match(/^https:\/\/drive\.google\.com\/open\?id=([A-Za-z0-9_-]{15,})/);
+ return m?m[1]:null;
+}
+async function openCFDocumentViewer(link){
+ const modal=$('cfDocumentViewer'),status=$('cfDocumentStatus'),frame=$('cfDocumentFrame');
+ if(!modal||!frame)return;
+ closeCFDocumentViewer();cfDocumentOriginalLink=String(link||'');
+ modal.classList.remove('hidden');status.textContent='Cargando archivo dentro de Control Fiscal…';
+ frame.removeAttribute('src');
+ const id=cfDocumentDriveId(cfDocumentOriginalLink),account=window.CFGoogleAccount?.active();
+ if(!id||!account){status.textContent=id?'Inicia sesión de Google antes de abrir el adjunto.':'Este documento no es un enlace de Drive reconocido. Puedes abrirlo externamente de forma voluntaria.';return;}
+ try{
+  const owner=account.id,request=token=>fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media',{headers:{Authorization:'Bearer '+token}});
+  let response=await request(account.token);
+  if(response.status===401&&window.CFGoogleAccount?.refreshAuthorization){
+   const token=await window.CFGoogleAccount.refreshAuthorization(account.token);
+   const fresh=window.CFGoogleAccount.active();if(!fresh||fresh.id!==owner)throw Error('La cuenta cambió.');
+   response=await request(token);
+  }
+  if(!response.ok)throw Error('Drive HTTP '+response.status+'. Comprueba el permiso para el documento.');
+  const blob=await response.blob();
+  const type=blob.type.split(';')[0].toLowerCase();
+  if(!['application/pdf','image/jpeg','image/png'].includes(type))throw Error('Vista previa no compatible ('+type+').');
+  if(blob.size>15*1024*1024)throw Error('El documento es mayor de 15 MB.');
+  if(window.CFGoogleAccount.active()?.id!==owner)throw Error('La sesión cambió durante la carga.');
+  cfDocumentObjectUrl=URL.createObjectURL(blob);frame.src=cfDocumentObjectUrl;
+  status.textContent='Documento privado · '+(type==='application/pdf'?'PDF':'Imagen')+' · Se muestra dentro de la aplicación.';
+ }catch(error){status.textContent='No se pudo mostrar dentro de la app: '+(error?.message||error);}
+}
+function closeCFDocumentViewer(){const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}}
+function cfDocumentOpenExternal(){if(!/^https:\/\//i.test(cfDocumentOriginalLink)){showToastMessage('Enlace no admitido','Solo se pueden abrir enlaces HTTPS.');return;}if(!confirm('¿Abrir este documento en el navegador externo?'))return;window.CFBrowser?.open?.({url:cfDocumentOriginalLink}).catch(e=>showToastMessage('No se pudo abrir',e.message||String(e)));}
 
 const NATIVE_WRITE_ACTIONS=new Set([
   "editar","eliminar","enviarFacturas","guardarTercero","eliminarTercero",
@@ -3487,7 +3628,7 @@ async function saveEditedRecord(){
 
 async function deleteCurrentRecord(){
   if(!editingRecord)return;
-  if(editingRecord.emitida){showToastMessage('Factura emitida','No se puede borrar una factura emitida desde este menú. Consulta la opción de rectificación.');return;}
+  if(editingRecord.emitida){await cfToggleIssuedArchive();return;}
   if(!confirm("¿Eliminar este registro? No aparecerá en tu historial.")) return;
 
   const m=$("modalMsg");
@@ -3611,6 +3752,7 @@ function openAgendaEventModal(id=null,dateStr=null){
   $("agendaEventDate").value=(e?.fecha||dateStr||agendaDayKey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())).slice(0,10);
   $("agendaEventStart").value=e?.horaInicio||"";
   $("agendaEventEnd").value=e?.horaFin||"";
+  $("agendaReminder").value=String(e?.reminderMinutes===undefined?60:e.reminderMinutes);
   $("agendaEventClient").value=e?.cliente||"";
   $("agendaEventLocation").value=e?.ubicacion||"";
   $("agendaEventBring").value=e?.llevar||"";
@@ -3620,6 +3762,7 @@ function openAgendaEventModal(id=null,dateStr=null){
   del.style.display=e?"block":"none";
   updateAgendaMapHint();
   $("agendaEventLocation").oninput=updateAgendaMapHint;
+  $("agendaSyncGoogle").checked=!!(e?.googleCalendarId||localStorage.getItem('cf_agenda_calendar_optin')!=='0');
   modal.classList.remove("hidden");
 }
 function updateAgendaMapHint(){
@@ -3628,23 +3771,42 @@ function updateAgendaMapHint(){
   el.innerHTML=loc?`📍 <a href="${mapsLink(loc)}" target="_blank" rel="noopener" style="color:var(--yellow);font-weight:800;text-decoration:none">Abrir esta ubicación en Google Maps</a>`:"Añade una ubicación para disponer del acceso directo al mapa.";
 }
 function closeAgendaEventModal(){$("agendaEventModal")?.classList.add("hidden");agendaEditingId=null;}
+function cfCalendarPermissionError(e){
+ const message=String(e?.message||e||'');
+ if(/403|PERMISSION_DENIED|insufficient|scope/i.test(message)){
+   if(/has not been used|disabled|accessNotConfigured|SERVICE_DISABLED/i.test(message))return 'La API de Google Calendar está desactivada o no habilitada en el proyecto de Google Cloud.';
+   return 'La cuenta no ha concedido permisos de escritura en Calendar. Revisa los permisos OAuth, habilita Calendar API y vuelve a autorizar la cuenta.';
+ }
+ return message.slice(0,260);
+}
 async function saveAgendaEvent(){
   const msg=$("agendaMsg");
   const previousEvent=agendaEvents.find(x=>String(x.id)===String(agendaEditingId));
-  const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),googleCalendarId:previousEvent?.googleCalendarId||'',evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim()};
+  const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),googleCalendarId:previousEvent?.googleCalendarId||'',evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim(),reminderMinutes:$("agendaReminder").value==='none'?'none':Number($("agendaReminder").value)};
   if(!obj.evento||!obj.fecha){msg.className="msg err";msg.textContent="Indica al menos el evento y la fecha.";return;}
+  localStorage.setItem('cf_agenda_calendar_optin',$('agendaSyncGoogle')?.checked?'1':'0');
   msg.className="msg";msg.textContent="Guardando...";
   try{
     await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
     agendaEditingId=obj.id; // Si Calendar falla, reintentar mantiene el mismo ID en Sheets.
-    msg.className='msg';msg.textContent='Evento guardado. Sincronizando calendario…';
-    try{
+    await loadAgenda(false);
+    await cfScheduleEventReminders().catch(e=>console.warn('Aviso local no programado',e));
+    if(!$('agendaSyncGoogle')?.checked){
+      msg.className='msg ok';msg.textContent='Evento guardado. Aviso de iPhone programado si has autorizado las notificaciones.';
+      await cfSuccessFeedback();setTimeout(closeAgendaEventModal,1200);
+    }else try{
+      msg.className='msg';msg.textContent='Evento guardado. Sincronizando Google Calendar…';
       const result=await window.CFGoogleExtras.upsertCalendar(obj);
       obj.googleCalendarId=result.id;
       await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
       msg.className='msg ok';msg.textContent='Evento guardado y sincronizado con Google Calendar ✓';
-      await loadAgenda(false);setTimeout(closeAgendaEventModal,650);
-    }catch(calendarError){await loadAgenda(false);msg.className='msg err';msg.textContent='Evento guardado, pero NO sincronizado con Google Calendar: '+calendarError.message+'. Comprueba los permisos y vuelve a pulsar Guardar.';}
+      await cfSuccessFeedback();await loadAgenda(false);setTimeout(closeAgendaEventModal,850);
+    }catch(calendarError){
+      await cfSuccessFeedback();
+      const reason=cfCalendarPermissionError(calendarError);
+      if(/403|insufficient|scope|disabled|accessNotConfigured/i.test(String(calendarError?.message||calendarError))){localStorage.setItem('cf_agenda_calendar_optin','0');$('agendaSyncGoogle').checked=false;}
+      msg.className='msg err';msg.textContent='✅ Evento guardado en Control Fiscal. ⚠️ Google Calendar NO sincronizado: '+reason+' Puedes seguir usando Agenda y el aviso local del iPhone.';
+    }
   }catch(e){msg.className='msg err';msg.textContent=e.message||'No se pudo guardar el evento.';}
 }
 async function deleteAgendaEvent(){
@@ -3680,10 +3842,14 @@ async function cfScheduleEventReminders(){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(event.fecha||''))continue;
   const hasTime=/^\d\d:\d\d$/.test(event.horaInicio||'');
   const start=new Date(event.fecha+'T'+(hasTime?event.horaInicio+':00':'09:00:00'));
-  const alertAt=new Date(start.getTime()-(hasTime?60*60000:0));
+  const before=event.reminderMinutes===undefined?60:event.reminderMinutes;
+  if(before==='none')continue;
+  const minutes=Number(before);if(!Number.isFinite(minutes)||minutes<0||minutes>43200)continue;
+  const alertAt=new Date(start.getTime()-minutes*60000);
   if(alertAt.getTime()<=now||alertAt.getTime()>future)continue;
   const id=700000+serial++;const loc=String(event.ubicacion||'').trim();
-  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:(hasTime?'Empieza en 1 hora. ':'Hoy tienes un evento. ')+(loc?'Ubicación: '+loc.slice(0,110):'Revisa tu agenda.'),schedule:{at:alertAt},extra:{kind:'agenda',eventId:String(event.id||'')}});
+  const notice=minutes===0?'El evento comienza ahora. ':minutes>=1440?'Evento dentro de '+Math.round(minutes/1440)+' día(s). ':'Evento dentro de '+minutes+' minutos. ';
+  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,110):'Revisa tu agenda.'),schedule:{at:alertAt},extra:{kind:'agenda',eventId:String(event.id||'')}});
   if(notifications.length>=40)break;
  }
  if(notifications.length)await plugin.schedule({notifications});
@@ -3694,15 +3860,16 @@ async function cfScheduleEventReminders(){
    ========================================================= */
 let inventoryItems=[];
 let inventoryEditingId=null;
-const INVENTORY_DEFAULT_CATEGORIES=["General","Herramientas","Consumibles","Oficina","Mobiliario","Otros"];
+const INVENTORY_DEFAULT_CATEGORIES=[];
 const CF_TYPE_ICON_RULES=[[/(altavoz|speaker|audio|sonido|subwoofer|line array|monitor)/i,"🔊"],[/(luz|ilumin|foco|cabeza|beam|led|laser)/i,"💡"],[/(pantalla|video|televisor|display)/i,"🖥️"],[/(estructura|truss|escenario|soporte)/i,"🏗️"],[/(cable|conector|adaptador)/i,"🔌"],[/(camara|foto)/i,"📷"],[/(ordenador|portatil|tablet)/i,"💻"],[/(microfono)/i,"🎤"],[/(herramienta|taladro)/i,"🧰"]];
 function cfCategoryIcon(name){return (CF_TYPE_ICON_RULES.find(([r])=>r.test(String(name||"")))||[null,"📦"])[1];}
+function cfInventoryCategoryKey(){return "cf_inventory_categories_v10_"+String(window.CFGoogleAccount?.active()?.id||"sin_cuenta").replace(/[^A-Za-z0-9_-]/g,"");}
 function getInventoryCategories(){
-  let cached=[];try{cached=JSON.parse(localStorage.getItem("cf_inventory_categories")||"[]")}catch(_){cached=[]}
+  let cached=[];try{cached=JSON.parse(localStorage.getItem(cfInventoryCategoryKey())||"[]")}catch(_){cached=[]}
   const fromItems=inventoryItems.map(i=>String(i.categoria||"").trim()).filter(Boolean);
   return [...new Set([...INVENTORY_DEFAULT_CATEGORIES,...cached,...fromItems])].filter(Boolean).sort((a,b)=>a.localeCompare(b,"es",{sensitivity:"base"}));
 }
-function saveInventoryCategories(list){localStorage.setItem("cf_inventory_categories",JSON.stringify([...new Set(list.map(x=>String(x).trim()).filter(Boolean))]));}
+function saveInventoryCategories(list){localStorage.setItem(cfInventoryCategoryKey(),JSON.stringify([...new Set(list.map(x=>String(x).trim()).filter(Boolean))]));}
 function buildInventoryCategoryControls(selected){
   const cats=getInventoryCategories();saveInventoryCategories(cats);
   const filter=$("inventoryCategoryFilter");
@@ -3712,7 +3879,7 @@ function buildInventoryCategoryControls(selected){
   if(host&&!buttons){buttons=document.createElement('div');buttons.id='cfInventoryTypeButtons';buttons.className='cfInventoryTypeButtons';host.parentNode.insertBefore(buttons,host);}
   if(buttons){const active=filter?.value||'all';buttons.innerHTML=`<button type="button" class="${active==='all'?'active':''}" data-cf-inv-cat="all">📋 Todos</button>`+cats.map(c=>`<button type="button" class="${active===c?'active':''}" data-cf-inv-cat="${esc(c)}">${cfCategoryIcon(c)} ${esc(c)}</button>`).join('');}
   const sel=$("invItemCategory");
-  if(sel){const prev=selected!==undefined?selected:(sel.value||"Otros");sel.innerHTML=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("")+`<option value="__new__">＋ Crear nuevo tipo</option>`;sel.value=cats.includes(prev)?prev:"Otros";}
+  if(sel){const prev=selected!==undefined?selected:(sel.value||"Otros");sel.innerHTML=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("")+`<option value="__new__">＋ Crear nuevo tipo</option>`;sel.value=cats.includes(prev)?prev:(cats.length?cats[0]:"__new__");}
 }
 async function loadInventoryCategoriesFromGoogle(){
  if(!cfSessionToken())return;
@@ -3723,10 +3890,10 @@ async function loadInventoryCategoriesFromGoogle(){
 async function inventoryCategoryChanged(){
  const sel=$('invItemCategory');if(!sel||sel.value!=='__new__')return;
  const value=window.prompt('Escribe el nuevo tipo de material:','');const clean=String(value||'').trim();
- if(!clean){sel.value='Otros';return;}
+ if(!clean){sel.value=getInventoryCategories()[0]||'__new__';return;}
  const previous=sel.disabled;sel.disabled=true;
  try{await callAction({accion:'guardarTipoInventario',tipo:clean});saveInventoryCategories([...getInventoryCategories(),clean]);buildInventoryCategoryControls(clean);sel.value=clean;cfTapFeedback();showToastMessage('Tipo guardado',clean);}
- catch(e){sel.value='Otros';showToastMessage('No se guardó el tipo de material',e.message||'Error al guardar los datos');}
+ catch(e){sel.value=getInventoryCategories()[0]||'__new__';showToastMessage('No se guardó el tipo de material',e.message||'Error al guardar los datos');}
  finally{sel.disabled=previous;}
 }
 function openInventory(){only("inventoryPage");nav("inventory");buildInventoryCategoryControls();renderInventory();loadInventory(false);}
@@ -3753,15 +3920,15 @@ function renderInventory(){
   wrap.innerHTML=[...groups.entries()].map(([category,items])=>{const cards=items.map(i=>{const qty=Number(i.cantidad)||0,min=Number(i.minimo)||0,low=qty<=min;return `<div class="stockCard"><div class="stockHead"><div><div class="stockName">${esc(i.articulo)}</div><div class="stockMeta">${esc(i.categoria||"Otros")} · ${esc(i.ubicacion||"Sin ubicación")} · ${esc(i.estado||"Disponible")}</div></div><div class="stockQty ${low?"low":"ok"}">${qty} <span style="font-size:9px;color:#9da7b0;font-weight:700">${esc(i.unidad||"unidades")}</span></div></div>${i.notas?`<div class="stockMeta" style="margin-top:8px">${esc(i.notas)}</div>`:""}<div class="stockActions"><button class="minus" type="button" data-inv-action="minus" data-inv-id="${esc(i.id)}">− 1</button><button class="plus" type="button" data-inv-action="plus" data-inv-id="${esc(i.id)}">＋ 1</button><button class="edit" type="button" data-inv-action="edit" data-inv-id="${esc(i.id)}">EDITAR</button><button class="delete" type="button" data-inv-action="delete" data-inv-id="${esc(i.id)}">ELIMINAR</button></div></div>`;}).join("");return `<div class="stockCategoryGroup"><div class="stockCategoryTitle">${esc(category)} <span>${items.length}</span></div>${cards}</div>`;}).join("");
 }
 function openInventoryModal(id=null){
-  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;buildInventoryCategoryControls(e?.categoria||"Otros");
-  $("inventoryModalTitle").textContent=e?"Editar material":"Nuevo material";$("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||"Otros";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad??1);$("invItemMin").value=Number(e?.minimo??0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");
+  inventoryEditingId=id||null;const e=id?inventoryItems.find(x=>String(x.id)===String(id)):null;buildInventoryCategoryControls(e?.categoria||getInventoryCategories()[0]||'__new__');
+  $("inventoryModalTitle").textContent=e?"Editar material":"Nuevo material";$("invItemName").value=e?.articulo||"";$("invItemCategory").value=e?.categoria||getInventoryCategories()[0]||"__new__";$("invItemUnit").value=e?.unidad||"unidades";$("invItemQty").value=Number(e?.cantidad??1);$("invItemMin").value=Number(e?.minimo??0);$("invItemLocation").value=e?.ubicacion||"";$("invItemStatus").value=e?.estado||"Disponible";$("invItemNotes").value=e?.notas||"";$("inventoryMsg").textContent="";$("inventoryMsg").className="msg";$("inventoryModal").classList.remove("hidden");
 }
 function closeInventoryModal(){$("inventoryModal")?.classList.add("hidden");inventoryEditingId=null;}
 async function saveInventoryItem(){
   const msg=$("inventoryMsg");const obj={id:inventoryEditingId||( "INV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),articulo:$("invItemName").value.trim(),categoria:$("invItemCategory").value,unidad:$("invItemUnit").value,cantidad:Math.max(0,Number($("invItemQty").value)||0),minimo:Math.max(0,Number($("invItemMin").value)||0),ubicacion:$("invItemLocation").value.trim(),estado:$("invItemStatus").value,notas:$("invItemNotes").value.trim(),imagenUrl:cfInventorySelectedPhoto?.url||'',imagenOrigen:cfInventorySelectedPhoto?.source||'',imagenLicencia:cfInventorySelectedPhoto?.license||''};
-  if(obj.categoria==="__new__"){inventoryCategoryChanged();obj.categoria=$("invItemCategory").value;}
+  if(obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Pulsa CREAR TIPO antes de guardar.";return;}
   if(!obj.articulo){msg.className="msg err";msg.textContent="Indica el nombre del material.";return;}
-  if(!obj.categoria||obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Indica el tipo de material.";return;}
+  if(!obj.categoria||obj.categoria==="__new__"){msg.className="msg err";msg.textContent="Crea o selecciona un tipo de material antes de guardar.";return;}
   saveInventoryCategories([...getInventoryCategories(),obj.categoria]);msg.className="msg";msg.textContent="Guardando...";
   try{await callAction({accion:"guardarInventario",item:JSON.stringify(obj)});await loadInventory(false);await cfSuccessFeedback();msg.className="msg ok";msg.textContent="Material guardado ✓";showToastMessage("Material guardado",`${obj.articulo} · ${obj.categoria}`);setTimeout(closeInventoryModal,350);}catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el material.";}
 }
@@ -3814,7 +3981,7 @@ function showToastMessage(title,text){
 
 function renderLatest(){
   $("latest").innerHTML=records.length
-    ?records.slice(0,4).map(row).join("")
+    ?records.filter(r=>!r.archivada).slice(0,4).map(row).join("")
     :'<div style="padding:22px;text-align:center;color:#66717b">Todavía no hay registros</div>';
 }
 
@@ -3977,6 +4144,7 @@ function renderAll(){
   const period=$("recordPeriod").value;
 
   const a=records.filter(r=>{
+    if(r.archivada&&!$('cfShowArchivedIssued')?.checked)return false;
     if(pendingOnly && r.facturaUrl) return false;
     if(recordFilter!=="all" && r.tipo!==recordFilter) return false;
 
@@ -4680,7 +4848,7 @@ async function sendCFSupport(){
  if(!confirm('¿Enviar tu mensaje al equipo de Control Fiscal? No se adjuntará información fiscal.'))return;
  if(el)el.textContent='Enviando…';
  try{
-  const result=await window.CFGoogleExtras.sendSupport({recipient:CF_SUPPORT_EMAIL,kind,message,appVersion:'UI76-20261023-R8'});
+  const result=await window.CFGoogleExtras.sendSupport({recipient:CF_SUPPORT_EMAIL,kind,message,appVersion:'UI76-20261023-R10'});
   if(!result?.id)throw Error('No se ha confirmado el envío.');
   await cfSuccessFeedback();
   $('cfSupportText').value='';if(el)el.textContent='Mensaje enviado correctamente. Gracias por tu ayuda.';
@@ -4693,6 +4861,7 @@ const CF_TOUR_STEPS=[
  {title:'Facturación',text:'Selecciona un cliente, incorpora conceptos y cantidades y guarda un borrador o emite una factura definitiva. Revisa los datos fiscales antes de emitir.',page:'sale',target:'#formBody .invoiceForm'},
  {title:'Agenda',text:'Registra fecha, horario y ubicación. Los eventos autorizados se sincronizan con Calendar y permiten recordatorios.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Inventario',text:'Crea materiales, cantidades y ubicación. Las categorías generan botones con iconos; puedes filtrar por tipo.',page:'inventory',target:'#inventoryCategoryFilter'},
+ {title:'Documentos',text:'Organiza certificados, licencias, fichas y documentos PDF en carpetas y subcarpetas privadas.',page:'documents',target:'#documentsPage .cfDocToolbar'},
  {title:'Resumen',text:'Filtra por año o mes para comparar compras, facturas emitidas e IVA. Consulta los registros antes de utilizarlos fiscalmente.',page:'summary',target:'#cfSummaryChart'},
  {title:'Ajustes y ayuda',text:'Personaliza Diseño, gestiona Clientes y Distribuidores y configura las facturas. Puedes volver a ejecutar este tutorial cuando quieras.',page:'settings',target:'#settingsPage .settingsCard'},
  {title:'Soporte y privacidad',text:'En Ajustes puedes enviar sugerencias o fallos al administrador. Solo se envía lo que escribas: tus libros fiscales siguen siendo privados.',page:'settings',target:'#cfSupportGroup'},
@@ -4709,7 +4878,7 @@ function cfShowTourStep(){
  const step=CF_TOUR_STEPS[cfTourIndex],overlay=$('cfTutorialOverlay');if(!step||!overlay)return finishCFTutorial();
  if(cfTourFocused){cfTourFocused.classList.remove('cfTourHighlight');cfTourFocused=null;}
  try{
-  switch(step.page){case 'home':goHome();break;case 'buy':openForm('Compra');break;case 'sale':openForm('Facturado');break;case 'agenda':openAgenda();break;case 'inventory':openInventory();break;case 'summary':openSummary();break;case 'settings':openSettings();break;}
+  switch(step.page){case 'home':goHome();break;case 'buy':openForm('Compra');break;case 'sale':openForm('Facturado');break;case 'agenda':openAgenda();break;case 'inventory':openInventory();break;case 'documents':CFDocuments.open();break;case 'summary':openSummary();break;case 'settings':openSettings();break;}
  }catch(e){console.warn('Tutorial sin poder abrir sección',e);}
  overlay.classList.remove('hidden');
  $('cfTutorialProgress').textContent='PASO '+(cfTourIndex+1)+' DE '+CF_TOUR_STEPS.length;
@@ -4765,7 +4934,7 @@ openInventoryModal=function(id=null){
 };
 let cfInventorySelectedPhoto=null;
 function cfSafeCommonsImage(url){
- try{const u=new URL(String(url||''));return u.protocol==='https:'&&u.hostname==='upload.wikimedia.org'?u.href:'';}catch{return '';}
+ try{const u=new URL(String(url||''));return u.protocol==='https:' && !/(^|\.)(localhost|local|internal)$/.test(u.hostname) && !/^\d+\.\d+\.\d+\.\d+$/.test(u.hostname) ? u.href : '';}catch{return '';}
 }
 function cfDrivePhotoId(url){
  try{const u=new URL(String(url||''));if(u.protocol!=='https:'||u.hostname!=='drive.google.com')return '';
@@ -4794,29 +4963,46 @@ async function cfLoadPrivateInventoryPhoto(img,driveUrl,accountId){
 }
 function cfClearPrivateInventoryPhotos(){for(const url of cfInventoryPrivateImages.values())try{URL.revokeObjectURL(url)}catch(e){}cfInventoryPrivateImages.clear();}
 
+function cfOpenGoogleImageSearch(){const model=String($('invItemName')?.value||'').trim();if(model.length<3){$('cfInventoryPhotoStatus').textContent='Escribe primero el nombre exacto del producto.';return;}const url='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(model);if(window.CFBrowser?.open)window.CFBrowser.open({url}).catch(e=>{$('cfInventoryPhotoStatus').textContent=e.message||String(e)});else window.open(url,'_blank','noopener');}
 async function cfFindInventoryPhotos(){
  const status=$('cfInventoryPhotoStatus'),wrap=$('cfInventoryPhotoChoices'),name=String($('invItemName')?.value||'').trim();
- if(name.length<4){status.textContent='Escribe antes el nombre o modelo exacto del artículo.';return;}
- status.textContent='Buscando imágenes con licencia abierta…';wrap.innerHTML='';
+ if(name.length<3){status.textContent='Escribe el nombre o modelo del artículo.';return;}
+ status.textContent='Buscando fotografías con licencia indicada…';wrap.replaceChildren();
  try{
-  const u=new URL('https://commons.wikimedia.org/w/api.php');
-  u.search=new URLSearchParams({action:'query',generator:'search',gsrsearch:name,gsrnamespace:'6',gsrlimit:'8',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'250',format:'json',origin:'*'}).toString();
-  const response=await fetch(u.href,{method:'GET'});if(!response.ok)throw Error('Servicio de imágenes temporalmente no disponible.');
-  const doc=await response.json(),entries=Object.values(doc.query?.pages||{}).filter(x=>x.imageinfo?.[0]);
-  const result=entries.map(x=>({title:String(x.title||'').replace(/^File:/,''),url:cfSafeCommonsImage(x.imageinfo[0].thumburl||x.imageinfo[0].url),original:cfSafeCommonsImage(x.imageinfo[0].url),license:String(x.imageinfo[0].extmetadata?.LicenseShortName?.value||'').replace(/<[^>]*>/g,'').slice(0,80),page:'https://commons.wikimedia.org/wiki/'+encodeURIComponent(x.title||'')})).filter(x=>x.url&&x.original);
-  if(!result.length){status.textContent='No hay imágenes verificables en Wikimedia Commons para ese nombre. Puedes usar una imagen propia.';return;}
-  result.forEach(photo=>{
-   const button=document.createElement('button');button.type='button';button.className='cfPhotoChoice';
-   const img=document.createElement('img');img.src=photo.url;img.alt=photo.title;img.loading='lazy';img.referrerPolicy='no-referrer';
-   const text=document.createElement('span');text.textContent=photo.title+' · '+(photo.license||'Revisar licencia');
-   button.append(img,text);button.onclick=()=>{
-    cfInventorySelectedPhoto={url:photo.url,source:photo.page,license:photo.license};
-    $('cfInventoryPhotoPreview').src=photo.url;$('cfInventoryPhotoPreview').hidden=false;
-    status.textContent='Imagen seleccionada. Verifica que sea tu modelo exacto y su licencia antes de guardar.';
+  // Openverse permite elegir fotografías de distintas fuentes; Google Imágenes no publica
+  // una API nueva de resultados utilizable libremente sin proveedor autorizado.
+  const url='https://api.openverse.org/v1/images/?'+new URLSearchParams({q:name,page_size:'15'});
+  const resp=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!resp.ok)throw Error('La búsqueda no está disponible (HTTP '+resp.status+').');
+  const doc=await resp.json(),results=(doc.results||[]).filter(x=>{
+   try{const u=new URL(x.thumbnail||x.url);return u.protocol==='https:';}catch{return false;}
+  }).slice(0,15);
+  if(!results.length){status.textContent='Sin fotografías apropiadas. Usa Google Imágenes para localizarla y después súbela desde Fotos o Archivos.';return;}
+  for(const photo of results){
+   const url=photo.thumbnail||photo.url;
+   const button=document.createElement('button');button.className='cfPhotoChoice';button.type='button';
+   const img=document.createElement('img');img.alt=String(photo.title||name);img.src=url;img.loading='lazy';img.referrerPolicy='no-referrer';
+   const label=document.createElement('span');label.textContent=String(photo.title||name).slice(0,65)+' · '+String(photo.license||'Licencia por revisar');
+   button.append(img,label);button.onclick=()=>{
+    cfInventorySelectedPhoto={url:photo.url||url,source:photo.foreign_landing_url||photo.url,license:String(photo.license||'')};
+    $('cfInventoryPhotoPreview').src=url;$('cfInventoryPhotoPreview').hidden=false;
+    status.textContent='Seleccionada. Comprueba que coincida con el modelo y que tengas derecho a usarla.';
    };wrap.append(button);
-  });
-  status.textContent='Selecciona la foto que corresponda exactamente a tu producto. Las sugerencias no se asignan automáticamente.';
- }catch(e){status.textContent='No se pudo buscar: '+(e.message||e)+'. El artículo puede guardarse sin imagen.';}
+  }
+  status.textContent='Elige una fotografía del modelo exacto. Si no aparece, usa Google Imágenes y súbela desde tu dispositivo.';
+ }catch(e){status.textContent='No se pudieron cargar sugerencias. Puedes usar Google Imágenes y luego subir la foto: '+(e.message||e);}
+}
+
+function cfUseCustomImageUrl(){
+ const status=$('cfInventoryPhotoStatus'),link=String($('cfInventoryCustomImageUrl')?.value||'').trim();
+ let u;try{u=new URL(link);}catch{status.textContent='Escribe una URL completa y válida.';return;}
+ if(u.protocol!=='https:'||!u.hostname.includes('.')||u.username||u.password||/^\d+\.\d+\.\d+\.\d+$/.test(u.hostname)){
+  status.textContent='Solo se admiten imágenes públicas desde URLs HTTPS seguras.';return;
+ }
+ if(!confirm('¿Confirmas que esta fotografía corresponde al artículo y que puedes utilizarla?'))return;
+ cfInventorySelectedPhoto={url:u.href,source:'url-seleccionada-usuario',license:'por verificar'};
+ $('cfInventoryPhotoPreview').src=u.href;$('cfInventoryPhotoPreview').hidden=false;
+ status.textContent='Imagen seleccionada. Si el servidor bloquea enlaces directos, súbela desde el teléfono.';
 }
 async function cfSelectInventoryPhotoFile(input){
  const status=$('cfInventoryPhotoStatus'),file=input?.files?.[0];if(!file)return;
@@ -4858,7 +5044,7 @@ startAccountSystem();
     <div class="modalTitle">📦 <span id="inventoryModalTitle">Nuevo material</span></div>
     <div class="inventoryModalGrid">
       <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. Artículo o referencia"></div>
-      <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option>Audio</option><option>Iluminación</option><option>Pantallas LED</option><option>Estructuras</option><option>Cableado</option><option>Otros</option><option value="__new__">＋ Crear nuevo tipo</option></select></div>
+      <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option value="__new__">＋ Crear nuevo tipo</option></select><button class="guideBtn" type="button" onclick="document.getElementById('invItemCategory').value='__new__';inventoryCategoryChanged()">＋ CREAR TIPO</button></div>
       <div class="field"><label>Unidad</label><select id="invItemUnit" class="select"><option>unidades</option><option>metros</option><option>pares</option><option>juegos</option><option>cajas</option></select></div>
       <div class="field"><label>Cantidad</label><input id="invItemQty" class="input" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
       <div class="field"><label>Stock mínimo</label><input id="invItemMin" class="input" type="number" min="0" step="1" inputmode="numeric" value="0"></div>
@@ -4866,9 +5052,15 @@ startAccountSystem();
       <div class="field"><label>Estado</label><select id="invItemStatus" class="select"><option>Disponible</option><option>En reparación</option><option>No disponible</option></select></div>
       <div class="field full"><label>Notas</label><textarea id="invItemNotes" class="textarea" placeholder="Opcional"></textarea></div>
       <div class="field full cfInventoryPhoto"><label>Imagen del artículo (opcional)</label>
-        <p class="settingsHint">Busca imágenes con licencia abierta para seleccionar la del modelo correcto. Si no aparece, puedes elegir un archivo propio.</p>
-        <button class="guideBtn" type="button" onclick="cfFindInventoryPhotos()">🖼️ BUSCAR FOTOS SUGERIDAS</button>
+        <p class="settingsHint">Busca imágenes de fuentes abiertas y elige la del modelo correcto. Google Imágenes se puede abrir para localizar y guardar una fotografía en el teléfono. Si no aparece, puedes elegir un archivo propio.</p>
+        <button class="guideBtn" type="button" onclick="cfFindInventoryPhotos()">🖼️ BUSCAR FOTOS SUGERIDAS (OPENVERSE)</button>
+        <button class="guideBtn" type="button" onclick="cfOpenGoogleImageSearch()">🔍 BUSCAR MODELO EN GOOGLE IMÁGENES</button><small class="settingsHint">Google Imágenes se abre para identificar el modelo. Por licencias y seguridad, Control Fiscal no importa automáticamente las fotos: selecciona una con permiso de uso o sube tu propia foto.</small>
         <div id="cfInventoryPhotoChoices" class="cfInventoryPhotoChoices"></div>
+        <div class="field"><label>Enlace directo de imagen elegida (opcional)</label>
+          <input id="cfInventoryCustomImageUrl" class="input" inputmode="url" type="url" placeholder="https://.../foto.jpg">
+          <button type="button" class="guideBtn" onclick="cfUseCustomImageUrl()">USAR ESTA FOTO</button>
+          <small class="settingsHint">Después de buscar en Google Imágenes, puedes copiar una URL directa a una foto autorizada. La imagen debe tener permiso de uso y el enlace puede caducar. Es preferible guardarla en Fotos y subirla al Drive personal.</small>
+        </div>
         <input id="cfInventoryPhotoUpload" class="input" type="file" accept="image/jpeg,image/png" onchange="cfSelectInventoryPhotoFile(this)">
         <img id="cfInventoryPhotoPreview" class="cfInventoryPhotoPreview" alt="Vista previa del producto" hidden>
         <div id="cfInventoryPhotoStatus" class="settingsHint" role="status"></div>
@@ -4888,12 +5080,14 @@ startAccountSystem();
       <div class="field"><label>Fecha</label><input id="agendaEventDate" class="input" type="date"></div>
       <div class="field"><label>Hora de inicio</label><input id="agendaEventStart" class="input" type="time"></div>
       <div class="field"><label>Hora de fin</label><input id="agendaEventEnd" class="input" type="time"></div>
+      <div class="field full"><label for="agendaReminder">Avisarme en el iPhone</label><select id="agendaReminder" class="select cfReminderChoice"><option value="none">Sin recordatorio</option><option value="0">Al empezar el evento</option><option value="15">15 minutos antes</option><option value="30">30 minutos antes</option><option value="60" selected>1 hora antes</option><option value="120">2 horas antes</option><option value="1440">1 día antes</option><option value="2880">2 días antes</option></select><small class="settingsHint">Requiere permitir notificaciones. El aviso se guarda con cada evento; no depende de sincronizar Google Calendar.</small></div>
       <div class="field"><label>Cliente / contacto</label><input id="agendaEventClient" class="input" placeholder="Opcional"></div>
       <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Ej. Dirección del evento, ciudad"></div>
       <div class="field full"><label>Qué tengo que llevar</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Documentación, equipos y herramientas..."></textarea></div>
       <div class="field full"><label>Comentarios</label><textarea id="agendaEventComments" class="textarea" placeholder="Montaje, horario de llegada, contacto, instrucciones..."></textarea></div>
     </div>
     <div id="agendaMapPreview" class="settingsHint" style="margin:4px 0 10px"></div>
+    <label class="field" style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;margin:8px 0 12px"><input id="agendaSyncGoogle" type="checkbox" style="width:22px;height:22px;flex-shrink:0"><span>Sincronizar también con Google Calendar (requiere permisos de Calendar API). El evento siempre se guarda en Control Fiscal, aunque Calendar no autorice la conexión.</span></label>
     <button class="save p" type="button" onclick="saveAgendaEvent()">GUARDAR EVENTO</button>
     <button class="deleteBtn" id="agendaDeleteBtn" type="button" style="margin-top:8px;display:none" onclick="deleteAgendaEvent()">ELIMINAR EVENTO</button>
     <div id="agendaMsg" class="msg"></div>
@@ -4980,12 +5174,14 @@ startAccountSystem();
  <div class="guideStep"><div class="guideNum">9</div><div><h4>Licitaciones públicas y precios</h4><p>Desde Resumen abre la página segura del Gobierno de España para localizar el acceso a la contratación pública. En Ajustes → Comparar precios puedes buscar un producto en comparadores; las ofertas deben verificarse en cada tienda. La app no promete cubrir todas las tiendas ni consultar sus precios automáticamente.</p></div></div>
  <div class="guideStep"><div class="guideNum">10</div><div><h4>Notificaciones y seguridad</h4><p>Activa los avisos para revisar documentos pendientes. Si sales de la app, volverás a identificarte con Face ID o con el método local configurado. Puedes cerrar sesión y cambiar de cuenta desde Ajustes: nunca compartas el mismo libro entre usuarios sin revisar los permisos.</p></div></div>
  <div class="guideStep"><div class="guideNum">11</div><div><h4>Imagen y optimización</h4><p>En Ajustes alterna tema negro o blanco, cambia la imagen del menú y la imagen de facturas. En pantallas antiguas usa Ahorro de rendimiento; el texto se mantiene nítido porque la interfaz usa elementos adaptativos.</p></div></div>
- <div class="guideStep"><div class="guideNum">12</div><div><h4>Editar o eliminar registros sin duplicados</h4><p>Desde Inicio pulsa Ver todos, selecciona un registro y elige editar o borrar. Confirma los cambios; cuando aparece el mensaje de éxito, los datos se actualizarán. El botón Guardar queda bloqueado durante el envío y los campos se vacían únicamente si Google confirma el alta. Si aparece un error 401, la app intentará renovar la autorización automáticamente; si no es posible, reconecta en Cuenta.</p></div></div>
+ <div class="guideStep"><div class="guideNum">12</div><div><h4>Editar o eliminar registros sin duplicados</h4><p>Las facturas emitidas se muestran en modo consulta: no se borran ni modifican. Para corregirlas es necesario el procedimiento de factura rectificativa. Desde Inicio pulsa Ver todos, selecciona un registro y elige editar o borrar. Confirma los cambios; cuando aparece el mensaje de éxito, los datos se actualizarán. El botón Guardar queda bloqueado durante el envío y los campos se vacían únicamente si Google confirma el alta. Si aparece un error 401, la app intentará renovar la autorización automáticamente; si no es posible, reconecta en Cuenta.</p></div></div>
 <div class="guideStep"><div class="guideNum">13</div><div><h4>Distribuidores y clientes anteriores</h4><p>En Compras escribe parte del nombre de un distribuidor y selecciona una coincidencia. En Facturación ocurre lo mismo con clientes. Para corregir NIF, dirección o teléfono ve a Ajustes → Mis clientes o Mis distribuidores y pulsa Editar.</p></div></div>
 <div class="guideStep"><div class="guideNum">14</div><div><h4>Iconos y fotografías del inventario</h4><p>Los iconos de tipo se escogen automáticamente según palabras como altavoz, iluminación, ordenador, cable o cámara. Las categorías que ya hayas guardado siguen disponibles. Puedes filtrar por esos botones. No se asignan fotografías de productos sin verificar que correspondan al modelo, para evitar mostrar material equivocado.</p></div></div>
-<div class="guideStep"><div class="guideNum">15</div><div><h4>Recordatorios de eventos</h4><p>Si autorizas las notificaciones en iOS, los eventos próximos permiten avisos en el móvil con el nombre y la ubicación. En Google Calendar se crean recordatorios un día y una hora antes. Comprueba que las notificaciones del sistema estén activadas.</p></div></div>
+<div class="guideStep"><div class="guideNum">15</div><div><h4>Recordatorios de eventos</h4><p>Si autorizas las notificaciones en iOS, los eventos próximos permiten avisos en el móvil con el nombre y la ubicación. En la ficha del evento eliges avisar al empezar, 15 minutos, 30 minutos, 1 hora, 2 horas, 1 día o 2 días antes. El aviso local no requiere Google Calendar. Comprueba que las notificaciones del sistema estén activadas.</p></div></div>
 <div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. Si Gmail rechaza el envío, verás el error para corregirlo.</p></div></div>
 <div class="guideStep"><div class="guideNum">17</div><div><h4>Permisos de Google, avisos y privacidad</h4><p>Google puede pedir de nuevo autorización tras un tiempo o cuando cambian los permisos. No compartas los accesos ni otorgues permisos a otras cuentas sin revisarlos. El administrador no puede abrir tus libros ni eliminar tus facturas desde el panel de soporte. Para controles centrales de cuentas se requiere un servidor independiente y una política de privacidad.</p></div></div>
+<div class="guideStep"><div class="guideNum">19</div><div><h4>Documentos: carpetas y subcarpetas privadas</h4><p>En Inicio pulsa DOCUMENTOS. Crea una carpeta Certificados; ábrela y añade la subcarpeta Certificados de sonido. Dentro sube PDF o imágenes con el botón Subir. La app mostrará los archivos en una lista y los abrirá sin salir. Los documentos se guardan en tu Google Drive; quitar un registro de la app no destruye el archivo de Drive.</p></div></div>
+<div class="guideStep"><div class="guideNum">20</div><div><h4>Retirar facturas emitidas de la lista</h4><p>Una factura emitida sigue siendo un documento fiscal y no se debe destruir como una compra. Desde Registros, abre la factura y selecciona Retirar de la lista; desaparecerá de las listas normales pero seguirá en el historial fiscal y computando en el resumen. Marca Mostrar facturas retiradas para consultarla y restaurarla. Para corregir importes fiscalmente debe emitirse una rectificativa cuando corresponda.</p></div></div>
 <div class="guideStep"><div class="guideNum">18</div><div><h4>Tutorial interactivo</h4><p>La primera vez que accedas se mostrará el tutorial. Avanza por las ventanas usando Siguiente; puedes saltarlo en cualquier momento. Vuelve a iniciarlo desde Ajustes → Información y herramientas → Iniciar tutorial interactivo.</p></div></div>
 <button class="modalAction" type="button" onclick="closeGuide()">CERRAR GUÍA</button></div></div>
 
@@ -5057,5 +5253,6 @@ startAccountSystem();
   window.addEventListener('resize',function(){ requestAnimationFrame(updateScrollIndicator); },{passive:true});
 })();
 </script>
+<script src="cf-documents.js"></script>
 </body>
 </html>
