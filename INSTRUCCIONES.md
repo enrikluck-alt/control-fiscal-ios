@@ -1,67 +1,68 @@
-# Control Fiscal V76-Google — R12 · Notificaciones, sonido y correcciones de interfaz
+# Control Fiscal V76-Google — R13 · Correo, Agenda, notificaciones y Mapas
 
-**Identificador visible en Ajustes:** `UI76-20261023-R12`
+**Identificador visible en Ajustes:** `UI76-20261023-R13`  
+**Estado:** versión para pruebas en iPhone. Mantiene el diseño V76 y el almacenamiento personal del usuario en Drive/Sheets. El proyecto NO ha sido compilado con Xcode en este entorno.
 
-Esta entrega conserva las pantallas originales V76 y los módulos de la R11; modifica principalmente Ajustes, notificaciones, soporte e Inventario. No se ha probado aún la IPA en un iPhone real ni se ha ejecutado Xcode en este entorno. Los datos fiscales reales requieren las precauciones de las versiones anteriores, especialmente con facturas emitidas y numeración concurrente.
+## Instalación en Windows + GitHub Actions
 
-## Instalación
+1. Descomprime el ZIP completo; sube sus archivos a la rama `v78-google-test`. **Incluye la carpeta oculta `.github`**. Mantén `main` intacta.
+2. Abre GitHub → Actions → `Build unsigned iOS IPA` → Run workflow y selecciona `v78-google-test`.
+3. Descarga **`ControlFiscal-V76-Google-R13-Correo-Agenda-IPA`**, con la IPA `ControlFiscal_V76_Google_R13_Correo_Agenda.ipa`.
+4. Instala en iPhone con Sideloadly. En Ajustes debe aparecer `UI76-20261023-R13`.
+5. Mantén habilitadas las notificaciones del dispositivo para Control Fiscal, con sonidos y alertas permitidos. Los modos Silencio y Concentración afectan a su presentación.
 
-1. Extrae el ZIP y sube su contenido **completo**, incluida la carpeta oculta `.github`, a la rama **`v78-google-test`**. No modifiques `main`.
-2. Abre GitHub Actions → `Build unsigned iOS IPA` → `Run workflow` y elige dicha rama.
-3. Descarga el artefacto **`ControlFiscal-V76-Google-R12-Notificaciones-IPA`** y dentro la IPA `ControlFiscal_V76_Google_R12_Notificaciones_Imagenes.ipa`.
-4. Instálala con Sideloadly y verifica la marca `UI76-20261023-R12` al final de Ajustes.
-5. Comprueba que en la IPA aparecen los archivos de sonido `cf_claro.wav`, `cf_pulso.wav` y `cf_calma.wav` en la raíz de `Payload/ControlFiscal.app/` (el workflow valida que estén).
+## Correcciones y pruebas recomendadas
 
-## Ajustes — tema blanco
+### A. Nuevo evento: ya no esperar a Google Calendar
 
-Se refuerza el contraste en el **índice principal de Ajustes**: los títulos y los botones de navegación pasan a oscuro sobre blanco. Prueba tanto el índice como Diseño, Notificaciones, Audio y Cuenta. Las preferencias existentes se conservan.
+Al guardar un evento, la app realiza **una única operación de escritura** en Sheets. Cuando Google la confirma, muestra `Evento guardado en Control Fiscal`, actualiza el calendario visual y permite salir de la ventana. A continuación intenta programar el aviso de iOS y, opcionalmente, sincronizar con Google Calendar por separado.
 
-## Sugerencias — menú nativo de compartir
+- Prueba creando un evento **ficticio**, a una hora futura, con ubicación. Selecciona `15 minutos antes` o `1 hora antes` y guárdalo.
+- Si Google Calendar devuelve error 403, el evento **permanece guardado**. Revisa el estado de sincronización en Agenda; Google Calendar API debe estar habilitada y la cuenta tiene que haber autorizado `calendar.events` en OAuth. Si el permiso cambia, puede hacer falta reconectar la cuenta.
+- Si **Sheets** no responde en 25 segundos, se muestra que el guardado *no se ha confirmado*. Evita pulsar repetidamente: abre Agenda y comprueba primero si existe. Se conserva el identificador durante el reintento para reducir duplicados.
+- La ventana se sitúa por debajo de la zona segura superior, incluso en iPhone con Dynamic Island. Comprueba que la X puede pulsarse.
 
-En Ajustes → Sugerencias y errores se mantiene el formulario. Al pulsar «Preparar correo» hay una vibración corta; tras confirmar se abre la hoja nativa de compartir de iOS. Elige Mail o tu aplicación de correo y envía la sugerencia a **Electrochispas@outlook.es** (es el destinatario provisional que ya figuraba en versiones anteriores). La app incluye esta dirección en el texto compartido, **pero debes indicarla como destinatario en tu aplicación de correo si ésta no la rellena**. Control Fiscal no tiene servidor de recepción ni puede verificar automáticamente que el correo se haya enviado.
+### B. Aviso de evento y ruta en Mapas
 
-Si el menú de compartir no se abre, se ofrece un enlace a Mail y la opción de copiar el texto. No se adjuntan automáticamente documentos, compras o facturas de la cuenta.
+- Cuando el evento tenga ubicación, el aviso local añade `Toca para ver la ruta`.
+- Al pulsar el aviso se abre Control Fiscal / Agenda y se solicita una ruta al destino mediante un enlace de **Apple Maps**. La apertura real del mapa depende del comportamiento de iOS y sus asociaciones de enlaces.
+- Estos **son avisos locales** del iPhone; no son Live Activities y no cambian el fondo de pantalla. Se programan para eventos dentro de los próximos 90 días y necesitan permiso de iOS.
 
-## Notificaciones iOS — configurar y comprobar
+### C. Ajustes → Notificaciones y Audio
 
-En Ajustes → **Notificaciones**:
+1. Pulsa `ACTIVAR / ACTUALIZAR RECORDATORIO`. Ahora el resultado se muestra en **Notificaciones** y no solo en Audio.
+2. Pulsa `ENVIAR AVISO DE PRUEBA` y verifica el mensaje visible: debe confirmar la programación para dentro de **10 segundos**. En la R13 se solicita que el aviso se muestre incluso **con la app abierta** (`foreground`). Bloquea también el teléfono para probarlo en segundo plano.
+3. En Audio elige `Claro`, `Pulso`, `Calma` o `Sonido de iOS`; pulsa `PROBAR EN EL IPHONE`. El resultado aparece tanto en Audio como en Notificaciones. Los tres WAV personalizados siguen empaquetados en la raíz de la `.app` por GitHub Actions.
+4. Activa o desactiva `Aviso diario de documentación pendiente` y selecciona su hora. **Solo se agenda el aviso diario si hay compras o facturas con documentación pendiente**. Sin pendientes, el botón explica que no ha programado ese aviso; el aviso de prueba sí debe poder funcionar.
+5. Si aparece `plugin de notificaciones no disponible` o `iOS no ha autorizado`, revisa la IPA y los permisos en iPhone → Ajustes → Control Fiscal → Notificaciones. La aplicación no puede saltarse esas restricciones.
 
-- Elige la **hora del recordatorio** (por ejemplo, 09:00).
-- Marca **«Aviso diario de documentación pendiente»** para activarlo; desmárcalo para cancelarlo. Esta preferencia se conserva al cerrar la aplicación.
-- Pulsa **«Permitir notificaciones»** si aún no has concedido el permiso de iOS. Para funcionar, iOS debe autorizar alertas y, para oír sonidos, tener el sonido permitido. El modo Silencio o Concentración puede afectar a su presentación.
-- Pulsa **«Enviar aviso de prueba»**: se programa una notificación local para **8 segundos más tarde**. Bloquea el iPhone para comprobar que aparece. Esto prueba el funcionamiento real del plugin nativo; si falla, la app muestra el motivo.
-- Las notificaciones de compras/facturas pendientes se programan a diario **solo cuando hay documentación pendiente y la casilla está activada**. Al actualizar la información o desactivar la casilla se reprograman o cancelan. Si cambias datos externamente en Drive, abre la app para que recalcule el estado.
+### D. Ajustes → Sugerencias y errores
 
-En **Agenda**, al guardar un evento que tenga aviso seleccionado, la aplicación pide autorización de iOS si aún no la tiene y programa el aviso. Si no se concede, el evento queda guardado y aparece una advertencia de que **no se ha programado** la notificación. No es necesario conceder permiso a Google Calendar para estos avisos locales. Los avisos cubren eventos de los próximos 90 días y se actualizan al cargar Agenda.
+El botón **ENVIAR SUGERENCIA POR CORREO** envía un mensaje dirigido a **electrochispas@outlook.es** mediante la **Gmail API de la cuenta Google activa**, previa confirmación. Si Google acepta, muestra su confirmación. **No adjunta automáticamente datos fiscales**, documentos de Drive ni otras informaciones privadas.
 
-### Audio de notificaciones
+**Requisitos para envío directo:** la cuenta de Google debe disponer de Gmail, el proyecto Google Cloud debe tener **Gmail API habilitada**, los permisos OAuth deben incluir `https://www.googleapis.com/auth/gmail.send`, y la cuenta debe haberlos aceptado. Si Google requiere verificación de la aplicación o devuelve un error 403, no se puede enviar automáticamente desde el cliente: el mensaje permanece editable y se muestra una alternativa `mailto:` para redactarlo. Para un envío completamente automático que también funcione sin Gmail y para cuentas que no han concedido el permiso, se necesita un **backend propio autorizado**, por ejemplo Cloud Run con autenticación, protección contra spam y un proveedor de correo; **no está configurado** en este proyecto.
 
-Nuevo apartado **Ajustes → Audio de notificaciones** con cuatro opciones: sonido del sistema o tres sonidos propios cortos (Claro, Pulso y Calma). Puedes pulsar **Escuchar sonido** y **Probar en el iPhone**. Los archivos WAV se incluyen tanto en `www/sounds/` como en la raíz de la aplicación iOS al construir la IPA. Son sonidos originales de esta entrega, no archivos copiados de terceros. Apple exige que los sonidos personalizados estén en el paquete de la app y duren menos de 30 segundos.
+La recepción en la bandeja del administrador debe comprobarse independientemente, ya que la respuesta Gmail confirma la aceptación de la operación, no su entrega final al destinatario Outlook.
 
-**Limitación:** iOS puede silenciar las alertas por los ajustes del dispositivo, el modo Concentración o los permisos. Ninguna app puede imponer una notificación o sonido si el sistema los bloquea. No se incluyen Live Activities en esta versión.
+### E. Resumen → Enviar documentación al gestor
 
-## Inventario
+La función R12 llamaba a un caso desactivado de Sheets. La R13 recupera los adjuntos privados desde Drive y envía por Gmail los PDF/JPG/PNG que correspondan al periodo elegido, **solo después de confirmar cantidad y correo del gestor**. Límite conservador: **15 documentos, 5 MB por archivo y 12 MB combinados** en cada envío. Con muchos documentos, selecciona menos meses. Si un archivo no está disponible o falla el correo, la app muestra el error y **no declara que se hayan enviado**.
 
-- Los botones de **tipos de material** se disponen en **cuadrícula** de ancho adaptable; ya no es necesario desplazarse horizontalmente para cambiar de tipo.
-- Las fichas de inventario muestran las fotos asociadas. Las imágenes privadas subidas a Drive se descargan para su visualización usando la cuenta Google activa; no se publican los archivos.
-- El editor conserva la imagen asociada al reabrir un artículo, evitando perderla al cambiar otros campos.
-- «Ver galería de fotografías» busca en Openverse/Wikimedia, añade una búsqueda **genérica** cuando el modelo exacto no arroja resultados y corta las peticiones que tarden demasiado. Muestra imágenes seleccionables con sus licencias. Si no hay imágenes, permite subir tu propia foto.
-- Esta galería **no es Google Imágenes** y las imágenes genéricas pueden no corresponder al producto. Comprueba siempre que es la foto correcta antes de guardarla. Fuentes externas pueden bloquear miniaturas y no se garantiza que todas estén disponibles.
+Se requiere el mismo permiso `gmail.send`. No se comparte el enlace del libro completo de Sheets: se envían únicamente los adjuntos seleccionados. Comprueba tanto el resumen de envío como la recepción real en la bandeja del gestor.
 
-## Pruebas de regresión y límites
+## Pruebas realizadas y límites
 
-- **81/81 pruebas automatizadas locales superadas**: 75 de versiones anteriores y 6 adicionales de activación/desactivación del aviso, hora, cuenta de pendientes, WAV, imágenes y envío de sugerencias.
-- Comprobada la sintaxis JavaScript de los scripts incrustados y externos, y la estructura YAML de GitHub Actions.
-- La comprobación visual automatizada con Chromium no pudo ejecutarse: `net::ERR_BLOCKED_BY_ADMINISTRATOR`. No se declara superada.
-- **Pendiente de iPhone y GitHub Actions:** compilar Xcode, permiso real de notificaciones, sonido mientras la app está en segundo plano, mostrar imágenes externas, hoja de compartir y contraste en dispositivos físicos.
-- **Facturación:** sigue existiendo el riesgo conocido de numeración concurrente en Google Sheets. No emitas facturas reales simultáneamente desde varios dispositivos hasta incorporar numeración atómica y validación fiscal. Las facturas emitidas continúan protegidas; no se ha alterado su histórico en este parche.
+- **86 pruebas automatizadas locales correctas**: las 81 heredadas (actualizadas solo donde el comportamiento ha cambiado) y 5 nuevas sobre Gmail, adjuntos, guardado de eventos, avisos y rutas.
+- HTML y JavaScript comprobados sintácticamente con Node; módulos V76 de Inicio, Agenda, Stock y estilos originales permanecen intactos.
+- El workflow comprueba antes y después de sincronizar Capacitor que los archivos de interfaz y plugins están presentes, verifica el módulo de notificaciones y coloca los tres WAV en el bundle principal.
+- **Sin compilar Xcode ni probar notificaciones, Gmail, Calendar o Mapas nativos en iPhone.** No hay garantía hasta completar esa validación; el primer error de GitHub Actions debe revisarse antes de instalar.
+- **Seguridad fiscal:** mantiene los avisos sobre numeración concurrente y rectificación de facturas emitidas. Usa inicialmente documentos y eventos **de prueba**, nunca facturas fiscales reales para validar la nueva versión.
 
-### Orden de prueba propuesto
+## Orden de prueba en iPhone
 
-1. Tema **blanco** → índice de Ajustes (comprueba títulos); negro → compara.
-2. Sugerencias → escribe 20 caracteres → pulsa Enviar → confirma → comprueba que aparece el menú nativo de compartir; prueba la vibración.
-3. Notificaciones → elige 09:15, activa casilla, permite notificaciones → **Enviar aviso de prueba** → bloquea el iPhone y comprueba el sonido a los 8 segundos.
-4. Audio → selecciona Claro, Pulso y Calma → Escuchar; pulsa Probar en el iPhone y verifica que cambia el sonido.
-5. Agenda → guarda un evento ficticio próximo, con aviso 15 min antes; confirma que no sale error de programación. Si Calendar falla por OAuth, el aviso local debe seguir disponible.
-6. Inventario → crea un tipo Altavoces → verifica cuadrícula → añade un artículo con foto propia → guarda → vuelve y comprueba miniatura y vista previa.
-7. Compras y Facturación → comprueba que la navegación y registros antiguos siguen igual.
+1. Inicia sesión y comprueba `UI76-20261023-R13` en Ajustes.
+2. Notificaciones: pulsa **Permitir/Actualizar**, envía una notificación de prueba, prueba los sonidos con la app abierta y bloqueada.
+3. Agenda: crea un evento de prueba con ubicación y aviso breve; comprueba que el guardado termina, que puedes pulsar la X y que el aviso abre la ruta.
+4. Sugerencias: envía un mensaje corto de prueba y comprueba que llega a `electrochispas@outlook.es`. Si Google devuelve 403, adjunta el **mensaje de error exacto** (sin compartir tokens ni contraseñas).
+5. Enviar documentación al gestor: elige un solo PDF de prueba y un destinatario de confianza.
+6. Compras, Facturación, Inventario, Documentos, Resumen y Ajustes: verifica que sus pantallas conservan el diseño original de V76.

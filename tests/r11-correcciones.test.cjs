@@ -51,11 +51,11 @@ test('R11: evita que se salte hacia atrás en numeración manual',async()=>{
 });
 test('R11: Ajustes claro, mailto en sugerencias y selector inline de tipo',()=>{
  assert.match(html,/body\.lightTheme #settingsPage \.cfSettingsNavBtn/);
- assert.match(html,/\bmailto:/);assert.match(html,/CFShare/);assert.match(html,/Control Fiscal no puede confirmar el envío/);
+ assert.match(html,/\bmailto:/);assert.match(html,/CFGoogleExtras\.sendSupport/);assert.match(html,/Gmail ha confirmado el envío/);
  assert.match(html,/id="cfInventoryNewTypeInline"/);assert.match(html,/id="cfInventoryNewTypeName"/);
  assert.doesNotMatch(html,/<button class="guideBtn" type="button" onclick="document.getElementById\('invItemCategory'\)/);
  assert.match(html,/cfFindInventoryPhotos/);assert.match(html,/commons\.wikimedia\.org\/w\/api\.php/);
  assert.match(html,/Mostrar facturas emitidas retiradas del listado/);
  assert.match(html,/id="invoiceManualNumber"/);
- assert.match(wf,/UI76-20261023-R12/);
+ assert.match(wf,/UI76-20261023-R13/);
 });

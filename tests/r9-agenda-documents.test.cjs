@@ -21,7 +21,7 @@ test('R9: Calendar respeta avisos de cada evento y ninguno cuando el usuario no 
 test('R9: opciones visibles de notificaciones y calendario no bloqueante',()=>{
  for(const n of ['agendaReminder','agendaSyncGoogle','cfCalendarPermissionError','cfScheduleEventReminders','reminderMinutes','Evento guardado en Control Fiscal'])assert.ok(html.includes(n),n);
  for(const m of ['value="none"','value="0"','value="15"','value="30"','value="60"','value="1440"','value="2880"'])assert.ok(html.includes(m),m);
- assert.match(html,/if\(!\$\('agendaSyncGoogle'\)\?\.checked\)/);
+ assert.match(html,/void cfUpdateEventIntegrations\(obj,calendarChecked\)/);
  assert.match(html,/if\(before==='none'\)continue/);
 });
 test('R9: visor local usa Bearer Google Drive y no incrusta enlaces de terceros',()=>{
@@ -43,7 +43,7 @@ test('R9: busca fotos en Google a petición del usuario sin importación automá
 });
 test('R9: sin alteraciones nativas de fondo de pantalla',()=>{
  assert.doesNotMatch(html,/UIApplication\.shared\.setWallpaper|wallpaper\.setWallpaper/);
- assert.match(html,/UI76-20261023-R12/);
+ assert.match(html,/UI76-20261023-R13/);
  const auth=fs.readFileSync('www/cf-google-auth.js','utf8');
  assert.match(auth,/root\.closeCFDocumentViewer/);
 });

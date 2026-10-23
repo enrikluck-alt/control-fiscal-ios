@@ -89,5 +89,39 @@
   const out=await request(s,'https://gmail.googleapis.com/gmail/v1/users/me/messages/send','POST',{raw:base64url(raw)});
   if(!out.id)throw Error('El correo no ha confirmado la recepción.');return {id:out.id};
  }
- root.CFGoogleExtras=Object.freeze({calendarBody,upsertCalendar,deleteCalendar,sendInvoice,sendSupport});
+
+ // Enviar documentos adjuntos mediante Gmail API (gmail.send). Nunca afirmar envío
+ // antes de recibir el identificador del mensaje confirmado por Google.
+ async function sendDocuments({recipient,attachments,from,to}){
+  const s=account();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(recipient||'')))throw Error('Correo del gestor no válido.');
+  if(!Array.isArray(attachments)||!attachments.length)throw Error('No hay documentos para adjuntar.');
+  if(attachments.length>15)throw Error('Máximo de 15 archivos por envío. Selecciona un periodo más corto.');
+  const sizes=attachments.map(a=>String(a.base64||'').length*3/4);
+  if(sizes.reduce((a,b)=>a+b,0)>12*1024*1024)throw Error('Los adjuntos superan 12 MB en conjunto. Elige menos meses.');
+  const safeName=x=>String(x||'documento.pdf').replace(/[\r\n\"\\]/g,'_').slice(0,85);
+  const boundary='cf_docs_'+Date.now().toString(36);
+  const subject='Control Fiscal · Documentación '+String(from||'')+' a '+String(to||'');
+  const lines=['MIME-Version: 1.0','To: '+recipient,'From: '+s.email,
+   'Subject: =?UTF-8?B?'+utf8base64(subject)+'?=',
+   'Content-Type: multipart/mixed; boundary="'+boundary+'"','','--'+boundary,
+   'Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: base64','',
+   utf8base64('Documentación enviada voluntariamente desde Control Fiscal.\nPeriodo: '+String(from||'')+' a '+String(to||'')+'\nArchivos: '+attachments.length+'\n'),
+  ];
+  for(const a of attachments){
+   if(!/^[A-Za-z0-9+/]+=*$/.test(a.base64||''))throw Error('El archivo adjunto está incompleto.');
+   const mime=['application/pdf','image/jpeg','image/png'].includes(a.mime)?a.mime:'application/pdf';
+   const name=safeName(a.name);
+   lines.push('--'+boundary,'Content-Type: '+mime+'; name="'+name+'"',
+    'Content-Disposition: attachment; filename="'+name+'"','Content-Transfer-Encoding: base64','',
+    (a.base64.match(/.{1,76}/g)||[]).join('\r\n'));
+  }
+  lines.push('--'+boundary+'--','');
+  const result=await request(s,'https://gmail.googleapis.com/gmail/v1/users/me/messages/send','POST',
+   {raw:base64url(lines.join('\r\n'))});
+  if(!result.id)throw Error('Gmail no ha confirmado el envío de documentación.');
+  return {id:result.id,documentos:attachments.length,correos:1};
+ }
+
+ root.CFGoogleExtras=Object.freeze({calendarBody,upsertCalendar,deleteCalendar,sendInvoice,sendSupport,sendDocuments});
 })(window);

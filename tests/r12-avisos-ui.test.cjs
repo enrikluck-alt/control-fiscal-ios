@@ -48,7 +48,7 @@ test('R12: aviso a los ocho segundos y permiso de iOS implementados',()=>{
  assert.match(html,/id="cfDailyReminderEnabled"/);
  assert.match(html,/id="cfNotificationTime"|id="notificationTime"/);
  assert.match(html,/async function cfSendTestNotification\(\)/);
- assert.match(html,/Date\.now\(\)\+8000/);
+ assert.match(html,/Date\.now\(\)\+10000/);
  assert.match(html,/async function cfEnsureNoticePermission\(\)/);
  assert.match(html,/await cfEnsureNoticePermission\(\);await cfScheduleEventReminders\(\)/);
  assert.match(html,/sound:cfNoticePayloadSound\(\)/);
@@ -62,7 +62,7 @@ test('R12: se incluyen tres WAV válidos en web y main app bundle del workflow',
   assert(workflow.includes("'Payload/ControlFiscal.app/'+f"));
  }
  assert.match(html,/id="cfNotificationSound"/);
- assert.match(workflow,/UI76-20261023-R12/);
+ assert.match(workflow,/UI76-20261023-R13/);
 });
 test('R12: nav claro y categorias en cuadrícula, fotos en tarjetas',()=>{
  assert.match(html,/body\.lightTheme #settingsPage \.cfSettingsNavigator \.cfSettingsNavBtn/);
@@ -71,9 +71,9 @@ test('R12: nav claro y categorias en cuadrícula, fotos en tarjetas',()=>{
  assert.match(html,/cfLoadPrivateInventoryPhoto\(img,img\.dataset\.cfPrivatePhoto/);
  assert.match(html,/function cfGenericPhotoQuery/);
 });
-test('R12: sugerencias usan compartir nativo y ofrecen copia alternativa',()=>{
- assert.match(html,/await share\.share\(/);
+test('R13: sugerencias intentan envío directo por Gmail y ofrecen redacción alternativa',()=>{
+ assert.match(html,/CFGoogleExtras\.sendSupport/);
  assert.match(html,/cfTapFeedback\(\);/);
- assert.match(html,/navigator\.clipboard\.writeText/);
- assert.match(html,/Selecciona Mail/);
+ assert.match(html,/mailto:/);
+ assert.match(html,/Gmail ha confirmado el envío/);
 });

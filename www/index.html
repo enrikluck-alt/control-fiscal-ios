@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R12">
+<html lang="es" data-cf-ui-build="UI76-20261023-R13">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1104,6 +1104,18 @@ body.lightTheme #accountGate input{background:#fff;color:#111820;border-color:#b
 #invoiceShareBtn{width:100%;margin-top:10px;background:#1c4451;border:1px solid #4bb0c7;color:white}
 #invoiceShareBtn[hidden]{display:none!important}
 @media(max-width:560px){#settingsPage .notificationSettingsRow{grid-template-columns:minmax(0,1fr)}}
+
+/* R13: modal de evento respeta isla dinámica, barra de estado y bordes de iPad */
+#agendaEventModal{align-items:flex-start!important;justify-content:center!important;
+  padding:calc(env(safe-area-inset-top, 0px) + 18px) max(12px,env(safe-area-inset-right,0px))
+  calc(env(safe-area-inset-bottom,0px) + 14px) max(12px,env(safe-area-inset-left,0px))!important;
+  overflow-y:auto!important;overscroll-behavior:contain!important;}
+#agendaEventModal .modalCard{margin:0 auto!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  box-sizing:border-box;scroll-padding-top:60px;}
+#agendaEventModal .modalClose{position:sticky!important;top:0!important;float:right;z-index:5;
+  margin:-3px -5px 0 5px;background:#202c36!important;border-radius:50%;color:white!important;}
+#agendaEventModal .modalTitle{min-height:44px;padding-right:45px;}
+#agendaSaveBtn:disabled{opacity:.62;cursor:wait;}
 </style>
 <style id="cf-r4-responsive">
 /* iPhone conserva el diseño V76; tablet amplía la misma disposición. */
@@ -1844,7 +1856,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R12</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R13</div>
 
     </div>
   </div>
@@ -3757,7 +3769,7 @@ let agendaEditingId=null;
 
 function mapsLink(location){
   const q=String(location||"").trim();
-  return q ? "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q) : "";
+  return q ? "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(q) : "";
 }
 function formatAgendaDate(dateStr){
   if(!dateStr) return "";
@@ -3870,39 +3882,54 @@ function cfCalendarPermissionError(e){
  }
  return message.slice(0,260);
 }
+// R13: guardar una vez en Sheets y confirmar al usuario ANTES de peticiones
+// independientes de Calendar/notificaciones; nunca repetir el alta por latencia.
+let cfEventSavePending=false;
+function cfEventSaveTimeout(ms){return new Promise((_,reject)=>setTimeout(()=>reject(Error('Google no ha confirmado el guardado después de '+Math.round(ms/1000)+' segundos. No pulses Guardar de nuevo: abre Agenda y comprueba el evento para evitar duplicados.')),ms));}
 async function saveAgendaEvent(){
-  const msg=$("agendaMsg");
-  const previousEvent=agendaEvents.find(x=>String(x.id)===String(agendaEditingId));
-  const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),googleCalendarId:previousEvent?.googleCalendarId||'',evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim(),reminderMinutes:$("agendaReminder").value==='none'?'none':Number($("agendaReminder").value)};
-  if(!obj.evento||!obj.fecha){msg.className="msg err";msg.textContent="Indica al menos el evento y la fecha.";return;}
-  localStorage.setItem('cf_agenda_calendar_optin',$('agendaSyncGoogle')?.checked?'1':'0');
-  msg.className="msg";msg.textContent="Guardando...";
+ if(cfEventSavePending)return;
+ const msg=$("agendaMsg"),button=$("agendaSaveBtn");
+ const previousEvent=agendaEvents.find(x=>String(x.id)===String(agendaEditingId));
+ const obj={id:agendaEditingId||("EV-"+Date.now()+"-"+Math.floor(Math.random()*10000)),googleCalendarId:previousEvent?.googleCalendarId||'',evento:$("agendaEventName").value.trim(),fecha:$("agendaEventDate").value,horaInicio:$("agendaEventStart").value,horaFin:$("agendaEventEnd").value,cliente:$("agendaEventClient").value.trim(),ubicacion:$("agendaEventLocation").value.trim(),llevar:$("agendaEventBring").value.trim(),comentarios:$("agendaEventComments").value.trim(),reminderMinutes:$("agendaReminder").value==='none'?'none':Number($("agendaReminder").value)};
+ if(!obj.evento||!obj.fecha){msg.className='msg err';msg.textContent='Indica al menos el nombre y fecha del evento.';return;}
+ cfEventSavePending=true;if(button){button.disabled=true;button.textContent='GUARDANDO…';}
+ // Conservar el ID incluso si la red tarda: un reintento edita el mismo evento.
+ agendaEditingId=obj.id;
+ localStorage.setItem('cf_agenda_calendar_optin',$('agendaSyncGoogle')?.checked?'1':'0');
+ const calendarChecked=!!$('agendaSyncGoogle')?.checked;
+ msg.className='msg';msg.textContent='Guardando evento en tu agenda…';
+ try{
+  // La petición queda activa si el tiempo vence; nunca se manda una segunda alta automática.
+  await Promise.race([callAction({accion:'guardarEvento',evento:JSON.stringify(obj)}),cfEventSaveTimeout(25000)]);
+  agendaEditingId=obj.id;
+  const idx=agendaEvents.findIndex(x=>String(x.id)===String(obj.id));
+  if(idx>=0)agendaEvents[idx]={...agendaEvents[idx],...obj};else agendaEvents.push(obj);
+  localStorage.setItem('cf_agenda',JSON.stringify(agendaEvents));renderAgenda();
+  msg.className='msg ok';msg.textContent='✅ Evento guardado en Control Fiscal. Calendar y avisos se actualizarán por separado.';
+  await cfSuccessFeedback();
+  // No bloquear el guardado porque iOS pregunte permisos o Google Calendar falle.
+  void cfUpdateEventIntegrations(obj,calendarChecked);
+  setTimeout(()=>{if($('agendaEventModal')?.classList.contains('hidden'))return;closeAgendaEventModal();},1100);
+ }catch(e){msg.className='msg err';msg.textContent='No se ha confirmado el guardado: '+(e.message||String(e));}
+ finally{cfEventSavePending=false;if(button){button.disabled=false;button.textContent='GUARDAR EVENTO';}}
+}
+async function cfUpdateEventIntegrations(obj,calendarChecked){
+ const notes=[];
+ if(obj.reminderMinutes!=='none'){
+  try{await cfEnsureNoticePermission();await cfScheduleEventReminders();notes.push('Aviso de iPhone programado.');}
+  catch(e){notes.push('No se pudo programar el aviso: '+(e.message||e));}
+ }
+ if(calendarChecked){
   try{
-    await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
-    agendaEditingId=obj.id; // Si Calendar falla, reintentar mantiene el mismo ID en Sheets.
-    await loadAgenda(false);
-    let localReminderMessage='';
-    if(obj.reminderMinutes!=='none'){
-      try{await cfEnsureNoticePermission();await cfScheduleEventReminders();localReminderMessage=' Aviso local programado.';}
-      catch(e){localReminderMessage=' AVISO NO PROGRAMADO: '+(e.message||e);console.warn('Aviso local no programado',e);}
-    }
-    if(!$('agendaSyncGoogle')?.checked){
-      msg.className='msg ok';msg.textContent='Evento guardado.'+localReminderMessage;
-      await cfSuccessFeedback();setTimeout(closeAgendaEventModal,1200);
-    }else try{
-      msg.className='msg';msg.textContent='Evento guardado. Sincronizando Google Calendar…';
-      const result=await window.CFGoogleExtras.upsertCalendar(obj);
-      obj.googleCalendarId=result.id;
-      await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
-      msg.className='msg ok';msg.textContent='Evento guardado y sincronizado con Google Calendar ✓'+localReminderMessage;
-      await cfSuccessFeedback();await loadAgenda(false);setTimeout(closeAgendaEventModal,850);
-    }catch(calendarError){
-      await cfSuccessFeedback();
-      const reason=cfCalendarPermissionError(calendarError);
-      if(/403|insufficient|scope|disabled|accessNotConfigured/i.test(String(calendarError?.message||calendarError))){localStorage.setItem('cf_agenda_calendar_optin','0');$('agendaSyncGoogle').checked=false;}
-      msg.className='msg err';msg.textContent='✅ Evento guardado en Control Fiscal. ⚠️ Google Calendar NO sincronizado: '+reason+localReminderMessage;
-    }
-  }catch(e){msg.className='msg err';msg.textContent=e.message||'No se pudo guardar el evento.';}
+   const result=await window.CFGoogleExtras.upsertCalendar(obj);
+   // La integración utiliza el mismo identificador, no crea otro evento en Sheets.
+   obj.googleCalendarId=result.id;
+   await callAction({accion:'guardarEvento',evento:JSON.stringify(obj)});
+   const idx=agendaEvents.findIndex(x=>String(x.id)===String(obj.id));if(idx>=0)agendaEvents[idx]={...agendaEvents[idx],googleCalendarId:result.id};
+   localStorage.setItem('cf_agenda',JSON.stringify(agendaEvents));notes.push('Sincronizado con Google Calendar.');
+  }catch(e){notes.push('Calendar no sincronizado: '+cfCalendarPermissionError(e));}
+ }
+ if(notes.length){if(!$('agendaStatus')){const host=$('agendaPage')?.querySelector('.page');if(host){const label=document.createElement('div');label.id='agendaStatus';label.className='settingsHint';label.style.padding='6px 12px';host.prepend(label);}}const st=$('agendaStatus');if(st)st.textContent=notes.join(' ');console.info('Integraciones Agenda:',notes.join(' '));}
 }
 async function deleteAgendaEvent(){
   if(!agendaEditingId)return;
@@ -3944,7 +3971,7 @@ async function cfScheduleEventReminders(){
   if(alertAt.getTime()<=now||alertAt.getTime()>future)continue;
   const id=700000+serial++;const loc=String(event.ubicacion||'').trim();
   const notice=minutes===0?'El evento comienza ahora. ':minutes>=1440?'Evento dentro de '+Math.round(minutes/1440)+' día(s). ':'Evento dentro de '+minutes+' minutos. ';
-  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,110):'Revisa tu agenda.'),schedule:{at:alertAt},sound:cfNoticePayloadSound(),extra:{kind:'agenda',eventId:String(event.id||'')}});
+  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,100)+'. Toca para ver la ruta.':'Revisa tu agenda.'),schedule:{at:alertAt},sound:cfNoticePayloadSound(),foreground:true,extra:{kind:'agenda',eventId:String(event.id||''),location:loc.slice(0,200)}});
   if(notifications.length>=40)break;
  }
  if(notifications.length)await plugin.schedule({notifications});
@@ -4134,7 +4161,7 @@ function cfSyncNotificationControls(){
  if(check)check.checked=cfDailyReminderEnabled();
  if(sound)sound.value=cfSelectedNoticeSound();
 }
-async function nativeLocalNotifications(){return window.CFLocalNotifications||window.__CF_NATIVE_SECURITY__?.LocalNotifications||null;}
+async function nativeLocalNotifications(){return window.CFLocalNotifications||window.Capacitor?.Plugins?.LocalNotifications||window.__CF_NATIVE_SECURITY__?.LocalNotifications||null;}
 async function cfEnsureNoticePermission(){
  const p=await nativeLocalNotifications();
  if(!p)throw Error('Plugin de notificaciones no disponible; reinstala la IPA completa.');
@@ -4146,7 +4173,7 @@ async function cfEnsureNoticePermission(){
 async function refreshNotificationStatus(){
  cfSyncNotificationControls();
  const el=$('notificationStatus'),btn=$('notificationPermissionBtn'),p=await nativeLocalNotifications();
- if(!p){if(el)el.textContent='No está disponible el plugin de notificaciones. Comprueba que has instalado la IPA R12.';if(btn)btn.disabled=true;return;}
+ if(!p){if(el)el.textContent='El módulo de avisos nativos no se ha cargado. Comprueba que la IPA R13 es la instalada. Puedes volver a intentarlo.';return;}
  try{
   const perm=await p.checkPermissions();
   if(el)el.textContent=(perm.display==='granted'?'✅ iOS permite notificaciones. ':'⚠️ Necesitas conceder permiso a iOS. ')+(cfDailyReminderEnabled()?'Aviso diario ACTIVADO.':'Aviso diario DESACTIVADO.');
@@ -4170,20 +4197,21 @@ function cfDocumentationPendingCounts(){
 async function schedulePendingNotificationFromCurrentState(){
  const p=await nativeLocalNotifications();if(!p)return;
  try{await p.cancel({notifications:[{id:60001}]});}catch(e){}
- if(!cfDailyReminderEnabled())return;
+ if(!cfDailyReminderEnabled())return {scheduled:false,reason:'disabled'};
  const {buys,issued}=cfDocumentationPendingCounts();
- if(!buys&&!issued)return;
+ if(!buys&&!issued)return {scheduled:false,reason:'no-pending'};
  try{
-  const perm=await p.checkPermissions();if(perm.display!=='granted')return;
+  const perm=await p.checkPermissions();if(perm.display!=='granted')throw Error('iOS no tiene permiso para mostrar avisos.');
   const {hour,minute}=notificationTimeParts();
   const text=[buys?buys+' compra(s) sin factura':'',issued?issued+' factura(s) sin documentación':''].filter(Boolean).join(' y ');
   await p.schedule({notifications:[{
    id:60001,title:'Control Fiscal · Documentación pendiente',
    body:'Tienes '+text+'. Abre Control Fiscal para revisar lo pendiente.',
-   schedule:{on:{hour,minute},repeats:true},sound:cfNoticePayloadSound(),
+   schedule:{on:{hour,minute},repeats:true},sound:cfNoticePayloadSound(),foreground:true,
    extra:{kind:'pending-documents'}
   }]});
- }catch(e){const el=$('notificationStatus');if(el)el.textContent='Error al programar aviso diario: '+(e.message||e);console.error(e);}
+  return {scheduled:true,hour,minute};
+ }catch(e){const el=$('notificationStatus');if(el)el.textContent='Error al programar aviso diario: '+(e.message||e);console.error(e);throw e;}
 }
 async function cfSetDailyReminderEnabled(value){
  const status=$('notificationStatus');
@@ -4194,14 +4222,21 @@ async function cfSetDailyReminderEnabled(value){
  await schedulePendingNotificationFromCurrentState();await refreshNotificationStatus();cfTapFeedback();
 }
 async function enablePendingNotifications(){
- const status=$('notificationStatus');
+ const status=$('notificationStatus'),button=$('notificationPermissionBtn');
+ if(button)button.disabled=true;
+ if(status)status.textContent='Comprobando el permiso de notificaciones de iOS…';
  try{
   await cfEnsureNoticePermission();
-  await schedulePendingNotificationFromCurrentState();
-  await cfScheduleEventReminders();
-  await refreshNotificationStatus();cfTapFeedback();
-  if(status)status.textContent='✅ Permiso concedido. Se han actualizado los avisos de Agenda y la opción de aviso diario.';
- }catch(e){if(status)status.textContent=e.message||String(e);cfSyncNotificationControls();}
+  const results=await Promise.allSettled([schedulePendingNotificationFromCurrentState(),cfScheduleEventReminders()]);
+  const errors=results.filter(r=>r.status==='rejected').map(r=>r.reason?.message||String(r.reason));
+  await refreshNotificationStatus();
+  const daily=results[0]?.status==='fulfilled'?results[0].value:null;
+  if(status)status.textContent=errors.length?'Permiso concedido, pero falló una programación: '+errors.join('; '):
+   '✅ Permiso de iOS confirmado. Avisos de Agenda revisados. '+
+   (daily?.reason==='no-pending'?'No hay documentación pendiente ahora mismo. No se programó aviso diario.':cfDailyReminderEnabled()?'Recordatorio diario programado.':'Recordatorio diario desactivado.');
+  cfTapFeedback();
+ }catch(e){if(status)status.textContent='No se pudieron activar los avisos: '+(e.message||String(e));cfSyncNotificationControls();}
+ finally{if(button)button.disabled=false;}
 }
 function cfSaveNoticeSound(s){
  const el=$('cfNotificationSoundStatus');
@@ -4218,18 +4253,54 @@ function cfPreviewNoticeSound(){
  }catch(e){if(el)el.textContent=e.message||String(e);}
 }
 async function cfSendTestNotification(){
- const status=$('cfNotificationSoundStatus')||$('notificationStatus');
+ // Los dos botones deben reflejar resultado tanto en Ajustes→Notificaciones
+ // como en Ajustes→Audio, incluso si uno de esos subapartados está oculto.
+ const statuses=[$('notificationStatus'),$('cfNotificationSoundStatus')].filter(Boolean);
+ const show=text=>statuses.forEach(el=>el.textContent=text);
+ show('Solicitando permiso a iOS y programando la prueba…');
  try{
   const p=await cfEnsureNoticePermission();
-  const when=new Date(Date.now()+8000);
-  await p.schedule({notifications:[{
+  const when=new Date(Date.now()+10000);
+  await p.cancel({notifications:[{id:60009}]}).catch(()=>{});
+  const result=await p.schedule({notifications:[{
    id:60009,title:'🔔 Prueba · Control Fiscal',body:'La notificación funciona en este iPhone.',
-   schedule:{at:when},sound:cfNoticePayloadSound(),extra:{kind:'test-notification'}
+   schedule:{at:when},sound:cfNoticePayloadSound(),foreground:true,extra:{kind:'test-notification'}
   }]});
+  if(Array.isArray(result?.notifications)&&!result.notifications.some(n=>Number(n.id)===60009))
+    throw Error('El plugin no confirmó la notificación de prueba.');
+  if(typeof p.getPending==='function'){
+   const pending=await p.getPending();
+   if(Array.isArray(pending?.notifications)&&!pending.notifications.some(n=>Number(n.id)===60009))
+     throw Error('iOS no muestra el aviso entre sus notificaciones pendientes.');
+  }
+  show('✅ iOS ha aceptado la notificación de prueba para dentro de 10 segundos. Bloquea el teléfono para verla y escuchar el sonido.');
   await cfSuccessFeedback();
-  if(status)status.textContent='✅ Prueba programada para dentro de 8 segundos. Bloquea el iPhone para comprobar el sonido y la notificación.';
- }catch(e){if(status)status.textContent='No se pudo programar la prueba: '+(e.message||e);}
+ }catch(e){show('❌ No se pudo programar el aviso de prueba: '+(e.message||String(e)));
+  console.error('Control Fiscal: error en aviso de prueba',e);}
 }
+// Las notificaciones de eventos contienen solamente título y ubicación, no datos fiscales.
+let cfNotificationTapRegistered=false;
+async function cfRegisterNotificationOpen(){
+ if(cfNotificationTapRegistered)return;
+ const p=await nativeLocalNotifications();
+ if(!p||typeof p.addListener!=='function')return;
+ await p.addListener('localNotificationActionPerformed',ev=>{
+  const extra=ev?.notification?.extra||{};
+  if(extra.kind!=='agenda')return;
+  const location=String(extra.location||'').trim();
+  const event=agendaEvents.find(e=>String(e.id)===String(extra.eventId));
+  const destination=location||String(event?.ubicacion||'').trim();
+  // Mostrar el evento en Agenda aunque no disponga de una ubicación.
+  if(typeof openAgenda==='function')openAgenda();
+  if(!destination)return;
+  const url='https://maps.apple.com/?daddr='+encodeURIComponent(destination)+'&dirflg=d';
+  // Tras pulsar el aviso, abrir directamente las indicaciones al lugar del evento.
+  if(window.CFBrowser?.open)window.CFBrowser.open({url}).catch(e=>console.warn('No se pudo abrir Mapas',e));
+  else window.location.assign(url);
+ });
+ cfNotificationTapRegistered=true;
+}
+setTimeout(()=>{cfRegisterNotificationOpen().catch(e=>console.warn('No se pudieron registrar acciones de avisos',e));},750);
 
 function updatePendingDocuments(){
   const pendingCompras = records.filter(r =>
@@ -4441,66 +4512,53 @@ async function sendInvoicesByEmail(){
   }
 
   const candidatos=records.filter(r=>{
-    const esCompra=r.tipo==="Compra";
-    const esEmitida=r.tipo==="Facturado" || r.tipo==="Facturación";
-
-    if(tipoEnvio==="compras" && !esCompra) return false;
-    if(tipoEnvio==="emitidas" && !esEmitida) return false;
-    if(tipoEnvio==="todas" && !esCompra && !esEmitida) return false;
-    if(!r.facturaUrl) return false;
-
-    const d=new Date(r.fecha);
-    if(Number.isNaN(d.getTime())) return false;
-
-    const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-    return key>=desde && key<=hasta;
+    const esCompra=r.tipo==='Compra',esEmitida=r.tipo==='Facturado'||r.tipo==='Facturación';
+    if(tipoEnvio==='compras'&&!esCompra)return false;
+    if(tipoEnvio==='emitidas'&&!esEmitida)return false;
+    if(tipoEnvio==='todas'&&!esCompra&&!esEmitida)return false;
+    if(!(r.facturaUrl||r.pdfUrl||r.archivoUrl))return false;
+    const d=new Date(r.fecha);if(Number.isNaN(d.getTime()))return false;
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    return key>=desde&&key<=hasta;
   });
-
-  if(!candidatos.length){
-    status.className="emailStatus err";
-    status.textContent="No hay facturas adjuntadas de ese tipo en el período seleccionado.";
-    return;
-  }
-
-  const tipoTexto=
-    tipoEnvio==="compras" ? "compras" :
-    tipoEnvio==="emitidas" ? "facturas emitidas" :
-    "compras y facturas emitidas";
-
-  if(!confirm(`Se enviarán ${candidatos.length} documento${candidatos.length===1?"":"s"} de ${tipoTexto} a ${correo}. ¿Continuar?`)) return;
-
-  btn.disabled=true;
-  status.className="emailStatus";
-  status.textContent="Preparando y enviando documentación...";
-  localStorage.setItem("cf_email_destino",correo);
-
+  if(!candidatos.length){status.className='emailStatus err';status.textContent='No hay documentos adjuntos en el periodo solicitado.';return;}
+  if(candidatos.length>15){status.className='emailStatus err';status.textContent='Hay '+candidatos.length+' documentos. Selecciona menos meses (máximo 15 por envío).';return;}
+  if(!confirm('¿Enviar '+candidatos.length+' documento(s) al correo '+correo+'? Se enviarán los PDF e imágenes seleccionados como adjuntos mediante tu cuenta Gmail.'))return;
+  btn.disabled=true;status.className='emailStatus';status.textContent='Recuperando documentación privada…';
+  localStorage.setItem('cf_email_destino',correo);
   try{
-    const result=await callAction({
-      accion:"enviarFacturas",
-      correo,
-      desde,
-      hasta,
-      tipoEnvio
-    });
-
-    const cantidad=Number(result.documentos||0);
-    const correos=Number(result.correos||1);
-
-    const mensaje=
-      `Se han enviado ${cantidad} documento${cantidad===1?"":"s"} correctamente`+
-      (correos>1 ? ` en ${correos} correos.` : " en 1 correo.");
-
-    status.className="emailStatus ok";
-    status.textContent=mensaje;
-    showToastMessage("Documentación enviada",mensaje);
-
-  }catch(e){
-    console.error(e);
-    status.className="emailStatus err";
-    status.textContent=e.message||"No se pudo enviar la documentación.";
-  }finally{
-    btn.disabled=false;
-  }
+    const session=window.CFGoogleAccount?.active();
+    if(!session?.token)throw Error('Inicia sesión con Google.');
+    const owner=session.id;const attachments=[];
+    for(let i=0;i<candidatos.length;i++){
+      const rec=candidatos[i],url=rec.facturaUrl||rec.pdfUrl||rec.archivoUrl;
+      const id=cfDocumentDriveId(url);
+      if(!id)throw Error('El documento '+(i+1)+' no dispone de enlace de Drive válido; no se ha enviado ningún correo.');
+      status.textContent='Descargando adjuntos '+(i+1)+' de '+candidatos.length+'…';
+      let active=window.CFGoogleAccount.active();
+      let response=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media',
+        {headers:{Authorization:'Bearer '+active.token}});
+      if(response.status===401&&window.CFGoogleAccount.refreshAuthorization){
+        const token=await window.CFGoogleAccount.refreshAuthorization(active.token);
+        response=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media',
+          {headers:{Authorization:'Bearer '+token}});
+      }
+      if(window.CFGoogleAccount.active()?.id!==owner)throw Error('Has cambiado de cuenta: envío cancelado.');
+      if(!response.ok)throw Error('No se pudo recuperar el adjunto '+(i+1)+' (Drive HTTP '+response.status+').');
+      const blob=await response.blob();
+      if(!blob.size||blob.size>5*1024*1024)throw Error('El documento '+(i+1)+' está vacío o supera 5 MB.');
+      const mime=blob.type.split(';')[0]||'application/pdf';
+      if(!['application/pdf','image/jpeg','image/png'].includes(mime))throw Error('El archivo '+(i+1)+' no es PDF/JPG/PNG.');
+      const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||'').split(',')[1]);r.onerror=()=>reject(Error('No se pudo leer el adjunto.'));r.readAsDataURL(blob);});
+      attachments.push({name:'ControlFiscal_'+String(rec.numeroFactura||rec.concepto||i+1).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,50)+'.'+(mime==='application/pdf'?'pdf':mime==='image/png'?'png':'jpg'),mime,base64});
+    }
+    status.textContent='Enviando '+attachments.length+' documento(s) mediante Gmail…';
+    const out=await window.CFGoogleExtras.sendDocuments({recipient:correo,attachments,from:desde,to:hasta});
+    if(!out?.id)throw Error('Gmail no ha confirmado el envío.');
+    status.className='emailStatus ok';status.textContent='✅ Gmail ha confirmado el envío de '+out.documentos+' documento(s) a '+correo+'.';
+    await cfSuccessFeedback();
+  }catch(e){status.className='emailStatus err';status.textContent='No enviado: '+(e.message||String(e))+' Revisa Gmail API y el permiso gmail.send si aparece HTTP 403.';}
+  finally{btn.disabled=false;}
 }
 
 function openPublicTenders(){
@@ -5010,27 +5068,28 @@ const CF_SUPPORT_EMAIL='Electrochispas@outlook.es'; // Dirección de contacto pu
 function openCFSupport(){cfTapFeedback();$('cfSupportModal')?.classList.remove('hidden');}
 function closeCFSupport(){$('cfSupportModal')?.classList.add('hidden');}
 async function sendCFSupport(){
- const message=String($('cfSupportText')?.value||'').trim();
- const kind=$('cfSupportKind')?.value||'Sugerencia',el=$('cfSupportStatus');
+ const message=String($('cfSupportText')?.value||'').trim(),kind=$('cfSupportKind')?.value||'Sugerencia';
+ const status=$('cfSupportStatus'),button=$('cfSupportSendBtn');
  cfTapFeedback();
- if(message.length<12){if(el)el.textContent='Describe el problema o la sugerencia con al menos 12 caracteres.';return;}
- if(message.length>2700){if(el)el.textContent='Reduce el mensaje a 2700 caracteres antes de enviarlo.';return;}
- const subject='Control Fiscal · '+kind;
- const body='Destinatario: '+CF_SUPPORT_EMAIL+'\nTipo: '+kind+'\nVersión: UI76-20261023-R12\n\n'+message;
- if(!confirm('Abrir el menú del iPhone para compartir la sugerencia con el administrador. Tendrás que seleccionar Mail y confirmar el envío.'))return;
- const share=window.CFShare;
+ if(message.length<12||message.length>2700){if(status)status.textContent='Escribe entre 12 y 2700 caracteres.';return;}
+ if(!confirm('¿Enviar '+kind.toLowerCase()+' a '+CF_SUPPORT_EMAIL+' desde tu cuenta de Google? No se compartirán tus datos fiscales.'))return;
+ if(button)button.disabled=true;
+ if(status)status.textContent='Enviando correo directamente…';
  try{
-  if(!share?.share)throw Error('No se ha encontrado el menú nativo para compartir.');
-  await share.share({title:subject,text:body,dialogTitle:'Enviar sugerencia o incidencia'});
-  if(el)el.textContent='El menú de compartir se ha abierto. Selecciona Mail e indica '+CF_SUPPORT_EMAIL+' como destinatario; pulsa Enviar. Control Fiscal no puede confirmar el envío desde aquí.';
+  if(!window.CFGoogleExtras?.sendSupport)throw Error('No se ha cargado el módulo de correo Gmail.');
+  const response=await window.CFGoogleExtras.sendSupport({recipient:CF_SUPPORT_EMAIL,kind,message,appVersion:'UI76-20261023-R13'});
+  if(!response?.id)throw Error('Gmail no ha confirmado el envío.');
+  if(status)status.textContent='✅ Gmail ha confirmado el envío de tu mensaje.';
+  if($('cfSupportText'))$('cfSupportText').value='';
   await cfSuccessFeedback();
  }catch(e){
-  console.warn('Compartir no disponible',e);
-  if(el){el.replaceChildren();el.append(document.createTextNode('No se ha podido abrir el menú de compartir. '));
-   const a=document.createElement('a');a.href='mailto:'+CF_SUPPORT_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);a.textContent='Abrir correo manualmente';el.append(a);
-   const b=document.createElement('button');b.type='button';b.textContent='Copiar mensaje';b.onclick=async()=>{try{await navigator.clipboard.writeText(body);el.append(document.createTextNode(' · Mensaje copiado.'));}catch(_){prompt('Copia tu mensaje:',body);}};el.append(b);
+  const text=String(e?.message||e||'No se pudo enviar');
+  if(status){status.replaceChildren();
+   status.append(document.createTextNode('No enviado: '+text+'. '));
+   if(/403|scope|permis|gmail|unauthorized|accessNotConfigured/i.test(text))status.append(document.createTextNode('Revisa Gmail API y el permiso gmail.send de Google OAuth. '));
+   const link=document.createElement('a');link.href='mailto:'+CF_SUPPORT_EMAIL+'?subject='+encodeURIComponent('Control Fiscal · '+kind)+'&body='+encodeURIComponent(message);link.textContent='Abrir un correo preparado como alternativa';status.append(link);
   }
- }
+ }finally{if(button)button.disabled=false;}
 }
 
 const CF_TOUR_STEPS=[
@@ -5251,7 +5310,7 @@ startAccountSystem();
   <div class="field"><label>Tipo de mensaje</label><select id="cfSupportKind" class="select"><option value="Sugerencia">Sugerencia</option><option value="Error">Informar de un error</option><option value="Consulta">Consulta</option></select></div>
   <div class="field"><label>Describe lo ocurrido o tu propuesta</label><textarea id="cfSupportText" class="textarea" rows="6" maxlength="3000" placeholder="Indica qué ventana estabas utilizando, qué pulsaste y qué sucedió. No incluyas contraseñas ni datos bancarios."></textarea></div>
   <div class="settingsHint" id="cfSupportStatus"></div>
-  <button class="save p" type="button" onclick="sendCFSupport()">PREPARAR CORREO PARA ENVIAR</button>
+  <button id="cfSupportSendBtn" class="save p" type="button" onclick="sendCFSupport()">ENVIAR SUGERENCIA POR CORREO</button>
  </div>
 </div>
 <div id="cfTutorialOverlay" class="cfTutorialOverlay hidden" role="dialog" aria-modal="true" aria-label="Tutorial de Control Fiscal">
@@ -5312,7 +5371,7 @@ startAccountSystem();
     </div>
     <div id="agendaMapPreview" class="settingsHint" style="margin:4px 0 10px"></div>
     <label class="field" style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;margin:8px 0 12px"><input id="agendaSyncGoogle" type="checkbox" style="width:22px;height:22px;flex-shrink:0"><span>Sincronizar también con Google Calendar (requiere permisos de Calendar API). El evento siempre se guarda en Control Fiscal, aunque Calendar no autorice la conexión.</span></label>
-    <button class="save p" type="button" onclick="saveAgendaEvent()">GUARDAR EVENTO</button>
+    <button class="save p" id="agendaSaveBtn" type="button" onclick="saveAgendaEvent()">GUARDAR EVENTO</button>
     <button class="deleteBtn" id="agendaDeleteBtn" type="button" style="margin-top:8px;display:none" onclick="deleteAgendaEvent()">ELIMINAR EVENTO</button>
     <div id="agendaMsg" class="msg"></div>
   </div>
@@ -5402,7 +5461,7 @@ startAccountSystem();
 <div class="guideStep"><div class="guideNum">13</div><div><h4>Distribuidores y clientes anteriores</h4><p>En Compras escribe parte del nombre de un distribuidor y selecciona una coincidencia. En Facturación ocurre lo mismo con clientes. Para corregir NIF, dirección o teléfono ve a Ajustes → Mis clientes o Mis distribuidores y pulsa Editar.</p></div></div>
 <div class="guideStep"><div class="guideNum">14</div><div><h4>Iconos y fotografías del inventario</h4><p>Desde el desplegable Tipo de material elige «Crear nuevo tipo…» y aparecerá un campo para escribirlo. Sus categorías generan botones con iconos. La galería muestra fotografías seleccionables de fuentes abiertas; si no encuentra el modelo comercial exacto, sube su fotografía.</p></div></div>
 <div class="guideStep"><div class="guideNum">15</div><div><h4>Recordatorios de eventos</h4><p>Si autorizas las notificaciones en iOS, los eventos próximos permiten avisos en el móvil con el nombre y la ubicación. En la ficha del evento eliges avisar al empezar, 15 minutos, 30 minutos, 1 hora, 2 horas, 1 día o 2 días antes. El aviso local no requiere Google Calendar. Comprueba que las notificaciones del sistema estén activadas.</p></div></div>
-<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. Se abre la aplicación de correo del teléfono para que revises y envíes el mensaje; no necesitas autorizar Gmail API.</p></div></div>
+<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. El botón intenta enviarlo directamente a la dirección de soporte por Gmail API. Solo muestra confirmación cuando Gmail acepta el mensaje. Si aparece error 403, revisa Gmail API y el permiso gmail.send; entonces se ofrece abrir un correo preescrito como alternativa.</p></div></div>
 <div class="guideStep"><div class="guideNum">17</div><div><h4>Permisos de Google, avisos y privacidad</h4><p>Google puede pedir de nuevo autorización tras un tiempo o cuando cambian los permisos. No compartas los accesos ni otorgues permisos a otras cuentas sin revisarlos. El administrador no puede abrir tus libros ni eliminar tus facturas desde el panel de soporte. Para controles centrales de cuentas se requiere un servidor independiente y una política de privacidad.</p></div></div>
 <div class="guideStep"><div class="guideNum">19</div><div><h4>Documentos: carpetas y subcarpetas privadas</h4><p>En Inicio pulsa DOCUMENTOS. Crea una carpeta Certificados; ábrela y añade la subcarpeta Certificados de sonido. Dentro sube PDF o imágenes con el botón Subir. La app mostrará los archivos en una lista y los abrirá sin salir. Los documentos se guardan en tu Google Drive; quitar un registro de la app no destruye el archivo de Drive.</p></div></div>
 <div class="guideStep"><div class="guideNum">20</div><div><h4>Retirar facturas emitidas de la lista</h4><p>Una factura emitida sigue siendo un documento fiscal y no se debe destruir como una compra. Desde Registros, abre la factura y selecciona Retirar de la lista; desaparecerá de las listas normales pero seguirá en el historial fiscal y computando en el resumen. Marca Mostrar facturas retiradas para consultarla y restaurarla. Para corregir importes fiscalmente debe emitirse una rectificativa cuando corresponda.</p></div></div>
