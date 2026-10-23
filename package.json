@@ -1,6 +1,6 @@
 {
   "name": "control-fiscal-v76-google",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "private": true,
   "scripts": {
     "cap:add:ios": "cap add ios",
@@ -19,7 +19,8 @@
     "@capacitor/browser": "8.0.5",
     "@capacitor/filesystem": "8.1.3",
     "@capacitor/share": "8.0.1",
-    "jspdf": "4.2.1"
+    "jspdf": "4.2.1",
+    "@capacitor/screen-orientation": "8.0.2"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.2",

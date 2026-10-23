@@ -293,5 +293,19 @@ async function start(){
    if(!session&&!connecting)await connect(true);
  }
 }
-root.CFGoogleAccount=Object.freeze({start,connect,setAccessMode,createGoogleAccount,openExisting,createBook,logout,active,http,refreshAuthorization,bookId,clear,discover,prepare});
+// Google devuelve el JWT de identidad desde su plugin nativo; NO enviar tokens de Drive.
+// Se obtiene exclusivamente al pulsar Enviar sugerencia, no se persiste en localStorage.
+async function getSupportIdToken(){
+ const account=active();
+ if(!account)throw Error('Inicia sesión con Google antes de enviar una sugerencia.');
+ await init();
+ const plugin=root.ControlFiscalSocialLogin;
+ if(typeof plugin?.getAuthorizationCode!=='function')throw Error('Actualiza la aplicación para verificar la identidad del envío.');
+ const data=await plugin.getAuthorizationCode({provider:'google'});
+ const jwt=data?.jwt||data?.idToken||data?.result?.idToken||'';
+ if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('La sesión no ha devuelto una identidad vigente. Cierra sesión y vuelve a entrar con Google.');
+ if(active()?.id!==account.id||active()?.email!==account.email)throw Error('La cuenta ha cambiado. Vuelve a enviar desde tu nueva sesión.');
+ return jwt;
+}
+root.CFGoogleAccount=Object.freeze({start,connect,setAccessMode,createGoogleAccount,openExisting,createBook,logout,active,http,refreshAuthorization,bookId,clear,discover,prepare,getSupportIdToken});
 })(window);

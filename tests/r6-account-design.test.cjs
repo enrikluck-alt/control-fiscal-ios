@@ -30,7 +30,7 @@ test('R6: Ajustes agrupa solo diseño, sitúa Cuenta al final y cierra con botó
  const design=html.indexOf('id="cfDesignPanel"');const account=html.indexOf('id="accountSettingsGroup"');
  assert.ok(design>0&&account>design);
  const designContent=html.slice(design,html.indexOf('<div class="settingsGroup" id="cfDirectorySettingsGroup">',design));
- for(const t of ['🎨 FONDO','IMAGEN DEL MENÚ PRINCIPAL','COLOR DE COMPRAS','COLOR DE FACTURACIÓN','RENDIMIENTO Y PANTALLA','RESTABLECER'])assert.ok(designContent.includes(t),t);
+ for(const t of ['🎨 FONDO','IMAGEN DEL MENÚ PRINCIPAL','COLOR DE COMPRAS','COLOR DE FACTURACIÓN','IDIOMA, ORIENTACIÓN Y RENDIMIENTO','RESTABLECER'])assert.ok(designContent.includes(t),t);
  assert.equal(designContent.includes('👤 CUENTA'),false);
  assert.ok(account>html.indexOf('ℹ️ INFORMACIÓN Y HERRAMIENTAS',design));
  assert.match(html,/id="cfLogoutDangerButton" class="cfLogoutDanger"/);
@@ -44,5 +44,5 @@ test('R6: logo oficial por defecto y dentro de IPA sin alterar imagen personaliz
  assert.match(html,/const src=saved \|\| "control-fiscal-logo.jpg"/);
  assert.match(html,/localStorage\.getItem\(SETTINGS_KEYS\.homeBrandImage\)/);
  assert.match(workflow,/control-fiscal-logo.jpg/);
- for(const f of ['UI76-20261023-R13','ControlFiscal-V76-Google-R13-Correo-Agenda-IPA','ControlFiscal_V76_Google_R13_Correo_Agenda.ipa'])assert.ok(workflow.includes(f),f);
+ for(const f of ['UI76-20261023-R15','ControlFiscal-V76-Google-R15-Cloud-Feedback-IPA','ControlFiscal_V76_Google_R15_Idiomas_Visor_Avisos.ipa'])assert.ok(workflow.includes(f),f);
 });

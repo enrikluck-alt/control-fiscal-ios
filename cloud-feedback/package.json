@@ -1,0 +1,9 @@
+{
+  "name": "control-fiscal-feedback-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {"node": ">=22"},
+  "scripts": {"start": "node server.js", "test": "node --test test/*.test.js"},
+  "dependencies": {"@google-cloud/firestore": "^8.0.0", "google-auth-library": "^10.0.0"}
+}

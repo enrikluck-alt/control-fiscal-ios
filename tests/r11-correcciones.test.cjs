@@ -49,13 +49,13 @@ test('R11: evita que se salte hacia atrás en numeración manual',async()=>{
  await assert.rejects(()=>root.CFGoogleData.action({...body,requestId:'R11-REQUEST-0000006',numeroSolicitado:'F2026-024'}),/retrocede/);
  assert.equal(sheets.CF_Facturas_Emitidas.length,1);
 });
-test('R11: Ajustes claro, mailto en sugerencias y selector inline de tipo',()=>{
+test('R15: Ajustes claro, Cloud para sugerencias y selector inline de tipo',()=>{
  assert.match(html,/body\.lightTheme #settingsPage \.cfSettingsNavBtn/);
- assert.match(html,/\bmailto:/);assert.match(html,/CFGoogleExtras\.sendSupport/);assert.match(html,/Gmail ha confirmado el envío/);
+ assert.match(html,/CFFeedback\.send/);assert.match(html,/Google Cloud no ha confirmado el envío/);assert.doesNotMatch(html,/mailto:/);
  assert.match(html,/id="cfInventoryNewTypeInline"/);assert.match(html,/id="cfInventoryNewTypeName"/);
  assert.doesNotMatch(html,/<button class="guideBtn" type="button" onclick="document.getElementById\('invItemCategory'\)/);
  assert.match(html,/cfFindInventoryPhotos/);assert.match(html,/commons\.wikimedia\.org\/w\/api\.php/);
  assert.match(html,/Mostrar facturas emitidas retiradas del listado/);
  assert.match(html,/id="invoiceManualNumber"/);
- assert.match(wf,/UI76-20261023-R13/);
+ assert.match(wf,/UI76-20261023-R15/);
 });

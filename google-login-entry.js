@@ -21,3 +21,6 @@ window.CFFilesystem = Filesystem;
 window.CFDirectory = Directory;
 window.CFShare = Share;
 window.CFjsPDF = jsPDF;
+
+import { ScreenOrientation } from '@capacitor/screen-orientation';
+window.CFScreenOrientation = ScreenOrientation;

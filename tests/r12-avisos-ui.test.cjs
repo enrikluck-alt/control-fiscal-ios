@@ -62,7 +62,7 @@ test('R12: se incluyen tres WAV válidos en web y main app bundle del workflow',
   assert(workflow.includes("'Payload/ControlFiscal.app/'+f"));
  }
  assert.match(html,/id="cfNotificationSound"/);
- assert.match(workflow,/UI76-20261023-R13/);
+ assert.match(workflow,/UI76-20261023-R15/);
 });
 test('R12: nav claro y categorias en cuadrícula, fotos en tarjetas',()=>{
  assert.match(html,/body\.lightTheme #settingsPage \.cfSettingsNavigator \.cfSettingsNavBtn/);
@@ -71,9 +71,9 @@ test('R12: nav claro y categorias en cuadrícula, fotos en tarjetas',()=>{
  assert.match(html,/cfLoadPrivateInventoryPhoto\(img,img\.dataset\.cfPrivatePhoto/);
  assert.match(html,/function cfGenericPhotoQuery/);
 });
-test('R13: sugerencias intentan envío directo por Gmail y ofrecen redacción alternativa',()=>{
- assert.match(html,/CFGoogleExtras\.sendSupport/);
+test('R15: sugerencias se remiten a Google Cloud y no se exponen direcciones de correo',()=>{
+ assert.match(html,/CFFeedback\.send/);
  assert.match(html,/cfTapFeedback\(\);/);
- assert.match(html,/mailto:/);
- assert.match(html,/Gmail ha confirmado el envío/);
+ assert.doesNotMatch(html,/mailto:/);
+ assert.match(html,/Google Cloud no ha confirmado el envío/);
 });

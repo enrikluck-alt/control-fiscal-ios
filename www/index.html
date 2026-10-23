@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R13">
+<html lang="es" data-cf-ui-build="UI76-20261023-R15">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1342,6 +1342,24 @@ body.lightTheme #settingsPage .cfNoticeSettings,body.lightTheme #settingsPage .c
 </style>
 
 
+<style id="cf-r14-enhancements">
+/* R14: visor adaptable; PDF e imágenes empiezan ajustados al espacio disponible. */
+#cfDocumentViewer .modalCard{width:min(100vw - 10px,1100px);height:min(94dvh,1100px);max-height:94dvh;display:flex;flex-direction:column;overflow:hidden}
+#cfDocumentViewer .cfViewerViewport{flex:1;min-height:0;width:100%;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:12px;background:#e4e9ee;-webkit-overflow-scrolling:touch}
+#cfDocumentViewer .cfViewerSurface{position:relative;width:100%;height:100%;min-height:220px;background:white}
+#cfDocumentViewer .cfDocumentFrame,#cfDocumentViewer .cfDocumentImage{border:0;width:100%;height:100%;min-height:220px;border-radius:0;background:white}
+#cfDocumentViewer .cfDocumentImage{object-fit:contain;display:block}
+#cfDocumentViewer .cfDocumentImage.hidden,#cfDocumentViewer .cfDocumentFrame.hidden{display:none!important}
+#cfDocumentViewer .cfViewerActions{flex:0 0 auto;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;padding:6px 0 0}
+#cfDocumentViewer .cfViewerActions button{font-size:13px;padding:9px 10px;border:1px solid #8995a2;border-radius:9px;background:var(--card);color:var(--white)}
+#cfDocumentViewer .cfViewerActions .cfViewerBack{flex:1 1 100%;background:#176d54;color:white;border-color:#176d54;font-weight:800}
+#cfDocumentViewer #cfDocumentZoomLabel{font-size:12px;white-space:nowrap;min-width:45px;text-align:center}
+body.lightTheme #cfDocumentViewer .cfViewerActions button{background:#edf2f6;color:#10212e}
+body.lightTheme #cfDocumentViewer .cfViewerActions .cfViewerBack{background:#176d54;color:#fff}
+@media(orientation:landscape){.app{max-width:min(100vw,1120px)}#cfDocumentViewer .modalCard{height:96dvh;max-height:96dvh}}
+#settingsPage .cfLanguageRow,#settingsPage .cfOrientationRow{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
+#settingsPage .cfLanguageRow select,#settingsPage .cfOrientationRow select{min-width:190px;max-width:100%}
+</style>
 </head>
 
 <body>
@@ -1788,7 +1806,17 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
       <div class="settingsGroup">
-        <div class="settingsTitle">📱 RENDIMIENTO Y PANTALLA</div>
+        <div class="settingsTitle">📱 IDIOMA, ORIENTACIÓN Y RENDIMIENTO</div>
+        <div class="settingsRow cfLanguageRow"><div><div class="settingsLabel">Idioma de la aplicación</div><div class="settingsHint">Automático usa el idioma del iPhone. Traducción inicial de las pantallas principales; el contenido dinámico puede permanecer en español.</div></div>
+          <select id="cfLanguageChoice" class="select" aria-label="Idioma de Control Fiscal" onchange="CFi18n.setLanguage(this.value)">
+            <option value="auto">Automático · idioma del teléfono</option><option value="es">Español</option><option value="en">English</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt">Português</option>
+          </select>
+        </div>
+        <div class="settingsRow cfOrientationRow"><div><div class="settingsLabel">Giro de pantalla</div><div class="settingsHint">Automático permite vertical y horizontal; Vertical bloquea el giro dentro de Control Fiscal.</div></div>
+          <select id="cfOrientationChoice" class="select" aria-label="Orientación de pantalla" onchange="cfSetOrientationMode(this.value)">
+            <option value="auto">Giro automático</option><option value="portrait">Bloquear en vertical</option>
+          </select>
+        </div>
         <div class="settingsHint">La interfaz se adapta a iPhone y iPad y conserva la definición nativa de la pantalla. El modo ahorro reduce desenfoques y animaciones; no modifica la resolución física.</div>
         <div class="settingsRow"><div class="settingsLabel">Calidad gráfica</div>
           <select class="select" id="cfGraphicsMode" style="max-width:230px" onchange="setCFGraphicsMode(this.value)">
@@ -1845,7 +1873,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
       <div class="settingsGroup" id="cfSupportGroup">
         <div class="settingsTitle">💬 SUGERENCIAS Y ERRORES</div>
-        <p class="settingsHint">Escribe al equipo de Control Fiscal desde la aplicación de correo del iPhone. Se preparará el destinatario y el texto; deberás pulsar Enviar en tu correo. No se adjuntan compras, facturas ni tu libro.</p>
+        <p class="settingsHint">Envía sugerencias y errores a los desarrolladores a través del buzón privado de Google Cloud. No se envían tus compras, facturas ni tus hojas de cálculo.</p>
         <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
       </div>
       <div class="settingsGroup" id="accountSettingsGroup">
@@ -1856,7 +1884,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R13</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R15</div>
 
     </div>
   </div>
@@ -1922,8 +1950,19 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
  <div class="modalCard">
   <div class="row" style="display:flex;justify-content:space-between;align-items:center"><h3 id="cfDocumentTitle" style="margin:0">📄 Documento adjunto</h3><button class="modalClose" type="button" onclick="closeCFDocumentViewer()" aria-label="Cerrar documento">×</button></div>
   <div id="cfDocumentStatus" class="cfDocumentInfo">Cargando documento…</div>
-  <iframe id="cfDocumentFrame" class="cfDocumentFrame" title="Vista del documento" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
-  <div class="cfViewerActions"><button type="button" onclick="closeCFDocumentViewer()">Volver a Control Fiscal</button><button type="button" id="cfDocumentOpenExternal" onclick="cfDocumentOpenExternal()">Abrir externamente (opcional)</button></div>
+  <div id="cfViewerViewport" class="cfViewerViewport"><div id="cfViewerSurface" class="cfViewerSurface">
+    <iframe id="cfDocumentFrame" class="cfDocumentFrame" title="Vista del documento" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
+    <img id="cfDocumentImage" class="cfDocumentImage hidden" alt="Imagen del documento ampliable">
+  </div></div>
+  <div class="cfViewerActions cfViewerToolbar" role="toolbar" aria-label="Herramientas del documento">
+    <button type="button" onclick="cfDocumentZoom(-0.25)" aria-label="Reducir">− <span>Reducir</span></button>
+    <strong id="cfDocumentZoomLabel" aria-live="polite">100 %</strong>
+    <button type="button" onclick="cfDocumentZoom(0.25)" aria-label="Ampliar">＋ <span>Ampliar</span></button>
+    <button type="button" onclick="cfDocumentResetZoom()">⤢ Ajustar</button>
+    <button type="button" onclick="cfDocumentPrint()">🖨️ Imprimir</button>
+    <button type="button" id="cfDocumentOpenExternal" onclick="cfDocumentOpenExternal()">↗ Abrir fuera</button>
+    <button type="button" class="cfViewerBack" onclick="closeCFDocumentViewer()">← Volver a Control Fiscal</button>
+  </div>
  </div>
 </div>
 <div id="recordModal" class="modal hidden" aria-hidden="true">
@@ -3671,11 +3710,38 @@ async function openCFDocumentViewer(link){
   if(!['application/pdf','image/jpeg','image/png'].includes(type))throw Error('Vista previa no compatible ('+type+').');
   if(blob.size>15*1024*1024)throw Error('El documento es mayor de 15 MB.');
   if(window.CFGoogleAccount.active()?.id!==owner)throw Error('La sesión cambió durante la carga.');
-  cfDocumentObjectUrl=URL.createObjectURL(blob);frame.src=cfDocumentObjectUrl;
-  status.textContent='Documento privado · '+(type==='application/pdf'?'PDF':'Imagen')+' · Se muestra dentro de la aplicación.';
+  cfDocumentObjectUrl=URL.createObjectURL(blob);cfDocumentBlob=blob;cfDocumentMime=type;
+  const picture=$('cfDocumentImage');
+  if(type==='application/pdf'){frame.classList.remove('hidden');picture?.classList.add('hidden');frame.src=cfDocumentObjectUrl;}
+  else{frame.classList.add('hidden');frame.removeAttribute('src');if(picture){picture.src=cfDocumentObjectUrl;picture.classList.remove('hidden');}}
+  cfDocumentResetZoom();
+  status.textContent='Documento privado · '+(type==='application/pdf'?'PDF':'Imagen')+' · Utiliza − / + o Ajustar para cambiar el tamaño.';
  }catch(error){status.textContent='No se pudo mostrar dentro de la app: '+(error?.message||error);}
 }
-function closeCFDocumentViewer(){const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}}
+let cfDocumentBlob=null,cfDocumentMime='',cfDocumentScale=1;
+function cfDocumentZoom(delta){
+ cfDocumentScale=Math.max(0.5,Math.min(3,Math.round((cfDocumentScale+delta)*100)/100));
+ const surf=$('cfViewerSurface'),label=$('cfDocumentZoomLabel'),vp=$('cfViewerViewport');
+ if(surf){surf.style.width=(cfDocumentScale*100)+'%';surf.style.height=(cfDocumentScale*100)+'%';}
+ if(label)label.textContent=Math.round(cfDocumentScale*100)+' %';
+ if(delta<0&&vp&&cfDocumentScale<=1){vp.scrollLeft=0;vp.scrollTop=0;}
+}
+function cfDocumentResetZoom(){cfDocumentScale=1;const surf=$('cfViewerSurface'),label=$('cfDocumentZoomLabel'),vp=$('cfViewerViewport');if(surf){surf.style.width='100%';surf.style.height='100%';}if(label)label.textContent='100 %';if(vp){vp.scrollLeft=0;vp.scrollTop=0;}}
+async function cfDocumentPrint(){
+ const status=$('cfDocumentStatus');
+ if(!cfDocumentBlob){if(status)status.textContent='Todavía no se ha cargado un documento para imprimir.';return;}
+ try{
+  const filesystem=window.CFFilesystem,share=window.CFShare;
+  if(!filesystem?.writeFile||!share?.share)throw Error('No está disponible el menú de impresión en este dispositivo.');
+  const bytes=new Uint8Array(await cfDocumentBlob.arrayBuffer());let base='';for(let i=0;i<bytes.length;i+=8192)base+=String.fromCharCode(...bytes.slice(i,i+8192));
+  const ext=cfDocumentMime==='application/pdf'?'pdf':cfDocumentMime==='image/png'?'png':'jpg';
+  const file='cf_visor_'+Date.now()+'.'+ext;
+  const result=await filesystem.writeFile({path:file,data:btoa(base),directory:window.CFDirectory?.Cache||'CACHE'});
+  await share.share({title:'Imprimir documento de Control Fiscal',files:[result.uri],dialogTitle:'Selecciona Imprimir'});
+  if(status)status.textContent='En el menú del iPhone, selecciona Imprimir o tu impresora compatible.';
+ }catch(e){if(status)status.textContent='No se pudo abrir la impresión: '+(e.message||e);}
+}
+function closeCFDocumentViewer(){const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');const img=$('cfDocumentImage');if(img){img.removeAttribute('src');img.classList.add('hidden');}if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}cfDocumentBlob=null;cfDocumentMime='';cfDocumentResetZoom();}
 function cfDocumentOpenExternal(){if(!/^https:\/\//i.test(cfDocumentOriginalLink)){showToastMessage('Enlace no admitido','Solo se pueden abrir enlaces HTTPS.');return;}if(!confirm('¿Abrir este documento en el navegador externo?'))return;window.CFBrowser?.open?.({url:cfDocumentOriginalLink}).catch(e=>showToastMessage('No se pudo abrir',e.message||String(e)));}
 
 const NATIVE_WRITE_ACTIONS=new Set([
@@ -5064,7 +5130,6 @@ async function securityStart(){
 
 
 // Envío de comentarios con consentimiento explícito; no registra usuarios a escondidas.
-const CF_SUPPORT_EMAIL='Electrochispas@outlook.es'; // Dirección de contacto publicada en la factura facilitada; verificar antes de distribución.
 function openCFSupport(){cfTapFeedback();$('cfSupportModal')?.classList.remove('hidden');}
 function closeCFSupport(){$('cfSupportModal')?.classList.add('hidden');}
 async function sendCFSupport(){
@@ -5072,23 +5137,19 @@ async function sendCFSupport(){
  const status=$('cfSupportStatus'),button=$('cfSupportSendBtn');
  cfTapFeedback();
  if(message.length<12||message.length>2700){if(status)status.textContent='Escribe entre 12 y 2700 caracteres.';return;}
- if(!confirm('¿Enviar '+kind.toLowerCase()+' a '+CF_SUPPORT_EMAIL+' desde tu cuenta de Google? No se compartirán tus datos fiscales.'))return;
+ if(!confirm('¿Enviar '+kind.toLowerCase()+' a los desarrolladores de Control Fiscal? No se compartirán tus datos fiscales.'))return;
  if(button)button.disabled=true;
- if(status)status.textContent='Enviando correo directamente…';
+ if(status)status.textContent='Enviando sugerencia a los desarrolladores…';
  try{
-  if(!window.CFGoogleExtras?.sendSupport)throw Error('No se ha cargado el módulo de correo Gmail.');
-  const response=await window.CFGoogleExtras.sendSupport({recipient:CF_SUPPORT_EMAIL,kind,message,appVersion:'UI76-20261023-R13'});
-  if(!response?.id)throw Error('Gmail no ha confirmado el envío.');
-  if(status)status.textContent='✅ Gmail ha confirmado el envío de tu mensaje.';
+  if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
+  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261023-R15'});
+  if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
+  if(status)status.textContent='✅ Sugerencia enviada a los desarrolladores.';
   if($('cfSupportText'))$('cfSupportText').value='';
   await cfSuccessFeedback();
  }catch(e){
   const text=String(e?.message||e||'No se pudo enviar');
-  if(status){status.replaceChildren();
-   status.append(document.createTextNode('No enviado: '+text+'. '));
-   if(/403|scope|permis|gmail|unauthorized|accessNotConfigured/i.test(text))status.append(document.createTextNode('Revisa Gmail API y el permiso gmail.send de Google OAuth. '));
-   const link=document.createElement('a');link.href='mailto:'+CF_SUPPORT_EMAIL+'?subject='+encodeURIComponent('Control Fiscal · '+kind)+'&body='+encodeURIComponent(message);link.textContent='Abrir un correo preparado como alternativa';status.append(link);
-  }
+  if(status)status.textContent='❌ No enviado: '+text;
  }finally{if(button)button.disabled=false;}
 }
 
@@ -5306,11 +5367,11 @@ startAccountSystem();
 <div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>
   <h3>✉️ SUGERENCIAS Y ERRORES</h3>
-  <p class="settingsHint">Abriremos el correo del teléfono con el destinatario y el mensaje preparados. Confirma el envío en Mail (u otra aplicación de correo). No enviaremos tus datos fiscales.</p>
+  <p class="settingsHint">Tu mensaje se guardará en el buzón privado de desarrolladores de Google Cloud cuando esté configurado. No se enviará desde Gmail ni se compartirán datos fiscales.</p>
   <div class="field"><label>Tipo de mensaje</label><select id="cfSupportKind" class="select"><option value="Sugerencia">Sugerencia</option><option value="Error">Informar de un error</option><option value="Consulta">Consulta</option></select></div>
   <div class="field"><label>Describe lo ocurrido o tu propuesta</label><textarea id="cfSupportText" class="textarea" rows="6" maxlength="3000" placeholder="Indica qué ventana estabas utilizando, qué pulsaste y qué sucedió. No incluyas contraseñas ni datos bancarios."></textarea></div>
   <div class="settingsHint" id="cfSupportStatus"></div>
-  <button id="cfSupportSendBtn" class="save p" type="button" onclick="sendCFSupport()">ENVIAR SUGERENCIA POR CORREO</button>
+  <button id="cfSupportSendBtn" class="save p" type="button" onclick="sendCFSupport()">ENVIAR SUGERENCIA A LOS DESARROLLADORES</button>
  </div>
 </div>
 <div id="cfTutorialOverlay" class="cfTutorialOverlay hidden" role="dialog" aria-modal="true" aria-label="Tutorial de Control Fiscal">
@@ -5461,11 +5522,12 @@ startAccountSystem();
 <div class="guideStep"><div class="guideNum">13</div><div><h4>Distribuidores y clientes anteriores</h4><p>En Compras escribe parte del nombre de un distribuidor y selecciona una coincidencia. En Facturación ocurre lo mismo con clientes. Para corregir NIF, dirección o teléfono ve a Ajustes → Mis clientes o Mis distribuidores y pulsa Editar.</p></div></div>
 <div class="guideStep"><div class="guideNum">14</div><div><h4>Iconos y fotografías del inventario</h4><p>Desde el desplegable Tipo de material elige «Crear nuevo tipo…» y aparecerá un campo para escribirlo. Sus categorías generan botones con iconos. La galería muestra fotografías seleccionables de fuentes abiertas; si no encuentra el modelo comercial exacto, sube su fotografía.</p></div></div>
 <div class="guideStep"><div class="guideNum">15</div><div><h4>Recordatorios de eventos</h4><p>Si autorizas las notificaciones en iOS, los eventos próximos permiten avisos en el móvil con el nombre y la ubicación. En la ficha del evento eliges avisar al empezar, 15 minutos, 30 minutos, 1 hora, 2 horas, 1 día o 2 días antes. El aviso local no requiere Google Calendar. Comprueba que las notificaciones del sistema estén activadas.</p></div></div>
-<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. El botón intenta enviarlo directamente a la dirección de soporte por Gmail API. Solo muestra confirmación cuando Gmail acepta el mensaje. Si aparece error 403, revisa Gmail API y el permiso gmail.send; entonces se ofrece abrir un correo preescrito como alternativa.</p></div></div>
+<div class="guideStep"><div class="guideNum">16</div><div><h4>Enviar sugerencias y comunicar fallos</h4><p>En Ajustes → Sugerencias y errores escribe qué ocurrió o qué mejorarías y pulsa Enviar. Se solicita confirmación. Únicamente se envía el mensaje escrito y el remitente, no las hojas privadas ni los datos de facturación. El mensaje se recibe en Google Cloud (Firestore) si el servicio privado está desplegado y configurado. No se solicita permiso Gmail para sugerencias. Solo aparece confirmación cuando Google Cloud confirma el registro.</p></div></div>
 <div class="guideStep"><div class="guideNum">17</div><div><h4>Permisos de Google, avisos y privacidad</h4><p>Google puede pedir de nuevo autorización tras un tiempo o cuando cambian los permisos. No compartas los accesos ni otorgues permisos a otras cuentas sin revisarlos. El administrador no puede abrir tus libros ni eliminar tus facturas desde el panel de soporte. Para controles centrales de cuentas se requiere un servidor independiente y una política de privacidad.</p></div></div>
 <div class="guideStep"><div class="guideNum">19</div><div><h4>Documentos: carpetas y subcarpetas privadas</h4><p>En Inicio pulsa DOCUMENTOS. Crea una carpeta Certificados; ábrela y añade la subcarpeta Certificados de sonido. Dentro sube PDF o imágenes con el botón Subir. La app mostrará los archivos en una lista y los abrirá sin salir. Los documentos se guardan en tu Google Drive; quitar un registro de la app no destruye el archivo de Drive.</p></div></div>
 <div class="guideStep"><div class="guideNum">20</div><div><h4>Retirar facturas emitidas de la lista</h4><p>Una factura emitida sigue siendo un documento fiscal y no se debe destruir como una compra. Desde Registros, abre la factura y selecciona Retirar de la lista; desaparecerá de las listas normales pero seguirá en el historial fiscal y computando en el resumen. Marca Mostrar facturas retiradas para consultarla y restaurarla. Para corregir importes fiscalmente debe emitirse una rectificativa cuando corresponda.</p></div></div>
 <div class="guideStep"><div class="guideNum">18</div><div><h4>Tutorial interactivo</h4><p>La primera vez que accedas se mostrará el tutorial. Avanza por las ventanas usando Siguiente; puedes saltarlo en cualquier momento. Vuelve a iniciarlo desde Ajustes → Información y herramientas → Iniciar tutorial interactivo.</p></div></div>
+<div class="guideStep"><div class="guideNum">21</div><div><h4>Idioma, orientación y permisos iOS</h4><p>En Ajustes → Diseño puedes elegir idioma y giro horizontal. Automático usa el idioma del iPhone. Las traducciones iniciales cubren opciones principales; algunos textos específicos pueden seguir en español. Si no llegan notificaciones revisa Ajustes del iPhone → Control Fiscal → Notificaciones; iOS solo muestra la pregunta de autorización cuando corresponde.</p></div></div>
 <button class="modalAction" type="button" onclick="closeGuide()">CERRAR GUÍA</button></div></div>
 
 <div id="cfPriceSearchModal" class="modal hidden" onclick="if(event.target===this)closePriceSearch()">
@@ -5537,5 +5599,9 @@ startAccountSystem();
 })();
 </script>
 <script src="cf-documents.js"></script>
+<script src="cf-i18n.js"></script>
+<script src="cf-feedback-config.js"></script>
+<script src="cf-feedback.js"></script>
+<script src="cf-r14-native.js"></script>
 </body>
 </html>
