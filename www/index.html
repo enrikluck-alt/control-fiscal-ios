@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R15">
+<html lang="es" data-cf-ui-build="UI76-20261023-R16">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1360,6 +1360,40 @@ body.lightTheme #cfDocumentViewer .cfViewerActions .cfViewerBack{background:#176
 #settingsPage .cfLanguageRow,#settingsPage .cfOrientationRow{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
 #settingsPage .cfLanguageRow select,#settingsPage .cfOrientationRow select{min-width:190px;max-width:100%}
 </style>
+
+<style id="cf-r16-pdf-and-safe-areas">
+/* Dynamic Island / notch / home indicator: horizontal as well as vertical safe insets. */
+:root{
+  --cf-left-safe:env(safe-area-inset-left,0px);
+  --cf-right-safe:env(safe-area-inset-right,0px);
+}
+.hero{padding-left:calc(15px + var(--cf-left-safe))!important;padding-right:calc(15px + var(--cf-right-safe))!important;}
+.header{padding-left:calc(16px + var(--cf-left-safe))!important;padding-right:calc(16px + var(--cf-right-safe))!important;}
+.bottom{padding-left:calc(6px + var(--cf-left-safe))!important;padding-right:calc(6px + var(--cf-right-safe))!important;}
+.page,#formBody{padding-left:calc(16px + var(--cf-left-safe))!important;padding-right:calc(16px + var(--cf-right-safe))!important;}
+#accountGate{padding-top:calc(18px + var(--cf-top-safe))!important;padding-left:calc(18px + var(--cf-left-safe))!important;padding-right:calc(18px + var(--cf-right-safe))!important;padding-bottom:calc(18px + var(--cf-bottom-safe))!important;}
+.modal{padding-left:calc(10px + var(--cf-left-safe))!important;padding-right:calc(10px + var(--cf-right-safe))!important;padding-top:calc(10px + var(--cf-top-safe))!important;padding-bottom:calc(10px + var(--cf-bottom-safe))!important;box-sizing:border-box!important;}
+.modal>.modalCard{max-width:100%;box-sizing:border-box;}
+#cfDocumentViewer .modalCard{max-height:calc(100dvh - var(--cf-top-safe) - var(--cf-bottom-safe) - 20px)!important;height:calc(100dvh - var(--cf-top-safe) - var(--cf-bottom-safe) - 20px)!important;}
+#cfDocumentViewer .cfViewerSurface{width:100%;height:auto;min-height:100%;background:#e4e9ee;}
+#cfDocumentViewer .cfPdfPages{width:100%;height:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px;box-sizing:border-box;}
+#cfDocumentViewer .cfPdfPages.hidden{display:none!important;}
+#cfDocumentViewer .cfPdfPage{display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;width:100%;background:white;box-shadow:0 2px 10px #0003;overflow:hidden;}
+#cfDocumentViewer .cfPdfCanvas{display:block;max-width:none!important;flex-shrink:0;}
+#cfDocumentViewer .cfDocumentImage{display:block;width:100%;height:auto;max-width:none;object-fit:contain;}
+#cfDocumentViewer .cfDocumentImage.hidden,#cfDocumentViewer .cfDocumentFrame.hidden{display:none!important;}
+#cfDocumentViewer .cfViewerToolbar{padding-bottom:2px;}
+@media(orientation:landscape) and (max-height:520px) and (pointer:coarse){
+ :root{--cf-landscape-side:max(34px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));}
+ .header,.bottom,.hero,.page,#formBody{padding-left:calc(12px + var(--cf-landscape-side))!important;padding-right:calc(12px + var(--cf-landscape-side))!important;}
+ #accountGate{padding-left:calc(16px + var(--cf-landscape-side))!important;padding-right:calc(16px + var(--cf-landscape-side))!important;}
+ .modal{padding-left:calc(8px + var(--cf-landscape-side))!important;padding-right:calc(8px + var(--cf-landscape-side))!important;}
+ .hero .logos .logo{height:48px!important;}.hero .title{font-size:20px!important;}
+ .hero{padding-top:calc(5px + var(--cf-top-safe))!important;padding-bottom:5px!important;}
+ #cfDocumentViewer .cfViewerActions{gap:4px;}
+ #cfDocumentViewer .cfViewerActions button{font-size:11px;padding:6px 8px;}
+}
+</style>
 </head>
 
 <body>
@@ -1807,7 +1841,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
       <div class="settingsGroup">
         <div class="settingsTitle">📱 IDIOMA, ORIENTACIÓN Y RENDIMIENTO</div>
-        <div class="settingsRow cfLanguageRow"><div><div class="settingsLabel">Idioma de la aplicación</div><div class="settingsHint">Automático usa el idioma del iPhone. Traducción inicial de las pantallas principales; el contenido dinámico puede permanecer en español.</div></div>
+        <div class="settingsRow cfLanguageRow"><div><div class="settingsLabel">Idioma de la aplicación</div><div class="settingsHint">Automático usa el idioma del teléfono. Los datos personales y fiscales no se traducen. Algunos mensajes técnicos todavía pueden aparecer en español.</div></div>
           <select id="cfLanguageChoice" class="select" aria-label="Idioma de Control Fiscal" onchange="CFi18n.setLanguage(this.value)">
             <option value="auto">Automático · idioma del teléfono</option><option value="es">Español</option><option value="en">English</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt">Português</option>
           </select>
@@ -1884,7 +1918,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R15</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R16</div>
 
     </div>
   </div>
@@ -1951,6 +1985,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
   <div class="row" style="display:flex;justify-content:space-between;align-items:center"><h3 id="cfDocumentTitle" style="margin:0">📄 Documento adjunto</h3><button class="modalClose" type="button" onclick="closeCFDocumentViewer()" aria-label="Cerrar documento">×</button></div>
   <div id="cfDocumentStatus" class="cfDocumentInfo">Cargando documento…</div>
   <div id="cfViewerViewport" class="cfViewerViewport"><div id="cfViewerSurface" class="cfViewerSurface">
+    <div id="cfPdfPages" class="cfPdfPages hidden" aria-label="Páginas del documento PDF"></div>
     <iframe id="cfDocumentFrame" class="cfDocumentFrame" title="Vista del documento" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
     <img id="cfDocumentImage" class="cfDocumentImage hidden" alt="Imagen del documento ampliable">
   </div></div>
@@ -3712,21 +3747,38 @@ async function openCFDocumentViewer(link){
   if(window.CFGoogleAccount.active()?.id!==owner)throw Error('La sesión cambió durante la carga.');
   cfDocumentObjectUrl=URL.createObjectURL(blob);cfDocumentBlob=blob;cfDocumentMime=type;
   const picture=$('cfDocumentImage');
-  if(type==='application/pdf'){frame.classList.remove('hidden');picture?.classList.add('hidden');frame.src=cfDocumentObjectUrl;}
-  else{frame.classList.add('hidden');frame.removeAttribute('src');if(picture){picture.src=cfDocumentObjectUrl;picture.classList.remove('hidden');}}
-  cfDocumentResetZoom();
-  status.textContent='Documento privado · '+(type==='application/pdf'?'PDF':'Imagen')+' · Utiliza − / + o Ajustar para cambiar el tamaño.';
+  frame.classList.add('hidden');frame.removeAttribute('src');
+  if(type==='application/pdf'){
+    picture?.classList.add('hidden');
+    if(!window.CFPdfViewer?.open)throw Error('No se ha cargado el motor PDF.js local. Comprueba la compilación R16.');
+    await window.CFPdfViewer.open(blob);
+  }else{
+    $('cfPdfPages')?.classList.add('hidden');
+    if(picture){picture.src=cfDocumentObjectUrl;picture.classList.remove('hidden');}
+    cfDocumentResetZoom();
+    status.textContent='Imagen privada · utiliza − / + o Ajustar para cambiar el tamaño.';
+  }
  }catch(error){status.textContent='No se pudo mostrar dentro de la app: '+(error?.message||error);}
 }
 let cfDocumentBlob=null,cfDocumentMime='',cfDocumentScale=1;
 function cfDocumentZoom(delta){
- cfDocumentScale=Math.max(0.5,Math.min(3,Math.round((cfDocumentScale+delta)*100)/100));
- const surf=$('cfViewerSurface'),label=$('cfDocumentZoomLabel'),vp=$('cfViewerViewport');
- if(surf){surf.style.width=(cfDocumentScale*100)+'%';surf.style.height=(cfDocumentScale*100)+'%';}
+ if(cfDocumentMime==='application/pdf'){
+   cfDocumentScale=window.CFPdfViewer?.zoom(delta)||1;
+   return;
+ }
+ cfDocumentScale=Math.max(0.5,Math.min(4,Math.round((cfDocumentScale+delta)*100)/100));
+ const surf=$('cfViewerSurface'),label=$('cfDocumentZoomLabel'),vp=$('cfViewerViewport'),img=$('cfDocumentImage');
+ if(surf&&img){surf.style.width=(cfDocumentScale*100)+'%';surf.style.height='auto';img.style.width='100%';img.style.height='auto';}
  if(label)label.textContent=Math.round(cfDocumentScale*100)+' %';
  if(delta<0&&vp&&cfDocumentScale<=1){vp.scrollLeft=0;vp.scrollTop=0;}
 }
-function cfDocumentResetZoom(){cfDocumentScale=1;const surf=$('cfViewerSurface'),label=$('cfDocumentZoomLabel'),vp=$('cfViewerViewport');if(surf){surf.style.width='100%';surf.style.height='100%';}if(label)label.textContent='100 %';if(vp){vp.scrollLeft=0;vp.scrollTop=0;}}
+function cfDocumentResetZoom(){
+ cfDocumentScale=1;
+ if(cfDocumentMime==='application/pdf'){window.CFPdfViewer?.reset();return;}
+ const surf=$('cfViewerSurface'),label=$('cfDocumentZoomLabel'),vp=$('cfViewerViewport');
+ if(surf){surf.style.width='100%';surf.style.height='100%';}
+ if(label)label.textContent='100 %';if(vp){vp.scrollLeft=0;vp.scrollTop=0;}
+}
 async function cfDocumentPrint(){
  const status=$('cfDocumentStatus');
  if(!cfDocumentBlob){if(status)status.textContent='Todavía no se ha cargado un documento para imprimir.';return;}
@@ -3741,7 +3793,7 @@ async function cfDocumentPrint(){
   if(status)status.textContent='En el menú del iPhone, selecciona Imprimir o tu impresora compatible.';
  }catch(e){if(status)status.textContent='No se pudo abrir la impresión: '+(e.message||e);}
 }
-function closeCFDocumentViewer(){const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');const img=$('cfDocumentImage');if(img){img.removeAttribute('src');img.classList.add('hidden');}if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}cfDocumentBlob=null;cfDocumentMime='';cfDocumentResetZoom();}
+function closeCFDocumentViewer(){window.CFPdfViewer?.close();const pdfPages=$('cfPdfPages');if(pdfPages){pdfPages.classList.add('hidden');pdfPages.style.width='100%';delete pdfPages.dataset.zoom;}const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');const img=$('cfDocumentImage');if(img){img.removeAttribute('src');img.classList.add('hidden');}if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}cfDocumentBlob=null;cfDocumentMime='';cfDocumentResetZoom();}
 function cfDocumentOpenExternal(){if(!/^https:\/\//i.test(cfDocumentOriginalLink)){showToastMessage('Enlace no admitido','Solo se pueden abrir enlaces HTTPS.');return;}if(!confirm('¿Abrir este documento en el navegador externo?'))return;window.CFBrowser?.open?.({url:cfDocumentOriginalLink}).catch(e=>showToastMessage('No se pudo abrir',e.message||String(e)));}
 
 const NATIVE_WRITE_ACTIONS=new Set([
@@ -5139,17 +5191,17 @@ async function sendCFSupport(){
  if(message.length<12||message.length>2700){if(status)status.textContent='Escribe entre 12 y 2700 caracteres.';return;}
  if(!confirm('¿Enviar '+kind.toLowerCase()+' a los desarrolladores de Control Fiscal? No se compartirán tus datos fiscales.'))return;
  if(button)button.disabled=true;
- if(status)status.textContent='Enviando sugerencia a los desarrolladores…';
+ if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261023-R15'});
+  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261023-R16'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
-  if(status)status.textContent='✅ Sugerencia enviada a los desarrolladores.';
+  if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
   await cfSuccessFeedback();
  }catch(e){
   const text=String(e?.message||e||'No se pudo enviar');
-  if(status)status.textContent='❌ No enviado: '+text;
+  if(status)status.textContent='❌ '+(window.CFi18n?.t('No enviado')||'No enviado')+': '+(window.CFi18n?.t(text)||text);
  }finally{if(button)button.disabled=false;}
 }
 
@@ -5600,8 +5652,10 @@ startAccountSystem();
 </script>
 <script src="cf-documents.js"></script>
 <script src="cf-i18n.js"></script>
+<script src="cf-i18n-extended.js"></script>
 <script src="cf-feedback-config.js"></script>
 <script src="cf-feedback.js"></script>
 <script src="cf-r14-native.js"></script>
+<script src="cf-pdf-viewer.js"></script>
 </body>
 </html>

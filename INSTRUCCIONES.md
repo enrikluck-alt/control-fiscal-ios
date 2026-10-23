@@ -1,6 +1,6 @@
-# Control Fiscal V76-Google — R15 · Sugerencias Google Cloud + mejoras R14
+# Control Fiscal V76-Google — R16 · Visor PDF real, idiomas y Dynamic Island
 
-**Versión:** `UI76-20261023-R15`  
+**Versión:** `UI76-20261023-R16`  
 **Rama de trabajo:** `v78-google-test`; **no tocar** `main`.  
 **Estado:** compilación y prueba en iPhone pendientes. No se ha compilado Xcode desde este entorno.
 
@@ -8,13 +8,13 @@
 
 1. Descomprime el ZIP y sube **todo** su contenido a `v78-google-test`, incluida la carpeta oculta `.github`, `resources/ios-locales`, `www` y `package.json`.
 2. Abre Actions → **Build unsigned iOS IPA** → **Run workflow**, seleccionando esa rama.
-3. Descarga el artefacto `ControlFiscal-V76-Google-R15-Cloud-Feedback-IPA`; contiene `ControlFiscal_V76_Google_R15_Idiomas_Visor_Avisos.ipa`.
-4. Instala la IPA con Sideloadly. En Ajustes verifica `UI76-20261023-R14`.
+3. Descarga el artefacto `ControlFiscal-V76-Google-R16-PDF-Idiomas-Island-IPA`; contiene `ControlFiscal_V76_Google_R16_Idiomas_PDF_Island.ipa`.
+4. Instala la IPA con Sideloadly. En Ajustes verifica `UI76-20261023-R16`.
 5. Conserva una copia de la versión instalada anteriormente y prueba **solo con registros ficticios**, no facturas fiscales reales.
 
 ## 2. Notificaciones y sonido: corrección de la espera infinita
 
-Antes de R14 podía quedarse eternamente en «Comprobando permiso de iOS» o «Solicitando permiso». La R14 (conservada en R15) incorpora un control de tiempo máximo y muestra un error concreto si el plugin nativo `LocalNotifications` no responde. Si `checkPermissions` falla, intenta solicitar el permiso mediante `requestPermissions`. La prueba se programa 10 segundos después y comprueba los avisos pendientes cuando el plugin lo permite. Las notificaciones de Agenda y documentación pendiente usan el sonido elegido (Claro, Pulso, Calma o sonido del sistema).
+Antes de R14 podía quedarse eternamente en «Comprobando permiso de iOS» o «Solicitando permiso». La R14 (conservada en R16) incorpora un control de tiempo máximo y muestra un error concreto si el plugin nativo `LocalNotifications` no responde. Si `checkPermissions` falla, intenta solicitar el permiso mediante `requestPermissions`. La prueba se programa 10 segundos después y comprueba los avisos pendientes cuando el plugin lo permite. Las notificaciones de Agenda y documentación pendiente usan el sonido elegido (Claro, Pulso, Calma o sonido del sistema).
 
 **Prueba en el iPhone:**
 
@@ -30,19 +30,19 @@ Antes de R14 podía quedarse eternamente en «Comprobando permiso de iOS» o «S
 
 Abre un documento adjunto desde Compras, Facturas o Documentos. El visor muestra inicialmente el PDF o la imagen ajustada al espacio disponible. Dispones de botones **− Reducir**, **+ Ampliar**, **Ajustar (100 %)**, **Imprimir**, **Abrir fuera** y **Volver a Control Fiscal**. La zona central se puede desplazar después de ampliar. «Imprimir» exporta una copia temporal al menú nativo de iOS para seleccionar la acción **Imprimir**; esta opción necesita una impresora compatible o AirPrint. No se abre el navegador para imprimir.
 
-El motor PDF incorporado en WKWebView puede diferir según versión de iOS y no ofrece control absoluto sobre el zoom interno. Esta versión controla el tamaño del visor; la visualización de PDF debe validarse en el teléfono. La información fiscal descargada no se envía a terceros para convertir archivos.
+En R16 hemos sustituido la vista previa interna mediante iframe por **Mozilla PDF.js**, descargado e incluido localmente durante la compilación. Ahora los botones cambian la escala real de las páginas dibujadas en canvas y vuelven a renderizarlas al ampliar. Los archivos PDF siguen descargándose privadamente mediante Google Drive con el token de la cuenta autenticada: **no se envían a servidores de conversión ni CDN**. Puedes deslizarte entre páginas y probar el pellizco de dos dedos. Hay que validar legibilidad, memoria y PDF multipágina en el iPhone.
 
 ## 4. Idiomas: elegir el del teléfono o uno manualmente
 
-Ajustes → **Diseño → Idioma de la aplicación**: **Automático** (recomendado), Español, English, Français, Deutsch, Italiano y Português. En Automático se detecta el idioma del iPhone al iniciar. Se traducen **las pantallas y opciones principales**; algunos textos dinámicos o especializados (especialmente textos fiscales y explicaciones extensas) **todavía quedan en español**. No se anuncia traducción completa a «cualquier idioma»: para ampliar idiomas hace falta traducir y probar el resto de cadenas.
+Ajustes → **Diseño → Idioma de la aplicación**: **Automático** (recomendado), Español, English, Français, Deutsch, Italiano y Português. En Automático se detecta el idioma del iPhone al iniciar. R16 incorpora **258 nuevas cadenas traducidas para cada uno de los 5 idiomas adicionales**, además de las existentes de R14: formularios, opciones de selector, etiquetas de accesibilidad, mensajes de soporte y titulares de la guía. **Los párrafos extensos de ayuda, ciertos mensajes técnicos y cadenas creadas dinámicamente aún pueden quedar en español**. Los datos fiscales de cada usuario no se alteran. No se anuncia traducción completa a «cualquier idioma»: para ampliar idiomas hace falta traducir y probar el resto de cadenas.
 
 Los diálogos nativos del sistema para seleccionar archivos dependen del idioma configurado en iOS, no exclusivamente del idioma del HTML. Incluimos localizaciones de iOS para seis idiomas y las descripciones de Face ID para mejorar esa selección, pero el resultado final debe verificarse en iPhone.
 
 ## 5. Giro automático de la pantalla
 
-Ajustes → **Diseño → Giro de pantalla**: **Giro automático** o **Bloquear en vertical**. Se incluye la dependencia nativa oficial `@capacitor/screen-orientation` 8.0.2, compatibilidad de orientaciones en `Info.plist` y un diseño que aprovecha mayor anchura en horizontal. El bloqueo de orientación puede no afectar a navegadores o pantallas del sistema ajenos al controlador de Control Fiscal. En iPad hay limitaciones del sistema con multitarea.
+Ajustes → **Diseño → Giro de pantalla**: **Giro automático** o **Bloquear en vertical**. Se incluye la dependencia nativa oficial `@capacitor/screen-orientation` 8.0.2, compatibilidad de orientaciones en `Info.plist` y un diseño que aprovecha mayor anchura en horizontal. **En R16** se aplican `safe-area-inset-left/right` en cabecera, navegación, formularios y modales, más márgenes de seguridad en horizontal para proteger la zona de la cámara/Isla Dinámica en iPhone. El bloqueo de orientación puede no afectar a navegadores o pantallas del sistema ajenos al controlador de Control Fiscal. En iPad hay limitaciones del sistema con multitarea.
 
-## 6. Sugerencias: buzón privado de Google Cloud (NUEVO R15)
+## 6. Sugerencias: buzón privado de Google Cloud (pendiente de despliegue)
 
 El formulario muestra «**Enviando sugerencia a los desarrolladores…**» sin mostrar la dirección privada y deja de utilizar Gmail API para **sugerencias**. La aplicación utiliza `www/cf-feedback.js` y un ID token de Google obtenido del plugin de inicio de sesión, que Cloud Run valida por firma y cliente OAuth autorizado. El cuerpo solo contiene el tipo, mensaje escrito voluntariamente, idioma, plataforma y versión: **nunca hojas de cálculo ni facturas**.
 
@@ -56,8 +56,8 @@ El permiso `gmail.send` se conserva para **enviar facturas/documentación por Gm
 
 ## 7. Pruebas y límites
 
-- **98 pruebas locales**: 92 del proyecto anterior y 6 nuevas de Cloud sobre idioma, plugin nativo, orientación y visor, todas correctas.
-- Se han verificado la sintaxis JavaScript, las firmas de los estilos V76 originales, el contenido del ZIP y las referencias que el workflow comprobará en la IPA.
+- **103 pruebas locales**: 98 de R15 y 5 nuevas verificaciones de R16 sobre PDF.js, idiomas, safe areas y configuración Cloud, todas correctas.
+- Se han verificado la sintaxis JavaScript, las firmas de los estilos V76 originales y las referencias que el workflow comprobará en la IPA. **El paquete PDF.js se descarga por `npm install` dentro de GitHub Actions**, y su copia local se verifica antes de `npx cap sync ios`; ese paso remoto no se ha ejecutado aquí.
 - **No se ha compilado el proyecto con Xcode ni se ha ejecutado la IPA físicamente**. Face ID, Gmail/Google Cloud, avisos y sonido reales, selector nativo de archivos, impresión y orientación necesitan comprobación en tu iPhone.
 - No borres datos de Drive ni limpies registros de facturas emitidas para comprobar cambios estéticos. Usa registros ficticios y haz una copia del libro antes de pruebas estructurales.
 

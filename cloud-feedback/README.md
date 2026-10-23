@@ -1,4 +1,4 @@
-# Control Fiscal — buzón de sugerencias en Google Cloud (R15)
+# Control Fiscal — buzón de sugerencias en Google Cloud (R16)
 
 **Estado**: código listo para preparar despliegue; **no** se ha desplegado, autenticado ni probado en Cloud Run. Por defecto la aplicación muestra un mensaje de configuración pendiente y NO afirma haber enviado nada.
 

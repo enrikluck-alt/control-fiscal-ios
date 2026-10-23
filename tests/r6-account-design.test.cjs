@@ -44,5 +44,5 @@ test('R6: logo oficial por defecto y dentro de IPA sin alterar imagen personaliz
  assert.match(html,/const src=saved \|\| "control-fiscal-logo.jpg"/);
  assert.match(html,/localStorage\.getItem\(SETTINGS_KEYS\.homeBrandImage\)/);
  assert.match(workflow,/control-fiscal-logo.jpg/);
- for(const f of ['UI76-20261023-R15','ControlFiscal-V76-Google-R15-Cloud-Feedback-IPA','ControlFiscal_V76_Google_R15_Idiomas_Visor_Avisos.ipa'])assert.ok(workflow.includes(f),f);
+ for(const f of ['UI76-20261023-R16','ControlFiscal-V76-Google-R16-PDF-Idiomas-Island-IPA','ControlFiscal_V76_Google_R16_Idiomas_PDF_Island.ipa'])assert.ok(workflow.includes(f),f);
 });

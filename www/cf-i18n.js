@@ -1,4 +1,4 @@
-/* R14: self-contained, privacy-preserving interface translations. No translation service is called.
+/* R16: offline translations for interface text and attributes. No translation service is called.
    Unknown phrases fall back to the original Spanish; user/fiscal data is never translated. */
 (function(root){'use strict';
 const STORE='cf_ui_language_r14';
@@ -15,7 +15,7 @@ Object.assign(data.fr,{'INICIAR SESIÓN':'SE CONNECTER','CREAR CUENTA':'CRÉER U
 Object.assign(data.de,{'INICIAR SESIÓN':'ANMELDEN','CREAR CUENTA':'KONTO ERSTELLEN','INICIAR SESIÓN CON GOOGLE':'MIT GOOGLE ANMELDEN','CREAR CUENTA GOOGLE':'GOOGLE-KONTO ERSTELLEN','Mantener sesión iniciada':'Angemeldet bleiben','COMPRAS':'EINKÄUFE','FACTURACIÓN':'RECHNUNGEN','AGENDA':'TERMINE','INVENTARIO':'INVENTAR'});
 Object.assign(data.it,{'INICIAR SESIÓN':'ACCEDI','CREAR CUENTA':'CREA ACCOUNT','INICIAR SESIÓN CON GOOGLE':'ACCEDI CON GOOGLE','CREAR CUENTA GOOGLE':'CREA ACCOUNT GOOGLE','Mantener sesión iniciada':'Resta connesso','COMPRAS':'ACQUISTI','FACTURACIÓN':'FATTURAZIONE','AGENDA':'AGENDA','INVENTARIO':'MAGAZZINO'});
 Object.assign(data.pt,{'INICIAR SESIÓN':'INICIAR SESSÃO','CREAR CUENTA':'CRIAR CONTA','INICIAR SESIÓN CON GOOGLE':'INICIAR SESSÃO COM GOOGLE','CREAR CUENTA GOOGLE':'CRIAR CONTA GOOGLE','Mantener sesión iniciada':'Manter sessão iniciada','COMPRAS':'COMPRAS','FACTURACIÓN':'FATURAÇÃO','AGENDA':'AGENDA','INVENTARIO':'INVENTÁRIO'});
-const original=new WeakMap();let current='es',scheduled=false;
+const original=new WeakMap(),attributeOriginal=new WeakMap();let current='es',scheduled=false;
 function device(){const lang=(root.navigator.languages?.[0]||root.navigator.language||'es').toLowerCase().split('-')[0];return data[lang]?lang:'es';}
 function choice(){return root.localStorage.getItem(STORE)||'auto';}
 function locale(){return choice()==='auto'?device():data[choice()]?choice():'es';}
@@ -25,18 +25,39 @@ function paint(){
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
  while(node=walker.nextNode()){
-  const parent=node.parentElement;if(!parent||parent.closest('script,style,textarea,pre,code,option,[contenteditable="true"]'))continue;
+  const parent=node.parentElement;if(!parent||parent.closest('script,style,textarea,pre,code,[contenteditable="true"],.rdesc,.rdate,.ramount,.cfDocNodeName,[data-cf-user-content]'))continue;
+  if(parent.tagName==='OPTION'&&!parent.hasAttribute('value'))parent.value=node.nodeValue.trim();
   if(!original.has(node))original.set(node,node.nodeValue);
   const raw=original.get(node),word=raw.trim();
-  if(!word||word.length>95)continue;
-  const translated=dictionary[word]||word;
+  if(!word||word.length>400)continue;
+  const undecorated=word.replace(/^[^\p{L}\p{N}]+/u,'');
+  const translated=dictionary[word]||(undecorated!==word&&dictionary[undecorated]?word.slice(0,word.length-undecorated.length)+dictionary[undecorated]:word);
   const next=translated===word?raw:raw.replace(word,translated);
   if(node.nodeValue!==next)node.nodeValue=next;
  }
+ // Inputs and accessibility hints must follow the same language as visible labels.
+ for(const el of document.querySelectorAll('[placeholder],[title],[aria-label]')){
+   let values=attributeOriginal.get(el);if(!values){values={};attributeOriginal.set(el,values);}
+   for(const key of ['placeholder','title','aria-label']){
+     if(!el.hasAttribute(key))continue;
+     const actual=el.getAttribute(key);
+     if(!(key in values))values[key]=actual;
+     const source=values[key],translated=dictionary[source]||source;
+     if(actual!==translated)el.setAttribute(key,translated);
+   }
+ }
 }
+
+function addTranslations(translations){
+ for(const [lang,items] of Object.entries(translations||{})){
+  if(data[lang]&&items&&typeof items==='object')Object.assign(data[lang],items);
+ }
+ schedule();
+}
+function t(phrase){return (data[locale()]||{})[String(phrase)]||String(phrase);}
 function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;paint();},60);}
 function setLanguage(lang){root.localStorage.setItem(STORE,lang==='auto'?'auto':data[lang]?lang:'auto');schedule();}
 function start(){paint();const observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.type==='childList'&&m.addedNodes.length))schedule();});observer.observe(document.body,{childList:true,subtree:true});}
-root.CFi18n={setLanguage,locale,choice,refresh:schedule};
+root.CFi18n={setLanguage,locale,choice,refresh:schedule,addTranslations,t};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })(window);
