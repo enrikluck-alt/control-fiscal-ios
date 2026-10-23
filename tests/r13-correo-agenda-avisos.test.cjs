@@ -78,7 +78,7 @@ test('R13: el aviso de prueba informa en Audio y Notificaciones y confirma progr
 test('R13: aviso de evento ofrece ruta en Mapas y modal respeta la zona segura',()=>{
  assert.match(html,/localNotificationActionPerformed/);
  assert.match(html,/maps\.apple\.com\/\?daddr=/);
- assert.match(html,/extra:\{kind:'agenda',eventId:String\(event\.id\|\|''\),location:loc\.slice/);
+ assert.match(html,/extra:\{kind:'agenda',eventId:String\(event\.id\|\|''\),ownerBookId/);
  assert.match(html,/#agendaEventModal\{align-items:flex-start!important/);
  assert.match(html,/env\(safe-area-inset-top/);
  assert.match(html,/id="agendaSaveBtn"/);

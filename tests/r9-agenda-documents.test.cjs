@@ -43,7 +43,7 @@ test('R9: busca fotos en Google a petición del usuario sin importación automá
 });
 test('R9: sin alteraciones nativas de fondo de pantalla',()=>{
  assert.doesNotMatch(html,/UIApplication\.shared\.setWallpaper|wallpaper\.setWallpaper/);
- assert.match(html,/UI76-20261023-R16/);
+ assert.match(html,/UI76-20261023-R17/);
  const auth=fs.readFileSync('www/cf-google-auth.js','utf8');
  assert.match(auth,/root\.closeCFDocumentViewer/);
 });

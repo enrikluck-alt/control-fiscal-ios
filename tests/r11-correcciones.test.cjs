@@ -57,5 +57,5 @@ test('R15: Ajustes claro, Cloud para sugerencias y selector inline de tipo',()=>
  assert.match(html,/cfFindInventoryPhotos/);assert.match(html,/commons\.wikimedia\.org\/w\/api\.php/);
  assert.match(html,/Mostrar facturas emitidas retiradas del listado/);
  assert.match(html,/id="invoiceManualNumber"/);
- assert.match(wf,/UI76-20261023-R16/);
+ assert.match(wf,/UI76-20261023-R17/);
 });

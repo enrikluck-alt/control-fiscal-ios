@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  // Solo un usuario autenticado crea su propia sugerencia. Nunca se exponen los datos fiscales.
+  match /control_fiscal_sugerencias/{suggestionId} {
+   allow create: if request.auth != null
+    && request.resource.data.keys().hasOnly(['uid','tipo','mensaje','estado','fecha'])
+    && request.resource.data.keys().hasAll(['uid','tipo','mensaje','estado','fecha'])
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.uid is string
+    && request.resource.data.tipo in ['Sugerencia','Error','Consulta']
+    && request.resource.data.mensaje is string
+    && request.resource.data.mensaje.size() >= 12
+    && request.resource.data.mensaje.size() <= 2700
+    && request.resource.data.estado == 'pendiente'
+    && request.resource.data.fecha == request.time;
+   allow get, list, update, delete: if false;
+  }
+  // Ninguna otra colección es accesible desde los clientes.
+  match /{document=**} {allow read, write: if false;}
+ }
+}

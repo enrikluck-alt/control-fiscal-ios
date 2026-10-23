@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R16">
+<html lang="es" data-cf-ui-build="UI76-20261023-R17">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1393,6 +1393,16 @@ body.lightTheme #cfDocumentViewer .cfViewerActions .cfViewerBack{background:#176
  #cfDocumentViewer .cfViewerActions{gap:4px;}
  #cfDocumentViewer .cfViewerActions button{font-size:11px;padding:6px 8px;}
 }
+/* R17: ficha de evento y mapa opcional; nada sale de la app hasta que se solicite la ruta. */
+.cfAgendaLocationMap{display:grid;gap:9px;margin:12px 0;padding:12px;border:1px solid #40586b;border-radius:12px;background:#14212d;color:#f5f7fa;min-width:0;}
+.cfAgendaLocationMap.hidden{display:none!important}
+.cfAgendaLocationMap iframe{width:100%;height:190px;border:0;border-radius:9px;background:#e6edf3;}
+.cfAgendaLocationMap small{color:#bac8d2;line-height:1.4}
+.cfAgendaMapActions{display:flex;gap:8px;flex-wrap:wrap}
+.cfAgendaMapActions button{flex:1;min-width:150px;min-height:44px;border-radius:9px;border:1px solid #70869a;color:white;background:#234258;font-weight:700;cursor:pointer}
+body.lightTheme .cfAgendaLocationMap{background:#f5f8fa;color:#152333;border-color:#becbd4}
+body.lightTheme .cfAgendaLocationMap small{color:#4f6474}
+body.lightTheme .cfAgendaMapActions button{color:white}
 </style>
 </head>
 
@@ -1909,6 +1919,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="settingsTitle">💬 SUGERENCIAS Y ERRORES</div>
         <p class="settingsHint">Envía sugerencias y errores a los desarrolladores a través del buzón privado de Google Cloud. No se envían tus compras, facturas ni tus hojas de cálculo.</p>
         <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
+        <div id="cfFirebaseStatus" class="settingsHint" role="status"></div>
       </div>
       <div class="settingsGroup" id="accountSettingsGroup">
         <div class="settingsTitle">👤 CUENTA</div>
@@ -1918,7 +1929,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R16</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R17</div>
 
     </div>
   </div>
@@ -2090,6 +2101,7 @@ function clearUserLocalCaches(){
   savedClients=[];
   inventoryItems=[];
   agendaEvents=[];
+  cfAgendaLoaded=false;
   pendingIncomeRecords=[];
   invoiceConfig={...DEFAULT_INVOICE_CONFIG};
   localStorage.removeItem("cf_invoice_config");
@@ -2327,11 +2339,17 @@ function toggleDesignSettings(forceOpen){
  const chevron=document.getElementById('cfDesignChevron');if(chevron)chevron.textContent=open?'▴':'▾';
 }
 
+function cfUpdateFirebaseStatus(){
+  const el=$('cfFirebaseStatus');if(!el)return;
+  const auth=window.CFFirebaseAuth;
+  el.textContent=!auth?.configured?.()?'Firebase: falta vincular el proyecto a la compilación.':auth.active()?'✅ Firebase Authentication conectado.':'Firebase: conexión pendiente. Inicia sesión con Google para activar el buzón.';
+}
 function openSettings(){
   only("settingsPage");
   cfSettingsHome();
   nav("settings");
   updateAccountSettings();
+  cfUpdateFirebaseStatus();
   applyAppSettings();
   renderSupplierPanel();
   loadSuppliersFromGoogle(false);
@@ -3884,6 +3902,7 @@ async function deleteCurrentRecord(){
 let agendaEvents=[];
 let agendaMonthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let agendaEditingId=null;
+let cfAgendaLoaded=false;
 
 function mapsLink(location){
   const q=String(location||"").trim();
@@ -3960,8 +3979,8 @@ function renderAgendaUpcoming(){
   }).join(""): '<div style="padding:20px;text-align:center;color:#66717b">No hay próximos eventos.</div>';
 }
 async function loadAgenda(showError=false){
-  try{const data=await callAction({accion:"listarAgenda"});agendaEvents=Array.isArray(data.eventos)?data.eventos:[];localStorage.setItem("cf_agenda",JSON.stringify(agendaEvents));renderAgenda();cfScheduleEventReminders().catch(e=>console.warn('Agenda: no se han programado todos los avisos',e));}
-  catch(e){try{agendaEvents=JSON.parse(localStorage.getItem("cf_agenda")||"[]")}catch(_){agendaEvents=[]}renderAgenda();if(showError)showToastMessage("Sin conexión","No se pudo cargar la agenda.");}
+  try{const data=await callAction({accion:"listarAgenda"});agendaEvents=Array.isArray(data.eventos)?data.eventos:[];cfAgendaLoaded=true;localStorage.setItem("cf_agenda",JSON.stringify(agendaEvents));renderAgenda();cfTryOpenPendingAgendaNotification();cfScheduleEventReminders().catch(e=>console.warn('Agenda: no se han programado todos los avisos',e));}
+  catch(e){try{agendaEvents=JSON.parse(localStorage.getItem("cf_agenda")||"[]")}catch(_){agendaEvents=[]}cfAgendaLoaded=true;renderAgenda();cfTryOpenPendingAgendaNotification();if(showError)showToastMessage("Sin conexión","No se pudo cargar la agenda.");}
 }
 function openAgendaEventModal(id=null,dateStr=null){
   agendaEditingId=id||null;
@@ -3982,7 +4001,9 @@ function openAgendaEventModal(id=null,dateStr=null){
   $("agendaMsg").className="msg";
   del.style.display=e?"block":"none";
   updateAgendaMapHint();
+  cfShowAgendaLocationMap(e?.ubicacion||'');
   $("agendaEventLocation").oninput=updateAgendaMapHint;
+  $("agendaEventLocation").onchange=()=>cfShowAgendaLocationMap($("agendaEventLocation").value);
   $("agendaSyncGoogle").checked=!!(e?.googleCalendarId||localStorage.getItem('cf_agenda_calendar_optin')!=='0');
   modal.classList.remove("hidden");
 }
@@ -3991,7 +4012,22 @@ function updateAgendaMapHint(){
   const loc=$("agendaEventLocation")?.value.trim()||"";
   el.innerHTML=loc?`📍 <a href="${mapsLink(loc)}" target="_blank" rel="noopener" style="color:var(--yellow);font-weight:800;text-decoration:none">Abrir esta ubicación en Google Maps</a>`:"Añade una ubicación para disponer del acceso directo al mapa.";
 }
-function closeAgendaEventModal(){$("agendaEventModal")?.classList.add("hidden");agendaEditingId=null;}
+function cfShowAgendaLocationMap(location){
+  const panel=$('cfAgendaLocationMap'),frame=$('cfAgendaMapFrame');if(!panel||!frame)return;
+  const value=String(location||'').trim();
+  panel.classList.toggle('hidden',!value);
+  const url=value?'https://maps.google.com/maps?q='+encodeURIComponent(value)+'&output=embed':'';
+  if(frame.getAttribute('src')!==url){if(url)frame.setAttribute('src',url);else frame.removeAttribute('src');}
+}
+function cfOpenAgendaRoute(provider){
+  const location=String($('agendaEventLocation')?.value||'').trim();
+  if(!location)return;
+  const url=provider==='apple'?'https://maps.apple.com/?daddr='+encodeURIComponent(location)+'&dirflg=d':mapsLink(location);
+  // Abrir ruta únicamente por acción expresa del usuario (no al tocar notificación).
+  if(window.CFBrowser?.open)window.CFBrowser.open({url}).catch(e=>showToastMessage('Mapa',String(e.message||e)));
+  else window.open(url,'_blank','noopener');
+}
+function closeAgendaEventModal(){const modal=$('agendaEventModal');modal?.classList.add('hidden');const frame=$('cfAgendaMapFrame');frame?.removeAttribute('src');agendaEditingId=null;}
 function cfCalendarPermissionError(e){
  const message=String(e?.message||e||'');
  if(/403|PERMISSION_DENIED|insufficient|scope/i.test(message)){
@@ -4089,7 +4125,7 @@ async function cfScheduleEventReminders(){
   if(alertAt.getTime()<=now||alertAt.getTime()>future)continue;
   const id=700000+serial++;const loc=String(event.ubicacion||'').trim();
   const notice=minutes===0?'El evento comienza ahora. ':minutes>=1440?'Evento dentro de '+Math.round(minutes/1440)+' día(s). ':'Evento dentro de '+minutes+' minutos. ';
-  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,100)+'. Toca para ver la ruta.':'Revisa tu agenda.'),schedule:{at:alertAt},sound:cfNoticePayloadSound(),foreground:true,extra:{kind:'agenda',eventId:String(event.id||''),location:loc.slice(0,200)}});
+  notifications.push({id,title:'📅 '+String(event.evento||'Evento').slice(0,70),body:notice+(loc?'Ubicación: '+loc.slice(0,100)+'. Toca para ver la ruta.':'Revisa tu agenda.'),schedule:{at:alertAt},sound:cfNoticePayloadSound(),foreground:true,extra:{kind:'agenda',eventId:String(event.id||''),ownerBookId:String(s.id||'')}});
   if(notifications.length>=40)break;
  }
  if(notifications.length)await plugin.schedule({notifications});
@@ -4396,29 +4432,57 @@ async function cfSendTestNotification(){
  }catch(e){show('❌ No se pudo programar el aviso de prueba: '+(e.message||String(e)));
   console.error('Control Fiscal: error en aviso de prueba',e);}
 }
-// Las notificaciones de eventos contienen solamente título y ubicación, no datos fiscales.
-let cfNotificationTapRegistered=false;
+// R17: al pulsar un aviso se abre SU ficha, nunca una ruta sin consentimiento.
+// Guardar únicamente el ID de evento de la notificación, no facturas ni registros.
+let cfNotificationTapRegistered=false,cfPendingAgendaNotification=null,cfAgendaRecoveryRunning=false;
+const CF_NOTIFICATION_TAP_KEY='cf_pending_agenda_tap_r17';
+function cfStoreAgendaNotificationTap(extra){
+ const id=String(extra?.eventId||'').slice(0,100);
+ if(extra?.kind!=='agenda'||!id)return;
+ const owner=String(extra?.ownerBookId||'').slice(0,150);
+ cfPendingAgendaNotification={id,owner,at:Date.now()};
+ try{sessionStorage.setItem(CF_NOTIFICATION_TAP_KEY,JSON.stringify(cfPendingAgendaNotification));}catch(_){}
+ cfTryOpenPendingAgendaNotification();
+}
+function cfTryOpenPendingAgendaNotification(){
+ if(!cfPendingAgendaNotification){
+  try{cfPendingAgendaNotification=JSON.parse(sessionStorage.getItem(CF_NOTIFICATION_TAP_KEY)||'null');}catch(_){cfPendingAgendaNotification=null;}
+ }
+ const target=cfPendingAgendaNotification;if(!target)return;
+ if(Date.now()-target.at>600000){cfDiscardPendingAgendaTap();return;}
+ const account=window.CFGoogleAccount?.active();
+ if(!account?.id||!account.email)return;
+ // R16 no etiquetaba propietario: no arriesgar acceso cruzado con avisos antiguos.
+ if(!target.owner||account.id!==target.owner){cfDiscardPendingAgendaTap();return;}
+ if(!$('securityLock')?.classList.contains('hidden')||!$('accountGate')?.classList.contains('hidden'))return;
+ if(!cfAgendaLoaded){
+  if(!cfAgendaRecoveryRunning){
+   cfAgendaRecoveryRunning=true;
+   Promise.resolve().then(()=>loadAgenda(false)).catch(e=>console.warn('No se pudo abrir evento pendiente',e)).finally(()=>{cfAgendaRecoveryRunning=false;});
+  }
+  return;
+ }
+ const event=agendaEvents.find(e=>String(e.id)===target.id);
+ cfDiscardPendingAgendaTap();
+ if(!event){openAgenda();showToastMessage('Agenda','El evento de esta notificación no está disponible en esta cuenta.');return;}
+ only('agendaPage');nav('agenda');
+ const d=String(event.fecha||'');
+ if(/^\d{4}-\d{2}-\d{2}$/.test(d)){
+  const [year,month]=d.split('-').map(Number);agendaMonthCursor=new Date(year,month-1,1);
+ }
+ renderAgenda();openAgendaEventModal(event.id);
+}
+function cfDiscardPendingAgendaTap(){cfPendingAgendaNotification=null;try{sessionStorage.removeItem(CF_NOTIFICATION_TAP_KEY)}catch(_){}}
 async function cfRegisterNotificationOpen(){
  if(cfNotificationTapRegistered)return;
  const p=await nativeLocalNotifications();
  if(!p||typeof p.addListener!=='function')return;
- await p.addListener('localNotificationActionPerformed',ev=>{
-  const extra=ev?.notification?.extra||{};
-  if(extra.kind!=='agenda')return;
-  const location=String(extra.location||'').trim();
-  const event=agendaEvents.find(e=>String(e.id)===String(extra.eventId));
-  const destination=location||String(event?.ubicacion||'').trim();
-  // Mostrar el evento en Agenda aunque no disponga de una ubicación.
-  if(typeof openAgenda==='function')openAgenda();
-  if(!destination)return;
-  const url='https://maps.apple.com/?daddr='+encodeURIComponent(destination)+'&dirflg=d';
-  // Tras pulsar el aviso, abrir directamente las indicaciones al lugar del evento.
-  if(window.CFBrowser?.open)window.CFBrowser.open({url}).catch(e=>console.warn('No se pudo abrir Mapas',e));
-  else window.location.assign(url);
- });
+ await p.addListener('localNotificationActionPerformed',ev=>cfStoreAgendaNotificationTap(ev?.notification?.extra||{}));
  cfNotificationTapRegistered=true;
+ cfTryOpenPendingAgendaNotification();
 }
-setTimeout(()=>{cfRegisterNotificationOpen().catch(e=>console.warn('No se pudieron registrar acciones de avisos',e));},750);
+void cfRegisterNotificationOpen().catch(e=>console.warn('No se pudieron registrar acciones de avisos',e));
+setTimeout(()=>{if(!cfNotificationTapRegistered)void cfRegisterNotificationOpen().catch(e=>console.warn('Reintento de acciones de avisos',e));},900);
 
 function updatePendingDocuments(){
   const pendingCompras = records.filter(r =>
@@ -5120,6 +5184,7 @@ function unlockSecurity(){
   if(lock) lock.classList.add("hidden");
   securitySetStatus("");
   if(cfSessionToken()) loadInitialDataForAccount().catch(e=>console.warn("No se pudieron cargar todos los datos iniciales",e));
+  cfTryOpenPendingAgendaNotification();
   cfMaybeStartFirstTutorial();
 }
 
@@ -5194,7 +5259,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261023-R16'});
+  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261023-R17'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5483,6 +5548,15 @@ startAccountSystem();
       <div class="field full"><label>Comentarios</label><textarea id="agendaEventComments" class="textarea" placeholder="Montaje, horario de llegada, contacto, instrucciones..."></textarea></div>
     </div>
     <div id="agendaMapPreview" class="settingsHint" style="margin:4px 0 10px"></div>
+    <section id="cfAgendaLocationMap" class="cfAgendaLocationMap hidden" aria-label="Ubicación del evento">
+      <strong>📍 Ubicación del evento</strong>
+      <iframe id="cfAgendaMapFrame" title="Mapa de ubicación del evento" loading="lazy" referrerpolicy="no-referrer" allowfullscreen></iframe>
+      <div class="cfAgendaMapActions">
+        <button type="button" onclick="cfOpenAgendaRoute('apple')">↗ Ruta en Mapas</button>
+        <button type="button" onclick="cfOpenAgendaRoute('google')">↗ Ruta en Google Maps</button>
+      </div>
+      <small>El mapa es una vista aproximada de la dirección indicada. Pulsa una ruta para elegir cómo llegar.</small>
+    </section>
     <label class="field" style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;margin:8px 0 12px"><input id="agendaSyncGoogle" type="checkbox" style="width:22px;height:22px;flex-shrink:0"><span>Sincronizar también con Google Calendar (requiere permisos de Calendar API). El evento siempre se guarda en Control Fiscal, aunque Calendar no autorice la conexión.</span></label>
     <button class="save p" id="agendaSaveBtn" type="button" onclick="saveAgendaEvent()">GUARDAR EVENTO</button>
     <button class="deleteBtn" id="agendaDeleteBtn" type="button" style="margin-top:8px;display:none" onclick="deleteAgendaEvent()">ELIMINAR EVENTO</button>
@@ -5653,9 +5727,12 @@ startAccountSystem();
 <script src="cf-documents.js"></script>
 <script src="cf-i18n.js"></script>
 <script src="cf-i18n-extended.js"></script>
+<script src="cf-firebase-config.js"></script>
+<script src="cf-firebase-auth.js"></script>
 <script src="cf-feedback-config.js"></script>
 <script src="cf-feedback.js"></script>
 <script src="cf-r14-native.js"></script>
+<script src="cf-navigation.js"></script>
 <script src="cf-pdf-viewer.js"></script>
 </body>
 </html>

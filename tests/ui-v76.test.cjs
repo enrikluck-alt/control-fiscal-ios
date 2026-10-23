@@ -63,11 +63,11 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
   assert.ok(!html.includes(str),'Se ha vuelto a incorporar la interfaz de pruebas: '+str);
  }
  const htmlScripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(x=>x[1]);
- assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-pdf-viewer.js']);
+ assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
- assert.match(html,new RegExp('data-cf-ui-build="UI76-20261023-R16"'));
- assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261023-R16'));
+ assert.match(html,new RegExp('data-cf-ui-build="UI76-20261023-R17"'));
+ assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261023-R17'));
  assert.match(auth,/if\(typeof root\.goHome==='function'\)root\.goHome\(\);/);
  assert.match(auth,/root\.startLocalSecurityForAccount\(fromInteractiveLogin\)/);
  assert.match(auth,/element\('accountGate'\)\?\.classList\.add\('hidden'\)/);

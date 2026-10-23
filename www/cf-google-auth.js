@@ -8,11 +8,12 @@ const TABS=['Configuracion','Compras','Facturas','Inventario','Clientes','Agenda
 const LAST_BOOK='cf_google_book_by_email_v76';
 const PERSIST='cf_google_keep_session_v76';
 let session=null,initialized=false,initInFlight=null,connecting=false,epoch=0,accessMode='login';
+let supportGoogleIdentity=null; // JWT sólo en memoria, jamás localStorage
 const element=id=>document.getElementById(id);
 const status=(m,ok=false)=>{const e=element('accountStatus');if(e){e.textContent=m;e.classList.toggle('ok',ok);}};
 const err=e=>String(e&&e.message||e||'Error desconocido');
 function active(){return session&&session.token&&session.email&&session.id?{...session}:null;}
-function clear(){epoch++;session=null;}
+function clear(){epoch++;session=null;supportGoogleIdentity=null;root.CFFirebaseAuth?.clear?.();}
 function cacheKey(email){return 'cf_google_book_'+email.toLowerCase();}
 function normalize(raw){let d=raw;if(typeof d==='string'){try{d=JSON.parse(d)}catch{d={raw:d.slice(0,150)}}}return d||{};}
 async function http(url,method='GET',data,tokenOverride){
@@ -186,6 +187,13 @@ async function connect(automatic=false){
   const token=getToken(response);
   if(!token){throw Error('No hay autorización vigente de Google. Pulsa iniciar sesión para renovarla.');}
   const email=await verify(token);
+  // Integración Firebase: reutilizar el Google ID token nativo, nunca el token de Drive.
+  const googleJwt=response?.result?.idToken||response?.idToken||response?.jwt||response?.result?.jwt||'';
+  supportGoogleIdentity=(typeof googleJwt==='string'&&googleJwt.split('.').length===3)?{jwt:googleJwt,email}:null;
+  if(supportGoogleIdentity&&root.CFFirebaseAuth?.configured?.()){
+    void root.CFFirebaseAuth.signInWithGoogleIdToken(supportGoogleIdentity.jwt,{email})
+      .catch(e=>console.warn('Firebase pendiente: '+err(e)));
+  }
   // La cuenta que ha confirmado Google prevalece sobre cualquier correo escrito.
   // Nunca convertir el campo opcional en una restricción ni cerrar sesión por diferencia.
   if(!automatic&&element('accountEmailHint'))element('accountEmailHint').value=email;
@@ -251,6 +259,7 @@ async function logout(){
  if(typeof root.closeCFDocumentViewer==='function')root.closeCFDocumentViewer();
  if(typeof root.lockSecurity==='function')root.lockSecurity();
  if(typeof root.goHome==='function')root.goHome();
+ if(typeof root.cfDiscardPendingAgendaTap==='function')root.cfDiscardPendingAgendaTap();
  element('accountExistingBookField')?.setAttribute('hidden','');
  element('accountCreateBtn')?.setAttribute('hidden','');
  element('accountGate')?.classList.remove('hidden');
@@ -299,13 +308,19 @@ async function getSupportIdToken(){
  const account=active();
  if(!account)throw Error('Inicia sesión con Google antes de enviar una sugerencia.');
  await init();
+ const cached=supportGoogleIdentity;
+ if(cached?.email===account.email){
+   try{const payload=JSON.parse(atob(cached.jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+     if(Number(payload.exp)>Date.now()/1000+60)return cached.jwt;
+   }catch(_){ /* intentar leer la identidad nativa */ }
+ }
  const plugin=root.ControlFiscalSocialLogin;
  if(typeof plugin?.getAuthorizationCode!=='function')throw Error('Actualiza la aplicación para verificar la identidad del envío.');
  const data=await plugin.getAuthorizationCode({provider:'google'});
  const jwt=data?.jwt||data?.idToken||data?.result?.idToken||'';
  if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('La sesión no ha devuelto una identidad vigente. Cierra sesión y vuelve a entrar con Google.');
  if(active()?.id!==account.id||active()?.email!==account.email)throw Error('La cuenta ha cambiado. Vuelve a enviar desde tu nueva sesión.');
- return jwt;
+ supportGoogleIdentity={jwt,email:account.email};return jwt;
 }
 root.CFGoogleAccount=Object.freeze({start,connect,setAccessMode,createGoogleAccount,openExisting,createBook,logout,active,http,refreshAuthorization,bookId,clear,discover,prepare,getSupportIdToken});
 })(window);
