@@ -13,7 +13,7 @@ const element=id=>document.getElementById(id);
 const status=(m,ok=false)=>{const e=element('accountStatus');if(e){e.textContent=m;e.classList.toggle('ok',ok);}};
 const err=e=>String(e&&e.message||e||'Error desconocido');
 function active(){return session&&session.token&&session.email&&session.id?{...session}:null;}
-function clear(){epoch++;session=null;supportGoogleIdentity=null;root.CFFirebaseAuth?.clear?.();}
+function clear(){epoch++;session=null;supportGoogleIdentity=null;root.CFFirebaseAuth?.clear?.();root.CFDocBlobCache?.clear?.();}
 function cacheKey(email){return 'cf_google_book_'+email.toLowerCase();}
 function normalize(raw){let d=raw;if(typeof d==='string'){try{d=JSON.parse(d)}catch{d={raw:d.slice(0,150)}}}return d||{};}
 async function http(url,method='GET',data,tokenOverride){

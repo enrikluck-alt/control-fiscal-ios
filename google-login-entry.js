@@ -10,12 +10,14 @@ window.CFLocalNotifications = LocalNotifications;
 
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
+import { AppLauncher } from '@capacitor/app-launcher';
 import { BiometricAuth } from '@aparajita/capacitor-biometric-auth';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { jsPDF } from 'jspdf';
 window.CFApp = App;
 window.CFBrowser = Browser;
+window.CFAppLauncher = AppLauncher;
 window.CFBiometricAuth = BiometricAuth;
 window.CFFilesystem = Filesystem;
 window.CFDirectory = Directory;

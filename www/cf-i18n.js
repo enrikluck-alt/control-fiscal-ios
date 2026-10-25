@@ -20,7 +20,7 @@ function device(){const lang=(root.navigator.languages?.[0]||root.navigator.lang
 function choice(){return root.localStorage.getItem(STORE)||'auto';}
 function locale(){return choice()==='auto'?device():data[choice()]?choice():'es';}
 function paint(){
- const lang=locale(),dictionary=data[lang]||{};current=lang;document.documentElement.lang=lang;
+ const lang=locale(),dictionary=['ca','nl','pl'].includes(lang)?{...data.en,...data[lang]}:(data[lang]||{});current=lang;document.documentElement.lang=lang;
  const select=document.getElementById('cfLanguageChoice');if(select&&select.value!==choice())select.value=choice();
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
@@ -50,11 +50,11 @@ function paint(){
 
 function addTranslations(translations){
  for(const [lang,items] of Object.entries(translations||{})){
-  if(data[lang]&&items&&typeof items==='object')Object.assign(data[lang],items);
+  if(items&&typeof items==='object'){if(!data[lang])data[lang]={};Object.assign(data[lang],items);}
  }
  schedule();
 }
-function t(phrase){return (data[locale()]||{})[String(phrase)]||String(phrase);}
+function t(phrase){const loc=locale();return (data[loc]||{})[String(phrase)]||(['ca','nl','pl'].includes(loc)?(data.en||{})[String(phrase)]:null)||String(phrase);}
 function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;paint();},60);}
 function setLanguage(lang){root.localStorage.setItem(STORE,lang==='auto'?'auto':data[lang]?lang:'auto');schedule();}
 function start(){paint();const observer=new MutationObserver(mutations=>{if(mutations.some(m=>m.type==='childList'&&m.addedNodes.length))schedule();});observer.observe(document.body,{childList:true,subtree:true});}

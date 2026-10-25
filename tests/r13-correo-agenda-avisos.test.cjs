@@ -41,7 +41,7 @@ test('R13: el evento confirma la escritura sin esperar a Calendar ni avisos',asy
   cfEnsureNoticePermission:async()=>{},cfScheduleEventReminders:async()=>{},
   cfSuccessFeedback:async()=>{feedback++;},renderAgenda:()=>{rendered++;},
   localStorage:{setItem:()=>{}},setTimeout:()=>1,console,Date,Promise,Math,
-  cfCalendarPermissionError:e=>String(e),window:{CFGoogleExtras:{upsertCalendar:async()=>new Promise(()=>{})}}
+  cfCalendarPermissionError:e=>String(e),window:{CFEventTools:{beforeSave:async()=>({materiales:[],adjuntos:[]})},CFGoogleExtras:{upsertCalendar:async()=>new Promise(()=>{})}}
  });
  const start=html.indexOf('let cfEventSavePending=false');const end=html.indexOf('async function deleteAgendaEvent(){',start);
  assert(start>0&&end>start);
@@ -77,7 +77,7 @@ test('R13: el aviso de prueba informa en Audio y Notificaciones y confirma progr
 
 test('R13: aviso de evento ofrece ruta en Mapas y modal respeta la zona segura',()=>{
  assert.match(html,/localNotificationActionPerformed/);
- assert.match(html,/maps\.apple\.com\/\?daddr=/);
+ assert.match(fs.readFileSync(path.join(root,'www/cf-r18-features.js'),'utf8'),/maps:\/\/\?daddr=/);
  assert.match(html,/extra:\{kind:'agenda',eventId:String\(event\.id\|\|''\),ownerBookId/);
  assert.match(html,/#agendaEventModal\{align-items:flex-start!important/);
  assert.match(html,/env\(safe-area-inset-top/);

@@ -81,8 +81,8 @@ test('el PDF se comparte con bytes y el destinatario se elige manualmente',async
 });
 test('workflow empaqueta el PDF, protege la UI V76 y genera IPA distinguible',()=>{
  assert.match(work,/cf-invoice-share\.js/);
- assert.match(work,/UI76-20261023-R17/);
- assert.match(work,/ControlFiscal-V76-Google-R17-Firebase-Agenda-Swipe-IPA/);
+ assert.match(work,/UI76-20261025-R18/);
+ assert.match(work,/ControlFiscal-V76-Google-R18-Firebase-Agenda-Swipe-IPA/);
 });
 
 test('sesión recordada restaura Google solo con checkbox marcado; reentrada abre Face ID',async()=>{

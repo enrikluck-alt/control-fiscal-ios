@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261023-R17">
+<html lang="es" data-cf-ui-build="UI76-20261025-R18">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1404,6 +1404,28 @@ body.lightTheme .cfAgendaLocationMap{background:#f5f8fa;color:#152333;border-col
 body.lightTheme .cfAgendaLocationMap small{color:#4f6474}
 body.lightTheme .cfAgendaMapActions button{color:white}
 </style>
+<style id="cf-r18-style">
+#cfDocLibraryItems{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important;align-items:stretch}
+#cfDocLibraryItems>.cfDocNode{display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;gap:8px;padding:8px;min-width:0}
+#cfDocLibraryItems>.cfDocNode>.cfDocThumb{width:100%;height:112px;display:flex;align-items:center;justify-content:center;background:rgba(120,140,170,.13);border-radius:10px;overflow:hidden;font-size:38px}
+#cfDocLibraryItems>.cfDocNode>.cfDocThumb img,#cfDocLibraryItems>.cfDocNode>.cfDocThumb canvas{max-width:100%;max-height:100%;object-fit:contain}
+#cfDocLibraryItems>.cfDocNode>.cfDocNodeName{font-size:11px;overflow-wrap:anywhere;line-height:1.25;flex:1;min-height:30px}
+#cfDocLibraryItems>.cfDocNode>.cfDocActions{display:flex;gap:6px;width:100%}
+#cfDocLibraryItems>.cfDocNode>.cfDocActions button{flex:1;min-width:0;padding:9px 3px;font-size:11px}
+.cfEventBox{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:9px;min-width:0}
+.cfEventInventoryPicker{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.cfEventInventoryPicker .guideBtn{margin:0;font-size:11px}
+.cfEventStockList,.cfEventAttachments{display:grid;gap:7px}
+.cfEventStockRow,.cfEventAttachment{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0}
+.cfEventStockRow span,.cfEventAttachment span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px}
+.cfEventStockRow input{width:60px;min-width:60px;height:38px;border-radius:8px;border:1px solid var(--line);text-align:center;background:var(--bg);color:var(--text);font-size:16px}
+.cfEventStockRow button,.cfEventAttachment button{border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--text);min-height:38px;min-width:34px}
+.cfR18Error{color:#fc8585!important;font-weight:800}
+.cfEventFileButton{display:flex;justify-content:center;align-items:center;min-height:44px}
+body.cf-performance-low .stockCard,body.cf-performance-low .agendaCard,body.cf-performance-low .cfDocNode,body.cf-performance-low .modalCard{backdrop-filter:none!important;box-shadow:none!important;filter:none!important}
+body.cf-performance-low .cfInventoryThumb,body.cf-performance-low .cfInventoryListImage{image-rendering:auto}
+@media(max-width:420px){#cfDocLibraryItems>.cfDocNode>.cfDocThumb{height:100px}.cfEventInventoryPicker{grid-template-columns:1fr}.cfEventInventoryPicker .guideBtn{width:100%}}
+</style>
 </head>
 
 <body>
@@ -1853,7 +1875,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <div class="settingsTitle">📱 IDIOMA, ORIENTACIÓN Y RENDIMIENTO</div>
         <div class="settingsRow cfLanguageRow"><div><div class="settingsLabel">Idioma de la aplicación</div><div class="settingsHint">Automático usa el idioma del teléfono. Los datos personales y fiscales no se traducen. Algunos mensajes técnicos todavía pueden aparecer en español.</div></div>
           <select id="cfLanguageChoice" class="select" aria-label="Idioma de Control Fiscal" onchange="CFi18n.setLanguage(this.value)">
-            <option value="auto">Automático · idioma del teléfono</option><option value="es">Español</option><option value="en">English</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt">Português</option>
+            <option value="auto">Automático · idioma del teléfono</option><option value="es">Español</option><option value="en">English</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt">Português</option><option value="ca">Català</option><option value="nl">Nederlands</option><option value="pl">Polski</option>
           </select>
         </div>
         <div class="settingsRow cfOrientationRow"><div><div class="settingsLabel">Giro de pantalla</div><div class="settingsHint">Automático permite vertical y horizontal; Vertical bloquea el giro dentro de Control Fiscal.</div></div>
@@ -1866,7 +1888,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
           <select class="select" id="cfGraphicsMode" style="max-width:230px" onchange="setCFGraphicsMode(this.value)">
             <option value="high">Máxima calidad</option><option value="low">Ahorro de rendimiento</option>
           </select>
-        </div>
+        </div><div class="settingsHint" id="cfGraphicsModeStatus" aria-live="polite"></div>
       </div>
       <div class="settingsGroup">
         <div class="settingsTitle">🔄 RESTABLECER</div>
@@ -1902,7 +1924,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <div class="settingsGroup">
         <div class="settingsTitle">ℹ️ INFORMACIÓN Y HERRAMIENTAS</div>
         <div class="guideGrid">
-          <button class="guideBtn" type="button" onclick="startCFTutorial()"><span class="guideIcon">✨</span><span>INICIAR TUTORIAL INTERACTIVO</span></button>
+          <button class="guideBtn" type="button" onclick="startCFTutorial()"><span class="guideIcon">✨</span><span>ELEGIR TUTORIAL RÁPIDO O EXTENSO</span></button>
           <button class="guideBtn" type="button" onclick="openGuide()">
             <span class="guideIcon">📖</span>
             <span>GUÍA DE FUNCIONAMIENTO</span>
@@ -1929,7 +1951,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261023-R17</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261025-R18</div>
 
     </div>
   </div>
@@ -2399,6 +2421,9 @@ function resetAppSettings(){
 function setCFGraphicsMode(mode){
  const val=mode==='low'?'low':'high';localStorage.setItem('cf_graphics_mode_v1',val);
  document.body.classList.toggle('cf-performance-low',val==='low');
+ document.documentElement.dataset.cfGraphicsMode=val;
+ const tip=$('cfGraphicsModeStatus');if(tip)tip.textContent=val==='low'?'Ahorro activo: sin efectos decorativos; PDF renderizado a resolución reducida.':'Máxima calidad: efectos visuales y PDF a mayor densidad de píxeles.';
+ if(window.CFPdfViewer?.level&&document.getElementById('cfDocumentViewer')&&!document.getElementById('cfDocumentViewer').classList.contains('hidden'))window.CFPdfViewer.zoom(0);
  if($('cfGraphicsMode'))$('cfGraphicsMode').value=val;
 }
 setCFGraphicsMode(localStorage.getItem('cf_graphics_mode_v1')||'high');
@@ -3751,14 +3776,17 @@ async function openCFDocumentViewer(link){
  if(!id||!account){status.textContent=id?'Inicia sesión de Google antes de abrir el adjunto.':'Este documento no es un enlace de Drive reconocido. Puedes abrirlo externamente de forma voluntaria.';return;}
  try{
   const owner=account.id,request=token=>fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media',{headers:{Authorization:'Bearer '+token}});
-  let response=await request(account.token);
-  if(response.status===401&&window.CFGoogleAccount?.refreshAuthorization){
-   const token=await window.CFGoogleAccount.refreshAuthorization(account.token);
-   const fresh=window.CFGoogleAccount.active();if(!fresh||fresh.id!==owner)throw Error('La cuenta cambió.');
-   response=await request(token);
+  let blob=window.CFDocBlobCache?.get(owner,id)||null;
+  if(!blob){
+   let response=await request(account.token);
+   if(response.status===401&&window.CFGoogleAccount?.refreshAuthorization){
+    const token=await window.CFGoogleAccount.refreshAuthorization(account.token);
+    const fresh=window.CFGoogleAccount.active();if(!fresh||fresh.id!==owner)throw Error('La cuenta cambió.');
+    response=await request(token);
+   }
+   if(!response.ok)throw Error('Drive HTTP '+response.status+'. Comprueba el permiso para el documento.');
+   blob=await response.blob();
   }
-  if(!response.ok)throw Error('Drive HTTP '+response.status+'. Comprueba el permiso para el documento.');
-  const blob=await response.blob();
   const type=blob.type.split(';')[0].toLowerCase();
   if(!['application/pdf','image/jpeg','image/png'].includes(type))throw Error('Vista previa no compatible ('+type+').');
   if(blob.size>15*1024*1024)throw Error('El documento es mayor de 15 MB.');
@@ -3975,7 +4003,7 @@ function renderAgendaUpcoming(){
   count.textContent=`${arr.length} evento${arr.length===1?"":"s"}`;
   wrap.innerHTML=arr.length?arr.slice(0,12).map(e=>{
     const map=mapsLink(e.ubicacion);
-    return `<div class="agendaCard"><div class="agendaCardTop"><div><div class="agendaCardTitle">${esc(e.evento)}</div><div class="agendaCardMeta">${formatAgendaDate(e.fecha)} · ${esc(e.horaInicio||"")}${e.horaFin?"–"+esc(e.horaFin):""}${e.ubicacion?" · "+esc(e.ubicacion):""}</div></div><div class="agendaCardTime">${esc(e.cliente||"")}</div></div>${e.llevar?`<div class="agendaCardMeta"><b>📦 Llevar:</b> ${esc(e.llevar)}</div>`:""}${e.comentarios?`<div class="agendaCardMeta"><b>📝</b> ${esc(e.comentarios)}</div>`:""}<div class="agendaCardActions"><button type="button" onclick="openAgendaEventModal('${esc(e.id)}')">EDITAR</button>${map?`<a href="${map}" target="_blank" rel="noopener">📍 MAPA</a>`:""}</div></div>`;
+    return `<div class="agendaCard"><div class="agendaCardTop"><div><div class="agendaCardTitle">${esc(e.evento)}</div><div class="agendaCardMeta">${formatAgendaDate(e.fecha)} · ${esc(e.horaInicio||"")}${e.horaFin?"–"+esc(e.horaFin):""}${e.ubicacion?" · "+esc(e.ubicacion):""}</div></div><div class="agendaCardTime">${esc(e.cliente||"")}</div></div>${e.llevar?`<div class="agendaCardMeta"><b>📦 Llevar:</b> ${esc(e.llevar)}</div>`:""}${e.comentarios?`<div class="agendaCardMeta"><b>📝</b> ${esc(e.comentarios)}</div>`:""}<div class="agendaCardActions"><button type="button" onclick="openAgendaEventModal('${esc(e.id)}')">EDITAR</button>${map?`<button type="button" data-cf-open-map="${esc(e.id)}">📍 MAPA</button>`:""}</div></div>`;
   }).join(""): '<div style="padding:20px;text-align:center;color:#66717b">No hay próximos eventos.</div>';
 }
 async function loadAgenda(showError=false){
@@ -4005,12 +4033,13 @@ function openAgendaEventModal(id=null,dateStr=null){
   $("agendaEventLocation").oninput=updateAgendaMapHint;
   $("agendaEventLocation").onchange=()=>cfShowAgendaLocationMap($("agendaEventLocation").value);
   $("agendaSyncGoogle").checked=!!(e?.googleCalendarId||localStorage.getItem('cf_agenda_calendar_optin')!=='0');
+  window.CFEventTools?.onOpen(e);
   modal.classList.remove("hidden");
 }
 function updateAgendaMapHint(){
   const el=$("agendaMapPreview"); if(!el)return;
   const loc=$("agendaEventLocation")?.value.trim()||"";
-  el.innerHTML=loc?`📍 <a href="${mapsLink(loc)}" target="_blank" rel="noopener" style="color:var(--yellow);font-weight:800;text-decoration:none">Abrir esta ubicación en Google Maps</a>`:"Añade una ubicación para disponer del acceso directo al mapa.";
+  el.textContent=loc?"📍 Vista previa del lugar dentro de Control Fiscal. Para navegar, pulsa Ruta en Mapas o Ruta en Google Maps.":"Añade una ubicación para disponer del acceso directo al mapa.";
 }
 function cfShowAgendaLocationMap(location){
   const panel=$('cfAgendaLocationMap'),frame=$('cfAgendaMapFrame');if(!panel||!frame)return;
@@ -4020,12 +4049,7 @@ function cfShowAgendaLocationMap(location){
   if(frame.getAttribute('src')!==url){if(url)frame.setAttribute('src',url);else frame.removeAttribute('src');}
 }
 function cfOpenAgendaRoute(provider){
-  const location=String($('agendaEventLocation')?.value||'').trim();
-  if(!location)return;
-  const url=provider==='apple'?'https://maps.apple.com/?daddr='+encodeURIComponent(location)+'&dirflg=d':mapsLink(location);
-  // Abrir ruta únicamente por acción expresa del usuario (no al tocar notificación).
-  if(window.CFBrowser?.open)window.CFBrowser.open({url}).catch(e=>showToastMessage('Mapa',String(e.message||e)));
-  else window.open(url,'_blank','noopener');
+ return window.CFEventTools?.openRoute(provider);
 }
 function closeAgendaEventModal(){const modal=$('agendaEventModal');modal?.classList.add('hidden');const frame=$('cfAgendaMapFrame');frame?.removeAttribute('src');agendaEditingId=null;}
 function cfCalendarPermissionError(e){
@@ -4051,8 +4075,10 @@ async function saveAgendaEvent(){
  agendaEditingId=obj.id;
  localStorage.setItem('cf_agenda_calendar_optin',$('agendaSyncGoogle')?.checked?'1':'0');
  const calendarChecked=!!$('agendaSyncGoogle')?.checked;
- msg.className='msg';msg.textContent='Guardando evento en tu agenda…';
+ msg.className='msg';msg.textContent='Comprobando stock y preparando archivos privados…';
  try{
+  Object.assign(obj,await window.CFEventTools.beforeSave());
+  msg.textContent='Guardando evento en tu agenda…';
   // La petición queda activa si el tiempo vence; nunca se manda una segunda alta automática.
   await Promise.race([callAction({accion:'guardarEvento',evento:JSON.stringify(obj)}),cfEventSaveTimeout(25000)]);
   agendaEditingId=obj.id;
@@ -4137,6 +4163,7 @@ async function cfScheduleEventReminders(){
 let inventoryItems=[];
 let inventoryEditingId=null;
 const INVENTORY_DEFAULT_CATEGORIES=[];
+window.CFR18InventorySnapshot=()=>inventoryItems;window.CFR18AgendaSnapshot=()=>agendaEvents;window.CFR18EditingEvent=()=>agendaEditingId;window.CFR18ReplaceInventory=items=>{inventoryItems=Array.isArray(items)?items:[];};
 const CF_TYPE_ICON_RULES=[[/(altavoz|speaker|audio|sonido|subwoofer|line array|monitor)/i,"🔊"],[/(luz|ilumin|foco|cabeza|beam|led|laser)/i,"💡"],[/(pantalla|video|televisor|display)/i,"🖥️"],[/(estructura|truss|escenario|soporte)/i,"🏗️"],[/(cable|conector|adaptador)/i,"🔌"],[/(camara|foto)/i,"📷"],[/(ordenador|portatil|tablet)/i,"💻"],[/(microfono)/i,"🎤"],[/(herramienta|taladro)/i,"🧰"]];
 function cfCategoryIcon(name){return (CF_TYPE_ICON_RULES.find(([r])=>r.test(String(name||"")))||[null,"📦"])[1];}
 function cfInventoryCategoryKey(){return "cf_inventory_categories_v10_"+String(window.CFGoogleAccount?.active()?.id||"sin_cuenta").replace(/[^A-Za-z0-9_-]/g,"");}
@@ -5259,7 +5286,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261023-R17'});
+  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261025-R18'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5283,24 +5310,65 @@ const CF_TOUR_STEPS=[
  {title:'Soporte y privacidad',text:'En Ajustes puedes enviar sugerencias o fallos al administrador. Solo se envía lo que escribas: tus libros fiscales siguen siendo privados.',page:'settings',target:'#cfSupportGroup'},
  {title:'Seguridad',text:'Al volver a la aplicación se pedirá Face ID o tu código. Para cambiar de cuenta, pulsa el botón rojo Cerrar sesión.',page:'settings',target:'#accountSettingsGroup'}
 ];
-let cfTourIndex=-1,cfTourFocused=null;
+const CF_TOUR_EXTENDED=[
+ {title:'Inicio · dónde están los datos',text:'El acceso usa tu cuenta Google. No edites manualmente columnas o IDs internos de las hojas creadas por la app. Esta información es privada por usuario.',page:'home',target:'#home .homegrid'},
+ {title:'Inicio · cómo volver',text:'Usa las flechas de cabecera o desliza desde el borde izquierdo hacia la derecha. Si estás dentro de una carpeta, volverás al nivel anterior.',page:'home',target:'#home .homegrid'},
+ {title:'Compras · distribuidor',text:'Selecciona el proveedor. Usa el directorio para guardar datos y evitar errores en próximas compras.',page:'buy',target:'#formBody'},
+ {title:'Compras · IVA y total',text:'Comprueba base, porcentaje de IVA y total antes de guardar. El informe fiscal depende de estos importes.',page:'buy',target:'#formBody'},
+ {title:'Compras · justificantes',text:'Adjunta un PDF o fotografía de la factura. Los originales quedan en tu Drive privado y se muestran desde la app.',page:'buy',target:'#formBody'},
+ {title:'Compras · consultar registros',text:'Tras guardar, consulta la compra desde Registros y comprueba que su factura está vinculada.',page:'buy',target:'#formBody'},
+ {title:'Facturación · datos del emisor',text:'En Ajustes → Datos de facturación configura nombre, domicilio y NIF/CIF antes de emitir ninguna factura.',page:'settings',target:'#settingsPage'},
+ {title:'Facturación · clientes',text:'Crea un cliente con sus datos correctos; al seleccionarlo se incorporará a tu factura.',page:'sale',target:'#formBody'},
+ {title:'Facturación · conceptos',text:'Añade una o más líneas, revisa cantidades y precios y comprueba que el IVA se calcula según corresponde.',page:'sale',target:'#formBody'},
+ {title:'Facturación · borrador y emisión',text:'Guardar borrador NO es emitir. Antes de emitir confirma la numeración y verifica la normativa fiscal aplicable; el PDF no sustituye ese cumplimiento.',page:'sale',target:'#formBody'},
+ {title:'Facturación · compartir el PDF',text:'Después de generar una factura, usa Compartir para exportar su PDF al sistema del teléfono.',page:'sale',target:'#formBody'},
+ {title:'Agenda · crear un evento',text:'Pulsa Nuevo evento y añade fecha, horas y contacto. El evento se conserva en tu libro de Google.',page:'agenda',target:'#agendaPage .agendaAdd'},
+ {title:'Agenda · avisos nativos',text:'Escoge entre al empezar, 15 minutos, 1 hora o días antes. Los avisos de iPhone requieren permiso para notificaciones.',page:'agenda',target:'#agendaPage .calendar'},
+ {title:'Agenda · ubicación y rutas',text:'Añade la dirección real. El mapa aparece en la ficha; Ruta en Mapas abre la navegación del teléfono, no una pestaña web dentro de la app.',page:'agenda',target:'#agendaPage .calendar'},
+ {title:'Agenda · carga de materiales',text:'En cada evento selecciona artículos del inventario y cantidades. Si hay stock insuficiente el evento no admitirá la reserva.',page:'agenda',target:'#agendaPage .agendaAdd'},
+ {title:'Agenda · hoja de carga',text:'Genera una hoja PDF para compartir o imprimir usando las funciones del iPhone. Marca el material al preparar el transporte.',page:'agenda',target:'#agendaPage .agendaAdd'},
+ {title:'Agenda · planos y fotos',text:'Asocia PDF, JPG o PNG al evento. Puedes abrirlos, compartirlos y guardarlos en tu Drive personal.',page:'agenda',target:'#agendaPage .agendaAdd'},
+ {title:'Inventario · altas',text:'Indica nombre, tipo de material, unidad, cantidad y ubicación. El dato cantidad indica el stock total conocido.',page:'inventory',target:'#inventoryNewBtn'},
+ {title:'Inventario · estado y mínimos',text:'Marca los equipos que estén en reparación como no disponibles y revisa las existencias y el stock mínimo.',page:'inventory',target:'#inventoryList'},
+ {title:'Inventario · reservas',text:'Reservar material en Agenda evita escoger más unidades de las disponibles para eventos solapados, pero no descuenta stock. Registra físicamente las salidas de almacén.',page:'inventory',target:'#inventoryList'},
+ {title:'Documentos · carpetas',text:'Organiza documentos por carpetas. Abre una carpeta pulsando Abrir y vuelve con las migas de navegación.',page:'documents',target:'#cfDocLibraryItems'},
+ {title:'Documentos · vistas previas',text:'La cuadrícula muestra 2 elementos por fila. Las miniaturas se cargan solo cuando aparecen en pantalla, para ganar velocidad.',page:'documents',target:'#cfDocLibraryItems'},
+ {title:'Documentos · visor PDF',text:'Abre un documento para ampliar, reducir y ajustar. Imprimir utiliza las opciones del teléfono; el documento no se hace público.',page:'documents',target:'#cfDocLibraryItems'},
+ {title:'Resumen · periodos',text:'Cambia de mes o año y distingue ingresos, compras e IVA. Verifica cada movimiento antes de presentar declaraciones.',page:'summary',target:'#summaryPage'},
+ {title:'Registros · buscar',text:'Usa las búsquedas y filtros para localizar compras, facturas y documentos.',page:'home',target:'#home .homegrid'},
+ {title:'Ajustes · idioma',text:'La app toma el idioma del dispositivo por defecto. Puedes cambiarlo aquí, aunque algunos mensajes muy técnicos pueden conservar otro idioma.',page:'settings',target:'#settingsPage'},
+ {title:'Ajustes · diseño y rendimiento',text:'El modo económico reduce animaciones, sombras y resolución interna de renderizado PDF; no cambia la resolución física del iPhone.',page:'settings',target:'#settingsPage'},
+ {title:'Ajustes · orientación',text:'Puedes dejar el giro automático o bloquear la aplicación en vertical. Los márgenes respetan Dynamic Island y las áreas seguras.',page:'settings',target:'#settingsPage'},
+ {title:'Ajustes · notificaciones',text:'Activa permisos, elige sonido y programa una prueba. Tocando un aviso se abrirá el evento de la Agenda.',page:'settings',target:'#settingsPage'},
+ {title:'Ajustes · privacidad',text:'Control Fiscal no da acceso administrativo a tus datos fiscales. Las sugerencias se envían al buzón separado Firestore.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Ajustes · Firebase',text:'Si el buzón no está conectado, el propietario debe configurar Authentication, Firestore y las reglas antes de publicar otra IPA.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Seguridad · cambio de usuario',text:'Antes de prestar el teléfono, cierra sesión. Cada cuenta accede a su propia información de Google.',page:'settings',target:'#accountSettingsGroup'},
+ {title:'Final · dónde volver al tutorial',text:'Puedes volver a elegir Tutorial rápido o Tutorial extenso desde Ajustes cuando lo necesites.',page:'settings',target:'#settingsPage'}
+];
+let cfTourIndex=-1,cfTourFocused=null,cfTourMode='quick';
+const cfTourSteps=()=>cfTourMode==='full'?CF_TOUR_STEPS.concat(CF_TOUR_EXTENDED):CF_TOUR_STEPS;
+function cfTutorialDismiss(){ $('cfTutorialChoiceModal')?.classList.add('hidden');if(cfAccountEmail())localStorage.setItem(cfTutorialSeenKey(),'1'); }
+function chooseCFTutorial(mode){cfTourMode=mode==='full'?'full':'quick';$('cfTutorialChoiceModal')?.classList.add('hidden');startCFTutorial(cfTourMode);}
+
 function cfTutorialSeenKey(){return 'cf_tutorial_seen_v1_'+(cfAccountEmail()||'sin_cuenta');}
-function startCFTutorial(){
+function startCFTutorial(mode){
  if(!cfAccountEmail())return;
+ if(!mode){$('cfTutorialChoiceModal')?.classList.remove('hidden');return;}
+ cfTourMode=mode==='full'?'full':'quick';
  document.querySelectorAll('.modal:not(.hidden)').forEach(m=>m.classList.add('hidden'));
  cfTourIndex=0;cfShowTourStep();
 }
 function cfShowTourStep(){
- const step=CF_TOUR_STEPS[cfTourIndex],overlay=$('cfTutorialOverlay');if(!step||!overlay)return finishCFTutorial();
+ const step=cfTourSteps()[cfTourIndex],overlay=$('cfTutorialOverlay');if(!step||!overlay)return finishCFTutorial();
  if(cfTourFocused){cfTourFocused.classList.remove('cfTourHighlight');cfTourFocused=null;}
  try{
   switch(step.page){case 'home':goHome();break;case 'buy':openForm('Compra');break;case 'sale':openForm('Facturado');break;case 'agenda':openAgenda();break;case 'inventory':openInventory();break;case 'documents':CFDocuments.open();break;case 'summary':openSummary();break;case 'settings':openSettings();break;}
  }catch(e){console.warn('Tutorial sin poder abrir sección',e);}
  overlay.classList.remove('hidden');
- $('cfTutorialProgress').textContent='PASO '+(cfTourIndex+1)+' DE '+CF_TOUR_STEPS.length;
+ $('cfTutorialProgress').textContent='PASO '+(cfTourIndex+1)+' DE '+cfTourSteps().length;
  $('cfTutorialTitle').textContent=step.title;
  $('cfTutorialBody').textContent=step.text;
- $('cfTutorialNext').textContent=cfTourIndex===CF_TOUR_STEPS.length-1?'TERMINAR ✓':'SIGUIENTE ›';
+ $('cfTutorialNext').textContent=cfTourIndex===cfTourSteps().length-1?'TERMINAR ✓':'SIGUIENTE ›';
  setTimeout(()=>{
   const target=document.querySelector(step.target);
   if(target&&!overlay.classList.contains('hidden')){
@@ -5495,6 +5563,14 @@ startAccountSystem();
  <div class="cfTutorialCard"><div class="cfTutorialProgress" id="cfTutorialProgress"></div><h3 id="cfTutorialTitle"></h3><p id="cfTutorialBody"></p>
  <div class="cfTutorialActions"><button type="button" onclick="finishCFTutorial()">SALTAR</button><button type="button" onclick="advanceCFTutorial()" id="cfTutorialNext">SIGUIENTE ›</button></div></div>
 </div>
+<div id="cfTutorialChoiceModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Elegir tutorial">
+  <div class="modalCard"><button class="modalClose" type="button" onclick="cfTutorialDismiss()">×</button>
+    <h2>✨ Bienvenido a Control Fiscal</h2><p class="settingsHint">¿Cómo quieres conocer la aplicación? Puedes repetir cualquier tutorial desde Ajustes, sin alterar tus datos.</p>
+    <button class="save p" type="button" onclick="chooseCFTutorial('quick')">⚡ Tutorial rápido · 11 pasos</button>
+    <button class="guideBtn" type="button" onclick="chooseCFTutorial('full')">📚 Tutorial extenso · 35+ pasos</button>
+    <button class="guideBtn" type="button" onclick="cfTutorialDismiss()">Ahora no</button>
+  </div>
+</div>
 <div id="inventoryModal" class="modal hidden" onclick="if(event.target===this)closeInventoryModal()">
   <div class="modalCard">
     <button class="modalClose" type="button" onclick="closeInventoryModal()">×</button>
@@ -5544,7 +5620,18 @@ startAccountSystem();
       <div class="field full"><label for="agendaReminder">Avisarme en el iPhone</label><select id="agendaReminder" class="select cfReminderChoice"><option value="none">Sin recordatorio</option><option value="0">Al empezar el evento</option><option value="15">15 minutos antes</option><option value="30">30 minutos antes</option><option value="60" selected>1 hora antes</option><option value="120">2 horas antes</option><option value="1440">1 día antes</option><option value="2880">2 días antes</option></select><small class="settingsHint">Requiere permitir notificaciones. El aviso se guarda con cada evento; no depende de sincronizar Google Calendar.</small></div>
       <div class="field"><label>Cliente / contacto</label><input id="agendaEventClient" class="input" placeholder="Opcional"></div>
       <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Ej. Dirección del evento, ciudad"></div>
-      <div class="field full"><label>Qué tengo que llevar</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Documentación, equipos y herramientas..."></textarea></div>
+      <div class="field full"><label>Qué tengo que llevar (notas adicionales)</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Documentación, equipos y herramientas no inventariados..."></textarea></div>
+      <div class="field full cfEventBox"><label>📦 Material del inventario</label>
+        <div class="cfEventInventoryPicker"><select id="cfEventStockSelect" class="select" aria-label="Material del inventario"><option value="">Selecciona un artículo</option></select><button type="button" class="guideBtn" onclick="CFEventTools.addMaterial()">＋ AÑADIR</button></div>
+        <div id="cfEventStockList" class="cfEventStockList"></div>
+        <div id="cfEventStockStatus" class="settingsHint">Los artículos se comprueban antes de guardar el evento.</div>
+        <button type="button" class="guideBtn" onclick="CFEventTools.printList()">🖨️ HOJA DE CARGA · IMPRIMIR / COMPARTIR PDF</button>
+      </div>
+      <div class="field full cfEventBox"><label>📎 Planos, fotos y archivos del evento</label>
+        <label class="guideBtn cfEventFileButton">＋ AÑADIR PDF O IMÁGENES <input type="file" id="cfEventFileInput" accept="application/pdf,image/jpeg,image/png" multiple hidden onchange="CFEventTools.onFiles(this.files)"></label>
+        <div id="cfEventAttachments" class="cfEventAttachments"></div>
+        <div id="cfEventAttachmentsCounter" class="settingsHint">Los archivos se guardan de forma privada en el Drive de tu cuenta.</div>
+      </div>
       <div class="field full"><label>Comentarios</label><textarea id="agendaEventComments" class="textarea" placeholder="Montaje, horario de llegada, contacto, instrucciones..."></textarea></div>
     </div>
     <div id="agendaMapPreview" class="settingsHint" style="margin:4px 0 10px"></div>
@@ -5555,7 +5642,7 @@ startAccountSystem();
         <button type="button" onclick="cfOpenAgendaRoute('apple')">↗ Ruta en Mapas</button>
         <button type="button" onclick="cfOpenAgendaRoute('google')">↗ Ruta en Google Maps</button>
       </div>
-      <small>El mapa es una vista aproximada de la dirección indicada. Pulsa una ruta para elegir cómo llegar.</small>
+      <small>El mapa se consulta dentro de Control Fiscal; la navegación paso a paso se inicia en la aplicación de Mapas elegida.</small>
     </section>
     <label class="field" style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;margin:8px 0 12px"><input id="agendaSyncGoogle" type="checkbox" style="width:22px;height:22px;flex-shrink:0"><span>Sincronizar también con Google Calendar (requiere permisos de Calendar API). El evento siempre se guarda en Control Fiscal, aunque Calendar no autorice la conexión.</span></label>
     <button class="save p" id="agendaSaveBtn" type="button" onclick="saveAgendaEvent()">GUARDAR EVENTO</button>
@@ -5734,5 +5821,7 @@ startAccountSystem();
 <script src="cf-r14-native.js"></script>
 <script src="cf-navigation.js"></script>
 <script src="cf-pdf-viewer.js"></script>
+<script src="cf-r18-features.js"></script>
+<script src="cf-r18-languages.js"></script>
 </body>
 </html>

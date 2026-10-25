@@ -42,11 +42,11 @@ async function load(blob){
  const fitWidth=Math.max(180,(view.clientWidth||300)-20);
  naturalFit=Math.min(2,fitWidth/dimensions.width);
  const frag=document.createDocumentFragment();
- // Retrieve page sizes so placeholders have the exact height before rendering.
+ // Fast first paint: do NOT read every PDF page before allowing the first page to render.
+ // The real dimensions of later pages are corrected when that page enters the viewport.
  for(let i=1;i<=pdf.numPages;i++){
    if(token!==docToken)return;
-   const p=i===1?first:await pdf.getPage(i);const rect=p.getViewport({scale:1});
-   frag.append(makeCanvas(i,rect.width,rect.height));
+   frag.append(makeCanvas(i,dimensions.width,dimensions.height));
  }
  pane.replaceChildren(frag);view.scrollTop=0;view.scrollLeft=0;
  observer=new IntersectionObserver(entries=>{
@@ -64,8 +64,10 @@ async function render(node,token){
  let renderTask;
  try{
    const page=await pdf.getPage(n);if(token!==docToken)return;
+   const actual=page.getViewport({scale:1});node.style.aspectRatio=actual.width+' / '+actual.height;
    const logical=page.getViewport({scale:naturalFit*level});
-   const resolution=Math.max(1,Math.min(root.devicePixelRatio||1,2.5,MAX_CANVAS_SIDE/Math.max(logical.width,logical.height)));
+   const quality=document.body.classList.contains('cf-performance-low')?1:2.5;
+   const resolution=Math.max(1,Math.min(root.devicePixelRatio||1,quality,MAX_CANVAS_SIDE/Math.max(logical.width,logical.height)));
    const canvas=document.createElement('canvas');canvas.className='cfPdfCanvas';
    canvas.width=Math.max(1,Math.floor(logical.width*resolution));canvas.height=Math.max(1,Math.floor(logical.height*resolution));
    canvas.style.width=logical.width+'px';canvas.style.height=logical.height+'px';
