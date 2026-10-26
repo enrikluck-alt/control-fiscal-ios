@@ -70,7 +70,9 @@ test('R17: disabled config never sends to Firebase',async()=>{
 test('R17: Firestore rules only allow create own UID and deny every client read',()=>{
  assert.match(rules,/request\.resource\.data\.uid == request\.auth\.uid/);
  assert.match(rules,/request\.resource\.data\.fecha == request\.time/);
- assert.match(rules,/allow get, list, update, delete: if false/);
+ assert.match(rules,/allow get, list: if isAdmin\(\)/);
+ assert.match(rules,/request.auth.uid == 'REEMPLAZAR_UID_ADMIN'/);
+ assert.match(rules,/allow delete: if false/);
  assert.match(rules,/match \/\{document=\*\*\} \{allow read, write: if false;/);
  assert.doesNotMatch(rules,/allow read: if true/);
 });
@@ -137,7 +139,7 @@ test('R17: iOS build includes Firebase bridge, navigation module and changed bui
   assert.match(html,new RegExp(`<script src="${script.replace('.','\\.')}"></script>`));
   assert.ok(w.includes(script));
  }
- assert.match(w,/UI76-20261026-R19/);
+ assert.match(w,/UI76-20261026-R20/);
  assert.match(html,/cfTryOpenPendingAgendaNotification\(\)/);
 });
 

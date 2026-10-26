@@ -1,22 +1,56 @@
 rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
-  // Solo un usuario autenticado crea su propia sugerencia. Nunca se exponen los datos fiscales.
+  function isAdmin() {
+    // Sustituir por el UID de Firebase Authentication del propietario.
+    // NO usar correo electronico para otorgar administracion.
+    return request.auth != null && request.auth.uid == 'REEMPLAZAR_UID_ADMIN';
+  }
   match /control_fiscal_sugerencias/{suggestionId} {
    allow create: if request.auth != null
-    && request.resource.data.keys().hasOnly(['uid','tipo','mensaje','estado','fecha'])
-    && request.resource.data.keys().hasAll(['uid','tipo','mensaje','estado','fecha'])
+    && (
+    // Compatibilidad R19: cliente antiguo sin datos de contacto ni consentimiento.
+    (request.resource.data.keys().hasOnly(['uid','tipo','mensaje','estado','fecha'])
+     && request.resource.data.keys().hasAll(['uid','tipo','mensaje','estado','fecha'])
+     && request.resource.data.uid == request.auth.uid
+     && request.resource.data.tipo in ['Sugerencia','Error','Consulta']
+     && request.resource.data.mensaje is string
+     && request.resource.data.mensaje.size() >= 12
+     && request.resource.data.mensaje.size() <= 2700
+     && request.resource.data.estado == 'pendiente'
+     && request.resource.data.fecha == request.time)
+    || (
+    request.resource.data.keys().hasOnly([
+       'uid','tipo','mensaje','estado','fecha','nombre','permiteRespuesta',
+       'correoRespuesta','version','plataforma'
+    ])
+    && request.resource.data.keys().hasAll([
+       'uid','tipo','mensaje','estado','fecha','nombre','permiteRespuesta','version','plataforma'
+    ])
     && request.resource.data.uid == request.auth.uid
-    && request.resource.data.uid is string
     && request.resource.data.tipo in ['Sugerencia','Error','Consulta']
     && request.resource.data.mensaje is string
     && request.resource.data.mensaje.size() >= 12
     && request.resource.data.mensaje.size() <= 2700
+    && request.resource.data.nombre is string && request.resource.data.nombre.size() <= 100
+    && request.resource.data.version is string && request.resource.data.version.size() <= 60
+    && request.resource.data.plataforma is string && request.resource.data.plataforma.size() <= 25
+    && request.resource.data.permiteRespuesta is bool
+    && ((!request.resource.data.permiteRespuesta
+          && !request.resource.data.keys().hasAny(['correoRespuesta']))
+       || (request.resource.data.permiteRespuesta
+          && request.auth.token.email_verified == true
+          && request.resource.data.correoRespuesta == request.auth.token.email))
     && request.resource.data.estado == 'pendiente'
-    && request.resource.data.fecha == request.time;
-   allow get, list, update, delete: if false;
+    && request.resource.data.fecha == request.time)
+    );
+   allow get, list: if isAdmin();
+   allow update: if isAdmin()
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','revisadoEn'])
+    && request.resource.data.estado in ['pendiente','leida','respondida']
+    && request.resource.data.revisadoEn == request.time;
+   allow delete: if false;
   }
-  // Ninguna otra colección es accesible desde los clientes.
   match /{document=**} {allow read, write: if false;}
  }
 }

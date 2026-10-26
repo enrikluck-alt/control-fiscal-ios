@@ -8,7 +8,7 @@
  const problem=()=> 'Firebase todavía no está vinculado a esta compilación. Configura apiKey y projectId en cf-firebase-config.js, activa el proveedor Google en Firebase Authentication y recompila.';
  const err=e=>String(e?.message||e||'Error');
  function clear(){generation++;state=null;pending=null;notify();}
- function active(){const acc=root.CFGoogleAccount?.active();return state && acc?.email===state.email && acc?.id?{uid:state.uid,email:state.email}:null;}
+ function active(){const acc=root.CFGoogleAccount?.active();return state && acc?.email===state.email && acc?.id?{uid:state.uid,email:state.email,name:state.name||''}:null;}
  function jwtValid(value){
   if(typeof value!=='string'||value.length>6000||value.split('.').length!==3)return false;
   try{const payload=JSON.parse(atob(value.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));return Number(payload.exp||0)>Date.now()/1000+60;}
@@ -26,7 +26,8 @@
   if(!response.ok)throw Error('Firebase Authentication: '+String(data.error?.message||'Error '+response.status).slice(0,200)+'. Comprueba que Google esté habilitado como proveedor.');
   const email=String(data.email||'').trim().toLowerCase();
   if(!data.localId||!data.idToken||email!==account.email)throw Error('La cuenta devuelta por Firebase no coincide con la de Google. No se ha autorizado el acceso.');
-  return {uid:data.localId,idToken:data.idToken,email,expiresAt:Date.now()+(Number(data.expiresIn||3600)-90)*1000};
+  let googleName='';try{const claims=JSON.parse(atob(googleIdToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));googleName=String(claims.name||'').trim();}catch(_){}
+  return {uid:data.localId,idToken:data.idToken,email,name:String(data.displayName||googleName||'').trim().slice(0,100),expiresAt:Date.now()+(Number(data.expiresIn||3600)-90)*1000};
  }
  async function signInWithGoogleIdToken(jwt,account){
   if(!configured())throw Error(problem());
@@ -49,13 +50,13 @@
   if(!configured())throw Error(problem());
   const acc=root.CFGoogleAccount?.active();
   if(!acc?.id||!acc.email)throw Error('Inicia sesión con Google y abre tu libro antes de enviar sugerencias.');
-  if(active()&&state.expiresAt>Date.now()+60000)return {uid:state.uid,idToken:state.idToken};
-  if(pending){await pending;if(active())return {uid:state.uid,idToken:state.idToken};}
+  if(active()&&state.expiresAt>Date.now()+60000)return {uid:state.uid,idToken:state.idToken,email:state.email,name:state.name||''};
+  if(pending){await pending;if(active())return {uid:state.uid,idToken:state.idToken,email:state.email,name:state.name||''};}
   // El plugin social es la única fuente de identidad: nunca usar access token de Drive como ID token.
   const jwt=await root.CFGoogleAccount.getSupportIdToken();
   await signInWithGoogleIdToken(jwt,acc);
   if(!active())throw Error('No se ha podido autenticar Firebase para la cuenta activa.');
-  return {uid:state.uid,idToken:state.idToken};
+  return {uid:state.uid,idToken:state.idToken,email:state.email,name:state.name||''};
  }
  root.CFFirebaseAuth=Object.freeze({configured,active,clear,signInWithGoogleIdToken,ensureSignedIn});
 })(window);

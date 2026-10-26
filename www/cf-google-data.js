@@ -8,6 +8,7 @@
 const MARK='CFV76_GOOGLE_2', OLD_MARK='CFV76_GOOGLE_1', LEDGER='CF_Registros_v2';
 const API='https://sheets.googleapis.com/v4/spreadsheets/';
 const ISSUED_TAB='CF_Facturas_Emitidas',ISSUED_DOC_TAB='CF_Facturas_Documentos',ISSUED_ARCHIVE_TAB='CF_Facturas_Archivadas';
+const PAYMENT_TAB='CF_EstadosCobro',PAYMENT_MARK='CF_ESTADO_COBRO_1';
 const has=v=>v!==undefined&&v!==null&&String(v)!=='';
 const num=v=>Number(v)||0;
 const now=()=>new Date().toISOString();
@@ -122,6 +123,30 @@ async function issuedRecords(s){
   return {...doc,numeroFactura:invoiceNumber, facturaUrl:pdfs.get(invoiceNumber)||'',fila:index+1,emitida:true,archivada:!!archived.get(r[1]),tipo:'Facturación',estado:'EMITIDA',requestId:r[1],_tab:ISSUED_TAB};
  }).filter(Boolean);
 }
+
+// Estados de cobro en hoja separada, append-only; nunca modifica facturas emitidas.
+async function paymentStates(s){
+ const rows=await maybeRead(s,PAYMENT_TAB),latest=new Map();
+ for(const row of rows){
+  if(row[0]!==PAYMENT_MARK||!row[1])continue;
+  const v=parseJSON(row[2],null);
+  if(v&&['pendiente','pagada'].includes(v.estado))latest.set(String(row[1]),v);
+ }
+ return latest;
+}
+function paymentKey(rec,kind='factura'){
+ const id=String(rec?.requestId||rec?.id||rec?._key||'');
+ return id?kind+':'+id:'';
+}
+function paymentAttach(item,states,kind='factura'){
+ const known=states.get(paymentKey(item,kind));
+ const oldPaid=kind==='ingreso'&&Number(item.cobrado)>0;
+ return {...item,estadoCobro:known?.estado||item.estadoCobro||(oldPaid?'pagada':'sin_indicar'),
+  correoCobro:known?.correo||item.correoCobro||item.cliente?.email||'',
+  telefonoCobro:known?.telefono||item.telefonoCobro||item.cliente?.telefono||'',
+  fechaCobro:known?.fechaCobro||''};
+}
+
 function verifyEmissionDoc(p){
  const issuer=parseJSON(p.emisor),client=parseJSON(p.cliente),lines=parseJSON(p.lineas,[]);
  for(const [name,obj] of [['Emisor',issuer],['Cliente',client]]){
@@ -137,8 +162,8 @@ async function action(p){
  const s=session(),a=String(p.accion||'');
  switch(a){
  case 'syncRecords':{
-  const result=[...await all(s,['Compras','Facturas','Facturación']),...await issuedRecords(s)];
-  const normalized=result.map(x=>({...x,fila:x._row,fecha:x.fecha||now(),tipo:x.tipo||((x._tab==='Compras')?'Compra':'Facturación')}));
+  const [result,states]=await Promise.all([Promise.all([all(s,['Compras','Facturas','Facturación']),issuedRecords(s)]),paymentStates(s)]);
+  const normalized=[...result[0],...result[1]].map(x=>paymentAttach({...x,fila:x._row,fecha:x.fecha||now(),tipo:x.tipo||((x._tab==='Compras')?'Compra':'Facturación')},states));
   return {ok:true,compras:normalized.filter(x=>x.tipo==='Compra'),facturacion:normalized.filter(x=>x.tipo!=='Compra')};
  }
  case 'guardarRegistro':{
@@ -148,7 +173,7 @@ async function action(p){
   const existing=(await items(s,t)).find(x=>x.requestId===requestId);
   if(existing)return {ok:true,id:existing.id||'',repetida:true};
   let url='';if(p.archivoBase64)url=await root.CFGoogleUploads.upload(p.archivoNombre,p.archivoMime,p.archivoBase64,s);
-  const obj={id:ident('REG'),requestId,fecha:now(),tipo:p.tipo==='Compra'?'Compra':'Facturación',tercero:p.tercero,concepto:p.concepto,base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),facturaUrl:url};
+  const obj={id:ident('REG'),requestId,fecha:now(),tipo:p.tipo==='Compra'?'Compra':'Facturación',tercero:p.tercero,concepto:p.concepto,base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),facturaUrl:url,estadoCobro:p.tipo==='Compra'?'':(p.estadoCobro==='pagada'?'pagada':'pendiente')};
   await upsert(s,t,obj);return {ok:true,id:obj.id};
  }
  case 'crearFactura':{
@@ -214,7 +239,7 @@ async function action(p){
     numeroAsignado:candidate,sequenceIndex:selectedIndex,
     tercero:p.tercero||validation.client.nombre,concepto:p.concepto||'',
     base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),
-    cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||''};
+    cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||'',estadoCobro:p.estadoCobro==='pagada'?'pagada':'pendiente'};
    const resp=await append(s,ISSUED_TAB,['CF_FACTURA_EMITIDA_1',key,JSON.stringify(doc)]);
    const matched=String(resp.updates?.updatedRange||'').match(/![A-Z]+(\d+)(?::|$)/);
    if(!matched){
@@ -361,9 +386,40 @@ async function action(p){
   const x=parseJSON(p.evento);if(!x.evento||!x.fecha)throw Error('Indica evento y fecha.');if(!x.id)x.id=ident('EV');await upsert(s,'Agenda',x);return {ok:true,id:x.id};
  }
  case 'eliminarEvento':return remove(s,'Agenda',x=>String(x.id)===String(p.id));
- case 'listarIngresosPendientes':return {ok:true,ingresos:await all(s,['Ingresos','Ingresos independientes','Ingresos pendientes'])};
+ case 'listarIngresosPendientes':{const [income,states]=await Promise.all([all(s,['Ingresos','Ingresos independientes','Ingresos pendientes']),paymentStates(s)]);return {ok:true,ingresos:income.map(x=>paymentAttach(x,states,'ingreso'))};}
  case 'guardarIngresoPendiente':{
-  const x=parseJSON(p.ingreso);if(!x.persona||!x.servicio)throw Error('Indica persona y servicio.');if(!x.id)x.id=ident('IP');x.fecha=x.fecha||now();await upsert(s,'Ingresos',x);return {ok:true,id:x.id};
+  const x=parseJSON(p.ingreso);if(!x.persona||!x.servicio)throw Error('Indica persona y servicio.');if(!x.id)x.id=ident('IP');x.fecha=x.fecha||now();x.estadoCobro=x.estadoCobro==='pagada'?'pagada':'pendiente';x.importePrevisto=num(x.importePrevisto||x.cobrado);x.cobrado=x.estadoCobro==='pagada'?x.importePrevisto:0;x.beneficio=x.cobrado-num(x.material);await upsert(s,'Ingresos',x);return {ok:true,id:x.id};
+ }
+ case 'cambiarEstadoCobro':{
+  const kind=p.clase==='ingreso'?'ingreso':'factura';
+  const key=String(p.clave||'');
+  const state=String(p.estadoCobro||'');
+  const email=String(p.correo||'').trim().slice(0,180),phone=String(p.telefono||'').trim().slice(0,35);
+  if(!['pendiente','pagada'].includes(state))throw Error('Estado de cobro no válido.');
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Correo del cliente no válido.');
+  if(phone&&!/^[+\d() .-]{6,35}$/.test(phone))throw Error('Teléfono no válido.');
+  let record=null,tab='';
+  if(kind==='ingreso'){
+   for(const name of ['Ingresos','Ingresos independientes','Ingresos pendientes']){
+    record=(await items(s,name)).find(x=>paymentKey(x,'ingreso')===key);
+    if(record){tab=name;break;}
+   }
+  } else {
+    record=[...await all(s,['Facturas','Facturación']),...await issuedRecords(s)]
+      .find(x=>paymentKey(x)===key&&x.tipo!=='Compra');
+  }
+  if(!record)throw Error('El documento no existe en tu cuenta Google actual.');
+  if(kind==='ingreso'){
+    // Para ingresos independientes, registrar realmente el ingreso cobrado (0 si pendiente).
+    const due=num(record.importePrevisto||record.cobrado);
+    if(!(due>0))throw Error('El importe previsto debe ser mayor que cero.');
+    await revision(s,tab,record._key,{...record,importePrevisto:due,estadoCobro:state,
+      cobrado:state==='pagada'?due:0,beneficio:(state==='pagada'?due:0)-num(record.material),
+      correoCobro:email,telefonoCobro:phone});
+  }
+  await append(s,PAYMENT_TAB,[PAYMENT_MARK,key,JSON.stringify({estado:state,correo:email,telefono:phone,
+    fechaCobro:state==='pagada'?now():'',actualizado:now()})]);
+  return {ok:true,estadoCobro:state};
  }
  case 'eliminarIngresoPendiente':{
   for(const tab of ['Ingresos','Ingresos independientes','Ingresos pendientes']){

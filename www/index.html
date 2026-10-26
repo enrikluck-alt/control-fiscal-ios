@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261026-R19">
+<html lang="es" data-cf-ui-build="UI76-20261026-R20">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1426,6 +1426,23 @@ body.cf-performance-low .stockCard,body.cf-performance-low .agendaCard,body.cf-p
 body.cf-performance-low .cfInventoryThumb,body.cf-performance-low .cfInventoryListImage{image-rendering:auto}
 @media(max-width:420px){#cfDocLibraryItems>.cfDocNode>.cfDocThumb{height:100px}.cfEventInventoryPicker{grid-template-columns:1fr}.cfEventInventoryPicker .guideBtn{width:100%}}
 </style>
+<style id="cf-r20-payment-style">
+/* R20: indicadores de cobro y consentimiento visibles en iPhone */
+.cfR20Bubble{display:inline-flex;align-items:center;gap:4px;border-radius:10px;padding:5px 8px;margin-top:6px;font-size:12px;font-weight:900;letter-spacing:.01em}
+.cfR20Bubble.isPending{background:#ff9d2f;color:#251506;border:1px solid #e57604;box-shadow:0 2px 0 #d46b0530}
+.cfR20Bubble.isPaid{background:#186b41;color:#fff;border:1px solid #45bf8a}
+.cfR20Bubble.isUnknown{background:#465363;color:#fff;border:1px solid #78869a}
+.cfR20Consent,.cfR20PaymentChoice{display:flex;align-items:flex-start;gap:12px;background:#25384a;padding:14px;border-radius:12px;color:#fff;line-height:1.55;margin:12px 0}
+.cfR20Consent input,.cfR20PaymentChoice input{width:23px;height:23px;min-width:23px;accent-color:#ffb34b;margin-top:3px}
+.cfR20PaymentCard{max-width:600px;overflow:auto;max-height:calc(100dvh - 40px)}
+.cfR20PaymentActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.cfR20PaymentActions button,.cfR20SmallBtn{background:#334962;color:white;border:1px solid #7997b0;border-radius:10px;padding:12px;font-weight:800}
+.cfR20SmallBtn{font-size:12px;padding:8px;margin-top:5px;display:block}
+#cfR20ManagePayment{width:100%;margin:12px 0;display:block}
+#cfR20ManagePayment[hidden]{display:none}
+@media(max-width:360px){.cfR20PaymentActions{grid-template-columns:1fr}}
+
+</style>
 </head>
 
 <body>
@@ -1951,7 +1968,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261026-R19</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261026-R20</div>
 
     </div>
   </div>
@@ -2072,6 +2089,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
     <div id="modalMsg" class="msg"></div>
 
+    <button id="cfR20ManagePayment" type="button" class="guideBtn" onclick="openCFPaymentForCurrent()">🟠 GESTIONAR COBRO / ENVIAR RECORDATORIO</button>
     <button id="cfArchiveInvoiceBtn" type="button" class="cfArchiveBtn" hidden onclick="cfToggleIssuedArchive()">RETIRAR FACTURA DE LA LISTA</button>
     <div class="modalActions">
       <button class="save" type="button" onclick="saveEditedRecord()">Guardar cambios</button>
@@ -2838,7 +2856,7 @@ function renderPendingIncomeList(){
   const arr=pendingIncomeRecords.slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   wrap.innerHTML=arr.length ? arr.slice(0,8).map(item=>{
     const benefit=Number(item.beneficio)||0;
-    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}</span></div><div class="pendingIncomeNums"><b>${euro(item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio ${euro(benefit)}</span></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
+    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}</span></div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
   }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos independientes registrados.</div>';
 }
 
@@ -2876,11 +2894,15 @@ function openPendingIncomeForm(){
         <div class="field"><label>Tipo de servicio</label><input id="pendingService" class="input" placeholder="Ej. Reparación de iPhone"></div>
         <div class="two">
           <div class="field"><label>Precio material</label><input id="pendingMaterial" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
-          <div class="field"><label>Importe cobrado</label><input id="pendingCharged" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
+          <div class="field"><label>Importe a cobrar</label><input id="pendingCharged" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
         </div>
+        <div class="field"><label>Estado del cobro</label><select class="select" id="pendingPaymentState" onchange="recalcPendingIncome()"><option value="pendiente">🟠 Pendiente de pago</option><option value="pagada">✅ Pago recibido</option></select></div>
+        <div class="two"><div class="field"><label>Correo del cliente (para recordatorios)</label><input id="pendingEmail" class="input" type="email" inputmode="email" placeholder="cliente@ejemplo.com"></div>
+        <div class="field"><label>WhatsApp del cliente (con prefijo internacional)</label><input id="pendingPhone" class="input" type="tel" inputmode="tel" placeholder="+34 600 000 000"></div></div>
+        <p class="settingsHint">Los recordatorios se abren en WhatsApp o en tu aplicación de correo para que los revises antes de enviarlos. No se mandan automáticamente.</p>
         <div class="calc pendingIncomeCalc">
           <div class="box"><small>Material</small><strong id="pendingMaterialValue">0,00 €</strong></div>
-          <div class="box"><small>Cobrado</small><strong id="pendingChargedValue">0,00 €</strong></div>
+          <div class="box"><small>Realmente cobrado</small><strong id="pendingChargedValue">0,00 €</strong></div>
           <div class="box pendingBenefitBox"><small>Beneficio</small><strong id="pendingBenefitValue">0,00 €</strong></div>
         </div>
       </div>
@@ -2895,10 +2917,10 @@ function recalcPendingIncome(){
   const charged=Number($("pendingCharged")?.value)||0;
   const benefit=charged-material;
   if($("pendingMaterialValue"))$("pendingMaterialValue").textContent=euro(material);
-  if($("pendingChargedValue"))$("pendingChargedValue").textContent=euro(charged);
+  if($("pendingChargedValue"))$("pendingChargedValue").textContent=euro(actuallyCollected);
   const b=$("pendingBenefitValue");
   if(b){b.textContent=euro(benefit);b.parentElement.classList.toggle("negativeBenefit",benefit<0);}
-  return {material,charged,benefit};
+  return {material,charged,actuallyCollected,benefit};
 }
 
 async function savePendingIncome(){
@@ -2907,10 +2929,12 @@ async function savePendingIncome(){
   const servicio=$("pendingService")?.value.trim()||"";
   const calc=recalcPendingIncome();
   if(!persona||!servicio){msg.className="msg err";msg.textContent="Indica la persona y el tipo de servicio.";return;}
-  if(calc.charged<=0){msg.className="msg err";msg.textContent="El importe cobrado debe ser mayor que 0.";return;}
+  if(calc.charged<=0){msg.className="msg err";msg.textContent="El importe a cobrar debe ser mayor que 0.";return;}
+  if($('pendingEmail')?.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('pendingEmail').value.trim())){msg.className='msg err';msg.textContent='Revisa el correo del cliente.';return;}
+  if($('pendingPhone')?.value.trim()&&!/^[+\d() .-]{6,35}$/.test($('pendingPhone').value.trim())){msg.className='msg err';msg.textContent='Revisa el teléfono del cliente.';return;}
   btn.disabled=true;msg.className="msg";msg.textContent="Guardando...";
   try{
-    const result=await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,cobrado:calc.charged,beneficio:calc.benefit})});
+    const result=await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:$('pendingPaymentState')?.value||'pendiente',correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:String($('pendingPhone')?.value||'').trim()})});
     if(!result || result.ok!==true || !result.id){
       throw new Error("Google Sheets no ha confirmado el guardado. Comprueba los permisos de la cuenta.");
     }
@@ -3209,6 +3233,7 @@ function openInvoiceForm(){
         <input id="invoiceManualNumber" class="input" type="text" autocomplete="off" autocapitalize="characters" maxlength="64" placeholder="Vacío = siguiente automático (ej. F2026-001)">
         <p class="cfInvoiceCustomNumberHelp">Antes de emitir, puedes indicar un número de tu serie. Se comprobará si coincide con la serie configurada y si otra factura ya lo utiliza. Los números emitidos no se modifican y los saltos en la secuencia pueden incumplir tus obligaciones fiscales.</p>
       </div>
+      <label class="cfR20PaymentChoice"><input type="checkbox" id="invoicePaidNow"><span>✅ El pago de esta factura ya se ha recibido. Si lo dejas desmarcado, aparecerá como <b>pendiente de cobro</b> y podrás enviar recordatorios.</span></label>
       <label class="cfInvoiceEmailRow"><input type="checkbox" id="invoiceEmailCopy"><span>Enviar automáticamente una copia PDF al correo del cliente al emitir (requiere autorización Gmail y confirmación del correo).</span></label>
       <button id="invoiceIssueBtn" class="save p" type="button" onclick="emitInvoice()">🧾 EMITIR FACTURA Y GENERAR PDF</button>
       <button id="invoiceSaveBtn" class="save" type="button" onclick="saveInvoice()">GUARDAR SOLO BORRADOR</button>
@@ -3348,7 +3373,7 @@ function currentInvoicePayload(){
  if(!client.nombre||!client.cif||!client.direccion||!client.cp||!client.ciudad||!client.provincia)throw Error('Completa nombre, CIF/NIF, domicilio, CP, ciudad y provincia del cliente.');
  if(!invoiceConfig.name||!invoiceConfig.taxId||!invoiceConfig.address||!invoiceConfig.postalCode||!invoiceConfig.city||!invoiceConfig.province)throw Error('Configura nombre, NIF/CIF y domicilio completo del emisor en Ajustes.');
  if(!lines.length||lines.some(x=>!x.concepto||x.cantidad<=0||x.precio<0)||calc.total<=0)throw Error('Revisa los conceptos, cantidades y precios de la factura.');
- return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig),numeroSolicitado:String($('invoiceManualNumber')?.value||'').trim()};
+ return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig),estadoCobro:$('invoicePaidNow')?.checked?'pagada':'pendiente',numeroSolicitado:String($('invoiceManualNumber')?.value||'').trim()};
 }
 async function emitInvoice(){
  const msg=$('invoiceMsg'),btn=$('invoiceIssueBtn');if(!btn||btn.disabled)return;
@@ -3496,6 +3521,7 @@ function openForm(tipo){
         <small class="fileHint">PDF, JPG o PNG. Puedes guardar el registro sin adjuntar ningún archivo.</small>
       </div>
 
+      ${c?'':`<label class="cfR20PaymentChoice"><input type="checkbox" id="simpleInvoicePaid"><span>✅ Pago recibido. Si no lo marcas, quedará pendiente y aparecerá una etiqueta naranja.</span></label>`}
       <button id="saveBtn" class="save ${c?"y":"p"}" onclick="sendRecord('${tipo}')">
         ${c?"GUARDAR COMPRA":"GUARDAR FACTURA"}
       </button>
@@ -3588,7 +3614,8 @@ async function sendRecord(tipo){
     base:+c.base.toFixed(2),
     ivaPorcentaje:i,
     iva:+c.iva.toFixed(2),
-    total:+c.total.toFixed(2)
+    total:+c.total.toFixed(2),
+    estadoCobro:tipo==='Compra'?'':($('simpleInvoicePaid')?.checked?'pagada':'pendiente')
   };
 
   b.disabled=true;
@@ -3669,6 +3696,7 @@ function row(r){
         <div class="rtitle">${compra?"Compra":(r.numeroFactura?"Factura "+esc(r.numeroFactura):"Factura")}</div>
         <div class="rdesc">${esc(r.tercero)} - ${esc(r.concepto)}</div>
         <div class="rdate">${dateText(r.fecha)}</div>
+        ${!compra&&r.estado!=='BORRADOR'?`<span class="cfR20Bubble ${r.estadoCobro==='pendiente'?'isPending':r.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${r.estadoCobro==='pendiente'?'🟠 Pendiente de cobro':r.estadoCobro==='pagada'?'✓ Pagada':'Cobro sin indicar'}</span>`:''}
         ${r.facturaUrl ? `<div class="attachment"><button type="button" class="cfDocViewLink" data-cf-doc-url="${esc(r.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver ${compra ? "factura / justificante" : "factura emitida"} dentro de la app</button></div>` : ""}
       </div>
       <div class="ramount">${euro(r.total)}</div>
@@ -5286,10 +5314,11 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261026-R19'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261026-R20'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
+  if($('cfSupportReplyConsent'))$('cfSupportReplyConsent').checked=false;
   await cfSuccessFeedback();
  }catch(e){
   const text=String(e?.message||e||'No se pudo enviar');
@@ -5301,13 +5330,13 @@ const CF_TOUR_STEPS=[
  {title:'Bienvenido a Control Fiscal',text:'Tus compras, clientes, facturas, inventario y agenda se guardan en tu espacio de Google. Empezaremos por Inicio.',page:'home',target:'#home .hero'},
  {title:'Accesos de Inicio',text:'Usa estas tarjetas para entrar a Compras, Facturación, Agenda y Stock; también puedes utilizar la barra inferior.',page:'home',target:'#home .homegrid'},
  {title:'Compras',text:'Indica el distribuidor, concepto, importe con IVA y justificante opcional. Al confirmar el guardado, el formulario se limpia para evitar duplicados.',page:'buy',target:'#formBody .form'},
- {title:'Facturación',text:'Selecciona un cliente, incorpora conceptos y cantidades y guarda un borrador o emite una factura definitiva. Revisa los datos fiscales antes de emitir.',page:'sale',target:'#formBody .invoiceForm'},
+ {title:'Facturación',text:'Crea una factura, revisa los datos fiscales y señala si el pago está recibido. Las pendientes tienen etiqueta naranja y permiten preparar recordatorios de WhatsApp o correo.',page:'sale',target:'#formBody .invoiceForm'},
  {title:'Agenda',text:'Registra fecha, horario y ubicación. Los eventos autorizados se sincronizan con Calendar y permiten recordatorios.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Inventario',text:'Crea materiales, cantidades y ubicación. Las categorías generan botones con iconos; puedes filtrar por tipo.',page:'inventory',target:'#inventoryCategoryFilter'},
  {title:'Documentos',text:'Organiza certificados, licencias, fichas y documentos PDF en carpetas y subcarpetas privadas.',page:'documents',target:'#documentsPage .cfDocToolbar'},
  {title:'Resumen',text:'Filtra por año o mes para comparar compras, facturas emitidas e IVA. Consulta los registros antes de utilizarlos fiscalmente.',page:'summary',target:'#cfSummaryChart'},
  {title:'Ajustes y ayuda',text:'Personaliza Diseño, gestiona Clientes y Distribuidores y configura las facturas. Puedes volver a ejecutar este tutorial cuando quieras.',page:'settings',target:'#settingsPage .settingsCard'},
- {title:'Soporte y privacidad',text:'En Ajustes puedes enviar sugerencias o fallos al administrador. Solo se envía lo que escribas: tus libros fiscales siguen siendo privados.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Soporte y privacidad',text:'En Ajustes puedes enviar sugerencias al administrador. Antes de enviarlas decide si aceptas compartir tu email verificado para recibir respuesta. Tus datos fiscales siguen siendo privados.',page:'settings',target:'#cfSupportGroup'},
  {title:'Seguridad',text:'Al volver a la aplicación se pedirá Face ID o tu código. Para cambiar de cuenta, pulsa el botón rojo Cerrar sesión.',page:'settings',target:'#accountSettingsGroup'}
 ];
 const CF_TOUR_EXTENDED=[
@@ -5321,6 +5350,10 @@ const CF_TOUR_EXTENDED=[
  {title:'Facturación · clientes',text:'Crea un cliente con sus datos correctos; al seleccionarlo se incorporará a tu factura.',page:'sale',target:'#formBody'},
  {title:'Facturación · conceptos',text:'Añade una o más líneas, revisa cantidades y precios y comprueba que el IVA se calcula según corresponde.',page:'sale',target:'#formBody'},
  {title:'Facturación · borrador y emisión',text:'Guardar borrador NO es emitir. Antes de emitir confirma la numeración y verifica la normativa fiscal aplicable; el PDF no sustituye ese cumplimiento.',page:'sale',target:'#formBody'},
+ {title:'Facturación · cobros pendientes',text:'Cuando emitas una factura puedes marcar Pago recibido. Si está pendiente se verá una etiqueta naranja. Abre el registro y pulsa Gestionar cobro para marcarla pagada cuando recibas el ingreso.',page:'sale',target:'#formBody'},
+ {title:'Facturación · avisar por WhatsApp',text:'En el registro pendiente guarda el móvil del cliente, preferiblemente con +34 u otro prefijo. Pulsa Preparar WhatsApp, revisa el texto y confirma el envío en WhatsApp.',page:'sale',target:'#formBody'},
+ {title:'Facturación · reclamar por correo',text:'En Gestionar cobro, introduce un correo válido y pulsa Preparar correo. Se abrirá el programa de correo con un borrador. El envío requiere tu confirmación.',page:'sale',target:'#formBody'},
+ {title:'Ingresos independientes · cobro real',text:'El importe a cobrar es lo acordado; solo cuenta como cobrado cuando indiques Pago recibido. Un ingreso pendiente mostrará una etiqueta naranja y podrás marcarlo pagado después.',page:'sale',target:'#formBody'},
  {title:'Facturación · compartir el PDF',text:'Después de generar una factura, usa Compartir para exportar su PDF al sistema del teléfono.',page:'sale',target:'#formBody'},
  {title:'Agenda · crear un evento',text:'Pulsa Nuevo evento y añade fecha, horas y contacto. El evento se conserva en tu libro de Google.',page:'agenda',target:'#agendaPage .agendaAdd'},
  {title:'Agenda · avisos nativos',text:'Escoge entre al empezar, 15 minutos, 1 hora o días antes. Los avisos de iPhone requieren permiso para notificaciones.',page:'agenda',target:'#agendaPage .calendar'},
@@ -5341,6 +5374,7 @@ const CF_TOUR_EXTENDED=[
  {title:'Ajustes · orientación',text:'Puedes dejar el giro automático o bloquear la aplicación en vertical. Los márgenes respetan Dynamic Island y las áreas seguras.',page:'settings',target:'#settingsPage'},
  {title:'Ajustes · notificaciones',text:'Activa permisos, elige sonido y programa una prueba. Tocando un aviso se abrirá el evento de la Agenda.',page:'settings',target:'#settingsPage'},
  {title:'Ajustes · privacidad',text:'Control Fiscal no da acceso administrativo a tus datos fiscales. Las sugerencias se envían al buzón separado Firestore.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Ajustes · sugerencias y consentimiento',text:'Al enviar una sugerencia puedes permitir o no recibir una respuesta por correo. Solo si aceptas, el buzón recibirá tu dirección de email verificada; tus hojas fiscales no se comparten.',page:'settings',target:'#cfSupportGroup'},
  {title:'Ajustes · Firebase',text:'Si el buzón no está conectado, el propietario debe configurar Authentication, Firestore y las reglas antes de publicar otra IPA.',page:'settings',target:'#cfSupportGroup'},
  {title:'Seguridad · cambio de usuario',text:'Antes de prestar el teléfono, cierra sesión. Cada cuenta accede a su propia información de Google.',page:'settings',target:'#accountSettingsGroup'},
  {title:'Final · dónde volver al tutorial',text:'Puedes volver a elegir Tutorial rápido o Tutorial extenso desde Ajustes cuando lo necesites.',page:'settings',target:'#settingsPage'}
@@ -5543,18 +5577,40 @@ async function cfSelectInventoryPhotoFile(input){
  }catch(e){status.textContent='No se ha podido guardar la imagen: '+(e.message||e);}
 }
 
+// R20: acceso restringido a listas ya cargadas, sin exponer tokens ni Drive.
+window.CFR20Data=Object.freeze({records:()=>records,incomes:()=>pendingIncomeRecords,editingRecord:()=>editingRecord});
 // Los datos privados se cargan después de iniciar sesión y desbloquear la app.
 cfRegisterSecurityLifecycle();
 startAccountSystem();
 
 </script>
 
+<div id="cfR20PaymentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfR20PaymentTitle" onclick="if(event.target===this)closeCFPayment()">
+ <div class="modalCard cfR20PaymentCard">
+  <button type="button" class="modalClose" onclick="closeCFPayment()" aria-label="Cerrar">×</button>
+  <h3 id="cfR20PaymentTitle">💶 Estado de cobro</h3>
+  <p id="cfR20PaymentSummary" class="settingsHint"></p>
+  <div class="field"><label>Estado del pago</label><select class="select" id="cfR20PaymentState"><option value="pendiente">🟠 Pendiente de pago</option><option value="pagada">✅ Pago recibido</option></select></div>
+  <div class="field"><label>Correo del cliente</label><input id="cfR20PaymentEmail" type="email" class="input" placeholder="cliente@ejemplo.com" autocomplete="email"></div>
+  <div class="field"><label>Teléfono / WhatsApp (con prefijo internacional)</label><input id="cfR20PaymentPhone" type="tel" class="input" placeholder="+34 600 000 000" autocomplete="tel"></div>
+  <div class="settingsHint">Estas referencias se guardan solo en tu Google Sheets. El estado no modifica el documento fiscal emitido. WhatsApp y Preparar correo abren borradores. Enviar con Gmail sí envía tras tu confirmación y la respuesta de Gmail API.</div>
+  <button class="save" type="button" id="cfR20PaymentSaveBtn" onclick="saveCFPayment()">💾 GUARDAR ESTADO Y CONTACTO</button>
+  <div class="cfR20PaymentActions">
+   <button type="button" id="cfR20PaymentWhatsapp" onclick="sendCFPaymentReminder('whatsapp')">💬 Preparar WhatsApp</button>
+   <button type="button" id="cfR20PaymentMail" onclick="sendCFPaymentReminder('email')">✉️ Preparar correo</button>
+   <button type="button" id="cfR20PaymentGmail" onclick="sendCFPaymentReminder('gmail')">📤 Enviar con Gmail</button>
+  </div>
+  <div class="msg" id="cfR20PaymentStatus" role="status"></div>
+ </div>
+</div>
 <div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>
   <h3>✉️ SUGERENCIAS Y ERRORES</h3>
   <p class="settingsHint">Tu mensaje se guardará en el buzón privado de desarrolladores de Google Cloud cuando esté configurado. No se enviará desde Gmail ni se compartirán datos fiscales.</p>
   <div class="field"><label>Tipo de mensaje</label><select id="cfSupportKind" class="select"><option value="Sugerencia">Sugerencia</option><option value="Error">Informar de un error</option><option value="Consulta">Consulta</option></select></div>
   <div class="field"><label>Describe lo ocurrido o tu propuesta</label><textarea id="cfSupportText" class="textarea" rows="6" maxlength="3000" placeholder="Indica qué ventana estabas utilizando, qué pulsaste y qué sucedió. No incluyas contraseñas ni datos bancarios."></textarea></div>
+  <label class="cfR20Consent"><input id="cfSupportReplyConsent" type="checkbox"><span><strong>Quiero recibir una respuesta por correo electrónico.</strong> Si lo marco, se enviará a los desarrolladores el correo verificado de mi cuenta Google para responder a esta sugerencia. Si no lo marco, no se compartirá mi dirección de correo en el mensaje.</span></label>
+  <p class="settingsHint">La sugerencia incluirá tu identificador de usuario y nombre de Google para organizar las consultas, sin compartir tus datos fiscales.</p>
   <div class="settingsHint" id="cfSupportStatus"></div>
   <button id="cfSupportSendBtn" class="save p" type="button" onclick="sendCFSupport()">ENVIAR SUGERENCIA A LOS DESARROLLADORES</button>
  </div>
@@ -5823,5 +5879,6 @@ startAccountSystem();
 <script src="cf-pdf-viewer.js"></script>
 <script src="cf-r18-features.js"></script>
 <script src="cf-r18-languages.js"></script>
+<script src="cf-r20-payments.js"></script>
 </body>
 </html>

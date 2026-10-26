@@ -90,5 +90,5 @@ test('R3: diseño V76 y navegación conservados, borrador persiste y herramienta
  for(const mark of ['captureInvoiceDraft','restoreInvoiceDraft','invoiceEmailCopy','resetInvoiceForm','CFGoogleExtras.upsertCalendar','enablePendingNotifications','cf-google-extras.js','cf-postal.js','EMITIR FACTURA Y GENERAR PDF']) assert.ok(html.includes(mark),mark);
  assert.match(html,/schedule:\{on:\{hour,minute\},repeats:true\}/);
  const workflow=fs.readFileSync('.github/workflows/build-ios.yml','utf8');
- for(const f of ['cf-google-extras.js','cf-postal.js','UI76-20261026-R19'])assert.ok(workflow.includes(f));
+ for(const f of ['cf-google-extras.js','cf-postal.js','UI76-20261026-R20'])assert.ok(workflow.includes(f));
 });

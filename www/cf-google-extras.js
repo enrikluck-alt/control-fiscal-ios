@@ -90,6 +90,23 @@
   if(!out.id)throw Error('El correo no ha confirmado la recepción.');return {id:out.id};
  }
 
+ // Recordatorio de cobro: envío inmediato SOLO por petición explícita y confirmada.
+ async function sendPaymentReminder({recipient,customer,reference,amount}){
+  const s=account();recipient=String(recipient||'').trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)||/[\r\n]/.test(recipient))throw Error('Correo destinatario no válido.');
+  const due=Number(amount);
+  if(!(due>0)||!Number.isFinite(due))throw Error('Importe pendiente no válido.');
+  const safe=t=>String(t||'').replace(/[\r\n]/g,' ').slice(0,180);
+  const subject='Recordatorio de pago · '+safe(reference||'Servicio');
+  const body='Hola, '+safe(customer)+'.\n\nTe escribimos para recordarte que tenemos pendiente de recibir el pago de '+due.toLocaleString('es-ES',{style:'currency',currency:'EUR'})+' correspondiente a '+safe(reference)+'.\n\nSi ya has realizado el pago, por favor ignora este aviso e indícanoslo. Muchas gracias.\n';
+  const raw=['MIME-Version: 1.0','To: '+recipient,'From: '+s.email,
+    'Subject: =?UTF-8?B?'+utf8base64(subject)+'?=',
+    'Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: base64','',utf8base64(body),''].join('\r\n');
+  const out=await request(s,'https://gmail.googleapis.com/gmail/v1/users/me/messages/send','POST',{raw:base64url(raw)});
+  if(!out.id)throw Error('Gmail no ha confirmado el envío del recordatorio.');
+  return {id:out.id};
+ }
+
  // Enviar documentos adjuntos mediante Gmail API (gmail.send). Nunca afirmar envío
  // antes de recibir el identificador del mensaje confirmado por Google.
  async function sendDocuments({recipient,attachments,from,to}){
@@ -123,5 +140,5 @@
   return {id:result.id,documentos:attachments.length,correos:1};
  }
 
- root.CFGoogleExtras=Object.freeze({calendarBody,upsertCalendar,deleteCalendar,sendInvoice,sendSupport,sendDocuments});
+ root.CFGoogleExtras=Object.freeze({calendarBody,upsertCalendar,deleteCalendar,sendInvoice,sendSupport,sendDocuments,sendPaymentReminder});
 })(window);

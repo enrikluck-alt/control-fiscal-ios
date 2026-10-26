@@ -8,14 +8,23 @@
    const data=new Uint8Array(16);crypto.getRandomValues(data);
    return 'cf_'+Array.from(data,b=>b.toString(16).padStart(2,'0')).join('');
  }
- async function sendFirebase({kind,message}){
+ async function sendFirebase({kind,message,allowReply,appVersion}){
    const user=await root.CFFirebaseAuth.ensureSignedIn();
    const projectId=String(root.CFFirebaseConfig?.projectId||'');
    if(!/^[-\w]{5,100}$/.test(projectId))throw Error('Configura el ID de proyecto de Firebase.');
    const id=newDocId();
+   const platform=String(root.Capacitor?.getPlatform?.()||'web').slice(0,25);
    const fields={
-     uid:{stringValue:user.uid},tipo:{stringValue:kind},mensaje:{stringValue:message},estado:{stringValue:'pendiente'}
+     uid:{stringValue:user.uid},tipo:{stringValue:kind},mensaje:{stringValue:message},estado:{stringValue:'pendiente'},
+     nombre:{stringValue:String(user.name||'Usuario de Control Fiscal').slice(0,100)},
+     permiteRespuesta:{booleanValue:allowReply===true},
+     version:{stringValue:String(appVersion||'').slice(0,60)},plataforma:{stringValue:platform}
    };
+   if(allowReply===true){
+     const email=String(user.email||'').trim().toLowerCase();
+     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Tu cuenta no tiene un correo verificado para responder.');
+     fields.correoRespuesta={stringValue:email};
+   }
    const url='https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(projectId)+'/databases/(default)/documents:commit';
    const body={writes:[{update:{name:'projects/'+projectId+'/databases/(default)/documents/control_fiscal_sugerencias/'+id,fields},
      currentDocument:{exists:false},updateTransforms:[{fieldPath:'fecha',setToServerValue:'REQUEST_TIME'}]}]};
@@ -30,11 +39,11 @@
    }catch(e){if(e?.name==='AbortError')throw Error('Google no confirmó el guardado. Comprueba Firestore antes de reintentar.');throw e;}
    finally{clearTimeout(stop);}
  }
- async function send({kind,message,appVersion}){
+ async function send({kind,message,appVersion,allowReply=false}){
    if(!kinds.has(kind))throw Error('Selecciona un tipo válido.');
    message=String(message||'').trim();
    if(message.length<12||message.length>2700)throw Error('Escribe entre 12 y 2700 caracteres.');
-   if(root.CFFirebaseAuth?.configured?.())return sendFirebase({kind,message});
+   if(root.CFFirebaseAuth?.configured?.())return sendFirebase({kind,message,appVersion,allowReply});
    const url=endpoint();
    if(!/^https:\/\/[^/\s?#]+/.test(url))throw Error('El buzón privado de sugerencias de Google Cloud todavía no está configurado. Añade apiKey y projectId en cf-firebase-config.js, activa Google en Firebase Authentication y recompila. No se ha enviado el mensaje.');
    const account=root.CFGoogleAccount?.active();
@@ -44,7 +53,7 @@
    try{
      const response=await root.fetch(url+'/api/feedback',{
        method:'POST',headers:{Authorization:'Bearer '+jwt,'Content-Type':'application/json'},
-       body:JSON.stringify({kind,message,appVersion:String(appVersion||'').slice(0,60),platform:root.Capacitor?.getPlatform?.()||'web',language:root.navigator?.language||'es'}),
+       body:JSON.stringify({kind,message,allowReply,appVersion:String(appVersion||'').slice(0,60),platform:root.Capacitor?.getPlatform?.()||'web',language:root.navigator?.language||'es'}),
        signal:controller.signal
      });
      const output=await response.json().catch(()=>({}));
