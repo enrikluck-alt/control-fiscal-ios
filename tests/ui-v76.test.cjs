@@ -66,8 +66,8 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
  assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js','cf-r18-features.js','cf-r18-languages.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
- assert.match(html,new RegExp('data-cf-ui-build="UI76-20261025-R18"'));
- assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261025-R18'));
+ assert.match(html,new RegExp('data-cf-ui-build="UI76-20261026-R19"'));
+ assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261026-R19'));
  assert.match(auth,/if\(typeof root\.goHome==='function'\)root\.goHome\(\);/);
  assert.match(auth,/root\.startLocalSecurityForAccount\(fromInteractiveLogin\)/);
  assert.match(auth,/element\('accountGate'\)\?\.classList\.add\('hidden'\)/);

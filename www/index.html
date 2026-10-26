@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261025-R18">
+<html lang="es" data-cf-ui-build="UI76-20261026-R19">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1951,7 +1951,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261025-R18</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261026-R19</div>
 
     </div>
   </div>
@@ -5286,7 +5286,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261025-R18'});
+  const response=await window.CFFeedback.send({kind,message,appVersion:'UI76-20261026-R19'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';

@@ -64,5 +64,5 @@ test('R8: UI contiene tutorial, avisos, contactos, feedback y no muestra mensaje
  const check=['cfTutorialOverlay','startCFTutorial','cfSupportModal','cfSuccessFeedback','cfScheduleEventReminders','cfFindInventoryPhotos','cfInventoryTypeButtons','requestId:(cfRecordRequestId','key:removed._key','cfMaybeStartFirstTutorial'];
  for(const text of check)assert.ok(html.includes(text),'Falta '+text);
  assert.doesNotMatch(html,/<p>El registro se ha guardado en Google Sheets<\/p>/);
- assert.ok(html.includes('UI76-20261025-R18'));
+ assert.ok(html.includes('UI76-20261026-R19'));
 });
