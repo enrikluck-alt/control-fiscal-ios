@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261027-R22">
+<html lang="es" data-cf-ui-build="UI76-20261027-R23">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -677,8 +677,9 @@ input, textarea, select {
 #cfR22ContactModal .modalCard{max-height:90dvh;overflow:auto}#cfR22ContactList{max-height:48dvh;overflow:auto;display:grid;gap:6px}#cfR22ContactList button{text-align:left;padding:12px;background:#253b4d;color:#fff;border:1px solid #6d849c;border-radius:10px}
 @media(max-width:375px){.cfR22ContactActions{grid-template-columns:1fr}}
 
-#pendingPartWrap[hidden],#cfR22PaymentPartWrap[hidden],#cfR21AdminEntry[hidden]{display:none!important}
+#pendingPartWrap[hidden],#cfR22PaymentPartWrap[hidden],#cfR21AdminEntry[hidden],#cfR22OperationView[hidden]{display:none!important}
 </style>
+
 <style id="cf-r3-accessibility">
 /* Los relojes y selectores de hora no deben quedar diminutos en iPhone. */
 input[type="time"],#notificationTime,#agendaEventStart,#agendaEventEnd{font-size:23px!important;line-height:1.4;min-height:54px!important;font-variant-numeric:tabular-nums;max-width:100%;}
@@ -1483,6 +1484,32 @@ body.cf-performance-low .cfInventoryThumb,body.cf-performance-low .cfInventoryLi
 .cfTutorialCard{z-index:2!important}
 @media (max-width:450px){.cfR21AdminControls{grid-template-columns:1fr}}
 </style>
+<style id="cf-r23-responsive-layout">
+/* R23: celdas de 6 semanas con altura fija, independientemente de los movimientos. */
+.calendarGrid{grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:82px;min-width:0}
+.calDay{height:82px;min-height:0!important;min-width:0;max-width:100%;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:5px 3px}
+.calDay .calNum{flex:0 0 22px;margin-bottom:0}
+.cfR23CalendarMarkers{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-start;align-content:flex-start;min-width:0;width:100%;max-height:45px;overflow:hidden}
+.cfR23Marker{display:inline-flex;flex:0 0 13px;width:13px;height:13px;border:1px solid rgba(10,20,30,.20);border-radius:50%;padding:0;min-width:0;box-shadow:inset 0 1px 1px rgba(255,255,255,.25);cursor:pointer}
+.cfR23Marker.isEvent{background:#61a7ff}.cfR23Marker.isPurchase{background:#f7c948}.cfR23Marker.isInvoice{background:#d487ee}.cfR23Marker.isIncome{background:#5fe0ae}.cfR23Marker.isUnpaid{background:#ff942f}
+.cfR23More{display:inline-flex;flex:0 0 auto;max-width:100%;min-height:14px;padding:0 2px;border:0;border-radius:5px;background:#344656;color:#f6f9fc;font-size:9px;font-weight:800;line-height:14px;cursor:pointer}
+.cfR23DayRow{display:block;width:100%;margin:5px 0;padding:11px;text-align:left;border:1px solid #516677;border-radius:10px;background:#263746;color:#fff;font-size:13px;overflow-wrap:anywhere}
+.cfR23DayRow strong{display:block;margin-bottom:4px;font-size:13px}.cfR23DayRow small{font-size:11px;color:#cbd5e1}
+/* La cuadrícula de 42 días y los selectores nativos se adaptan a iOS/Android. */
+.field,.two>.field,.emailGrid>.field,.agendaFormGrid>.field,.invoiceGrid>.field,.settingsInvoiceGrid>.field{min-width:0;max-width:100%}
+.input,.select,input[type="date"],input[type="time"],input[type="datetime-local"]{box-sizing:border-box;min-width:0!important;max-width:100%!important}
+input[type="date"],input[type="time"],input[type="datetime-local"],#agendaEventModal input[type="time"],#agendaEventModal input[type="date"]{display:block;width:100%!important;min-height:45px;overflow:hidden;white-space:nowrap;font-size:16px!important;padding-left:8px!important;padding-right:6px!important;line-height:1.35!important}
+input[type="date"]::-webkit-date-and-time-value,input[type="time"]::-webkit-date-and-time-value{min-width:0;max-width:100%;text-align:left}
+input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-edit{min-width:0;max-width:100%;padding:0}
+input[type="date"]::-webkit-calendar-picker-indicator{margin:0 0 0 2px;padding:0;flex-shrink:0}
+.two:has(input[type="date"]),.two:has(input[type="time"]){grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:560px){
+ .emailGrid:has(input[type="date"]),.two:has(input[type="date"]),.two:has(input[type="time"]),.agendaFormGrid:has(input[type="date"]),.invoiceGrid:has(input[type="date"]){grid-template-columns:minmax(0,1fr)}
+ .calendarGrid{grid-auto-rows:76px}.calDay{height:76px;padding:4px 2px}
+ .cfR23CalendarMarkers{gap:2px}.cfR23Marker{width:12px;height:12px;flex-basis:12px}
+}
+@media(orientation:landscape) and (max-height:500px){.calendarGrid{grid-auto-rows:70px}.calDay{height:70px}}
+</style>
 </head>
 
 <body>
@@ -2006,9 +2033,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <p class="settingsHint">Envía sugerencias y errores a los desarrolladores a través del buzón privado de Google Cloud. No se envían tus compras, facturas ni tus hojas de cálculo.</p>
         <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
         <div id="cfFirebaseStatus" class="settingsHint" role="status"></div>
-        <div id="cfR22AdminHint" class="settingsHint" role="status">Comprobando el acceso al buzón de administración…</div>
-        <button class="guideBtn" type="button" onclick="CFR21Admin.check()">🔄 COMPROBAR MI ACCESO DE ADMINISTRADOR</button>
-        <div id="cfR21AdminEntry" hidden><button class="guideBtn" type="button" onclick="CFR21Admin.open()">🛡️ ADMINISTRACIÓN · BUZÓN DE SUGERENCIAS</button><small class="settingsHint">Solo visible si Firebase confirma los permisos de tu cuenta administradora.</small></div>
+        <div id="cfR21AdminEntry" hidden><button class="guideBtn" type="button" onclick="CFR21Admin.open()">🛡️ ADMINISTRACIÓN · BUZÓN DE SUGERENCIAS</button></div>
       </div>
       <div class="settingsGroup" id="accountSettingsGroup">
         <div class="settingsTitle">👤 CUENTA</div>
@@ -2018,7 +2043,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R22</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R23</div>
 
     </div>
   </div>
@@ -2464,6 +2489,7 @@ function openSettings(){
   nav("settings");
   updateAccountSettings();
   cfUpdateFirebaseStatus();
+  void window.CFR21Admin?.check?.(); // Comprobación silenciosa, nunca mostrar a usuarios normales.
   applyAppSettings();
   renderSupplierPanel();
   loadSuppliersFromGoogle(false);
@@ -4067,6 +4093,7 @@ async function deleteCurrentRecord(){
    AGENDA
    ========================================================= */
 let agendaEvents=[];
+window.CFR23CalendarEvents=()=>agendaEvents.slice();
 let agendaMonthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let agendaEditingId=null;
 let cfAgendaLoaded=false;
@@ -4124,8 +4151,9 @@ function renderAgenda(){
     const evs=agendaEvents.filter(e=>String(e.fecha||"").slice(0,10)===key).sort((a,b)=>String(a.horaInicio||"").localeCompare(String(b.horaInicio||"")));
     const todayKey=agendaDayKey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
     const cls=(inMonth?"":" muted")+(key===todayKey?" today":"");
-    const chips=evs.slice(0,3).map(e=>`<span class="calEvent" data-event-id="${esc(e.id)}">${esc((e.horaInicio?e.horaInicio+" ":"")+e.evento)}</span>`).join("")+(evs.length>3?`<span class="calEvent more">+${evs.length-3} más</span>`:"");
-    cells.push(`<div class="calDay${cls}" data-date="${key}"><span class="calNum">${realDate.getDate()}</span>${chips}</div>`);
+    // R23: los eventos y movimientos se combinan en círculos compactos por CFR22Agenda.decorate.
+    // La altura de cada día no depende de cuántas operaciones tenga.
+    cells.push(`<div class="calDay${cls}" data-date="${key}"><span class="calNum">${realDate.getDate()}</span><div class="cfR23CalendarMarkers" aria-label="Movimientos de ${key}"></div></div>`);
   }
   grid.innerHTML=cells.join("");
   grid.querySelectorAll(".calDay").forEach(cell=>cell.addEventListener("click",e=>{
@@ -5427,7 +5455,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R22'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R23'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5473,7 +5501,7 @@ const CF_TOUR_EXTENDED=[
  {title:'Ingresos independientes · pagos parciales',text:'Indica la fecha, el importe acordado y lo recibido. Si el cliente abona una parte, marca Pago parcial; se calculará automáticamente lo que falta y será la cantidad del recordatorio. Más tarde puedes editar el coste de material y el precio.',page:'sale',target:'#formBody'},
  {title:'Proyectos · ampliar facturas',text:'Puedes editar la fecha e importe de los justificantes de material y añadir un nuevo PDF desde Facturas de material por proyecto; las facturas fiscales emitidas no se alteran.',page:'sale',target:'#formBody'},
  {title:'Agenda · operaciones coloreadas',text:'Activa Compras, Facturas o Servicios / ingresos para reconocer por colores qué movimiento ocurrió cada día. El naranja marca cobros pendientes. Toca un indicador para ver su descripción y saltar al registro original.',page:'agenda',target:'#cfR22AgendaLegend'},
- {title:'Ajustes · panel del administrador',text:'Si tus permisos Firebase están autorizados, en Sugerencias y errores aparecerá el buzón de administración, sin salir de la aplicación. Si no se muestra, revisa el acceso y la versión instalada.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Ajustes · panel del administrador',text:'Si esta cuenta tiene permisos en Firebase, aparece automáticamente el buzón en Sugerencias y errores. Los usuarios normales no ven ninguna opción ni comprobación de administración.',page:'settings',target:'#cfSupportGroup'},
  {title:'Agenda · crear un evento',text:'Pulsa Nuevo evento y añade fecha, horas y contacto. El evento se conserva en tu libro de Google.',page:'agenda',target:'#agendaPage .agendaAdd'},
  {title:'Agenda · avisos nativos',text:'Escoge entre al empezar, 15 minutos, 1 hora o días antes. Los avisos de iPhone requieren permiso para notificaciones.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Agenda · ubicación y rutas',text:'Añade la dirección real. El mapa aparece en la ficha; Ruta en Mapas abre la navegación del teléfono, no una pestaña web dentro de la app.',page:'agenda',target:'#agendaPage .calendar'},
@@ -5739,7 +5767,7 @@ startAccountSystem();
  </div>
 </div>
 <div id="cfR22OperationModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfR22OperationTitle" onclick="if(event.target===this)CFR22Agenda.close()">
- <div class="modalCard"><button class="modalClose" type="button" onclick="CFR22Agenda.close()">×</button><h3 id="cfR22OperationTitle">Operación</h3><div id="cfR22OperationBody" class="settingsHint"></div><button type="button" class="save" onclick="CFR22Agenda.viewSelected()">VER REGISTRO</button></div>
+ <div class="modalCard"><button class="modalClose" type="button" onclick="CFR22Agenda.close()">×</button><h3 id="cfR22OperationTitle">Operación</h3><div id="cfR22OperationBody" class="settingsHint"></div><button type="button" class="save" id="cfR22OperationView" onclick="CFR22Agenda.viewSelected()">VER REGISTRO</button></div>
 </div>
 <div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>

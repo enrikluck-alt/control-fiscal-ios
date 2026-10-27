@@ -120,16 +120,52 @@ const agenda=(function(){let selected=null,currentRows=[],account='';
  }
  function decorate(){
   const grid=$('agendaGrid');if(!grid)return;const types=getTypes();currentRows=collect();
+  const events=typeof root.CFR23CalendarEvents==='function'?root.CFR23CalendarEvents():[];
   for(const cell of grid.querySelectorAll('.calDay')){
-   const day=cell.dataset.date;if(!day)continue;const arr=currentRows.filter(r=>r.fecha===day&&types.has(r.kind));
-   for(const r of arr.slice(0,4)){
-    const btn=root.document.createElement('button');btn.type='button';btn.className='cfR22AgendaChip '+(r.pendiente?'isUnpaid':r.kind==='facturas'?'isInvoice':r.kind==='ingresos'?'isIncome':'isPurchase');
-    btn.textContent=(r.pendiente?'🟠 ':'')+r.label;btn.title=r.descripcion||r.label;btn.onclick=event=>{event.stopPropagation();show(r);};cell.appendChild(btn);
+   const day=cell.dataset.date;if(!day)continue;
+   let strip=cell.querySelector('.cfR23CalendarMarkers');if(!strip){strip=root.document.createElement('div');strip.className='cfR23CalendarMarkers';cell.appendChild(strip);}
+   strip.replaceChildren();
+   const operations=currentRows.filter(r=>r.fecha===day&&types.has(r.kind));
+   const dayEvents=events.filter(e=>text(e.fecha).slice(0,10)===day);
+   const combined=[...dayEvents.map(e=>({event:e})),...operations.map(r=>({operation:r}))];
+   // Máximo tres globos + contador. Nunca se añaden filas de altura variable.
+   const visible=combined.length>3?combined.slice(0,2):combined;
+   for(const row of visible){
+    const isEvent=!!row.event,entry=row.operation;
+    const marker=root.document.createElement('button');marker.type='button';
+    marker.className='cfR23Marker '+(isEvent?'isEvent':entry.pendiente?'isUnpaid':entry.kind==='facturas'?'isInvoice':entry.kind==='ingresos'?'isIncome':'isPurchase');
+    const label=isEvent?text(row.event.evento||'Evento'):text(entry.label||'Operación');
+    marker.setAttribute('aria-label',label);marker.title=label;
+    marker.addEventListener('click',ev=>{ev.stopPropagation();if(isEvent)root.openAgendaEventModal?.(row.event.id);else show(entry);});
+    strip.appendChild(marker);
    }
-   if(arr.length>4){const more=root.document.createElement('small');more.textContent='+'+(arr.length-4)+' operaciones';cell.appendChild(more);}
+   if(combined.length>3){
+    const more=root.document.createElement('button');more.type='button';more.className='cfR23More';
+    more.textContent='+'+(combined.length-visible.length);more.setAttribute('aria-label','Ver todos los '+combined.length+' elementos del '+day);
+    more.addEventListener('click',ev=>{ev.stopPropagation();showDay(day,dayEvents,operations);});strip.appendChild(more);
+   }
   }
  }
- function show(row){selected=row;const modal=$('cfR22OperationModal');if(!modal)return;
+ function showDay(day,events,operations){
+  selected=null;const modal=$('cfR22OperationModal'),body=$('cfR22OperationBody');if(!modal||!body)return;
+  $('cfR22OperationTitle').textContent='Actividad · '+day;
+  body.replaceChildren();
+  const action=$('cfR22OperationView');if(action)action.hidden=true;
+  for(const event of events){
+   const btn=root.document.createElement('button');btn.type='button';btn.className='cfR23DayRow';
+   const name=root.document.createElement('strong');name.textContent='🔵 Evento · '+text(event.evento||'Sin título');
+   const detail=root.document.createElement('small');detail.textContent=text(event.horaInicio||'')+' · Abrir evento';
+   btn.append(name,detail);btn.addEventListener('click',()=>{close();root.openAgendaEventModal?.(event.id);});body.appendChild(btn);
+  }
+  for(const row of operations){
+   const btn=root.document.createElement('button');btn.type='button';btn.className='cfR23DayRow';
+   const name=root.document.createElement('strong');name.textContent=(row.pendiente?'🟠 ':'')+row.label;
+   const detail=root.document.createElement('small');detail.textContent=[row.descripcion,money(row.importe)].filter(Boolean).join(' · ');
+   btn.append(name,detail);btn.addEventListener('click',()=>show(row));body.appendChild(btn);
+  }
+  modal.classList.remove('hidden');
+ }
+ function show(row){selected=row;const modal=$('cfR22OperationModal');if(!modal)return;const action=$('cfR22OperationView');if(action)action.hidden=false;
   $('cfR22OperationTitle').textContent=row.label;
   const body=$('cfR22OperationBody');body.replaceChildren();
   const entries=[['Fecha',row.fecha],['Descripción',row.descripcion||'Sin descripción'],['Importe',money(row.importe)],['Estado',row.pendiente?'Pendiente de cobro / pago parcial':'Consulta el estado en su registro']];
@@ -151,6 +187,6 @@ const agenda=(function(){let selected=null,currentRows=[],account='';
   decorate();
  }
  root.document.querySelectorAll('#cfR22AgendaLegend input').forEach(el=>el.addEventListener('change',decorate));
- return Object.freeze({decorate,refresh,close,viewSelected,collect,getTypes});
+ return Object.freeze({decorate,refresh,close,viewSelected,collect,getTypes,showDay});
 })();root.CFR22Agenda=agenda;
 })(window);

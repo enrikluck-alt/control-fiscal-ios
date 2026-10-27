@@ -42,7 +42,7 @@
    const now=root.CFGoogleAccount?.active();
    // Si aún estamos eligiendo libro se acepta únicamente la cuenta validada.
    if(epoch!==generation || (now?.email&&now.email!==expected.email))throw Error('La cuenta ha cambiado durante Firebase Authentication.');
-   state=next;notify();return {uid:next.uid,email:next.email};
+   state=next;notify();try{root.dispatchEvent?.(new Event('cf:firebase-ready'));}catch(_){}return {uid:next.uid,email:next.email};
   })();
   try{return await pending;}finally{pending=null;}
  }
@@ -58,5 +58,6 @@
   if(!active())throw Error('No se ha podido autenticar Firebase para la cuenta activa.');
   return {uid:state.uid,idToken:state.idToken,email:state.email,name:state.name||''};
  }
- root.CFFirebaseAuth=Object.freeze({configured,active,clear,signInWithGoogleIdToken,ensureSignedIn});
+ const peek=()=>active()&&state?.expiresAt>Date.now()+30000?{uid:state.uid,email:state.email,idToken:state.idToken}:null;
+ root.CFFirebaseAuth=Object.freeze({configured,active,peek,clear,signInWithGoogleIdToken,ensureSignedIn});
 })(window);

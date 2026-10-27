@@ -14,7 +14,7 @@ const allowedMime=m=>['application/pdf','image/png','image/jpeg'].includes(m);
 root.CFR21Files=Object.freeze({fileToBase64,allowedMime});
 // ===== Administrador: las reglas de Firestore, NO el frontend, deciden quién accede =====
 const admin=(function(){
-let rows=[],activeAccount=null,confirmed=false;
+let rows=[],activeAccount=null,confirmed=false,checking=null,generation=0;
 const apiBase='https://firestore.googleapis.com/v1/projects/control-fiscal-511118/databases/(default)/documents';
 const collection='control_fiscal_sugerencias';
 const decode=v=>{if(!v||typeof v!=='object')return null;if('stringValue'in v)return v.stringValue;if('timestampValue'in v)return v.timestampValue;if('booleanValue'in v)return v.booleanValue;if('integerValue'in v)return Number(v.integerValue);return null;};
@@ -28,26 +28,44 @@ async function request(url,options={}){
  return json;
 }
 const listUrl=apiBase+'/'+collection+'?pageSize=100&orderBy=fecha%20desc';
+const accountKey=()=>{const a=root.CFGoogleAccount?.active();return a?.id&&a?.email?a.email+':'+a.id:'';};
+function reset(){
+ generation++;confirmed=false;activeAccount=null;rows=[];checking=null;
+ const entry=$('cfR21AdminEntry');if(entry)entry.hidden=true;
+ // Eliminar información de otro administrador al cambiar de cuenta.
+ const holder=$('cfR21AdminCards');if(holder)holder.replaceChildren();
+ const adminPage=$('cfR21AdminPage');if(adminPage&&!adminPage.classList.contains('hidden'))root.openSettings?.();
+}
+// Solo comprobar si el ID token Firebase YA está en memoria tras Google OAuth.
+// No solicitar un segundo inicio de sesión, ni bloquear la UI, ni mostrar errores a usuarios normales.
 async function check(){
- const entry=$('cfR21AdminEntry'),hint=$('cfR22AdminHint');if(!entry)return false;
- entry.hidden=true;confirmed=false;rows=[];activeAccount=null;render();
- if(hint)hint.textContent='Comprobando el acceso al buzón con Firebase…';
- try{
-  const s=session();const auth=await root.CFFirebaseAuth.ensureSignedIn();
-  const output=await root.fetch(listUrl.replace('pageSize=100','pageSize=1'),{headers:{Authorization:'Bearer '+auth.idToken}});
-  same(s);
-  if(!output.ok){
-   const detail=await output.json().catch(()=>({}));
-   if(hint)hint.textContent=output.status===403?'Acceso administrativo no autorizado (HTTP 403). Comprueba que has sustituido el marcador del UID de administrador en las reglas publicadas por el UID real de tu cuenta.':'Error al verificar Firebase (HTTP '+output.status+'): '+text(detail.error?.message||'inténtalo de nuevo.');
-   return false;
-  }
-  await output.json().catch(()=>({}));activeAccount=s.email+':'+s.id;confirmed=true;entry.hidden=false;
-  if(hint)hint.textContent='✅ Permiso confirmado. Pulsa «ADMINISTRACIÓN · BUZÓN DE SUGERENCIAS». ';
-  return true;
- }catch(e){if(hint)hint.textContent='No se pudo comprobar el acceso: '+text(e.message||e);return false;}
+ const entry=$('cfR21AdminEntry');if(!entry)return false;
+ const key=accountKey(),auth=root.CFFirebaseAuth?.peek?.();
+ if(!key||!auth?.idToken){reset();return false;}
+ if(confirmed&&activeAccount===key){entry.hidden=false;return true;}
+ if(checking?.key===key&&checking.uid===auth.uid)return checking.promise;
+ const epoch=++generation;
+ entry.hidden=true;confirmed=false;activeAccount=null;
+ const promise=(async()=>{
+  const controller=typeof AbortController==='function'?new AbortController():null;
+  const timeout=controller?setTimeout(()=>controller.abort(),8000):null;
+  try{
+   const response=await root.fetch(apiBase+'/'+collection+'?pageSize=1',{
+    headers:{Authorization:'Bearer '+auth.idToken},...(controller?{signal:controller.signal}:{})
+   });
+   if(epoch!==generation||key!==accountKey()||auth.uid!==root.CFFirebaseAuth?.peek?.()?.uid)return false;
+   if(!response.ok)return false;
+   confirmed=true;activeAccount=key;entry.hidden=false;return true;
+  }catch(_){return false;}
+  finally{if(timeout!==null)clearTimeout(timeout);}
+ })();
+ checking={key,uid:auth.uid,promise};
+ try{return await promise;}finally{if(checking?.promise===promise)checking=null;}
 }
 async function open(){
- if(!await check()){root.showToastMessage?.('Acceso restringido','Tu cuenta Firebase no tiene permiso de administrador. Verifica el UID de las reglas.');return;}
+ // El panel nunca se muestra si la comprobación automática no fue autorizada.
+ if(!confirmed||activeAccount!==accountKey())return;
+ if(!await check())return;
  page('cfR21AdminPage');return load();
 }
 function close(){page('settingsPage');root.openSettings?.();}
@@ -92,7 +110,13 @@ async function mark(item,estado,btn){
  }catch(e){status('cfR21AdminStatus','Error al actualizar: '+text(e.message||e));btn.disabled=false;}
 }
 ['cfR21AdminFilter','cfR21AdminSearch'].forEach(id=>root.document.addEventListener('input',event=>{if(event.target?.id===id)render();}));
-return Object.freeze({check,open,close,load,render});
+// Eventos emitidos al iniciar/cambiar sesión y al obtener el token Firebase.
+root.addEventListener?.('cf:account-changed',()=>{reset();void check();});
+root.addEventListener?.('cf:firebase-ready',()=>{void check();});
+root.document?.addEventListener?.('visibilitychange',()=>{if(!root.document.hidden)void check();});
+// En instalaciones restauradas, comprobar solo si Firebase ya está listo.
+void check();
+return Object.freeze({check,reset,open,close,load,render});
 })();root.CFR21Admin=admin;
 // ===== Proyecto: adjuntos extra independientes del asiento contable =====
 const materials=(function(){let list=[];let accountKey='',editingId='';
@@ -244,7 +268,4 @@ if(typeof oldFacturacion==='function')root.openFacturacionPage=function(...args)
  }
  return result;
 };
-// Comprobar permisos al entrar en Ajustes, sin confiar en un UID embebido ni mostrar admin a otros usuarios.
-const oldOpenSettings=root.openSettings;
-if(typeof oldOpenSettings==='function')root.openSettings=function(...args){oldOpenSettings.apply(this,args);admin.check().catch(()=>{});};
-})();
+})(window);

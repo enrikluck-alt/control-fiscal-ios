@@ -13,7 +13,7 @@ const element=id=>document.getElementById(id);
 const status=(m,ok=false)=>{const e=element('accountStatus');if(e){e.textContent=m;e.classList.toggle('ok',ok);}};
 const err=e=>String(e&&e.message||e||'Error desconocido');
 function active(){return session&&session.token&&session.email&&session.id?{...session}:null;}
-function clear(){epoch++;session=null;supportGoogleIdentity=null;root.CFFirebaseAuth?.clear?.();root.CFDocBlobCache?.clear?.();}
+function clear(){epoch++;session=null;supportGoogleIdentity=null;root.CFFirebaseAuth?.clear?.();root.CFDocBlobCache?.clear?.();try{root.dispatchEvent?.(new Event('cf:account-changed'));}catch(_){}}
 function cacheKey(email){return 'cf_google_book_'+email.toLowerCase();}
 function normalize(raw){let d=raw;if(typeof d==='string'){try{d=JSON.parse(d)}catch{d={raw:d.slice(0,150)}}}return d||{};}
 async function http(url,method='GET',data,tokenOverride){
@@ -137,6 +137,7 @@ async function useBook(token,email,id,fromInteractiveLogin=false){
  root.localStorage.setItem('cf_account_sheet_url_v76','https://docs.google.com/spreadsheets/d/'+id+'/edit');
  root.localStorage.setItem(cacheKey(email),id);
  session={token,email,id};
+ try{root.dispatchEvent?.(new Event('cf:account-changed'));}catch(_){}
  if(typeof root.updateAccountSettings==='function')root.updateAccountSettings();
  // Restaurar exactamente la navegación de V76. No debemos reabrir la última
  // ventana (Ajustes, Compras, etc.) después de cambiar de usuario.

@@ -58,6 +58,6 @@ test('R21: selección granular, consentimiento, spotlight y acceso interno',()=>
  for(const token of ['compras','emitidas','independientes','material'])assert.match(html,new RegExp('value="'+token+'"'));
  assert.match(html,/CFR21Export\.send\(\)/);
  assert.match(html,/cfSettingsShow\(index\)/);
- assert.match(features,/isAdmin|permiso de administrador/);
+ assert.match(features,/root\.CFFirebaseAuth\?\.peek|permiso de administrador/);
  assert.match(features,/box-shadow|spotlight/);
 });

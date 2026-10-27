@@ -90,6 +90,6 @@ test('R22: GitHub conserva módulos R21/R22 y empaqueta los contactos nativos',(
  assert.match(nativePicker,/result\?\.contacts\?\.\[0\]/);
  assert.match(nativePicker,/emailAddresses/);
  assert.match(nativePicker,/ContactProperty\.PhoneNumber/);
- assert.match(html,/CFR21Admin\.open\(\)/);assert.match(html,/CFR21Admin\.check\(\)/);
+ assert.match(html,/CFR21Admin\.open\(\)/);assert.doesNotMatch(html,/onclick="CFR21Admin\.check\(\)"/);
  assert.match(html,/cfR22AgendaLegend/);assert.match(html,/CFR21Materials\.openForProject/);
 });
