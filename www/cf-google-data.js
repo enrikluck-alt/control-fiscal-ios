@@ -386,6 +386,14 @@ async function action(p){
   const x=parseJSON(p.evento);if(!x.evento||!x.fecha)throw Error('Indica evento y fecha.');if(!x.id)x.id=ident('EV');await upsert(s,'Agenda',x);return {ok:true,id:x.id};
  }
  case 'eliminarEvento':return remove(s,'Agenda',x=>String(x.id)===String(p.id));
+ case 'listarFacturasMaterialProyecto':return {ok:true,facturas:await items(s,'CF_Material_Facturas')};
+ case 'guardarFacturaMaterialProyecto':{
+  const x=parseJSON(p.factura);
+  if(!x.proyecto||!x.proveedor||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(x.fecha||'')))throw Error('Indica proyecto, proveedor y fecha válida.');
+  if(!(num(x.importe)>0)||!/^https:\/\/drive\.google\.com\//.test(String(x.documentoUrl||'')))throw Error('Indica importe y adjunta una factura en Drive.');
+  x.id=ident('MAT');x.creado=now();x.proyecto=String(x.proyecto).trim().slice(0,120);x.proveedor=String(x.proveedor).trim().slice(0,120);x.importe=num(x.importe);
+  await upsert(s,'CF_Material_Facturas',x);return {ok:true,id:x.id};
+ }
  case 'listarIngresosPendientes':{const [income,states]=await Promise.all([all(s,['Ingresos','Ingresos independientes','Ingresos pendientes']),paymentStates(s)]);return {ok:true,ingresos:income.map(x=>paymentAttach(x,states,'ingreso'))};}
  case 'guardarIngresoPendiente':{
   const x=parseJSON(p.ingreso);if(!x.persona||!x.servicio)throw Error('Indica persona y servicio.');if(!x.id)x.id=ident('IP');x.fecha=x.fecha||now();x.estadoCobro=x.estadoCobro==='pagada'?'pagada':'pendiente';x.importePrevisto=num(x.importePrevisto||x.cobrado);x.cobrado=x.estadoCobro==='pagada'?x.importePrevisto:0;x.beneficio=x.cobrado-num(x.material);await upsert(s,'Ingresos',x);return {ok:true,id:x.id};

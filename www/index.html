@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261026-R20">
+<html lang="es" data-cf-ui-build="UI76-20261027-R21">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1443,6 +1443,27 @@ body.cf-performance-low .cfInventoryThumb,body.cf-performance-low .cfInventoryLi
 @media(max-width:360px){.cfR20PaymentActions{grid-template-columns:1fr}}
 
 </style>
+<style id="cf-r21-panel-style">
+/* R21 · panel privado, colecciones por proyecto, exportación, foco tutorial */
+.cfR21Page .page{padding-bottom:110px}
+.cfR21AdminControls{display:grid;grid-template-columns:minmax(130px,1fr) minmax(150px,2fr);gap:10px;margin:12px 0}
+.cfR21AdminControls button{grid-column:1/-1}
+.cfR21AdminCards{display:grid;gap:12px;padding:12px 0}
+.cfR21Message{border:1px solid var(--line,#46586a);border-radius:15px;padding:15px;background:var(--card,#1d2936);color:var(--text,#fff);overflow-wrap:anywhere}
+.cfR21Message h3{margin:5px 0;font-size:17px}.cfR21Message p{white-space:pre-wrap;line-height:1.55;margin:12px 0}
+.cfR21Meta{font-size:12px;color:var(--muted,#a5b5c3);margin-bottom:8px}
+.cfR21Actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cfR21Actions button,.cfR21Actions a{display:inline-flex;padding:10px 12px;border-radius:10px;color:inherit;border:1px solid #667d96;background:#26394d;text-decoration:none}
+.cfR21DocTypes{display:grid;gap:10px;padding:11px;border:1px solid var(--line,#46586a);border-radius:12px;margin:10px 0}
+.cfR21DocTypes label,.cfR21ExportItem{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.5;min-height:28px}
+.cfR21DocTypes input,.cfR21ExportItem input{width:20px;height:20px;flex-shrink:0}
+.cfR21ExportItems{display:grid;gap:8px;margin:12px 0;max-height:300px;overflow:auto}
+.cfR21ExportItem{padding:10px;border-radius:10px;border:1px solid var(--line,#46586a);background:var(--card,#1d2936)}
+.cfTutorialOverlay{background:transparent!important;isolation:isolate}
+#cfTourSpotlight{display:none;position:fixed;z-index:0;pointer-events:none;border:3px solid #ffdc21;border-radius:12px;box-shadow:0 0 0 200vmax rgba(0,0,0,.76),0 0 24px 2px rgba(255,220,33,.25);transition:left .15s,top .15s,width .15s,height .15s}
+.cfTourHighlight{outline:3px solid #ffdc21!important;outline-offset:4px!important;box-shadow:none!important;z-index:auto!important}
+.cfTutorialCard{z-index:2!important}
+@media (max-width:450px){.cfR21AdminControls{grid-template-columns:1fr}}
+</style>
 </head>
 
 <body>
@@ -1733,30 +1754,31 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
     <div class="emailPanel">
       <h3>📧 ENVIAR DOCUMENTACIÓN AL GESTOR</h3>
-      <p>Envía por correo las facturas adjuntadas de compras, facturas emitidas o ambas.</p>
-      <div class="field">
-        <label>Documentación</label>
-        <select id="emailTipo" class="select">
-          <option value="todas">Todas (compras + emitidas)</option>
-          <option value="compras">Solo compras</option>
-          <option value="emitidas">Solo facturas emitidas</option>
-        </select>
+      <p>Elige el intervalo y qué documentación privada deseas enviar. Revisa después cada archivo marcando o desmarcando su casilla. No se envía nada sin confirmación.</p>
+      <div class="cfR21DocTypes" id="cfR21DocTypes">
+        <label><input type="checkbox" value="compras" checked> Compras con factura</label>
+        <label><input type="checkbox" value="emitidas" checked> Facturas de ingreso / emitidas</label>
+        <label><input type="checkbox" value="independientes" checked> Ingresos independientes con justificante</label>
+        <label><input type="checkbox" value="material" checked> Facturas de material por proyecto</label>
       </div>
       <div class="emailGrid">
         <div class="field">
           <label>Desde</label>
-          <input id="emailDesde" class="input" type="month">
+          <input id="emailDesde" class="input" type="date" onchange="CFR21Export.prepare()">
         </div>
         <div class="field">
           <label>Hasta</label>
-          <input id="emailHasta" class="input" type="month">
+          <input id="emailHasta" class="input" type="date" onchange="CFR21Export.prepare()">
         </div>
       </div>
       <div class="field">
         <label>Correo electrónico</label>
         <input id="emailDestino" class="input" type="email" inputmode="email" autocomplete="email" placeholder="ejemplo@correo.com">
       </div>
-      <button id="emailBtn" class="emailBtn" type="button" onclick="sendInvoicesByEmail()">ENVIAR DOCUMENTACIÓN</button>
+      <button class="guideBtn" type="button" onclick="CFR21Export.prepare()">🔎 BUSCAR DOCUMENTOS EN LAS FECHAS</button>
+      <div id="cfR21ExportCount" class="settingsHint" role="status"></div>
+      <div id="cfR21ExportItems" class="cfR21ExportItems"></div>
+      <button id="emailBtn" class="emailBtn" type="button" onclick="CFR21Export.send()">📤 ENVIAR SOLO LOS SELECCIONADOS</button>
       <div id="emailStatus" class="emailStatus"></div>
     </div>
   </div>
@@ -1959,6 +1981,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <p class="settingsHint">Envía sugerencias y errores a los desarrolladores a través del buzón privado de Google Cloud. No se envían tus compras, facturas ni tus hojas de cálculo.</p>
         <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
         <div id="cfFirebaseStatus" class="settingsHint" role="status"></div>
+        <div id="cfR21AdminEntry" hidden><button class="guideBtn" type="button" onclick="CFR21Admin.open()">🛡️ ADMINISTRACIÓN · BUZÓN DE SUGERENCIAS</button><small class="settingsHint">Solo visible si Firebase confirma los permisos de tu cuenta administradora.</small></div>
       </div>
       <div class="settingsGroup" id="accountSettingsGroup">
         <div class="settingsTitle">👤 CUENTA</div>
@@ -1968,12 +1991,35 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261026-R20</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R21</div>
 
     </div>
   </div>
 </section>
 
+<section id="cfR21AdminPage" class="hidden cfR21Page">
+  <div class="header"><button class="back" type="button" onclick="CFR21Admin.close()">‹</button><div class="headericon">🛡️</div><div><h2>ADMINISTRACIÓN</h2><p>Sugerencias recibidas · Firestore privado</p></div></div>
+  <div class="page">
+    <div id="cfR21AdminStatus" class="settingsHint" role="status"></div>
+    <div class="cfR21AdminControls"><select class="select" id="cfR21AdminFilter" aria-label="Filtrar sugerencias"><option value="all">Todas</option><option value="pendiente">Pendientes</option><option value="leida">Leídas</option><option value="respondida">Respondidas</option></select><input class="input" id="cfR21AdminSearch" placeholder="Buscar usuario o mensaje" aria-label="Buscar sugerencias"><button class="guideBtn" type="button" onclick="CFR21Admin.load()">↻ Actualizar</button></div>
+    <div id="cfR21AdminCards" class="cfR21AdminCards"></div>
+  </div>
+</section>
+<section id="cfR21MaterialPage" class="hidden cfR21Page">
+  <div class="header"><button class="back" type="button" onclick="CFR21Materials.close()">‹</button><div class="headericon">📁</div><div><h2>FACTURAS DE MATERIAL</h2><p>Organizadas por proyecto · Drive privado</p></div></div>
+  <div class="page">
+    <div class="settingsCard">
+      <h3>Nueva factura de material</h3>
+      <div class="field"><label for="cfR21Project">Proyecto</label><input id="cfR21Project" class="input" maxlength="120" placeholder="Ej. Montaje escenario - Octubre"></div>
+      <div class="two"><div class="field"><label for="cfR21Vendor">Proveedor</label><input id="cfR21Vendor" class="input" maxlength="120" placeholder="Ej. Tienda electrónica"></div><div class="field"><label for="cfR21MaterialDate">Fecha factura</label><input id="cfR21MaterialDate" class="input" type="date"></div></div>
+      <div class="two"><div class="field"><label for="cfR21MaterialAmount">Total factura (€)</label><input id="cfR21MaterialAmount" class="input" type="number" min="0" step=".01" inputmode="decimal"></div><div class="field"><label for="cfR21MaterialFile">PDF / foto</label><input id="cfR21MaterialFile" class="input" type="file" accept="application/pdf,image/png,image/jpeg"></div></div>
+      <p class="settingsHint">Las facturas se vinculan al proyecto, pero no se suman a Compras automáticamente. Registra cada compra en Compras para evitar duplicidades y facilitar la contabilidad.</p>
+      <button class="save" id="cfR21MaterialSave" type="button" onclick="CFR21Materials.save()">💾 GUARDAR FACTURA EN PROYECTO</button>
+      <div id="cfR21MaterialStatus" class="settingsHint" role="status"></div>
+    </div>
+    <h3>Facturas guardadas</h3><div id="cfR21MaterialList" class="cfR21AdminCards"></div>
+  </div>
+</section>
 <section id="recordsPage" class="hidden">
   <div class="header">
     <button class="back" onclick="goHome()">‹</button>
@@ -2254,7 +2300,7 @@ function calc(total,iva){
 }
 
 function only(id){
-  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage","documentsPage"].forEach(x=>{
+  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage","documentsPage","cfR21AdminPage","cfR21MaterialPage"].forEach(x=>{
     $(x).classList.toggle("hidden",x!==id);
   });
   setTimeout(updateScrollIndicator,0);
@@ -2856,7 +2902,7 @@ function renderPendingIncomeList(){
   const arr=pendingIncomeRecords.slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   wrap.innerHTML=arr.length ? arr.slice(0,8).map(item=>{
     const benefit=Number(item.beneficio)||0;
-    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}</span></div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
+    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}${item.proyecto?' · Proyecto: '+esc(item.proyecto):''}</span>${item.facturaUrl?`<button type="button" class="cfR20SmallBtn" data-cf-doc-url="${esc(item.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver justificante</button>`:''}</div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
   }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos independientes registrados.</div>';
 }
 
@@ -2906,6 +2952,8 @@ function openPendingIncomeForm(){
           <div class="box pendingBenefitBox"><small>Beneficio</small><strong id="pendingBenefitValue">0,00 €</strong></div>
         </div>
       </div>
+      <div class="field"><label>Proyecto asociado (opcional)</label><input id="pendingProject" class="input" maxlength="120" placeholder="Ej. Instalación de sonido · Cliente"></div>
+      <div class="field"><label>Factura / justificante del ingreso (opcional)</label><input id="pendingInvoiceFile" class="input" type="file" accept="application/pdf,image/png,image/jpeg"><small class="settingsHint">PDF, JPG o PNG, hasta 5 MB. Se guarda en tu Drive privado y se podrá incluir en el envío al gestor.</small></div>
       <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">GUARDAR INGRESO INDEPENDIENTE</button>
       <div id="pendingIncomeMsg" class="msg"></div>
     </div>`;
@@ -2915,7 +2963,9 @@ function openPendingIncomeForm(){
 function recalcPendingIncome(){
   const material=Number($("pendingMaterial")?.value)||0;
   const charged=Number($("pendingCharged")?.value)||0;
-  const benefit=charged-material;
+  const paid=$('pendingPaymentState')?.value==='pagada';
+  const actuallyCollected=paid?charged:0;
+  const benefit=actuallyCollected-material;
   if($("pendingMaterialValue"))$("pendingMaterialValue").textContent=euro(material);
   if($("pendingChargedValue"))$("pendingChargedValue").textContent=euro(actuallyCollected);
   const b=$("pendingBenefitValue");
@@ -2927,14 +2977,24 @@ async function savePendingIncome(){
   const msg=$("pendingIncomeMsg"), btn=$("pendingIncomeSaveBtn");
   const persona=$("pendingPerson")?.value.trim()||"";
   const servicio=$("pendingService")?.value.trim()||"";
-  const calc=recalcPendingIncome();
+  let calc;
+  try{calc=recalcPendingIncome();}catch(e){if(msg){msg.className='msg err';msg.textContent='No se pudo calcular el ingreso: '+(e.message||e);}return;}
   if(!persona||!servicio){msg.className="msg err";msg.textContent="Indica la persona y el tipo de servicio.";return;}
   if(calc.charged<=0){msg.className="msg err";msg.textContent="El importe a cobrar debe ser mayor que 0.";return;}
   if($('pendingEmail')?.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('pendingEmail').value.trim())){msg.className='msg err';msg.textContent='Revisa el correo del cliente.';return;}
   if($('pendingPhone')?.value.trim()&&!/^[+\d() .-]{6,35}$/.test($('pendingPhone').value.trim())){msg.className='msg err';msg.textContent='Revisa el teléfono del cliente.';return;}
   btn.disabled=true;msg.className="msg";msg.textContent="Guardando...";
   try{
-    const result=await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:$('pendingPaymentState')?.value||'pendiente',correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:String($('pendingPhone')?.value||'').trim()})});
+    const invoiceFile=$('pendingInvoiceFile')?.files?.[0]||null;
+    let facturaUrl='';
+    if(invoiceFile){
+      if(!['application/pdf','image/jpeg','image/png'].includes(invoiceFile.type)||invoiceFile.size>5*1024*1024)throw Error('El justificante debe ser PDF, JPG o PNG de hasta 5 MB.');
+      msg.textContent='Subiendo el justificante a tu Drive privado…';
+      const base64=await window.CFR21Files.fileToBase64(invoiceFile);
+      facturaUrl=await window.CFGoogleUploads.upload(invoiceFile.name,invoiceFile.type,base64,window.CFGoogleAccount.active());
+    }
+    msg.textContent='Guardando ingreso en Google Sheets…';
+    const result=await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:$('pendingPaymentState')?.value||'pendiente',correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:String($('pendingPhone')?.value||'').trim(),proyecto:String($('pendingProject')?.value||'').trim().slice(0,120),facturaUrl})});
     if(!result || result.ok!==true || !result.id){
       throw new Error("Google Sheets no ha confirmado el guardado. Comprueba los permisos de la cuenta.");
     }
@@ -4712,8 +4772,8 @@ async function openSummary(){
 function setDefaultEmailMonths(){
   const now=new Date();
   const key=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
-  if($("emailDesde") && !$("emailDesde").value) $("emailDesde").value=key;
-  if($("emailHasta") && !$("emailHasta").value) $("emailHasta").value=key;
+  if($("emailDesde") && (!$("emailDesde").value||$("emailDesde").value.length===7)) $("emailDesde").value=key+'-01';
+  if($("emailHasta") && (!$("emailHasta").value||$("emailHasta").value.length===7)) $("emailHasta").value=key+'-'+String(new Date(now.getFullYear(),now.getMonth()+1,0).getDate()).padStart(2,'0');
   const saved=localStorage.getItem("cf_email_destino")||"";
   if($("emailDestino") && !$("emailDestino").value) $("emailDestino").value=saved;
 }
@@ -5314,7 +5374,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261026-R20'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R21'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5377,6 +5437,10 @@ const CF_TOUR_EXTENDED=[
  {title:'Ajustes · sugerencias y consentimiento',text:'Al enviar una sugerencia puedes permitir o no recibir una respuesta por correo. Solo si aceptas, el buzón recibirá tu dirección de email verificada; tus hojas fiscales no se comparten.',page:'settings',target:'#cfSupportGroup'},
  {title:'Ajustes · Firebase',text:'Si el buzón no está conectado, el propietario debe configurar Authentication, Firestore y las reglas antes de publicar otra IPA.',page:'settings',target:'#cfSupportGroup'},
  {title:'Seguridad · cambio de usuario',text:'Antes de prestar el teléfono, cierra sesión. Cada cuenta accede a su propia información de Google.',page:'settings',target:'#accountSettingsGroup'},
+ {title:'Administración · buzón privado',text:'Si tu cuenta es la administradora autorizada, en Ajustes → Sugerencias encontrarás el botón Administración. Las sugerencias se consultan dentro de Control Fiscal, sin acceder a los datos fiscales de otras cuentas.',page:'settings',target:'#cfSupportGroup'},
+ {title:'Compras · facturas de material y proyectos',text:'En Facturación abre Facturas de material por proyecto. Guarda justificantes de varios proveedores bajo un mismo proyecto; evita registrarlos dos veces como gastos.',page:'sale',target:'#formBody'},
+ {title:'Ingresos independientes · guardar y adjuntar',text:'Desde Facturación registra un ingreso independiente, indica pago pendiente o recibido y añade opcionalmente su factura. El botón Guardar confirma el resultado de Google Sheets.',page:'sale',target:'#formBody'},
+ {title:'Gestor · selección de archivos',text:'En Resumen marca Compras, Facturas, Ingresos independientes o Material por proyecto; elige fechas y revisa cada casilla antes de enviar por Gmail.',page:'summary',target:'#summaryPage .emailPanel'},
  {title:'Final · dónde volver al tutorial',text:'Puedes volver a elegir Tutorial rápido o Tutorial extenso desde Ajustes cuando lo necesites.',page:'settings',target:'#settingsPage'}
 ];
 let cfTourIndex=-1,cfTourFocused=null,cfTourMode='quick';
@@ -5398,22 +5462,29 @@ function cfShowTourStep(){
  try{
   switch(step.page){case 'home':goHome();break;case 'buy':openForm('Compra');break;case 'sale':openForm('Facturado');break;case 'agenda':openAgenda();break;case 'inventory':openInventory();break;case 'documents':CFDocuments.open();break;case 'summary':openSummary();break;case 'settings':openSettings();break;}
  }catch(e){console.warn('Tutorial sin poder abrir sección',e);}
+ // Abrir el apartado real de Ajustes para que el paso no señale una sección cerrada.
+ if(step.page==='settings' && typeof cfSettingsGroups==='function'){
+   const wanted=window.CFR21Tour?.settingsTarget?.(step.title)||'';
+   if(wanted){const groups=cfSettingsGroups();const index=groups.findIndex(g=>(g.querySelector('.settingsTitle')?.textContent||'').toLocaleLowerCase('es').includes(wanted));if(index>=0){cfSettingsShow(index);step._activeTarget='#settingsPage .settingsGroup:not([hidden]),#cfDesignPanel:not([hidden])';}}
+ }
  overlay.classList.remove('hidden');
  $('cfTutorialProgress').textContent='PASO '+(cfTourIndex+1)+' DE '+cfTourSteps().length;
  $('cfTutorialTitle').textContent=step.title;
  $('cfTutorialBody').textContent=step.text;
  $('cfTutorialNext').textContent=cfTourIndex===cfTourSteps().length-1?'TERMINAR ✓':'SIGUIENTE ›';
  setTimeout(()=>{
-  const target=document.querySelector(step.target);
+  const target=document.querySelector(step._activeTarget||step.target);
   if(target&&!overlay.classList.contains('hidden')){
    cfTourFocused=target;target.classList.add('cfTourHighlight');
    target.scrollIntoView({block:'center',behavior:'instant'});
-  }
+   requestAnimationFrame(()=>window.CFR21Tour?.spotlight?.(target));
+  }else window.CFR21Tour?.clear?.();
  },100);
 }
 function advanceCFTutorial(){if(cfTourIndex<0)return;cfTourIndex++;cfShowTourStep();}
 function finishCFTutorial(){
  if(cfTourFocused){cfTourFocused.classList.remove('cfTourHighlight');cfTourFocused=null;}
+ window.CFR21Tour?.clear?.();
  cfTourIndex=-1;$('cfTutorialOverlay')?.classList.add('hidden');
  if(cfAccountEmail())localStorage.setItem(cfTutorialSeenKey(),'1');
  goHome();
@@ -5880,5 +5951,6 @@ startAccountSystem();
 <script src="cf-r18-features.js"></script>
 <script src="cf-r18-languages.js"></script>
 <script src="cf-r20-payments.js"></script>
+<script src="cf-r21-features.js"></script>
 </body>
 </html>
