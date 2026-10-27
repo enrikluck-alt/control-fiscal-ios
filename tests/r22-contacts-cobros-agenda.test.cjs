@@ -83,7 +83,13 @@ test('R22: GitHub conserva módulos R21/R22 y empaqueta los contactos nativos',(
  const workflow=source('.github/workflows/build-ios.yml');const packageJson=JSON.parse(source('package.json'));
  for(const needed of ['cf-r21-features.js','cf-r22-features.js','contacts.bundle.js'])assert.ok(workflow.includes(needed),needed);
  assert.match(workflow,/npm run build:contacts/);assert.match(workflow,/NSContactsUsageDescription/);
- assert.equal(packageJson.dependencies['@capacitor/contacts'],'8.0.0');
+ assert.equal(packageJson.dependencies['@capgo/capacitor-contacts'],'8.1.10');
+ assert.equal(packageJson.dependencies['@capacitor/contacts'],undefined,'No usar el paquete sin versión publicable');
+ const nativePicker=source('contacts-entry.js');
+ assert.match(nativePicker,/CapacitorContacts\.pickContact\(options\)/);
+ assert.match(nativePicker,/result\?\.contacts\?\.\[0\]/);
+ assert.match(nativePicker,/emailAddresses/);
+ assert.match(nativePicker,/ContactProperty\.PhoneNumber/);
  assert.match(html,/CFR21Admin\.open\(\)/);assert.match(html,/CFR21Admin\.check\(\)/);
  assert.match(html,/cfR22AgendaLegend/);assert.match(html,/CFR21Materials\.openForProject/);
 });

@@ -25,7 +25,7 @@
     "@capacitor/screen-orientation": "8.0.2",
     "pdfjs-dist": "4.10.38",
     "@capacitor/app-launcher": "8.0.0",
-    "@capacitor/contacts": "8.0.0"
+    "@capgo/capacitor-contacts": "8.1.10"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.2",
