@@ -18,17 +18,18 @@ function sheetHarness(){
  vm.runInNewContext(data,{window:root,URLSearchParams,console});
  return {action:root.CFGoogleData.action,tab,changeId:id=>account.id=id};
 }
-test('R21: guardar ingreso pendiente no hace referencia a una variable no definida',()=>{
- const source=html.match(/function recalcPendingIncome\(\)\{[\s\S]*?\n\}/)?.[0];assert.ok(source);
+test('R24: el ingreso independiente calcula lo cobrado parcial aunque el selector no se toque',()=>{
+ const source=html.match(/function recalcPendingIncome\(source='amount'\)\{[\s\S]*?\n\}/)?.[0];assert.ok(source);
  const els=new Map();
- const ids=['pendingMaterial','pendingCharged','pendingPaymentState','pendingMaterialValue','pendingChargedValue','pendingBenefitValue'];
+ const ids=['pendingMaterial','pendingCharged','pendingPaymentState','pendingPaidPart','pendingMaterialValue','pendingChargedValue','pendingDueValue','pendingBenefitValue'];
  for(const id of ids)els.set(id,{value:'',textContent:'',parentElement:{classList:{toggle(){}}}});
- els.get('pendingMaterial').value='60';els.get('pendingCharged').value='500';els.get('pendingPaymentState').value='pendiente';
- const $=id=>els.get(id);
- const euro=x=>String(Number(x));
+ els.get('pendingMaterial').value='60';els.get('pendingCharged').value='500';els.get('pendingPaymentState').value='pendiente';els.get('pendingPaidPart').value='0';
+ const $=id=>els.get(id),euro=x=>String(Number(x));
  const ctx={$,euro};vm.runInNewContext(source+';globalThis.evalCalc=recalcPendingIncome;',ctx);
  let value=ctx.evalCalc();assert.equal(value.charged,500);assert.equal(value.actuallyCollected,0);assert.equal(value.benefit,-60);
- els.get('pendingPaymentState').value='pagada';value=ctx.evalCalc();assert.equal(value.actuallyCollected,500);assert.equal(value.benefit,440);
+ els.get('pendingPaidPart').value='50';value=ctx.evalCalc('amount');assert.equal(value.actuallyCollected,50);assert.equal(value.state,'parcial');assert.equal(value.benefit,-10);
+ assert.equal(els.get('pendingDueValue').textContent,'450');
+ els.get('pendingPaymentState').value='pagada';value=ctx.evalCalc('state');assert.equal(value.actuallyCollected,500);assert.equal(value.benefit,440);
 });
 test('R21: proyecto permite múltiples facturas de distintos proveedores en Drive personal',async()=>{
  const {action,tab,changeId}=sheetHarness();

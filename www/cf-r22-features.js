@@ -146,38 +146,71 @@ const agenda=(function(){let selected=null,currentRows=[],account='';
    }
   }
  }
+ let activeDay='';
+ function mode(dayMode){
+  const add=$('cfR24DayAdd'),back=$('cfR24ReturnToDay'),view=$('cfR22OperationView');
+  if(add)add.hidden=!dayMode;
+  if(back)back.hidden=dayMode||!activeDay;
+  if(view)view.hidden=dayMode;
+ }
+ function makeDayRow(title,description,color,onClick){
+  const btn=root.document.createElement('button');btn.type='button';btn.className='cfR23DayRow';
+  const layout=root.document.createElement('span');layout.className='cfR24DayRowContent';
+  const dot=root.document.createElement('span');dot.className='cfR24DayDot '+color;dot.setAttribute('aria-hidden','true');
+  const label=root.document.createElement('span');label.className='cfR24DayRowText';
+  const strong=root.document.createElement('strong');strong.textContent=title;
+  const small=root.document.createElement('small');small.textContent=description;
+  label.append(strong,small);layout.append(dot,label);btn.appendChild(layout);
+  btn.addEventListener('click',onClick);return btn;
+ }
+ function openDay(day){
+  if(!isDate(day))return;
+  const events=(typeof root.CFR23CalendarEvents==='function'?root.CFR23CalendarEvents():[])
+    .filter(e=>text(e.fecha).slice(0,10)===day)
+    .sort((a,b)=>text(a.horaInicio||'').localeCompare(text(b.horaInicio||'')));
+  const operations=collect().filter(r=>r.fecha===day&&getTypes().has(r.kind))
+    .sort((a,b)=>({compras:0,facturas:1,ingresos:2}[a.kind]??3)-({compras:0,facturas:1,ingresos:2}[b.kind]??3)||text(a.label).localeCompare(text(b.label)));
+  showDay(day,events,operations);
+ }
  function showDay(day,events,operations){
-  selected=null;const modal=$('cfR22OperationModal'),body=$('cfR22OperationBody');if(!modal||!body)return;
-  $('cfR22OperationTitle').textContent='Actividad · '+day;
-  body.replaceChildren();
-  const action=$('cfR22OperationView');if(action)action.hidden=true;
+  activeDay=day;selected=null;
+  const modal=$('cfR22OperationModal'),body=$('cfR22OperationBody');if(!modal||!body)return;
+  $('cfR22OperationTitle').textContent='📅 '+day.split('-').reverse().join('/');
+  body.replaceChildren();mode(true);
+  const section=(label)=>{const h=root.document.createElement('h4');h.className='cfR24DayHeading';h.textContent=label;body.appendChild(h);};
+  section('EVENTOS · '+events.length);
+  if(!events.length){const p=root.document.createElement('p');p.textContent='No hay eventos para este día.';body.appendChild(p);}
   for(const event of events){
-   const btn=root.document.createElement('button');btn.type='button';btn.className='cfR23DayRow';
-   const name=root.document.createElement('strong');name.textContent='🔵 Evento · '+text(event.evento||'Sin título');
-   const detail=root.document.createElement('small');detail.textContent=text(event.horaInicio||'')+' · Abrir evento';
-   btn.append(name,detail);btn.addEventListener('click',()=>{close();root.openAgendaEventModal?.(event.id);});body.appendChild(btn);
+   const parts=[text(event.horaInicio),text(event.cliente),text(event.ubicacion)].filter(Boolean);
+   body.appendChild(makeDayRow(text(event.evento||'Evento sin título'),parts.join(' · ')||'Ver evento','isEvent',()=>{
+    close();root.openAgendaEventModal?.(event.id);
+   }));
   }
+  section('COMPRAS, FACTURAS E INGRESOS · '+operations.length);
+  if(!operations.length){const p=root.document.createElement('p');p.textContent='No hay otras operaciones para este día.';body.appendChild(p);}
   for(const row of operations){
-   const btn=root.document.createElement('button');btn.type='button';btn.className='cfR23DayRow';
-   const name=root.document.createElement('strong');name.textContent=(row.pendiente?'🟠 ':'')+row.label;
-   const detail=root.document.createElement('small');detail.textContent=[row.descripcion,money(row.importe)].filter(Boolean).join(' · ');
-   btn.append(name,detail);btn.addEventListener('click',()=>show(row));body.appendChild(btn);
+   const color=row.pendiente?'isUnpaid':row.kind==='compras'?'isPurchase':row.kind==='facturas'?'isInvoice':'isIncome';
+   const state=row.pendiente?' · 🟠 Pendiente de cobro':'';
+   body.appendChild(makeDayRow(row.label,[row.descripcion,money(row.importe)].filter(Boolean).join(' · ')+state,color,()=>show(row)));
   }
   modal.classList.remove('hidden');
  }
- function show(row){selected=row;const modal=$('cfR22OperationModal');if(!modal)return;const action=$('cfR22OperationView');if(action)action.hidden=false;
+ function createEventForDay(){const day=activeDay;close();if(isDate(day))root.openAgendaEventModal?.(null,day);}
+ function backToDay(){if(activeDay)openDay(activeDay);}
+ function show(row){selected=row;const modal=$('cfR22OperationModal');if(!modal)return;mode(false);
   $('cfR22OperationTitle').textContent=row.label;
   const body=$('cfR22OperationBody');body.replaceChildren();
   const entries=[['Fecha',row.fecha],['Descripción',row.descripcion||'Sin descripción'],['Importe',money(row.importe)],['Estado',row.pendiente?'Pendiente de cobro / pago parcial':'Consulta el estado en su registro']];
   for(const [label,value] of entries){const p=root.document.createElement('p');const strong=root.document.createElement('strong');strong.textContent=label+': ';p.appendChild(strong);p.appendChild(root.document.createTextNode(value));body.appendChild(p);}
   modal.classList.remove('hidden');
  }
- function close(){$('cfR22OperationModal')?.classList.add('hidden');selected=null;}
+ function close(){$('cfR22OperationModal')?.classList.add('hidden');selected=null;activeDay='';}
  async function viewSelected(){const r=selected;if(!r)return;close();
   if(r.material){await root.CFR21Materials?.openItem?.(r.id);return;}
   if(r.kind==='ingresos'){root.openPendingIncomeForm?.(r.id);return;}
   root.openRecordData?.(r.ref);
  }
+
  async function refresh(){
   const key=accountKey();if(!key){currentRows=[];account='';decorate();return;}
   account=key;
@@ -187,6 +220,6 @@ const agenda=(function(){let selected=null,currentRows=[],account='';
   decorate();
  }
  root.document.querySelectorAll('#cfR22AgendaLegend input').forEach(el=>el.addEventListener('change',decorate));
- return Object.freeze({decorate,refresh,close,viewSelected,collect,getTypes,showDay});
+ return Object.freeze({decorate,refresh,close,viewSelected,collect,getTypes,showDay,openDay,createEventForDay,backToDay});
 })();root.CFR22Agenda=agenda;
 })(window);

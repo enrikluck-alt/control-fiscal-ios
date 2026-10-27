@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261027-R23">
+<html lang="es" data-cf-ui-build="UI76-20261027-R24">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1510,6 +1510,47 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin:0 0 0 2px;padding:0
 }
 @media(orientation:landscape) and (max-height:500px){.calendarGrid{grid-auto-rows:70px}.calDay{height:70px}}
 </style>
+<style id="cf-r24-daily-tutorial-dates">
+/* Cuadrícula del mes sin alturas variables; el día seleccionado abre listado completo. */
+.cfR24DayModalCard{width:min(100%,610px);max-height:min(88dvh,900px);overflow:auto;overscroll-behavior:contain}
+.cfR24DayBody{display:grid;gap:6px;margin:12px 0 14px;max-height:min(52dvh,570px);overflow:auto;min-width:0}
+.cfR24DayHeading{font-weight:850;color:var(--text,#fff);font-size:13px;margin:12px 0 4px}
+.cfR24DayRowContent{display:flex;align-items:center;gap:10px;min-width:0}
+.cfR24DayRowText{flex:1;min-width:0;overflow-wrap:anywhere}
+.cfR24DayDot{display:inline-block;flex:0 0 13px;width:13px;height:13px;border-radius:50%;border:1px solid #777}
+.cfR24DayDot.isEvent{background:#61a7ff}.cfR24DayDot.isPurchase{background:#f7c948}.cfR24DayDot.isInvoice{background:#d487ee}.cfR24DayDot.isIncome{background:#5fe0ae}.cfR24DayDot.isUnpaid{background:#ff942f}
+#cfR24DayAdd{margin:8px 0 12px}#cfR24ReturnToDay{width:100%;margin-top:9px}
+#cfR24DayAdd[hidden],#cfR24ReturnToDay[hidden]{display:none!important}
+/* Todos los selectores nativos deben caber en su campo incluso en iPhone estrecho. */
+#formBody,#cfR21MaterialPage,#agendaEventModal,#summaryPage,.emailPanel{min-width:0}
+#formBody .field,#cfR21MaterialPage .field,.emailPanel .field,#agendaEventModal .field{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+#formBody input[type="date"],#formBody input[type="time"],#cfR21MaterialPage input[type="date"],.emailPanel input[type="date"],#agendaEventModal input[type="date"],#agendaEventModal input[type="time"]{
+ display:block!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:48px!important;
+ padding:10px 6px!important;margin:0!important;font-size:16px!important;letter-spacing:normal;overflow:hidden!important;-webkit-appearance:auto;appearance:auto;
+}
+input[type="date"]::-webkit-date-and-time-value,input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-date-and-time-value,input[type="time"]::-webkit-datetime-edit{min-width:0!important;max-width:100%!important;overflow:hidden}
+.two,.emailGrid,.agendaFormGrid,.invoiceGrid{min-width:0;max-width:100%}
+.two>.field,.emailGrid>.field,.agendaFormGrid>.field,.invoiceGrid>.field{min-width:0;max-width:100%;overflow:hidden}
+@media(max-width:640px){
+ #formBody .two:has(input[type="date"]),.emailGrid:has(input[type="date"]),
+ #cfR21MaterialPage .two:has(input[type="date"]),#agendaEventModal .agendaFormGrid:has(input[type="date"]){grid-template-columns:minmax(0,1fr)!important}
+}
+.cfR24CollectedField{border:1px solid #f0a44d;border-radius:11px;padding:12px;background:rgba(245,158,11,.08);margin:11px 0}
+.cfR24CollectedField label{font-weight:850;display:block;margin-bottom:8px}
+/* Foco real con cuatro máscaras alrededor del elemento. Evita la sombra gigante sobre el recorte. */
+.cfTutorialOverlay{background:transparent!important;isolation:isolate;pointer-events:none!important;padding:0!important;display:block!important}
+.cfTutorialOverlay.hidden{display:none!important}
+.cfTourMask{position:fixed!important;background:rgba(4,9,17,.82)!important;z-index:1;pointer-events:auto}
+#cfTourSpotlight{position:fixed!important;display:none;z-index:2!important;border:3px solid #ffde32!important;border-radius:11px!important;box-shadow:0 0 0 2px rgba(255,222,50,.28),0 0 24px rgba(255,222,50,.35)!important;transition:none!important;pointer-events:none}
+.cfTourHighlight{outline:0!important;box-shadow:none!important}
+.cfTutorialOverlay .cfTutorialCard{z-index:3!important;position:absolute!important;left:calc(10px + env(safe-area-inset-left))!important;right:calc(10px + env(safe-area-inset-right))!important;width:auto!important;max-width:560px!important;margin:0 auto!important;max-height:min(46dvh,430px);overflow:auto;border:1px solid #ffd44d!important;border-radius:16px!important;padding:clamp(12px,3vw,18px)!important;background:#152233!important;box-sizing:border-box!important;pointer-events:auto!important;bottom:calc(10px + env(safe-area-inset-bottom))}
+.cfTutorialCard h3{font-size:clamp(16px,4vw,21px)!important;line-height:1.2;overflow-wrap:anywhere}
+.cfTutorialCard p{font-size:clamp(13px,3.7vw,16px)!important;line-height:1.38;overflow-wrap:anywhere}
+.cfTutorialActions{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
+.cfTutorialActions button{min-width:0!important;font-size:clamp(12px,3.8vw,16px)!important;padding:10px 8px!important;white-space:normal}
+@media (orientation:landscape) and (max-height:470px){.cfTutorialOverlay .cfTutorialCard{max-height:60dvh!important}.cfTutorialCard p{font-size:12px!important;line-height:1.22!important}}
+</style>
 </head>
 
 <body>
@@ -1699,7 +1740,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
   </div>
   <div class="page">
     <div class="inventoryTop">
-      <div class="field" style="margin-bottom:0"><label>BUSCAR MATERIAL</label><input id="inventorySearch" class="input" placeholder="Ej. Event 28A, cable DMX..." oninput="renderInventory()"></div>
+      <div class="field" style="margin-bottom:0"><label>BUSCAR MATERIAL</label><input id="inventorySearch" class="input" placeholder="Buscar por nombre, categoría o referencia" oninput="renderInventory()"></div>
       <button id="inventoryNewBtn" class="agendaNav" type="button">＋</button>
     </div>
     <div class="field" style="margin-top:8px"><label>TIPO DE MATERIAL</label><select id="inventoryCategoryFilter" class="select" onchange="renderInventory()"><option value="all">Todos los tipos</option></select></div>
@@ -2043,7 +2084,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R23</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R24</div>
 
     </div>
   </div>
@@ -2062,8 +2103,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
   <div class="page">
     <div class="settingsCard">
       <h3>Nueva factura de material</h3>
-      <div class="field"><label for="cfR21Project">Proyecto</label><input id="cfR21Project" class="input" maxlength="120" placeholder="Ej. Montaje escenario - Octubre"></div>
-      <div class="two"><div class="field"><label for="cfR21Vendor">Proveedor</label><input id="cfR21Vendor" class="input" maxlength="120" placeholder="Ej. Tienda electrónica"></div><div class="field"><label for="cfR21MaterialDate">Fecha factura</label><input id="cfR21MaterialDate" class="input" type="date"></div></div>
+      <div class="field"><label for="cfR21Project">Proyecto</label><input id="cfR21Project" class="input" maxlength="120" placeholder="Nombre o referencia del proyecto"></div>
+      <div class="two"><div class="field"><label for="cfR21Vendor">Proveedor</label><input id="cfR21Vendor" class="input" maxlength="120" placeholder="Nombre del proveedor"></div><div class="field"><label for="cfR21MaterialDate">Fecha factura</label><input id="cfR21MaterialDate" class="input" type="date"></div></div>
       <div class="two"><div class="field"><label for="cfR21MaterialAmount">Total factura (€)</label><input id="cfR21MaterialAmount" class="input" type="number" min="0" step=".01" inputmode="decimal"></div><div class="field"><label for="cfR21MaterialFile">PDF / foto</label><input id="cfR21MaterialFile" class="input" type="file" accept="application/pdf,image/png,image/jpeg"></div></div>
       <p class="settingsHint">Las facturas se vinculan al proyecto, pero no se suman a Compras automáticamente. Registra cada compra en Compras para evitar duplicidades y facilitar la contabilidad.</p>
       <button class="save" id="cfR21MaterialSave" type="button" onclick="CFR21Materials.save()">💾 GUARDAR FACTURA EN PROYECTO</button>
@@ -2996,15 +3037,15 @@ function openPendingIncomeForm(recordId=''){
     <div class="pendingIncomeForm">
       <div class="invoiceSection">
         <h3>🟢 DATOS DEL SERVICIO</h3>
-        <div class="field"><label>Persona</label><input id="pendingPerson" class="input" placeholder="Ej. Juan Pérez"></div>
+        <div class="field"><label>Persona</label><input id="pendingPerson" class="input" placeholder="Nombre de la persona o empresa"></div>
         <div class="field"><label>Fecha del servicio / ingreso</label><input id="pendingDate" class="input" type="date"></div>
-        <div class="field"><label>Tipo de servicio</label><input id="pendingService" class="input" placeholder="Ej. Reparación de iPhone"></div>
+        <div class="field"><label>Tipo de servicio</label><input id="pendingService" class="input" placeholder="Descripción del trabajo o servicio"></div>
         <div class="two">
           <div class="field"><label>Precio material</label><input id="pendingMaterial" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
           <div class="field"><label>Importe a cobrar</label><input id="pendingCharged" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
         </div>
-        <div class="field"><label>Estado del cobro</label><select class="select" id="pendingPaymentState" onchange="recalcPendingIncome()"><option value="pendiente">🟠 Pendiente de pago</option><option value="parcial">🟠 Pago parcial</option><option value="pagada">✅ Pago recibido</option></select></div>
-        <div class="field" id="pendingPartWrap" hidden><label>Importe recibido hasta hoy (€)</label><input id="pendingPaidPart" class="input" type="number" min="0" step=".01" inputmode="decimal" oninput="recalcPendingIncome()" placeholder="50,00"><small class="settingsHint">Introduce el importe total recibido hasta el momento, no solo el último abono.</small></div>
+        <div class="field cfR24CollectedField" id="pendingPartWrap"><label for="pendingPaidPart">💶 Dinero ya recibido (€), aunque sea solo una parte</label><input id="pendingPaidPart" class="input" type="number" min="0" step=".01" inputmode="decimal" oninput="recalcPendingIncome('amount')" placeholder="0,00" value="0"><small class="settingsHint">Ejemplo: total 200 €, recibido 50 €, pendiente 150 €. Puedes cambiar este importe al editar el ingreso.</small></div>
+        <div class="field"><label for="pendingPaymentState">Estado del cobro (calculado automáticamente)</label><select class="select" id="pendingPaymentState" onchange="recalcPendingIncome('state')"><option value="pendiente">🟠 No he recibido ningún pago</option><option value="parcial">🟠 He recibido una parte</option><option value="pagada">✅ He recibido el importe completo</option></select></div>
         <div class="two"><div class="field"><label>Correo del cliente (para recordatorios)</label><input id="pendingEmail" class="input" type="email" inputmode="email" placeholder="cliente@ejemplo.com"></div>
         <div class="field"><label>WhatsApp del cliente</label><input id="pendingPhone" class="input" type="tel" inputmode="tel" placeholder="600 000 000"></div></div>
         <div class="cfR22ContactActions"><button type="button" class="guideBtn" onclick="CFR22.pickClient('income')">👤 Elegir cliente guardado</button><button type="button" class="guideBtn" onclick="CFR22.pickNativeContact('income')">📱 Contactos del teléfono</button></div>
@@ -3016,7 +3057,7 @@ function openPendingIncomeForm(recordId=''){
           <div class="box pendingBenefitBox"><small>Beneficio</small><strong id="pendingBenefitValue">0,00 €</strong></div>
         </div>
       </div>
-      <div class="field"><label>Proyecto asociado (opcional)</label><input id="pendingProject" class="input" maxlength="120" placeholder="Ej. Instalación de sonido · Cliente"></div>${editing?`<button type="button" class="guideBtn" onclick="CFR21Materials.openForProject(document.getElementById('pendingProject').value)">🧾 AÑADIR O MODIFICAR FACTURAS DE MATERIAL DEL PROYECTO</button>`:''}
+      <div class="field"><label>Proyecto asociado (opcional)</label><input id="pendingProject" class="input" maxlength="120" placeholder="Proyecto o trabajo relacionado"></div>${editing?`<button type="button" class="guideBtn" onclick="CFR21Materials.openForProject(document.getElementById('pendingProject').value)">🧾 AÑADIR O MODIFICAR FACTURAS DE MATERIAL DEL PROYECTO</button>`:''}
       <div class="field"><label>Factura / justificante del ingreso (opcional)</label><input id="pendingInvoiceFile" class="input" type="file" accept="application/pdf,image/png,image/jpeg"><small class="settingsHint">PDF, JPG o PNG, hasta 5 MB. Se guarda en tu Drive privado y se podrá incluir en el envío al gestor.</small></div>
       <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">${editing?'GUARDAR CAMBIOS DEL INGRESO':'GUARDAR INGRESO INDEPENDIENTE'}</button>
       <div id="pendingIncomeMsg" class="msg"></div>
@@ -3027,20 +3068,29 @@ function openPendingIncomeForm(recordId=''){
   recalcPendingIncome();
 }
 
-function recalcPendingIncome(){
-  const material=Number($("pendingMaterial")?.value)||0;
-  const charged=Number($("pendingCharged")?.value)||0;
-  const state=$('pendingPaymentState')?.value||'pendiente';
-  const part=$('pendingPaidPart');const partWrap=$('pendingPartWrap');
-  if(partWrap)partWrap.hidden=state!=='parcial';
-  const actuallyCollected=state==='pagada'?charged:state==='parcial'?(Number(part?.value)||0):0;
+function recalcPendingIncome(source='amount'){
+  const material=Math.max(0,Number($("pendingMaterial")?.value)||0);
+  const charged=Math.max(0,Number($("pendingCharged")?.value)||0);
+  const stateField=$('pendingPaymentState'),part=$('pendingPaidPart');
+  if(!stateField||!part)return {material,charged,actuallyCollected:0,benefit:-material};
+  let collected=Number(part.value)||0;
+  if(source==='state'){
+    if(stateField.value==='pendiente')collected=0;
+    if(stateField.value==='pagada')collected=charged;
+    // Para un pago parcial se utiliza el importe que se escriba, nunca se inventa.
+  }
+  collected=Math.max(0,Math.round(collected*100)/100);
+  if(source==='state')part.value=String(collected);
+  const state=collected<=0?'pendiente':charged>0&&collected>=charged?'pagada':'parcial';
+  stateField.value=state;
+  const actuallyCollected=collected;
   const benefit=actuallyCollected-material;
   if($("pendingMaterialValue"))$("pendingMaterialValue").textContent=euro(material);
   if($("pendingChargedValue"))$("pendingChargedValue").textContent=euro(actuallyCollected);
   if($('pendingDueValue'))$('pendingDueValue').textContent=euro(Math.max(0,charged-actuallyCollected));
   const b=$("pendingBenefitValue");
   if(b){b.textContent=euro(benefit);b.parentElement.classList.toggle("negativeBenefit",benefit<0);}
-  return {material,charged,actuallyCollected,benefit};
+  return {material,charged,actuallyCollected,benefit,state};
 }
 
 async function savePendingIncome(){
@@ -3065,7 +3115,7 @@ async function savePendingIncome(){
       facturaUrl=await window.CFGoogleUploads.upload(invoiceFile.name,invoiceFile.type,base64,window.CFGoogleAccount.active());
     }
     msg.textContent='Guardando ingreso en Google Sheets…';
-    const result=await callAction({accion:cfPendingEditingId?'editarIngresoIndependiente':'guardarIngresoPendiente',id:cfPendingEditingId,ingreso:JSON.stringify({id:cfPendingEditingId||'IP-'+Date.now()+'-'+Math.floor(Math.random()*10000),fecha,persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:$('pendingPaymentState')?.value||'pendiente',correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:window.CFR22?.normalizeContactPhone?.('income')||String($('pendingPhone')?.value||'').trim(),proyecto:String($('pendingProject')?.value||'').trim().slice(0,120),facturaUrl})});
+    const result=await callAction({accion:cfPendingEditingId?'editarIngresoIndependiente':'guardarIngresoPendiente',id:cfPendingEditingId,ingreso:JSON.stringify({id:cfPendingEditingId||'IP-'+Date.now()+'-'+Math.floor(Math.random()*10000),fecha,persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:calc.state,correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:window.CFR22?.normalizeContactPhone?.('income')||String($('pendingPhone')?.value||'').trim(),proyecto:String($('pendingProject')?.value||'').trim().slice(0,120),facturaUrl})});
     if(!result || result.ok!==true || !result.id){
       throw new Error("Google Sheets no ha confirmado el guardado. Comprueba los permisos de la cuenta.");
     }
@@ -3326,13 +3376,13 @@ function openInvoiceForm(){
           <div class="field" style="display:flex;align-items:end"><button class="invoiceAdd" type="button" onclick="saveCurrentClient()">💾 GUARDAR CLIENTE</button></div>
         </div>
         <div class="invoiceGrid">
-          <div class="field"><label>Nombre / Empresa</label><input id="invClientName" class="input" placeholder="Ej. Empresa cliente"></div>
+          <div class="field"><label>Nombre / Empresa</label><input id="invClientName" class="input" placeholder="Nombre de la empresa o persona"></div>
           <div class="field"><label>CIF / NIF</label><input id="invClientTaxId" class="input" placeholder="CIF / NIF"></div>
           <div class="field full"><label>Dirección</label><input id="invClientAddress" class="input" placeholder="Calle, número..."></div>
-          <div class="field"><label>Código postal</label><input id="invClientPostalCode" class="input" inputmode="numeric" placeholder="Ej. 28001"></div>
-          <div class="field"><label>Ciudad</label><input id="invClientCity" class="input" placeholder="Ej. Madrid"></div>
-          <div class="field"><label>Provincia</label><input id="invClientProvince" class="input" placeholder="Ej. Madrid"></div>
-          <div class="field"><label>Teléfono</label><input id="invClientPhone" class="input" inputmode="tel" placeholder="Ej. 900 000 000"></div>
+          <div class="field"><label>Código postal</label><input id="invClientPostalCode" class="input" inputmode="numeric" placeholder="Código postal"></div>
+          <div class="field"><label>Ciudad</label><input id="invClientCity" class="input" placeholder="Ciudad o municipio"></div>
+          <div class="field"><label>Provincia</label><input id="invClientProvince" class="input" placeholder="Provincia o región"></div>
+          <div class="field"><label>Teléfono</label><input id="invClientPhone" class="input" inputmode="tel" placeholder="Número de teléfono"></div>
           <div class="field"><label>Email</label><input id="invClientEmail" class="input" type="email" placeholder="cliente@empresa.com"></div>
         </div>
       </div>
@@ -3387,7 +3437,7 @@ function addInvoiceLine(){
   const row=document.createElement("div");
   row.className="invoiceLine";
   row.innerHTML=`
-    <input class="input invoiceDesc" placeholder="Ej. Servicio de sonido">
+    <input class="input invoiceDesc" placeholder="Descripción del producto o servicio">
     <input class="input invoiceQty" type="number" min="0.01" step="0.01" value="1" inputmode="decimal">
     <input class="input invoicePrice" type="number" min="0" step="0.01" value="0" inputmode="decimal">
     <div class="invoiceLineTotal">0,00 €</div>
@@ -3612,7 +3662,7 @@ function openForm(tipo){
       <div class="field">
         <label>${c?"Distribuidor":"Cliente"}</label>
         <div class="autocompleteWrap" style="margin-top:${c?"8px":"0"}">
-          <input id="tercero" class="input" placeholder="${c?"Ej. MadridHifi":"Ej. Ayuntamiento, empresa, particular"}" autocomplete="off">
+          <input id="tercero" class="input" placeholder="${c?"Nombre del proveedor":"Nombre de la persona o empresa"}" autocomplete="off">
           <div id="thirdPartyAutocomplete" class="autocompleteMenu"></div>
         </div>
         ${c?'<button class="invoiceAdd" type="button" style="margin-top:8px" onclick="savePurchaseDistributor()">💾 GUARDAR DISTRIBUIDOR</button>':'<button class="invoiceAdd" type="button" style="margin-top:8px" onclick="openSimpleClientModal()">💾 GUARDAR CLIENTE</button>'}
@@ -3620,7 +3670,7 @@ function openForm(tipo){
 
       <div class="field">
         <label>Concepto</label>
-        <input id="concepto" class="input" placeholder="${c?"Ej. Material de oficina, suministro, servicio...":"Ej. Sonido e iluminación, pantalla LED, etc."}">
+        <input id="concepto" class="input" placeholder="${c?"Describe la compra o el gasto":"Describe el servicio o producto"}">
       </div>
       <div class="field"><label>${c?'Fecha de la compra':'Fecha de la factura / servicio'}</label><input id="cfR22RecordDate" class="input" type="date"><small class="settingsHint">Esta fecha aparecerá en Agenda, con el color correspondiente a la operación.</small></div>
 
@@ -4159,7 +4209,7 @@ function renderAgenda(){
   grid.querySelectorAll(".calDay").forEach(cell=>cell.addEventListener("click",e=>{
     const ev=e.target.closest("[data-event-id]");
     if(ev){openAgendaEventModal(ev.dataset.eventId);return;}
-    openAgendaEventModal(null,cell.dataset.date);
+    window.CFR22Agenda?.openDay?.(cell.dataset.date);
   }));
   window.CFR22Agenda?.decorate?.();
   renderAgendaUpcoming();
@@ -5455,7 +5505,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R23'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R24'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5503,6 +5553,7 @@ const CF_TOUR_EXTENDED=[
  {title:'Agenda · operaciones coloreadas',text:'Activa Compras, Facturas o Servicios / ingresos para reconocer por colores qué movimiento ocurrió cada día. El naranja marca cobros pendientes. Toca un indicador para ver su descripción y saltar al registro original.',page:'agenda',target:'#cfR22AgendaLegend'},
  {title:'Ajustes · panel del administrador',text:'Si esta cuenta tiene permisos en Firebase, aparece automáticamente el buzón en Sugerencias y errores. Los usuarios normales no ven ninguna opción ni comprobación de administración.',page:'settings',target:'#cfSupportGroup'},
  {title:'Agenda · crear un evento',text:'Pulsa Nuevo evento y añade fecha, horas y contacto. El evento se conserva en tu libro de Google.',page:'agenda',target:'#agendaPage .agendaAdd'},
+ {title:'Agenda · día completo',text:'Pulsa cualquier día del calendario: aparecen primero todos los eventos y después las compras, facturas e ingresos con sus globos de colores. Usa Añadir evento en este día para crearlo directamente con la fecha seleccionada.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Agenda · avisos nativos',text:'Escoge entre al empezar, 15 minutos, 1 hora o días antes. Los avisos de iPhone requieren permiso para notificaciones.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Agenda · ubicación y rutas',text:'Añade la dirección real. El mapa aparece en la ficha; Ruta en Mapas abre la navegación del teléfono, no una pestaña web dentro de la app.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Agenda · carga de materiales',text:'En cada evento selecciona artículos del inventario y cantidades. Si hay stock insuficiente el evento no admitirá la reserva.',page:'agenda',target:'#agendaPage .agendaAdd'},
@@ -5526,7 +5577,7 @@ const CF_TOUR_EXTENDED=[
  {title:'Seguridad · cambio de usuario',text:'Antes de prestar el teléfono, cierra sesión. Cada cuenta accede a su propia información de Google.',page:'settings',target:'#accountSettingsGroup'},
  {title:'Administración · buzón privado',text:'Si tu cuenta es la administradora autorizada, en Ajustes → Sugerencias encontrarás el botón Administración. Las sugerencias se consultan dentro de Control Fiscal, sin acceder a los datos fiscales de otras cuentas.',page:'settings',target:'#cfSupportGroup'},
  {title:'Compras · facturas de material y proyectos',text:'En Facturación abre Facturas de material por proyecto. Guarda justificantes de varios proveedores bajo un mismo proyecto; evita registrarlos dos veces como gastos.',page:'sale',target:'#formBody'},
- {title:'Ingresos independientes · guardar y adjuntar',text:'Desde Facturación registra un ingreso independiente, indica pago pendiente o recibido y añade opcionalmente su factura. El botón Guardar confirma el resultado de Google Sheets.',page:'sale',target:'#formBody'},
+ {title:'Ingresos independientes · guardar y adjuntar',text:'Introduce el importe acordado y, justo debajo, cuánto has cobrado realmente. La app calcula automáticamente si hay pago pendiente, parcial o completo. Puedes modificar ese importe después y adjuntar justificantes del proyecto.',page:'sale',target:'#formBody'},
  {title:'Gestor · selección de archivos',text:'En Resumen marca Compras, Facturas, Ingresos independientes o Material por proyecto; elige fechas y revisa cada casilla antes de enviar por Gmail.',page:'summary',target:'#summaryPage .emailPanel'},
  {title:'Final · dónde volver al tutorial',text:'Puedes volver a elegir Tutorial rápido o Tutorial extenso desde Ajustes cuando lo necesites.',page:'settings',target:'#settingsPage'}
 ];
@@ -5546,13 +5597,14 @@ function startCFTutorial(mode){
 function cfShowTourStep(){
  const step=cfTourSteps()[cfTourIndex],overlay=$('cfTutorialOverlay');if(!step||!overlay)return finishCFTutorial();
  if(cfTourFocused){cfTourFocused.classList.remove('cfTourHighlight');cfTourFocused=null;}
+ step._activeElement=null;
  try{
   switch(step.page){case 'home':goHome();break;case 'buy':openForm('Compra');break;case 'sale':openForm('Facturado');break;case 'agenda':openAgenda();break;case 'inventory':openInventory();break;case 'documents':CFDocuments.open();break;case 'summary':openSummary();break;case 'settings':openSettings();break;}
  }catch(e){console.warn('Tutorial sin poder abrir sección',e);}
  // Abrir el apartado real de Ajustes para que el paso no señale una sección cerrada.
  if(step.page==='settings' && typeof cfSettingsGroups==='function'){
    const wanted=window.CFR21Tour?.settingsTarget?.(step.title)||'';
-   if(wanted){const groups=cfSettingsGroups();const index=groups.findIndex(g=>(g.querySelector('.settingsTitle')?.textContent||'').toLocaleLowerCase('es').includes(wanted));if(index>=0){cfSettingsShow(index);step._activeTarget='#settingsPage .settingsGroup:not([hidden]),#cfDesignPanel:not([hidden])';}}
+   if(wanted){const groups=cfSettingsGroups();const index=groups.findIndex(g=>(g.querySelector('.settingsTitle')?.textContent||'').toLocaleLowerCase('es').includes(wanted));if(index>=0){cfSettingsShow(index);step._activeElement=groups[index].classList.contains('cfDesignToggleWrapper')?document.getElementById('cfDesignPanel'):groups[index];}}
  }
  overlay.classList.remove('hidden');
  $('cfTutorialProgress').textContent='PASO '+(cfTourIndex+1)+' DE '+cfTourSteps().length;
@@ -5560,11 +5612,11 @@ function cfShowTourStep(){
  $('cfTutorialBody').textContent=step.text;
  $('cfTutorialNext').textContent=cfTourIndex===cfTourSteps().length-1?'TERMINAR ✓':'SIGUIENTE ›';
  setTimeout(()=>{
-  const target=document.querySelector(step._activeTarget||step.target);
+  const target=(step._activeElement?.isConnected?step._activeElement:null)||document.querySelector(step.target);
   if(target&&!overlay.classList.contains('hidden')){
    cfTourFocused=target;target.classList.add('cfTourHighlight');
-   target.scrollIntoView({block:'center',behavior:'instant'});
-   requestAnimationFrame(()=>window.CFR21Tour?.spotlight?.(target));
+   target.scrollIntoView({block:'center',behavior:'auto'});
+   requestAnimationFrame(()=>requestAnimationFrame(()=>window.CFR21Tour?.spotlight?.(target)));
   }else window.CFR21Tour?.clear?.();
  },100);
 }
@@ -5767,7 +5819,7 @@ startAccountSystem();
  </div>
 </div>
 <div id="cfR22OperationModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfR22OperationTitle" onclick="if(event.target===this)CFR22Agenda.close()">
- <div class="modalCard"><button class="modalClose" type="button" onclick="CFR22Agenda.close()">×</button><h3 id="cfR22OperationTitle">Operación</h3><div id="cfR22OperationBody" class="settingsHint"></div><button type="button" class="save" id="cfR22OperationView" onclick="CFR22Agenda.viewSelected()">VER REGISTRO</button></div>
+  <div class="modalCard cfR24DayModalCard"><button class="modalClose" type="button" onclick="CFR22Agenda.close()">×</button><h3 id="cfR22OperationTitle">Operación</h3><div id="cfR22OperationBody" class="cfR24DayBody"></div><button type="button" class="save" id="cfR24DayAdd" hidden onclick="CFR22Agenda.createEventForDay()">＋ AÑADIR EVENTO EN ESTE DÍA</button><button type="button" class="save" id="cfR22OperationView" onclick="CFR22Agenda.viewSelected()">VER REGISTRO</button><button type="button" class="guideBtn" id="cfR24ReturnToDay" hidden onclick="CFR22Agenda.backToDay()">‹ VOLVER AL DÍA</button></div>
 </div>
 <div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>
@@ -5782,6 +5834,7 @@ startAccountSystem();
  </div>
 </div>
 <div id="cfTutorialOverlay" class="cfTutorialOverlay hidden" role="dialog" aria-modal="true" aria-label="Tutorial de Control Fiscal">
+ <div id="cfTourSpotlight" aria-hidden="true"></div>
  <div class="cfTutorialCard"><div class="cfTutorialProgress" id="cfTutorialProgress"></div><h3 id="cfTutorialTitle"></h3><p id="cfTutorialBody"></p>
  <div class="cfTutorialActions"><button type="button" onclick="finishCFTutorial()">SALTAR</button><button type="button" onclick="advanceCFTutorial()" id="cfTutorialNext">SIGUIENTE ›</button></div></div>
 </div>
@@ -5801,13 +5854,13 @@ startAccountSystem();
       <div class="field full"><label>Artículo / Material</label><input id="invItemName" class="input" placeholder="Ej. Artículo o referencia"></div>
       <div class="field"><label>Tipo de material</label><select id="invItemCategory" class="select" onchange="inventoryCategoryChanged()"><option value="__new__">＋ Crear nuevo tipo…</option></select>
         <div id="cfInventoryNewTypeInline" class="cfInventoryNewTypeInline" hidden>
-          <input id="cfInventoryNewTypeName" class="input" maxlength="65" autocomplete="off" placeholder="Nombre del tipo (ej. Televisores)" onkeydown="if(event.key==='Enter'){event.preventDefault();cfConfirmNewInventoryType();}">
+          <input id="cfInventoryNewTypeName" class="input" maxlength="65" autocomplete="off" placeholder="Nombre de la nueva categoría" onkeydown="if(event.key==='Enter'){event.preventDefault();cfConfirmNewInventoryType();}">
           <button id="cfInventoryConfirmType" type="button" onclick="cfConfirmNewInventoryType()">GUARDAR TIPO</button>
         </div></div>
       <div class="field"><label>Unidad</label><select id="invItemUnit" class="select"><option>unidades</option><option>metros</option><option>pares</option><option>juegos</option><option>cajas</option></select></div>
       <div class="field"><label>Cantidad</label><input id="invItemQty" class="input" type="number" min="0" step="1" inputmode="numeric" value="1"></div>
       <div class="field"><label>Stock mínimo</label><input id="invItemMin" class="input" type="number" min="0" step="1" inputmode="numeric" value="0"></div>
-      <div class="field"><label>Ubicación</label><input id="invItemLocation" class="input" placeholder="Ej. Almacén 1"></div>
+      <div class="field"><label>Ubicación</label><input id="invItemLocation" class="input" placeholder="Ubicación o zona de almacenamiento"></div>
       <div class="field"><label>Estado</label><select id="invItemStatus" class="select"><option>Disponible</option><option>En reparación</option><option>No disponible</option></select></div>
       <div class="field full"><label>Notas</label><textarea id="invItemNotes" class="textarea" placeholder="Opcional"></textarea></div>
       <div class="field full cfInventoryPhoto"><label>Imagen del artículo (opcional)</label>
@@ -5835,14 +5888,14 @@ startAccountSystem();
     <button class="modalClose" type="button" onclick="closeAgendaEventModal()">×</button>
     <div class="modalTitle">📅 <span id="agendaModalTitle">Nuevo evento</span></div>
     <div class="agendaFormGrid">
-      <div class="field full"><label>Evento</label><input id="agendaEventName" class="input" placeholder="Ej. Fiesta de verano"></div>
+      <div class="field full"><label>Evento</label><input id="agendaEventName" class="input" placeholder="Nombre del evento o actividad"></div>
       <div class="field"><label>Fecha</label><input id="agendaEventDate" class="input" type="date"></div>
       <div class="field"><label>Hora de inicio</label><input id="agendaEventStart" class="input" type="time"></div>
       <div class="field"><label>Hora de fin</label><input id="agendaEventEnd" class="input" type="time"></div>
       <div class="field full"><label for="agendaReminder">Avisarme en el iPhone</label><select id="agendaReminder" class="select cfReminderChoice"><option value="none">Sin recordatorio</option><option value="0">Al empezar el evento</option><option value="15">15 minutos antes</option><option value="30">30 minutos antes</option><option value="60" selected>1 hora antes</option><option value="120">2 horas antes</option><option value="1440">1 día antes</option><option value="2880">2 días antes</option></select><small class="settingsHint">Requiere permitir notificaciones. El aviso se guarda con cada evento; no depende de sincronizar Google Calendar.</small></div>
       <div class="field"><label>Cliente / contacto</label><input id="agendaEventClient" class="input" placeholder="Opcional"></div>
-      <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Ej. Dirección del evento, ciudad"></div>
-      <div class="field full"><label>Qué tengo que llevar (notas adicionales)</label><textarea id="agendaEventBring" class="textarea" placeholder="Ej. Documentación, equipos y herramientas no inventariados..."></textarea></div>
+      <div class="field full"><label>Ubicación</label><input id="agendaEventLocation" class="input" placeholder="Dirección o lugar del evento"></div>
+      <div class="field full"><label>Qué tengo que llevar (notas adicionales)</label><textarea id="agendaEventBring" class="textarea" placeholder="Materiales, documentos o elementos adicionales"></textarea></div>
       <div class="field full cfEventBox"><label>📦 Material del inventario</label>
         <div class="cfEventInventoryPicker"><select id="cfEventStockSelect" class="select" aria-label="Material del inventario"><option value="">Selecciona un artículo</option></select><button type="button" class="guideBtn" onclick="CFEventTools.addMaterial()">＋ AÑADIR</button></div>
         <div id="cfEventStockList" class="cfEventStockList"></div>
@@ -5879,13 +5932,13 @@ startAccountSystem();
     <div class="modalTitle">👤 Guardar cliente</div>
     <div class="settingsHint" style="margin-bottom:14px">Guarda estos datos para reutilizarlos en futuras facturas.</div>
     <div class="settingsInvoiceGrid">
-      <div class="field"><label>Nombre / Empresa</label><input id="savedClientName" class="input" placeholder="Ej. Empresa cliente"></div>
-      <div class="field"><label>CIF / NIF</label><input id="savedClientTaxId" class="input" placeholder="Ej. B00000000"></div>
-      <div class="field full"><label>Dirección</label><input id="savedClientAddress" class="input" placeholder="Ej. Calle Principal 1"></div>
-      <div class="field"><label>Código postal</label><input id="savedClientPostalCode" class="input" placeholder="Ej. 28001"></div>
-      <div class="field"><label>Ciudad</label><input id="savedClientCity" class="input" placeholder="Ej. Madrid"></div>
-      <div class="field"><label>Provincia</label><input id="savedClientProvince" class="input" placeholder="Ej. Madrid"></div>
-      <div class="field"><label>Teléfono</label><input id="savedClientPhone" class="input" placeholder="Ej. 900 000 000"></div>
+      <div class="field"><label>Nombre / Empresa</label><input id="savedClientName" class="input" placeholder="Nombre de la empresa o persona"></div>
+      <div class="field"><label>CIF / NIF</label><input id="savedClientTaxId" class="input" placeholder="NIF o CIF"></div>
+      <div class="field full"><label>Dirección</label><input id="savedClientAddress" class="input" placeholder="Calle y número"></div>
+      <div class="field"><label>Código postal</label><input id="savedClientPostalCode" class="input" placeholder="Código postal"></div>
+      <div class="field"><label>Ciudad</label><input id="savedClientCity" class="input" placeholder="Ciudad o municipio"></div>
+      <div class="field"><label>Provincia</label><input id="savedClientProvince" class="input" placeholder="Provincia o región"></div>
+      <div class="field"><label>Teléfono</label><input id="savedClientPhone" class="input" placeholder="Número de teléfono"></div>
       <div class="field"><label>Email</label><input id="savedClientEmail" class="input" type="email" placeholder="cliente@empresa.com"></div>
     </div>
     <button class="save p settingsSave" type="button" onclick="saveSimpleClient()">GUARDAR CLIENTE</button>
@@ -5924,14 +5977,14 @@ startAccountSystem();
     <div class="settingsHint" style="margin-bottom:14px">Estos datos se utilizarán como emisor en las nuevas facturas.</div>
     <div class="settingsInvoiceGrid">
       <div class="field"><label>Nombre / Empresa</label><input id="issuerName" class="input" placeholder="Ej. Empresa de servicios"></div>
-      <div class="field"><label>CIF / NIF</label><input id="issuerTaxId" class="input" placeholder="Ej. B00000000"></div>
-      <div class="field full"><label>Dirección</label><input id="issuerAddress" class="input" placeholder="Ej. Calle Principal 1"></div>
-      <div class="field"><label>Código postal</label><input id="issuerPostalCode" class="input" inputmode="numeric" placeholder="Ej. 28001"></div>
-      <div class="field"><label>Ciudad</label><input id="issuerCity" class="input" placeholder="Ej. Madrid"></div>
-      <div class="field"><label>Provincia</label><input id="issuerProvince" class="input" placeholder="Ej. Madrid"></div>
-      <div class="field"><label>Teléfono</label><input id="issuerPhone" class="input" inputmode="tel" placeholder="Ej. 900 000 000"></div>
-      <div class="field"><label>Email</label><input id="issuerEmail" class="input" type="email" placeholder="Ej. correo@empresa.com"></div>
-      <div class="field full"><label>Cuenta bancaria / IBAN</label><input id="issuerIban" class="input" placeholder="Ej. ES00 0000 0000 0000 0000 0000"></div>
+      <div class="field"><label>CIF / NIF</label><input id="issuerTaxId" class="input" placeholder="NIF o CIF"></div>
+      <div class="field full"><label>Dirección</label><input id="issuerAddress" class="input" placeholder="Calle y número"></div>
+      <div class="field"><label>Código postal</label><input id="issuerPostalCode" class="input" inputmode="numeric" placeholder="Código postal"></div>
+      <div class="field"><label>Ciudad</label><input id="issuerCity" class="input" placeholder="Ciudad o municipio"></div>
+      <div class="field"><label>Provincia</label><input id="issuerProvince" class="input" placeholder="Provincia o región"></div>
+      <div class="field"><label>Teléfono</label><input id="issuerPhone" class="input" inputmode="tel" placeholder="Número de teléfono"></div>
+      <div class="field"><label>Email</label><input id="issuerEmail" class="input" type="email" placeholder="correo@ejemplo.com"></div>
+      <div class="field full"><label>Cuenta bancaria / IBAN</label><input id="issuerIban" class="input" placeholder="IBAN de la cuenta"></div>
     </div>
     <button class="save p settingsSave" type="button" onclick="saveInvoiceSettings()">GUARDAR DATOS</button>
     <div id="issuerMsg" class="msg"></div>

@@ -240,15 +240,54 @@ async function send(){
 root.document.querySelectorAll('#cfR21DocTypes input').forEach(x=>x.addEventListener('change',prepare));
 return Object.freeze({prepare,send,identify,list});})();root.CFR21Export=exporter;
 // ===== Spotlight tutorial: cuatro lados realmente atenuados y zona visible =====
-const tour=(function(){let observed=null;
-function clear(){const el=$('cfTourSpotlight');if(el)el.style.display='none';observed=null;}
+const tour=(function(){let observed=null,masks=[];
+function ensureParts(){
+ const overlay=$('cfTutorialOverlay');if(!overlay)return null;
+ if(!masks.length){
+  for(let i=0;i<4;i++){
+   const pane=root.document.createElement('div');pane.className='cfTourMask';pane.setAttribute('aria-hidden','true');
+   overlay.insertBefore(pane,overlay.firstChild);masks.push(pane);
+  }
+ }
+ return overlay;
+}
+function clear(){
+ const el=$('cfTourSpotlight');if(el)el.style.display='none';
+ const overlay=ensureParts();
+ masks.forEach((pane,i)=>{
+   Object.assign(pane.style,{display:i===0&&overlay&&!overlay.classList.contains('hidden')?'block':'none'});
+   if(i===0)Object.assign(pane.style,{left:'0px',top:'0px',width:root.innerWidth+'px',height:root.innerHeight+'px'});
+ });
+ observed=null;
+}
 function spotlight(target){
- observed=target;const spot=$('cfTourSpotlight');if(!spot||!target||!target.isConnected)return clear();
- const r=target.getBoundingClientRect(),margin=7;
+ observed=target;const overlay=ensureParts(),spot=$('cfTourSpotlight');
+ if(!overlay||!spot||!target||!target.isConnected||overlay.classList.contains('hidden'))return clear();
+ const r=target.getBoundingClientRect(),width=root.innerWidth,height=root.innerHeight,margin=6;
  if(r.width<1||r.height<1)return clear();
- const left=Math.max(5,r.left-margin),top=Math.max(5,r.top-margin),right=Math.min(root.innerWidth-5,r.right+margin),bottom=Math.min(root.innerHeight-5,r.bottom+margin);
+ const left=Math.max(0,Math.min(width,r.left-margin)),top=Math.max(0,Math.min(height,r.top-margin));
+ const right=Math.max(left,Math.min(width,r.right+margin)),bottom=Math.max(top,Math.min(height,r.bottom+margin));
  if(right<=left||bottom<=top)return clear();
+ const rects=[
+  [0,0,width,top],
+  [0,bottom,width,Math.max(0,height-bottom)],
+  [0,top,left,bottom-top],
+  [right,top,Math.max(0,width-right),bottom-top]
+ ];
+ rects.forEach(([x,y,w,h],i)=>Object.assign(masks[i].style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',display:w&&h?'block':'none'}));
  Object.assign(spot.style,{left:left+'px',top:top+'px',width:right-left+'px',height:bottom-top+'px',display:'block'});
+ const card=overlay.querySelector('.cfTutorialCard');
+ if(card){
+  // Colocar la explicación sin tapar el control que se está señalando.
+  const cardHeight=Math.min(card.scrollHeight||240,Math.max(135,height*.45));
+  const below=height-bottom,above=top;
+  const putBelow=below>=cardHeight+22||(below>above&&top<cardHeight+18);
+  if(putBelow){card.style.top=Math.min(bottom+12,height-cardHeight-8)+'px';card.style.bottom='auto';}
+  else{card.style.top='auto';card.style.bottom=Math.max(8,height-top+12)+'px';}
+  // Pantallas pequeñas: nunca colocar la caja completamente fuera del viewport.
+  const rCard=card.getBoundingClientRect();
+  if(rCard.top<0||rCard.bottom>height){card.style.top='auto';card.style.bottom='calc(8px + env(safe-area-inset-bottom))';}
+ }
 }
 function settingsTarget(title){const v=text(title).toLocaleLowerCase('es');if(/notificacion|notificación/.test(v))return 'notificaciones';if(/idioma|orientaci|diseño|rendimiento/.test(v))return 'idioma';if(/privacidad|sugerencia|firebase|administración/.test(v))return 'sugerencias';if(/emisor|facturaci.n · datos/.test(v))return 'datos de facturación';if(/dónde volver|tutorial/.test(v))return 'información y herramientas';return '';}
 root.addEventListener('resize',()=>observed&&spotlight(observed),{passive:true});
