@@ -29,14 +29,22 @@ async function request(url,options={}){
 }
 const listUrl=apiBase+'/'+collection+'?pageSize=100&orderBy=fecha%20desc';
 async function check(){
- const entry=$('cfR21AdminEntry');if(!entry)return false;
- entry.hidden=true;confirmed=false;rows=[];render();
+ const entry=$('cfR21AdminEntry'),hint=$('cfR22AdminHint');if(!entry)return false;
+ entry.hidden=true;confirmed=false;rows=[];activeAccount=null;render();
+ if(hint)hint.textContent='Comprobando el acceso al buzón con Firebase…';
  try{
   const s=session();const auth=await root.CFFirebaseAuth.ensureSignedIn();
   const output=await root.fetch(listUrl.replace('pageSize=100','pageSize=1'),{headers:{Authorization:'Bearer '+auth.idToken}});
-  same(s);if(!output.ok)return false;
-  await output.json().catch(()=>({}));activeAccount=s.email+':'+s.id;confirmed=true;entry.hidden=false;return true;
- }catch{return false;}
+  same(s);
+  if(!output.ok){
+   const detail=await output.json().catch(()=>({}));
+   if(hint)hint.textContent=output.status===403?'Acceso administrativo no autorizado (HTTP 403). Comprueba que has sustituido el marcador del UID de administrador en las reglas publicadas por el UID real de tu cuenta.':'Error al verificar Firebase (HTTP '+output.status+'): '+text(detail.error?.message||'inténtalo de nuevo.');
+   return false;
+  }
+  await output.json().catch(()=>({}));activeAccount=s.email+':'+s.id;confirmed=true;entry.hidden=false;
+  if(hint)hint.textContent='✅ Permiso confirmado. Pulsa «ADMINISTRACIÓN · BUZÓN DE SUGERENCIAS». ';
+  return true;
+ }catch(e){if(hint)hint.textContent='No se pudo comprobar el acceso: '+text(e.message||e);return false;}
 }
 async function open(){
  if(!await check()){root.showToastMessage?.('Acceso restringido','Tu cuenta Firebase no tiene permiso de administrador. Verifica el UID de las reglas.');return;}
@@ -87,10 +95,21 @@ async function mark(item,estado,btn){
 return Object.freeze({check,open,close,load,render});
 })();root.CFR21Admin=admin;
 // ===== Proyecto: adjuntos extra independientes del asiento contable =====
-const materials=(function(){let list=[];let accountKey='';
+const materials=(function(){let list=[];let accountKey='',editingId='';
 function items(){const s=root.CFGoogleAccount?.active();return s&&accountKey===s.email+':'+s.id?list.slice():[];}
-async function open(){page('cfR21MaterialPage');if($('cfR21MaterialDate')&&!$('cfR21MaterialDate').value){const d=new Date();$('cfR21MaterialDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}await load();}
+async function open(){editingId='';const btn=$('cfR21MaterialSave');if(btn)btn.textContent='💾 GUARDAR FACTURA EN PROYECTO';page('cfR21MaterialPage');if($('cfR21MaterialDate')&&!$('cfR21MaterialDate').value){const d=new Date();$('cfR21MaterialDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}await load();}
 function close(){root.openFacturacionPage?.();}
+async function openForProject(name){
+ await open();
+ const project=text(name);
+ if(project&&$('cfR21Project'))$('cfR21Project').value=project;
+ status('cfR21MaterialStatus',project?'Proyecto seleccionado: '+project+'. Añade una nueva factura de material o modifica una anterior.':'Selecciona un proyecto antes de subir facturas.');
+}
+async function openItem(id){
+ await open();
+ const row=root.document.querySelector('[data-cf-r21-material-id="'+String(id).replace(/[^A-Za-z0-9_-]/g,'')+'"]');
+ if(row){row.scrollIntoView?.({block:'center'});row.classList.add('cfR22MaterialFocus');}
+}
 async function load(){
  status('cfR21MaterialStatus','Cargando justificantes de tu Google Sheets…');
  try{const s=session(),data=await root.CFGoogleData.action({accion:'listarFacturasMaterialProyecto'});same(s);
@@ -100,27 +119,31 @@ async function load(){
 function render(){const holder=$('cfR21MaterialList');if(!holder)return;holder.replaceChildren();
  const ordered=items().sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
  if(!ordered.length){holder.textContent='Todavía no hay facturas de material vinculadas a proyectos.';return;}
- for(const r of ordered){const card=root.document.createElement('article');card.className='cfR21Message';
+ for(const r of ordered){const card=root.document.createElement('article');card.className='cfR21Message';card.dataset.cfR21MaterialId=String(r.id);
  const h=root.document.createElement('h3');h.textContent=r.proyecto;card.appendChild(h);
  const t=root.document.createElement('p');t.textContent=r.proveedor+' · '+r.fecha+' · '+euro(r.importe);card.appendChild(t);
- const b=root.document.createElement('button');b.className='guideBtn';b.textContent='📄 Ver factura';b.onclick=()=>root.openCFDocumentViewer?.(r.documentoUrl);card.appendChild(b);holder.appendChild(card);
+ const b=root.document.createElement('button');b.className='guideBtn';b.textContent='📄 Ver factura';b.onclick=()=>root.openCFDocumentViewer?.(r.documentoUrl);card.appendChild(b);
+ const edit=root.document.createElement('button');edit.className='guideBtn';edit.style.marginTop='8px';edit.textContent='✏️ Modificar datos / añadir justificante';edit.onclick=()=>{editingId=String(r.id);$('cfR21Project').value=r.proyecto;$('cfR21Vendor').value=r.proveedor;$('cfR21MaterialDate').value=String(r.fecha).slice(0,10);$('cfR21MaterialAmount').value=r.importe;$('cfR21MaterialFile').value='';$('cfR21MaterialSave').textContent='💾 GUARDAR CAMBIOS';status('cfR21MaterialStatus','Editando '+r.proyecto+'. Puedes sustituir el justificante o conservarlo.');root.document.getElementById('cfR21MaterialPage')?.scrollIntoView?.({behavior:'smooth'});};card.appendChild(edit);holder.appendChild(card);
  }
 }
 async function save(){
  const project=text($('cfR21Project')?.value),vendor=text($('cfR21Vendor')?.value),date=text($('cfR21MaterialDate')?.value),amount=Number($('cfR21MaterialAmount')?.value),file=$('cfR21MaterialFile')?.files?.[0],button=$('cfR21MaterialSave');
  if(!project||!vendor||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)||!(amount>0))return status('cfR21MaterialStatus','Completa proyecto, proveedor, fecha e importe positivo.');
- if(!file||!allowedMime(file.type)||file.size>5*1024*1024)return status('cfR21MaterialStatus','Selecciona un archivo PDF, JPG o PNG de hasta 5 MB.');
+ if((!file&&!editingId)||(file&&(!allowedMime(file.type)||file.size>5*1024*1024)))return status('cfR21MaterialStatus','Selecciona un archivo PDF, JPG o PNG de hasta 5 MB.');
  button.disabled=true;
  try{
-  const s=session();status('cfR21MaterialStatus','Subiendo la factura al Drive privado…');
-  const base64=await fileToBase64(file);const url=await root.CFGoogleUploads.upload(file.name,file.type,base64,root.CFGoogleAccount.active());same(s);
-  status('cfR21MaterialStatus','Guardando el vínculo con el proyecto en Sheets…');
-  const result=await root.CFGoogleData.action({accion:'guardarFacturaMaterialProyecto',factura:JSON.stringify({proyecto:project,proveedor:vendor,fecha:date,importe:amount,documentoUrl:url})});
-  if(!result?.ok||!result.id)throw Error('Sheets no ha confirmado el registro. El archivo ya subido puede estar en Drive: compruébalo antes de reintentar.');
-  status('cfR21MaterialStatus','Factura registrada en el proyecto.');$('cfR21MaterialFile').value='';await load();
+  const s=session(),previous=editingId?items().find(x=>String(x.id)===editingId):null;
+  let url=previous?.documentoUrl||'';
+  if(file){status('cfR21MaterialStatus','Subiendo la factura a tu Drive privado…');
+   const base64=await fileToBase64(file);url=await root.CFGoogleUploads.upload(file.name,file.type,base64,root.CFGoogleAccount.active());same(s);}
+  status('cfR21MaterialStatus','Guardando los datos del proyecto en Sheets…');
+  const result=await root.CFGoogleData.action({accion:editingId?'editarFacturaMaterialProyecto':'guardarFacturaMaterialProyecto',id:editingId,factura:JSON.stringify({proyecto:project,proveedor:vendor,fecha:date,importe:amount,documentoUrl:url})});
+  if(!result?.ok||!result.id)throw Error('Sheets no ha confirmado el registro. Comprueba en Drive antes de reintentar.');
+  editingId='';$('cfR21MaterialSave').textContent='💾 GUARDAR FACTURA EN PROYECTO';
+  status('cfR21MaterialStatus','Factura registrada o actualizada en el proyecto.');$('cfR21MaterialFile').value='';await load();
  }catch(e){status('cfR21MaterialStatus','No guardado: '+text(e.message||e));}finally{button.disabled=false;}
 }
-return Object.freeze({open,close,load,save,items});})();root.CFR21Materials=materials;
+return Object.freeze({open,openForProject,openItem,close,load,save,items});})();root.CFR21Materials=materials;
 // ===== Preparación y selección granular para el gestor =====
 const exporter=(function(){let candidates=[],preparedRange='',preparedAccount='';
 function range(){const from=text($('emailDesde')?.value),to=text($('emailHasta')?.value);if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>to)throw Error('Selecciona dos fechas válidas, desde y hasta.');return {from,to};}

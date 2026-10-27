@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261027-R21">
+<html lang="es" data-cf-ui-build="UI76-20261027-R22">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -659,6 +659,25 @@ input, textarea, select {
   -webkit-user-select: text;
   user-select: text;
 }
+</style>
+<style id="cf-r22-operations-style">
+/* R22: indicadores en agenda, pagos parciales y selección de contactos. */
+.cfR22AgendaLegend{display:flex;flex-wrap:wrap;gap:8px 12px;margin:4px 0 11px;align-items:center}
+.cfR22AgendaLegend label{font-size:11px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.cfR22AgendaLegend input{width:15px;height:15px;accent-color:#49ee9d}
+.cfR22AgendaLegend small{font-size:10px;color:var(--muted)}
+.cfR22Dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#aab}
+.cfR22Dot.isPurchase{background:#f7c948}.cfR22Dot.isInvoice{background:#d487ee}.cfR22Dot.isIncome{background:#5fe0ae}.cfR22Dot.isUnpaid{background:#ff942f}
+.cfR22AgendaChip{display:block;border-radius:7px;margin:2px 1px;padding:4px 5px;font-size:9px;font-weight:800;text-align:left;border:0;width:calc(100% - 2px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#151515;background:#f7c948;cursor:pointer}
+.cfR22AgendaChip.isInvoice{background:#d487ee}.cfR22AgendaChip.isIncome{background:#5fe0ae}.cfR22AgendaChip.isUnpaid{background:#ff942f}
+.cfR22CountrySlot select{font-size:14px;min-width:140px;max-width:100%;padding:10px;border:1px solid #8294a3;border-radius:9px;background:#283946;color:#fff}
+.cfR22CountrySlot{margin:8px 0 10px}.cfR22CountrySlot small{display:block;margin-top:5px}
+.cfR22ContactActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
+.cfR22ContactActions button{font-size:12px!important;padding:10px!important}
+#cfR22ContactModal .modalCard{max-height:90dvh;overflow:auto}#cfR22ContactList{max-height:48dvh;overflow:auto;display:grid;gap:6px}#cfR22ContactList button{text-align:left;padding:12px;background:#253b4d;color:#fff;border:1px solid #6d849c;border-radius:10px}
+@media(max-width:375px){.cfR22ContactActions{grid-template-columns:1fr}}
+
+#pendingPartWrap[hidden],#cfR22PaymentPartWrap[hidden],#cfR21AdminEntry[hidden]{display:none!important}
 </style>
 <style id="cf-r3-accessibility">
 /* Los relojes y selectores de hora no deben quedar diminutos en iPhone. */
@@ -1630,6 +1649,12 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <button class="agendaNav" type="button" onclick="changeAgendaMonth(1)">›</button>
     </div>
     <button class="agendaToday" type="button" onclick="agendaGoToday()">IR A HOY</button>
+    <div class="cfR22AgendaLegend" id="cfR22AgendaLegend">
+      <label><input type="checkbox" value="compras" checked> <span class="cfR22Dot isPurchase"></span> Compras</label>
+      <label><input type="checkbox" value="facturas" checked> <span class="cfR22Dot isInvoice"></span> Facturas</label>
+      <label><input type="checkbox" value="ingresos" checked> <span class="cfR22Dot isIncome"></span> Servicios / ingresos</label>
+      <small><span class="cfR22Dot isUnpaid"></span> Naranja = pendiente de cobro</small>
+    </div>
     <div class="calendar">
       <div class="calendarWeek"><div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div></div>
       <div id="agendaGrid" class="calendarGrid"></div>
@@ -1981,6 +2006,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
         <p class="settingsHint">Envía sugerencias y errores a los desarrolladores a través del buzón privado de Google Cloud. No se envían tus compras, facturas ni tus hojas de cálculo.</p>
         <button class="guideBtn" type="button" onclick="openCFSupport()">✉️ ENVIAR SUGERENCIA O INFORMAR DE UN FALLO</button>
         <div id="cfFirebaseStatus" class="settingsHint" role="status"></div>
+        <div id="cfR22AdminHint" class="settingsHint" role="status">Comprobando el acceso al buzón de administración…</div>
+        <button class="guideBtn" type="button" onclick="CFR21Admin.check()">🔄 COMPROBAR MI ACCESO DE ADMINISTRADOR</button>
         <div id="cfR21AdminEntry" hidden><button class="guideBtn" type="button" onclick="CFR21Admin.open()">🛡️ ADMINISTRACIÓN · BUZÓN DE SUGERENCIAS</button><small class="settingsHint">Solo visible si Firebase confirma los permisos de tu cuenta administradora.</small></div>
       </div>
       <div class="settingsGroup" id="accountSettingsGroup">
@@ -1991,7 +2018,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R21</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R22</div>
 
     </div>
   </div>
@@ -2183,6 +2210,7 @@ function clearUserLocalCaches(){
   cfDistributorDetails={};
   window.cfInvoiceNumberConfig=null;window.cfInvoiceBrandUrl='';
   ["cf_records","cf_clients","cf_inventory","cf_agenda","cf_pending_income","cf_stores","cf_providers","cf_store_list","cf_provider_list","cf_invoice_settings","cf_pending_records","cf_inventory_categories"].forEach(k=>localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k=>k.startsWith('cf_pending_income:')).forEach(k=>localStorage.removeItem(k));
   records=[];
   savedClients=[];
   inventoryItems=[];
@@ -2902,28 +2930,34 @@ function renderPendingIncomeList(){
   const arr=pendingIncomeRecords.slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   wrap.innerHTML=arr.length ? arr.slice(0,8).map(item=>{
     const benefit=Number(item.beneficio)||0;
-    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}${item.proyecto?' · Proyecto: '+esc(item.proyecto):''}</span>${item.facturaUrl?`<button type="button" class="cfR20SmallBtn" data-cf-doc-url="${esc(item.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver justificante</button>`:''}</div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button></div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
+    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}${item.proyecto?' · Proyecto: '+esc(item.proyecto):''}</span>${item.facturaUrl?`<button type="button" class="cfR20SmallBtn" data-cf-doc-url="${esc(item.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver justificante</button>`:''}</div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='parcial'?'🟠 Pago parcial':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><span>Percibido ${euro(item.cobrado)} · Falta ${euro(Math.max(0,(Number(item.importePrevisto)||0)-(Number(item.cobrado)||0)))}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button><button type="button" class="cfR20SmallBtn" data-cf-income-id="${esc(item.id)}" onclick="event.stopPropagation();openPendingIncomeForm(this.dataset.cfIncomeId)">✏️ Editar importes / fecha / justificante</button>${item.proyecto?`<button type="button" class="cfR20SmallBtn" data-cf-project="${esc(item.proyecto)}" onclick="event.stopPropagation();CFR21Materials.openForProject(this.dataset.cfProject)">🧾 Añadir facturas al proyecto</button>`:''}</div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
   }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos independientes registrados.</div>';
 }
 
 async function loadPendingIncome(showError=false){
+  const cfPendingIncomeCacheKey=()=>{const a=window.CFGoogleAccount?.active?.();return a?.id&&a?.email?'cf_pending_income:'+a.id+':'+a.email:'';};
   if(pendingIncomeSyncInProgress) return;
   pendingIncomeSyncInProgress=true;
   try{
     const data=await callAction({accion:"listarIngresosPendientes"});
     pendingIncomeRecords=Array.isArray(data.ingresos)?data.ingresos:[];
-    localStorage.setItem("cf_pending_income",JSON.stringify(pendingIncomeRecords));
+    const cacheKey=cfPendingIncomeCacheKey();
+    if(cacheKey)localStorage.setItem(cacheKey,JSON.stringify(pendingIncomeRecords));
     renderPendingIncomeList();
     updateSummary();
   }catch(e){
-    try{pendingIncomeRecords=JSON.parse(localStorage.getItem("cf_pending_income")||"[]");}catch(_){pendingIncomeRecords=[];}
+    const cacheKey=cfPendingIncomeCacheKey();
+    try{pendingIncomeRecords=cacheKey?JSON.parse(localStorage.getItem(cacheKey)||"[]"):[];}catch(_){pendingIncomeRecords=[];}
     renderPendingIncomeList();
     updateSummary();
     if(showError) showToastMessage("Sin conexión","No se pudieron cargar los ingresos pendientes.");
   }finally{pendingIncomeSyncInProgress=false;}
 }
 
-function openPendingIncomeForm(){
+let cfPendingEditingId='';
+function openPendingIncomeForm(recordId=''){
+  cfPendingEditingId=String(recordId||'');
+  const editing=cfPendingEditingId?pendingIncomeRecords.find(x=>String(x.id)===cfPendingEditingId):null;
   only("formPage");
   nav("sale");
   invoiceConfig=getInvoiceConfig();
@@ -2931,43 +2965,53 @@ function openPendingIncomeForm(){
   $("formHeader").innerHTML=`
     <button class="back" onclick="openFacturacionPage()">‹</button>
     <div class="headericon"><span style="font-size:27px">🟢</span></div>
-    <div><h2>INGRESO INDEPENDIENTE</h2><p>Registra un ingreso independiente</p></div>`;
+    <div><h2>INGRESO INDEPENDIENTE</h2><p>${editing?'Modifica el ingreso guardado':'Registra un ingreso independiente'}</p></div>`;
   $("formBody").innerHTML=`
     <div class="pendingIncomeForm">
       <div class="invoiceSection">
         <h3>🟢 DATOS DEL SERVICIO</h3>
         <div class="field"><label>Persona</label><input id="pendingPerson" class="input" placeholder="Ej. Juan Pérez"></div>
+        <div class="field"><label>Fecha del servicio / ingreso</label><input id="pendingDate" class="input" type="date"></div>
         <div class="field"><label>Tipo de servicio</label><input id="pendingService" class="input" placeholder="Ej. Reparación de iPhone"></div>
         <div class="two">
           <div class="field"><label>Precio material</label><input id="pendingMaterial" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
           <div class="field"><label>Importe a cobrar</label><input id="pendingCharged" class="input" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" oninput="recalcPendingIncome()"></div>
         </div>
-        <div class="field"><label>Estado del cobro</label><select class="select" id="pendingPaymentState" onchange="recalcPendingIncome()"><option value="pendiente">🟠 Pendiente de pago</option><option value="pagada">✅ Pago recibido</option></select></div>
+        <div class="field"><label>Estado del cobro</label><select class="select" id="pendingPaymentState" onchange="recalcPendingIncome()"><option value="pendiente">🟠 Pendiente de pago</option><option value="parcial">🟠 Pago parcial</option><option value="pagada">✅ Pago recibido</option></select></div>
+        <div class="field" id="pendingPartWrap" hidden><label>Importe recibido hasta hoy (€)</label><input id="pendingPaidPart" class="input" type="number" min="0" step=".01" inputmode="decimal" oninput="recalcPendingIncome()" placeholder="50,00"><small class="settingsHint">Introduce el importe total recibido hasta el momento, no solo el último abono.</small></div>
         <div class="two"><div class="field"><label>Correo del cliente (para recordatorios)</label><input id="pendingEmail" class="input" type="email" inputmode="email" placeholder="cliente@ejemplo.com"></div>
-        <div class="field"><label>WhatsApp del cliente (con prefijo internacional)</label><input id="pendingPhone" class="input" type="tel" inputmode="tel" placeholder="+34 600 000 000"></div></div>
+        <div class="field"><label>WhatsApp del cliente</label><input id="pendingPhone" class="input" type="tel" inputmode="tel" placeholder="600 000 000"></div></div>
+        <div class="cfR22ContactActions"><button type="button" class="guideBtn" onclick="CFR22.pickClient('income')">👤 Elegir cliente guardado</button><button type="button" class="guideBtn" onclick="CFR22.pickNativeContact('income')">📱 Contactos del teléfono</button></div>
+        <div id="cfR22IncomeCountry" class="cfR22CountrySlot"></div>
         <p class="settingsHint">Los recordatorios se abren en WhatsApp o en tu aplicación de correo para que los revises antes de enviarlos. No se mandan automáticamente.</p>
         <div class="calc pendingIncomeCalc">
           <div class="box"><small>Material</small><strong id="pendingMaterialValue">0,00 €</strong></div>
-          <div class="box"><small>Realmente cobrado</small><strong id="pendingChargedValue">0,00 €</strong></div>
+          <div class="box"><small>Realmente cobrado</small><strong id="pendingChargedValue">0,00 €</strong></div><div class="box"><small>Pendiente de recibir</small><strong id="pendingDueValue">0,00 €</strong></div>
           <div class="box pendingBenefitBox"><small>Beneficio</small><strong id="pendingBenefitValue">0,00 €</strong></div>
         </div>
       </div>
-      <div class="field"><label>Proyecto asociado (opcional)</label><input id="pendingProject" class="input" maxlength="120" placeholder="Ej. Instalación de sonido · Cliente"></div>
+      <div class="field"><label>Proyecto asociado (opcional)</label><input id="pendingProject" class="input" maxlength="120" placeholder="Ej. Instalación de sonido · Cliente"></div>${editing?`<button type="button" class="guideBtn" onclick="CFR21Materials.openForProject(document.getElementById('pendingProject').value)">🧾 AÑADIR O MODIFICAR FACTURAS DE MATERIAL DEL PROYECTO</button>`:''}
       <div class="field"><label>Factura / justificante del ingreso (opcional)</label><input id="pendingInvoiceFile" class="input" type="file" accept="application/pdf,image/png,image/jpeg"><small class="settingsHint">PDF, JPG o PNG, hasta 5 MB. Se guarda en tu Drive privado y se podrá incluir en el envío al gestor.</small></div>
-      <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">GUARDAR INGRESO INDEPENDIENTE</button>
+      <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">${editing?'GUARDAR CAMBIOS DEL INGRESO':'GUARDAR INGRESO INDEPENDIENTE'}</button>
       <div id="pendingIncomeMsg" class="msg"></div>
     </div>`;
+  const d=new Date();$('pendingDate').value=editing?String(editing.fecha).slice(0,10):agendaDayKey(d.getFullYear(),d.getMonth(),d.getDate());
+  if(editing){$('pendingPerson').value=editing.persona||'';$('pendingService').value=editing.servicio||'';$('pendingMaterial').value=String(Number(editing.material)||0);$('pendingCharged').value=String(Number(editing.importePrevisto||editing.cobrado)||0);$('pendingPaymentState').value=editing.estadoCobro==='parcial'?'parcial':editing.estadoCobro==='pagada'?'pagada':'pendiente';$('pendingPaidPart').value=String(Number(editing.cobrado)||0);$('pendingEmail').value=editing.correoCobro||'';$('pendingPhone').value=editing.telefonoCobro||'';$('pendingProject').value=editing.proyecto||'';}
+  window.CFR22?.mountIncomeCountry?.();
   recalcPendingIncome();
 }
 
 function recalcPendingIncome(){
   const material=Number($("pendingMaterial")?.value)||0;
   const charged=Number($("pendingCharged")?.value)||0;
-  const paid=$('pendingPaymentState')?.value==='pagada';
-  const actuallyCollected=paid?charged:0;
+  const state=$('pendingPaymentState')?.value||'pendiente';
+  const part=$('pendingPaidPart');const partWrap=$('pendingPartWrap');
+  if(partWrap)partWrap.hidden=state!=='parcial';
+  const actuallyCollected=state==='pagada'?charged:state==='parcial'?(Number(part?.value)||0):0;
   const benefit=actuallyCollected-material;
   if($("pendingMaterialValue"))$("pendingMaterialValue").textContent=euro(material);
   if($("pendingChargedValue"))$("pendingChargedValue").textContent=euro(actuallyCollected);
+  if($('pendingDueValue'))$('pendingDueValue').textContent=euro(Math.max(0,charged-actuallyCollected));
   const b=$("pendingBenefitValue");
   if(b){b.textContent=euro(benefit);b.parentElement.classList.toggle("negativeBenefit",benefit<0);}
   return {material,charged,actuallyCollected,benefit};
@@ -2980,13 +3024,14 @@ async function savePendingIncome(){
   let calc;
   try{calc=recalcPendingIncome();}catch(e){if(msg){msg.className='msg err';msg.textContent='No se pudo calcular el ingreso: '+(e.message||e);}return;}
   if(!persona||!servicio){msg.className="msg err";msg.textContent="Indica la persona y el tipo de servicio.";return;}
-  if(calc.charged<=0){msg.className="msg err";msg.textContent="El importe a cobrar debe ser mayor que 0.";return;}
+  if(calc.charged<=0||calc.material<0||calc.actuallyCollected<0||calc.actuallyCollected>calc.charged||($('pendingPaymentState').value==='parcial'&&!(calc.actuallyCollected>0&&calc.actuallyCollected<calc.charged))){msg.className="msg err";msg.textContent="Comprueba el importe acordado, el coste y lo recibido. El abono parcial debe ser menor que el total.";return;}
+  const fecha=String($('pendingDate')?.value||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)){msg.className='msg err';msg.textContent='Indica la fecha del servicio.';return;}
   if($('pendingEmail')?.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('pendingEmail').value.trim())){msg.className='msg err';msg.textContent='Revisa el correo del cliente.';return;}
   if($('pendingPhone')?.value.trim()&&!/^[+\d() .-]{6,35}$/.test($('pendingPhone').value.trim())){msg.className='msg err';msg.textContent='Revisa el teléfono del cliente.';return;}
   btn.disabled=true;msg.className="msg";msg.textContent="Guardando...";
   try{
     const invoiceFile=$('pendingInvoiceFile')?.files?.[0]||null;
-    let facturaUrl='';
+    let facturaUrl=cfPendingEditingId?(pendingIncomeRecords.find(x=>String(x.id)===cfPendingEditingId)?.facturaUrl||''):'';
     if(invoiceFile){
       if(!['application/pdf','image/jpeg','image/png'].includes(invoiceFile.type)||invoiceFile.size>5*1024*1024)throw Error('El justificante debe ser PDF, JPG o PNG de hasta 5 MB.');
       msg.textContent='Subiendo el justificante a tu Drive privado…';
@@ -2994,13 +3039,13 @@ async function savePendingIncome(){
       facturaUrl=await window.CFGoogleUploads.upload(invoiceFile.name,invoiceFile.type,base64,window.CFGoogleAccount.active());
     }
     msg.textContent='Guardando ingreso en Google Sheets…';
-    const result=await callAction({accion:"guardarIngresoPendiente",ingreso:JSON.stringify({id:"IP-"+Date.now()+"-"+Math.floor(Math.random()*10000),persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:$('pendingPaymentState')?.value||'pendiente',correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:String($('pendingPhone')?.value||'').trim(),proyecto:String($('pendingProject')?.value||'').trim().slice(0,120),facturaUrl})});
+    const result=await callAction({accion:cfPendingEditingId?'editarIngresoIndependiente':'guardarIngresoPendiente',id:cfPendingEditingId,ingreso:JSON.stringify({id:cfPendingEditingId||'IP-'+Date.now()+'-'+Math.floor(Math.random()*10000),fecha,persona,servicio,material:calc.material,importePrevisto:calc.charged,cobrado:calc.actuallyCollected,beneficio:calc.benefit,estadoCobro:$('pendingPaymentState')?.value||'pendiente',correoCobro:String($('pendingEmail')?.value||'').trim(),telefonoCobro:window.CFR22?.normalizeContactPhone?.('income')||String($('pendingPhone')?.value||'').trim(),proyecto:String($('pendingProject')?.value||'').trim().slice(0,120),facturaUrl})});
     if(!result || result.ok!==true || !result.id){
       throw new Error("Google Sheets no ha confirmado el guardado. Comprueba los permisos de la cuenta.");
     }
     await loadPendingIncome(false);
-    msg.className="msg ok";msg.textContent="Ingreso independiente registrado ✓";
-    showToastMessage("Ingreso independiente registrado","Se ha registrado como ingreso independiente.");
+    msg.className="msg ok";msg.textContent=cfPendingEditingId?"Ingreso independiente actualizado ✓":"Ingreso independiente registrado ✓";
+    showToastMessage("Ingreso independiente guardado","Los datos se han confirmado en tus hojas privadas de Google.");
     setTimeout(()=>openFacturacionPage(),700);
   }catch(e){msg.className="msg err";msg.textContent=e.message||"No se pudo guardar el ingreso.";}
   finally{btn.disabled=false;}
@@ -3551,6 +3596,7 @@ function openForm(tipo){
         <label>Concepto</label>
         <input id="concepto" class="input" placeholder="${c?"Ej. Material de oficina, suministro, servicio...":"Ej. Sonido e iluminación, pantalla LED, etc."}">
       </div>
+      <div class="field"><label>${c?'Fecha de la compra':'Fecha de la factura / servicio'}</label><input id="cfR22RecordDate" class="input" type="date"><small class="settingsHint">Esta fecha aparecerá en Agenda, con el color correspondiente a la operación.</small></div>
 
       <div class="two">
         <div class="field">
@@ -3588,6 +3634,7 @@ function openForm(tipo){
       <div id="msg" class="msg"></div>
     </div>`;
 
+  const d=new Date();$('cfR22RecordDate').value=agendaDayKey(d.getFullYear(),d.getMonth(),d.getDate());
   if(c)formThirdPartyCategory="distribuidores";
   const input=$("tercero");
   input.addEventListener("input",renderAutocomplete);
@@ -3664,6 +3711,8 @@ async function sendRecord(tipo){
     }
   }
 
+  const fecha=String($('cfR22RecordDate')?.value||'');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)){m.className='msg err';m.textContent='Indica una fecha válida para la operación.';return;}
   const c=calcRecord(tipo,t,i);
   const payload={
     sessionToken:cfSessionToken(),
@@ -3671,6 +3720,7 @@ async function sendRecord(tipo){
     tipo,
     tercero,
     concepto,
+    fecha,
     base:+c.base.toFixed(2),
     ivaPorcentaje:i,
     iva:+c.iva.toFixed(2),
@@ -3711,6 +3761,7 @@ async function sendRecord(tipo){
     if(fileInput)fileInput.value='';
     if($('iva'))$('iva').value='21';
     cfRecordRequestId=null;
+    const d=new Date();if($('cfR22RecordDate'))$('cfR22RecordDate').value=agendaDayKey(d.getFullYear(),d.getMonth(),d.getDate());
     recalc();
     await cfSuccessFeedback();
     m.className='msg ok';m.textContent=(tipo==='Compra'?'Compra':'Registro')+' guardado correctamente.';
@@ -4040,6 +4091,7 @@ function openAgenda(){
   agendaMonthCursor=new Date(agendaMonthCursor.getFullYear(),agendaMonthCursor.getMonth(),1);
   renderAgenda();
   loadAgenda(false);
+  window.CFR22Agenda?.refresh?.();
 }
 function agendaGoToday(){
   const now=new Date();
@@ -4081,6 +4133,7 @@ function renderAgenda(){
     if(ev){openAgendaEventModal(ev.dataset.eventId);return;}
     openAgendaEventModal(null,cell.dataset.date);
   }));
+  window.CFR22Agenda?.decorate?.();
   renderAgendaUpcoming();
 }
 function renderAgendaUpcoming(){
@@ -5374,7 +5427,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R21'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R22'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5391,6 +5444,7 @@ const CF_TOUR_STEPS=[
  {title:'Accesos de Inicio',text:'Usa estas tarjetas para entrar a Compras, Facturación, Agenda y Stock; también puedes utilizar la barra inferior.',page:'home',target:'#home .homegrid'},
  {title:'Compras',text:'Indica el distribuidor, concepto, importe con IVA y justificante opcional. Al confirmar el guardado, el formulario se limpia para evitar duplicados.',page:'buy',target:'#formBody .form'},
  {title:'Facturación',text:'Crea una factura, revisa los datos fiscales y señala si el pago está recibido. Las pendientes tienen etiqueta naranja y permiten preparar recordatorios de WhatsApp o correo.',page:'sale',target:'#formBody .invoiceForm'},
+ {title:'Agenda · movimientos',text:'Además de eventos, identifica por colores las compras, facturas y servicios, con un indicador naranja si el cobro sigue pendiente. Pulsa una operación para consultar su ficha.',page:'agenda',target:'#cfR22AgendaLegend'},
  {title:'Agenda',text:'Registra fecha, horario y ubicación. Los eventos autorizados se sincronizan con Calendar y permiten recordatorios.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Inventario',text:'Crea materiales, cantidades y ubicación. Las categorías generan botones con iconos; puedes filtrar por tipo.',page:'inventory',target:'#inventoryCategoryFilter'},
  {title:'Documentos',text:'Organiza certificados, licencias, fichas y documentos PDF en carpetas y subcarpetas privadas.',page:'documents',target:'#documentsPage .cfDocToolbar'},
@@ -5415,6 +5469,11 @@ const CF_TOUR_EXTENDED=[
  {title:'Facturación · reclamar por correo',text:'En Gestionar cobro, introduce un correo válido y pulsa Preparar correo. Se abrirá el programa de correo con un borrador. El envío requiere tu confirmación.',page:'sale',target:'#formBody'},
  {title:'Ingresos independientes · cobro real',text:'El importe a cobrar es lo acordado; solo cuenta como cobrado cuando indiques Pago recibido. Un ingreso pendiente mostrará una etiqueta naranja y podrás marcarlo pagado después.',page:'sale',target:'#formBody'},
  {title:'Facturación · compartir el PDF',text:'Después de generar una factura, usa Compartir para exportar su PDF al sistema del teléfono.',page:'sale',target:'#formBody'},
+ {title:'Facturación · contactos y país',text:'Cuando prepares un recordatorio, Control Fiscal propone el prefijo telefónico a partir de la región del teléfono. Puedes escoger un cliente de tu base o un contacto del dispositivo y comprobar el número antes de enviarlo.',page:'sale',target:'#formBody'},
+ {title:'Ingresos independientes · pagos parciales',text:'Indica la fecha, el importe acordado y lo recibido. Si el cliente abona una parte, marca Pago parcial; se calculará automáticamente lo que falta y será la cantidad del recordatorio. Más tarde puedes editar el coste de material y el precio.',page:'sale',target:'#formBody'},
+ {title:'Proyectos · ampliar facturas',text:'Puedes editar la fecha e importe de los justificantes de material y añadir un nuevo PDF desde Facturas de material por proyecto; las facturas fiscales emitidas no se alteran.',page:'sale',target:'#formBody'},
+ {title:'Agenda · operaciones coloreadas',text:'Activa Compras, Facturas o Servicios / ingresos para reconocer por colores qué movimiento ocurrió cada día. El naranja marca cobros pendientes. Toca un indicador para ver su descripción y saltar al registro original.',page:'agenda',target:'#cfR22AgendaLegend'},
+ {title:'Ajustes · panel del administrador',text:'Si tus permisos Firebase están autorizados, en Sugerencias y errores aparecerá el buzón de administración, sin salir de la aplicación. Si no se muestra, revisa el acceso y la versión instalada.',page:'settings',target:'#cfSupportGroup'},
  {title:'Agenda · crear un evento',text:'Pulsa Nuevo evento y añade fecha, horas y contacto. El evento se conserva en tu libro de Google.',page:'agenda',target:'#agendaPage .agendaAdd'},
  {title:'Agenda · avisos nativos',text:'Escoge entre al empezar, 15 minutos, 1 hora o días antes. Los avisos de iPhone requieren permiso para notificaciones.',page:'agenda',target:'#agendaPage .calendar'},
  {title:'Agenda · ubicación y rutas',text:'Añade la dirección real. El mapa aparece en la ficha; Ruta en Mapas abre la navegación del teléfono, no una pestaña web dentro de la app.',page:'agenda',target:'#agendaPage .calendar'},
@@ -5650,6 +5709,7 @@ async function cfSelectInventoryPhotoFile(input){
 
 // R20: acceso restringido a listas ya cargadas, sin exponer tokens ni Drive.
 window.CFR20Data=Object.freeze({records:()=>records,incomes:()=>pendingIncomeRecords,editingRecord:()=>editingRecord});
+window.CFR22ClientsSnapshot=()=>savedClients;
 // Los datos privados se cargan después de iniciar sesión y desbloquear la app.
 cfRegisterSecurityLifecycle();
 startAccountSystem();
@@ -5661,9 +5721,13 @@ startAccountSystem();
   <button type="button" class="modalClose" onclick="closeCFPayment()" aria-label="Cerrar">×</button>
   <h3 id="cfR20PaymentTitle">💶 Estado de cobro</h3>
   <p id="cfR20PaymentSummary" class="settingsHint"></p>
-  <div class="field"><label>Estado del pago</label><select class="select" id="cfR20PaymentState"><option value="pendiente">🟠 Pendiente de pago</option><option value="pagada">✅ Pago recibido</option></select></div>
+  <div class="field"><label>Estado del pago</label><select class="select" id="cfR20PaymentState"><option value="pendiente">🟠 Pendiente de pago</option><option value="parcial">🟠 Pago parcial</option><option value="pagada">✅ Pago recibido</option></select></div>
+  <div id="cfR22PaymentPartWrap" class="field" hidden><label>Importe total recibido hasta ahora (€)</label><input class="input" id="cfR22PaidAmount" type="number" min="0" step=".01" inputmode="decimal" value="0"><small class="settingsHint">Es el total acumulado recibido, no únicamente el último ingreso.</small></div>
+  <p class="settingsHint" id="cfR22PaymentDue">Pendiente: —</p>
   <div class="field"><label>Correo del cliente</label><input id="cfR20PaymentEmail" type="email" class="input" placeholder="cliente@ejemplo.com" autocomplete="email"></div>
-  <div class="field"><label>Teléfono / WhatsApp (con prefijo internacional)</label><input id="cfR20PaymentPhone" type="tel" class="input" placeholder="+34 600 000 000" autocomplete="tel"></div>
+  <div class="field"><label>Teléfono / WhatsApp</label><input id="cfR20PaymentPhone" type="tel" class="input" placeholder="600 000 000" autocomplete="tel"></div>
+  <div id="cfR22PaymentCountry" class="cfR22CountrySlot"></div>
+  <div class="cfR22ContactActions"><button type="button" class="guideBtn" onclick="CFR22.pickClient('payment')">👤 Cliente guardado</button><button type="button" class="guideBtn" onclick="CFR22.pickNativeContact('payment')">📱 Contactos del teléfono</button></div>
   <div class="settingsHint">Estas referencias se guardan solo en tu Google Sheets. El estado no modifica el documento fiscal emitido. WhatsApp y Preparar correo abren borradores. Enviar con Gmail sí envía tras tu confirmación y la respuesta de Gmail API.</div>
   <button class="save" type="button" id="cfR20PaymentSaveBtn" onclick="saveCFPayment()">💾 GUARDAR ESTADO Y CONTACTO</button>
   <div class="cfR20PaymentActions">
@@ -5673,6 +5737,9 @@ startAccountSystem();
   </div>
   <div class="msg" id="cfR20PaymentStatus" role="status"></div>
  </div>
+</div>
+<div id="cfR22OperationModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfR22OperationTitle" onclick="if(event.target===this)CFR22Agenda.close()">
+ <div class="modalCard"><button class="modalClose" type="button" onclick="CFR22Agenda.close()">×</button><h3 id="cfR22OperationTitle">Operación</h3><div id="cfR22OperationBody" class="settingsHint"></div><button type="button" class="save" onclick="CFR22Agenda.viewSelected()">VER REGISTRO</button></div>
 </div>
 <div id="cfSupportModal" class="modal hidden" onclick="if(event.target===this)closeCFSupport()">
  <div class="modalCard"><button class="modalClose" type="button" onclick="closeCFSupport()">×</button>
@@ -5952,5 +6019,7 @@ startAccountSystem();
 <script src="cf-r18-languages.js"></script>
 <script src="cf-r20-payments.js"></script>
 <script src="cf-r21-features.js"></script>
+<script src="contacts.bundle.js"></script>
+<script src="cf-r22-features.js"></script>
 </body>
 </html>

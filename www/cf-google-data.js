@@ -130,7 +130,7 @@ async function paymentStates(s){
  for(const row of rows){
   if(row[0]!==PAYMENT_MARK||!row[1])continue;
   const v=parseJSON(row[2],null);
-  if(v&&['pendiente','pagada'].includes(v.estado))latest.set(String(row[1]),v);
+  if(v&&['pendiente','parcial','pagada'].includes(v.estado))latest.set(String(row[1]),v);
  }
  return latest;
 }
@@ -142,6 +142,7 @@ function paymentAttach(item,states,kind='factura'){
  const known=states.get(paymentKey(item,kind));
  const oldPaid=kind==='ingreso'&&Number(item.cobrado)>0;
  return {...item,estadoCobro:known?.estado||item.estadoCobro||(oldPaid?'pagada':'sin_indicar'),
+  cobrado:kind==='ingreso'?(known?.cobrado===undefined?num(item.cobrado):num(known.cobrado)):num(known?.cobrado),
   correoCobro:known?.correo||item.correoCobro||item.cliente?.email||'',
   telefonoCobro:known?.telefono||item.telefonoCobro||item.cliente?.telefono||'',
   fechaCobro:known?.fechaCobro||''};
@@ -172,8 +173,10 @@ async function action(p){
   // Idempotencia: si un reintento sigue a una respuesta de red perdida, no crear dos compras.
   const existing=(await items(s,t)).find(x=>x.requestId===requestId);
   if(existing)return {ok:true,id:existing.id||'',repetida:true};
+  const selectedDate=String(p.fecha||'').slice(0,10);
+  if(p.fecha&&!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate))throw Error('La fecha de compra/factura no es válida.');
   let url='';if(p.archivoBase64)url=await root.CFGoogleUploads.upload(p.archivoNombre,p.archivoMime,p.archivoBase64,s);
-  const obj={id:ident('REG'),requestId,fecha:now(),tipo:p.tipo==='Compra'?'Compra':'Facturación',tercero:p.tercero,concepto:p.concepto,base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),facturaUrl:url,estadoCobro:p.tipo==='Compra'?'':(p.estadoCobro==='pagada'?'pagada':'pendiente')};
+  const obj={id:ident('REG'),requestId,fecha:selectedDate||now().slice(0,10),tipo:p.tipo==='Compra'?'Compra':'Facturación',tercero:p.tercero,concepto:p.concepto,base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),facturaUrl:url,estadoCobro:p.tipo==='Compra'?'':(p.estadoCobro==='pagada'?'pagada':'pendiente')};
   await upsert(s,t,obj);return {ok:true,id:obj.id};
  }
  case 'crearFactura':{
@@ -394,16 +397,52 @@ async function action(p){
   x.id=ident('MAT');x.creado=now();x.proyecto=String(x.proyecto).trim().slice(0,120);x.proveedor=String(x.proveedor).trim().slice(0,120);x.importe=num(x.importe);
   await upsert(s,'CF_Material_Facturas',x);return {ok:true,id:x.id};
  }
+ case 'editarFacturaMaterialProyecto':{
+  const old=(await items(s,'CF_Material_Facturas')).find(x=>String(x.id)===String(p.id||''));
+  if(!old)throw Error('No se encuentra la factura de material de esta cuenta.');
+  const x=parseJSON(p.factura),fecha=String(x.fecha||'').slice(0,10),importe=Number(x.importe);
+  if(!x.proyecto||!x.proveedor||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(fecha)||!Number.isFinite(importe)||importe<=0)throw Error('Revisa proyecto, proveedor, fecha e importe.');
+  const url=String(x.documentoUrl||old.documentoUrl||'');
+  if(!/^https:\/\/drive\.google\.com\//.test(url))throw Error('Falta un justificante válido.');
+  await revision(s,'CF_Material_Facturas',old._key,{...old,proyecto:String(x.proyecto).trim().slice(0,120),proveedor:String(x.proveedor).trim().slice(0,120),fecha,importe,documentoUrl:url});
+  return {ok:true,id:old.id};
+ }
  case 'listarIngresosPendientes':{const [income,states]=await Promise.all([all(s,['Ingresos','Ingresos independientes','Ingresos pendientes']),paymentStates(s)]);return {ok:true,ingresos:income.map(x=>paymentAttach(x,states,'ingreso'))};}
  case 'guardarIngresoPendiente':{
-  const x=parseJSON(p.ingreso);if(!x.persona||!x.servicio)throw Error('Indica persona y servicio.');if(!x.id)x.id=ident('IP');x.fecha=x.fecha||now();x.estadoCobro=x.estadoCobro==='pagada'?'pagada':'pendiente';x.importePrevisto=num(x.importePrevisto||x.cobrado);x.cobrado=x.estadoCobro==='pagada'?x.importePrevisto:0;x.beneficio=x.cobrado-num(x.material);await upsert(s,'Ingresos',x);return {ok:true,id:x.id};
+  const x=parseJSON(p.ingreso);
+  if(!x.persona||!x.servicio)throw Error('Indica persona y servicio.');
+  if(!x.id)x.id=ident('IP');
+  if(!x.fecha)x.fecha=now().slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x.fecha).slice(0,10)))throw Error('Indica la fecha del servicio.');
+  x.importePrevisto=num(x.importePrevisto||x.cobrado);
+  x.material=num(x.material);
+  if(x.importePrevisto<=0||x.material<0)throw Error('Revisa los importes del ingreso.');
+  const paid=num(x.cobrado);
+  if(!Number.isFinite(paid)||paid<0||paid>x.importePrevisto)throw Error('El cobro no puede superar el importe previsto.');
+  x.cobrado=x.estadoCobro==='pagada'?x.importePrevisto:(x.estadoCobro==='parcial'?paid:0);
+  x.estadoCobro=x.cobrado<=0?'pendiente':x.cobrado>=x.importePrevisto?'pagada':'parcial';
+  x.beneficio=x.cobrado-x.material;
+  await upsert(s,'Ingresos',x);return {ok:true,id:x.id};
+ }
+ case 'editarIngresoIndependiente':{
+  const originalId=String(p.id||''),fields=parseJSON(p.ingreso),keys=['Ingresos','Ingresos independientes','Ingresos pendientes'];
+  let tab='',record=null;
+  for(const name of keys){record=(await items(s,name)).find(x=>String(x.id)===originalId);if(record){tab=name;break;}}
+  if(!record)throw Error('No se encontró el ingreso en la cuenta actual.');
+  const persona=String(fields.persona||'').trim().slice(0,150),servicio=String(fields.servicio||'').trim().slice(0,200),fecha=String(fields.fecha||'').slice(0,10);
+  const importePrevisto=Number(fields.importePrevisto),material=Number(fields.material),cobrado=Number(fields.cobrado);
+  if(!persona||!servicio||!/^\d{4}-\d{2}-\d{2}$/.test(fecha)||!Number.isFinite(importePrevisto)||importePrevisto<=0||!Number.isFinite(material)||material<0||!Number.isFinite(cobrado)||cobrado<0||cobrado>importePrevisto)throw Error('Comprueba fecha, descripción y pagos; no pueden exceder el total.');
+  const patch={...record,persona,servicio,fecha,importePrevisto,material,cobrado,beneficio:cobrado-material,estadoCobro:cobrado===0?'pendiente':cobrado>=importePrevisto?'pagada':'parcial',correoCobro:String(fields.correoCobro||'').trim().slice(0,180),telefonoCobro:String(fields.telefonoCobro||'').trim().slice(0,35),proyecto:String(fields.proyecto||'').trim().slice(0,120),facturaUrl:String(fields.facturaUrl||record.facturaUrl||'').trim()};
+  await revision(s,tab,record._key,patch);
+  await append(s,PAYMENT_TAB,[PAYMENT_MARK,'ingreso:'+originalId,JSON.stringify({estado:patch.estadoCobro,cobrado,correo:patch.correoCobro,telefono:patch.telefonoCobro,fechaCobro:cobrado>0?now():'',actualizado:now()})]);
+  return {ok:true,id:originalId};
  }
  case 'cambiarEstadoCobro':{
   const kind=p.clase==='ingreso'?'ingreso':'factura';
   const key=String(p.clave||'');
   const state=String(p.estadoCobro||'');
   const email=String(p.correo||'').trim().slice(0,180),phone=String(p.telefono||'').trim().slice(0,35);
-  if(!['pendiente','pagada'].includes(state))throw Error('Estado de cobro no válido.');
+  if(!['pendiente','parcial','pagada'].includes(state))throw Error('Estado de cobro no válido.');
   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Correo del cliente no válido.');
   if(phone&&!/^[+\d() .-]{6,35}$/.test(phone))throw Error('Teléfono no válido.');
   let record=null,tab='';
@@ -417,17 +456,19 @@ async function action(p){
       .find(x=>paymentKey(x)===key&&x.tipo!=='Compra');
   }
   if(!record)throw Error('El documento no existe en tu cuenta Google actual.');
+  const due=kind==='ingreso'?num(record.importePrevisto||record.cobrado):num(record.total);
+  if(!(due>0))throw Error('El importe total debe ser positivo.');
+  const specified=Number(p.cobradoParcial);
+  const paid=state==='pagada'?due:state==='pendiente'?0:specified;
+  if(!Number.isFinite(paid)||paid<0||paid>due||(state==='parcial'&&(paid<=0||paid>=due)))throw Error('El pago parcial debe ser mayor que cero e inferior al total.');
   if(kind==='ingreso'){
-    // Para ingresos independientes, registrar realmente el ingreso cobrado (0 si pendiente).
-    const due=num(record.importePrevisto||record.cobrado);
-    if(!(due>0))throw Error('El importe previsto debe ser mayor que cero.');
     await revision(s,tab,record._key,{...record,importePrevisto:due,estadoCobro:state,
-      cobrado:state==='pagada'?due:0,beneficio:(state==='pagada'?due:0)-num(record.material),
+      cobrado:paid,beneficio:paid-num(record.material),
       correoCobro:email,telefonoCobro:phone});
   }
-  await append(s,PAYMENT_TAB,[PAYMENT_MARK,key,JSON.stringify({estado:state,correo:email,telefono:phone,
-    fechaCobro:state==='pagada'?now():'',actualizado:now()})]);
-  return {ok:true,estadoCobro:state};
+  await append(s,PAYMENT_TAB,[PAYMENT_MARK,key,JSON.stringify({estado:state,cobrado:paid,correo:email,telefono:phone,
+    fechaCobro:paid>0?now():'',actualizado:now()})]);
+  return {ok:true,estadoCobro:state,cobrado:paid,pendiente:Math.max(0,due-paid)};
  }
  case 'eliminarIngresoPendiente':{
   for(const tab of ['Ingresos','Ingresos independientes','Ingresos pendientes']){

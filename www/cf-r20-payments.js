@@ -20,7 +20,9 @@
   const amount=isIncome?number(record.importePrevisto||record.cobrado):number(record.total);
   $('cfR20PaymentTitle').textContent='💶 Cobro · '+(isIncome?'Ingreso independiente':text(record.numeroFactura)||'Factura');
   $('cfR20PaymentSummary').textContent=(isIncome?text(record.persona):text(record.tercero))+' · '+euro(amount)+' · '+text(record.concepto||record.servicio);
-  $('cfR20PaymentState').value=record.estadoCobro==='pagada'?'pagada':'pendiente';
+  $('cfR20PaymentState').value=['pagada','parcial'].includes(record.estadoCobro)?record.estadoCobro:'pendiente';
+  $('cfR22PaidAmount').value=String(number(record.cobrado));
+  root.CFR22?.refreshPaymentDue?.();
   $('cfR20PaymentEmail').value=text(record.correoCobro||record.cliente?.email);
   $('cfR20PaymentPhone').value=text(record.telefonoCobro||record.cliente?.telefono);
   $('cfR20PaymentStatus').textContent='';
@@ -35,14 +37,16 @@
  async function save(){
   const msg=$('cfR20PaymentStatus'),btn=$('cfR20PaymentSaveBtn');
   if(!selected)return;
-  const estadoCobro=$('cfR20PaymentState').value,correo=text($('cfR20PaymentEmail').value),telefono=text($('cfR20PaymentPhone').value);
+  const estadoCobro=$('cfR20PaymentState').value,correo=text($('cfR20PaymentEmail').value),telefono=root.CFR22?.normalizeContactPhone?.('payment')||text($('cfR20PaymentPhone').value);
+  const cobradoParcial=number($('cfR22PaidAmount')?.value);const total=selected.kind==='ingreso'?number(selected.record.importePrevisto||selected.record.cobrado):number(selected.record.total);
+  if(estadoCobro==='parcial'&&!(cobradoParcial>0&&cobradoParcial<total)){msg.className='msg err';msg.textContent='El importe abonado debe estar entre 0 € y el total.';return;}
   if(correo&&!validEmail(correo)){msg.className='msg err';msg.textContent='Comprueba el correo electrónico del cliente.';return;}
-  if(telefono&&!validPhone(telefono)){msg.className='msg err';msg.textContent='Introduce un teléfono válido con prefijo internacional.';return;}
+  if(telefono&&!validPhone(telefono)){msg.className='msg err';msg.textContent='Introduce un teléfono válido. Comprueba el país y los dígitos.';return;}
   if(estadoCobro==='pendiente'&&selected.record.estadoCobro==='pagada'&&!confirm('¿Marcar de nuevo como pendiente un importe anteriormente cobrado? Comprueba el movimiento bancario y cualquier devolución antes de continuar.'))return;
   btn.disabled=true;msg.className='msg';msg.textContent='Guardando estado de cobro en tu Google Sheets…';
   const identity=selected.key;
   try{
-   const result=await root.callAction({accion:'cambiarEstadoCobro',clase:selected.kind,clave:identity,estadoCobro,correo,telefono});
+   const result=await root.callAction({accion:'cambiarEstadoCobro',clase:selected.kind,clave:identity,estadoCobro,cobradoParcial,correo,telefono});
    if(result?.ok!==true)throw Error('Google Sheets no ha confirmado la actualización.');
    if(selected.kind==='ingreso')await root.loadPendingIncome(false);
    else await root.syncFromSheets();
@@ -60,21 +64,27 @@
  }
  async function remind(channel){
   const msg=$('cfR20PaymentStatus');if(!selected)return;
-  if($('cfR20PaymentState').value!=='pendiente'){
+  if($('cfR20PaymentState').value==='pagada'){
    msg.className='msg err';msg.textContent='El cobro figura como pagado. Cambia primero su estado si realmente sigue pendiente.';return;
   }
   const rec=selected.record;
   const amount=selected.kind==='ingreso'?number(rec.importePrevisto||rec.cobrado):number(rec.total);
+  const state=$('cfR20PaymentState').value;const paid=state==='pagada'?amount:state==='parcial'?number($('cfR22PaidAmount')?.value):0;
+  const remaining=Math.max(0,Math.round((amount-paid)*100)/100);
+  const savedState=['pagada','parcial'].includes(rec.estadoCobro)?rec.estadoCobro:'pendiente';
+  const savedPaid=savedState==='pagada'?amount:savedState==='parcial'?number(rec.cobrado):0;
+  if(state!==savedState||Math.abs(savedPaid-paid)>0.009){msg.className='msg err';msg.textContent='Has cambiado el estado o importe recibido. Pulsa primero GUARDAR ESTADO Y CONTACTO para que el recordatorio refleje el saldo confirmado en Google Sheets.';return;}
+  if(remaining<=0){msg.className='msg err';msg.textContent='No queda nada por cobrar.';return;}
   const name=text(rec.tercero||rec.persona),reference=text(rec.numeroFactura||rec.servicio||rec.concepto||'servicio');
-  const body=`Hola, ${name}. Te escribimos para recordarte que tenemos pendiente de recibir el pago de ${euro(amount)} correspondiente a ${reference}. Si ya has realizado el pago, por favor ignora este aviso e indícanoslo. Muchas gracias.`;
+  const body=`Hola, ${name}. Te escribimos para recordarte que tenemos pendiente de recibir el pago de ${euro(remaining)} correspondiente a ${reference} (importe acordado: ${euro(amount)}, recibido: ${euro(paid)}). Si ya has realizado el pago, por favor ignora este aviso e indícanoslo. Muchas gracias.`;
   if(channel==='gmail'){
    const email=text($('cfR20PaymentEmail').value);
    if(!validEmail(email)){msg.className='msg err';msg.textContent='Introduce el correo electrónico del cliente.';return;}
-   if(!confirm('¿Enviar AHORA un recordatorio por Gmail a '+email+' por '+euro(amount)+'? La app enviará el mensaje directamente desde tu cuenta, no abrirá un borrador.'))return;
+   if(!confirm('¿Enviar AHORA un recordatorio por Gmail a '+email+' por '+euro(remaining)+'? La app enviará el mensaje directamente desde tu cuenta, no abrirá un borrador.'))return;
    const button=$('cfR20PaymentGmail');button.disabled=true;
    msg.className='msg';msg.textContent='Enviando mediante tu Gmail…';
    try{
-    const out=await root.CFGoogleExtras?.sendPaymentReminder?.({recipient:email,customer:name,reference,amount});
+    const out=await root.CFGoogleExtras?.sendPaymentReminder?.({recipient:email,customer:name,reference,amount:remaining});
     if(!out?.id)throw Error('Gmail no ha confirmado el envío.');
     msg.className='msg ok';msg.textContent='✅ Gmail confirmó el envío del recordatorio a '+email+'.';
    }catch(e){msg.className='msg err';msg.textContent='No enviado: '+String(e.message||e)+'. Revisa los permisos Gmail API si aparece HTTP 403.';}
@@ -82,12 +92,10 @@
    return;
   }
   if(channel==='whatsapp'){
-   const raw=text($('cfR20PaymentPhone').value);
+   const raw=root.CFR22?.normalizeContactPhone?.('payment')||text($('cfR20PaymentPhone').value);
    if(!validPhone(raw)){msg.className='msg err';msg.textContent='Primero introduce el teléfono del cliente con prefijo internacional.';return;}
    const phone=raw.replace(/[^\d]/g,'');
-   if(!phone.startsWith('1')&&!raw.startsWith('+')){
-    msg.className='msg err';msg.textContent='Indica el prefijo internacional (por ejemplo +34) para evitar enviarlo a otro número.';return;
-   }
+   if(!raw.startsWith('+')){msg.className='msg err';msg.textContent='Confirma el país del destinatario antes de enviar.';return;}
    if(!confirm('Se abrirá WhatsApp para el número '+raw+'. Revisa el destinatario y el mensaje antes de enviarlo.'))return;
    try{await launchUrl('https://wa.me/'+phone+'?text='+encodeURIComponent(body));}
    catch(e){msg.textContent='No se pudo abrir WhatsApp: '+(e.message||e);msg.className='msg err';}
