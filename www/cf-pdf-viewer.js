@@ -52,6 +52,8 @@ async function load(blob){
  observer=new IntersectionObserver(entries=>{
    for(const entry of entries){if(entry.isIntersecting)render(entry.target,docToken).catch(err=>{if(err?.name!=='RenderingCancelledException')showError('Error al dibujar el PDF: '+(err.message||err));});}
  },{root:view,rootMargin:'420px 0px',threshold:0.01});
+ await render(pane.firstElementChild,token); // Wait for actual first-page paint before dismissing the loader.
+ if(token!==docToken)return;
  for(const item of pane.children)observer.observe(item);
  updateLabel();showError('PDF privado · '+pdf.numPages+' página(s) · zoom real con − y +.');
 }
@@ -66,7 +68,7 @@ async function render(node,token){
    const page=await pdf.getPage(n);if(token!==docToken)return;
    const actual=page.getViewport({scale:1});node.style.aspectRatio=actual.width+' / '+actual.height;
    const logical=page.getViewport({scale:naturalFit*level});
-   const quality=document.body.classList.contains('cf-performance-low')?1:2.5;
+   const quality=document.body.classList.contains('cf-performance-low')?1:1.8;
    const resolution=Math.max(1,Math.min(root.devicePixelRatio||1,quality,MAX_CANVAS_SIDE/Math.max(logical.width,logical.height)));
    const canvas=document.createElement('canvas');canvas.className='cfPdfCanvas';
    canvas.width=Math.max(1,Math.floor(logical.width*resolution));canvas.height=Math.max(1,Math.floor(logical.height*resolution));

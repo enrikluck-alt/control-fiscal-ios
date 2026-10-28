@@ -43,5 +43,5 @@ test('R15: el servidor valida Google JWT y Firestore, sin listados públicos ni 
 });
 test('R15: GitHub copia cliente y config Cloud al iPhone',()=>{
  assert.match(workflow,/cf-feedback-config.js/);assert.match(workflow,/cf-feedback.js/);
- assert.match(workflow,/UI76-20261028-R25/);
+ assert.match(workflow,/UI76-20261028-R26/);
 });

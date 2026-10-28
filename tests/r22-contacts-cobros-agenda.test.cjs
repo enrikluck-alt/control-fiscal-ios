@@ -86,7 +86,7 @@ test('R22: GitHub conserva módulos R21/R22 y empaqueta los contactos nativos',(
  assert.equal(packageJson.dependencies['@capgo/capacitor-contacts'],'8.1.10');
  assert.equal(packageJson.dependencies['@capacitor/contacts'],undefined,'No usar el paquete sin versión publicable');
  const nativePicker=source('contacts-entry.js');
- assert.match(nativePicker,/CapacitorContacts\.pickContact\(options\)/);
+ assert.match(nativePicker,/CapacitorContacts\.pickContact\(\{ property: ContactProperty\.PhoneNumber \}\)/);
  assert.match(nativePicker,/result\?\.contacts\?\.\[0\]/);
  assert.match(nativePicker,/emailAddresses/);
  assert.match(nativePicker,/ContactProperty\.PhoneNumber/);

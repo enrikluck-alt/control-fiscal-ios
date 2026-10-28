@@ -23,7 +23,7 @@ test('R22 compilación corregida: selector iOS normaliza nombre, móvil y correo
   assert.equal(c.displayName,'Ana López');
   assert.equal(c.phoneNumbers[0].value,'+34612345678');
   assert.equal(c.emails[0].value,'ana@example.com');
-  assert.ok(options().fields.includes('phoneNumbers'));
+  assert.equal(options().property,'PhoneNumber');
 });
 test('R22 compilación corregida: Android elige un número sin acceder a toda la agenda',async()=>{
   const {pick,options}=simulate('android',{contacts:[{displayName:'Luis',phoneNumbers:[{value:'+34911222333'}]}]});

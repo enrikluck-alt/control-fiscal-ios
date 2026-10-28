@@ -64,8 +64,12 @@ function renderClients(){
 async function pickClient(kind){pickerKind=kind;try{await root.loadClients?.(false);}catch(_){}const modal=ensurePicker();modal.classList.remove('hidden');$('cfR22ContactSearch').value='';renderClients();}
 async function pickNativeContact(kind){
  const status=$(kind==='income'?'pendingIncomeMsg':'cfR20PaymentStatus');
- const report=(message,failed=false)=>{if(status){status.className='msg'+(failed?' err':'');status.textContent=message;}};
- if(!root.Capacitor?.isNativePlatform?.()){
+ const inline=$(kind==='income'?'cfR26IncomeContactStatus':'cfR26PaymentContactStatus');
+ const report=(message,failed=false)=>{
+  for(const el of [inline,status])if(el){el.className='msg'+(failed?' err':'');el.textContent=message;el.setAttribute('role','status');}
+  if(failed&&typeof root.showToastMessage==='function')root.showToastMessage('Contactos del teléfono',message);
+ };
+ if(root.Capacitor?.getPlatform?.()==='web'){
   report('El selector de contactos del teléfono solo funciona en la aplicación iOS/Android. También puedes elegir un cliente guardado.',true);return;
  }
  const picker=root.CFNativeContactPicker;

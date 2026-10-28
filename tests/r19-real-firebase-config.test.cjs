@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const context={window:{}};
 vm.runInNewContext(read('www/cf-firebase-config.js'),context);
 const config=context.window.CFFirebaseConfig;
-const oauth=JSON.parse(read('oauth-config.json'));
+const authSource=read('www/cf-google-auth.js');
 const token=()=>`eyJhbGciOiJub25lIn0.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+600})).toString('base64url')}.sig`;
 
 test('R19 Firebase configurado con el mismo proyecto que el OAuth iOS existente',()=>{
@@ -16,7 +16,7 @@ test('R19 Firebase configurado con el mismo proyecto que el OAuth iOS existente'
   assert.equal(config.messagingSenderId,'429272495544');
   assert.equal(config.appId.startsWith('1:429272495544:web:'),true);
   assert.match(config.apiKey,/^AIza[\w-]{20,}$/);
-  assert.equal(oauth.iosClientId.startsWith(config.messagingSenderId+'-'),true);
+  assert.match(authSource,new RegExp("const CLIENT_ID='"+config.messagingSenderId+"-[\\w-]+\\.apps\\.googleusercontent\\.com'"));
   assert.equal(Object.isFrozen(config),true);
 });
 
@@ -24,7 +24,7 @@ test('R19 no añade Firebase Analytics ni credenciales privadas',()=>{
   const contents=read('www/cf-firebase-config.js')+read('www/index.html');
   assert.doesNotMatch(contents,/getAnalytics\s*\(/);
   assert.doesNotMatch(read('www/cf-firebase-config.js'),/private_key|client_secret|refresh_token|BEGIN PRIVATE KEY/);
-  assert.match(read('www/index.html'),/data-cf-ui-build="UI76-20261028-R25"/);
+  assert.match(read('www/index.html'),/data-cf-ui-build="UI76-20261028-R26"/);
 });
 
 test('R19 sugerencia usa este proyecto, Google ID token para Firebase y uid del cliente',async()=>{
@@ -70,6 +70,6 @@ test('R19 compilación verifica el config y etiqueta su propio artefacto',()=>{
   const w=read('.github/workflows/build-ios.yml');
   assert.match(w,/Comprobar configuración pública Firebase/);
   assert.match(w,/projectId:.*control-fiscal-511118/);
-  assert.match(w,/ControlFiscal-R25-Adjuntos-Listados-Facturas-IPA/);
-  assert.match(w,/ControlFiscal_R25_Adjuntos_Listados_Facturas\.ipa/);
+  assert.match(w,/ControlFiscal-R26-Movimientos-Visor-Contactos-IPA/);
+  assert.match(w,/ControlFiscal_R26_Movimientos_Visor_Contactos\.ipa/);
 });

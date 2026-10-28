@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261028-R25">
+<html lang="es" data-cf-ui-build="UI76-20261028-R26">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1687,6 +1687,13 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 
     </div>
 
+    <div class="section cfR26SectionLead">
+      <button type="button" class="home full cfR26MovementEntry" onclick="CFR26.openMovements()" aria-label="Abrir listado completo de movimientos">
+        <div class="icon"><span style="font-size:28px">📚</span></div>
+        <div class="text"><b>TODOS LOS MOVIMIENTOS</b><small>COMPRAS · FACTURAS · INGRESOS · FILTROS POR FECHA</small></div>
+        <div class="chev">›</div>
+      </button>
+    </div>
     <div class="section">
       <h3>ÚLTIMOS REGISTROS</h3>
       <button class="outline" onclick="openRecords()">Ver todos　›</button>
@@ -1718,6 +1725,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     </div>
     <button class="agendaToday" type="button" onclick="agendaGoToday()">IR A HOY</button>
     <div class="cfR22AgendaLegend" id="cfR22AgendaLegend">
+      <small><span class="cfR22Dot isEvent"></span> Azul = eventos</small>
       <label><input type="checkbox" value="compras" checked> <span class="cfR22Dot isPurchase"></span> Compras</label>
       <label><input type="checkbox" value="facturas" checked> <span class="cfR22Dot isInvoice"></span> Facturas</label>
       <label><input type="checkbox" value="ingresos" checked> <span class="cfR22Dot isIncome"></span> Servicios / ingresos</label>
@@ -2089,7 +2097,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261028-R25</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261028-R26</div>
 
     </div>
   </div>
@@ -2099,6 +2107,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
   <div class="header"><button class="back" type="button" onclick="CFR21Admin.close()">‹</button><div class="headericon">🛡️</div><div><h2>ADMINISTRACIÓN</h2><p>Sugerencias recibidas · Firestore privado</p></div></div>
   <div class="page">
     <div id="cfR21AdminStatus" class="settingsHint" role="status"></div>
+    <div class="settingsGroup"><label class="cfR26AdminLocalToggle"><input id="cfR26AdminLocalNotices" type="checkbox" onchange="CFR26.setAdminLocalNotices(this.checked)"> Avisar dentro de Control Fiscal cuando lleguen nuevas sugerencias (solo con la app abierta)</label><p class="settingsHint" id="cfR26AdminNoticeStatus" role="status"></p></div>
+    <p class="settingsHint" id="cfR26AdminPushInfo">🔔 Para recibir notificaciones de sugerencias con la aplicación cerrada, falta conectar las notificaciones push de iOS (APNs) y Firebase Cloud Messaging. No están activadas todavía.</p>
     <div class="cfR21AdminControls"><select class="select" id="cfR21AdminFilter" aria-label="Filtrar sugerencias"><option value="all">Todas</option><option value="pendiente">Pendientes</option><option value="leida">Leídas</option><option value="respondida">Respondidas</option></select><input class="input" id="cfR21AdminSearch" placeholder="Buscar usuario o mensaje" aria-label="Buscar sugerencias"><button class="guideBtn" type="button" onclick="CFR21Admin.load()">↻ Actualizar</button></div>
     <div id="cfR21AdminCards" class="cfR21AdminCards"></div>
   </div>
@@ -2118,6 +2128,42 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     <h3>Facturas guardadas</h3><div id="cfR21MaterialList" class="cfR21AdminCards"></div>
   </div>
 </section>
+<section id="cfR26MovementsPage" class="hidden">
+  <div class="header"><button class="back" type="button" onclick="goHome()">‹</button><div class="headericon">📚</div><div><h2>MOVIMIENTOS</h2><p>Todos tus registros privados</p></div></div>
+  <div class="page">
+    <div class="cfR26Card">
+      <div class="cfR26TypeChecks" role="group" aria-label="Categorías de movimientos">
+        <label><input type="checkbox" id="cfR26TypeCompra" checked onchange="CFR26.renderMovements()"> Compras</label>
+        <label><input type="checkbox" id="cfR26TypeFactura" checked onchange="CFR26.renderMovements()"> Facturas</label>
+        <label><input type="checkbox" id="cfR26TypeIngreso" checked onchange="CFR26.renderMovements()"> Ingresos independientes</label>
+      </div>
+      <div class="field"><label for="cfR26Period">PERÍODO</label><select class="select" id="cfR26Period" onchange="CFR26.periodChanged()">
+        <option value="current-month">Mes actual</option><option value="current-year">Año actual</option><option value="year">Elegir año</option><option value="month">Elegir año y mes</option><option value="custom">Entre dos fechas</option><option value="all">Todos los períodos</option>
+      </select></div>
+      <div class="two" id="cfR26YearMonth">
+        <div class="field"><label for="cfR26Year">Año</label><select id="cfR26Year" class="select" onchange="CFR26.renderMovements()"></select></div>
+        <div class="field"><label for="cfR26Month">Mes</label><select id="cfR26Month" class="select" onchange="CFR26.renderMovements()"></select></div>
+      </div>
+      <div class="two" id="cfR26CustomDates" hidden>
+        <div class="field"><label for="cfR26From">Desde</label><input type="date" class="input" id="cfR26From" onchange="CFR26.renderMovements()"></div>
+        <div class="field"><label for="cfR26To">Hasta</label><input type="date" class="input" id="cfR26To" onchange="CFR26.renderMovements()"></div>
+      </div>
+      <div class="field"><label for="cfR26Search">Buscar</label><input id="cfR26Search" class="input" placeholder="Cliente, proveedor o concepto" oninput="CFR26.renderMovements()"></div>
+      <p id="cfR26MovementCount" class="settingsHint" role="status"></p>
+    </div>
+    <div id="cfR26MovementItems" class="cfR26MovementItems"></div>
+    <div class="cfR26Card" id="cfR26ReminderCard">
+      <h3>✉️ Programación de recordatorios de cobro</h3>
+      <p class="settingsHint">Guarda cómo quieres preparar los recordatorios. Los envíos automáticos no se activarán hasta conectar un proveedor de correo y WhatsApp Business y autorizar los destinatarios. Mientras tanto, puedes enviar avisos manuales desde cada registro.</p>
+      <div class="two"><div class="field"><label for="cfR26ReminderFrequency">Frecuencia deseada</label><select class="select" id="cfR26ReminderFrequency"><option value="daily">Cada día</option><option value="interval">Cada X días</option><option value="weekly">Cada semana</option><option value="monthly">Un día del mes</option></select></div><div class="field"><label for="cfR26ReminderDay">Día del mes (si corresponde)</label><input class="input" type="number" min="1" max="28" value="1" id="cfR26ReminderDay"></div></div>
+      <div class="field"><label for="cfR26ReminderInterval">Cada cuántos días (si eliges cada X días)</label><input class="input" type="number" min="1" max="365" value="7" id="cfR26ReminderInterval"></div>
+      <div class="cfR26TypeChecks"><label><input type="checkbox" id="cfR26ReminderEmail" checked> Correo</label><label><input type="checkbox" id="cfR26ReminderWhatsApp"> WhatsApp Business</label></div>
+      <div class="cfR26TypeChecks"><label><input type="checkbox" id="cfR26RemindInvoices" checked> Facturas pendientes</label><label><input type="checkbox" id="cfR26RemindIncomes" checked> Ingresos independientes pendientes</label></div>
+      <button type="button" class="guideBtn" onclick="CFR26.saveReminderPreferences()">Guardar preferencias (sin activar envíos)</button><p id="cfR26ReminderStatus" class="settingsHint" role="status"></p>
+    </div>
+  </div>
+</section>
+
 <section id="recordsPage" class="hidden">
   <div class="header">
     <button class="back" onclick="goHome()">‹</button>
@@ -2177,7 +2223,8 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
 <div id="cfDocumentViewer" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfDocumentTitle" onclick="if(event.target===this)closeCFDocumentViewer()">
  <div class="modalCard">
   <div class="row" style="display:flex;justify-content:space-between;align-items:center"><h3 id="cfDocumentTitle" style="margin:0">📄 Documento adjunto</h3><button class="modalClose" type="button" onclick="closeCFDocumentViewer()" aria-label="Cerrar documento">×</button></div>
-  <div id="cfDocumentStatus" class="cfDocumentInfo">Cargando documento…</div>
+  <div id="cfDocumentStatus" class="cfDocumentInfo" role="status" aria-live="polite">Cargando documento…</div>
+  <div id="cfR26ViewerLoading" class="cfR26ViewerLoading" hidden role="status" aria-live="polite"><span class="cfR26Spinner" aria-hidden="true"></span><strong>Preparando documento…</strong><small>Se mostrará cuando la primera página esté lista</small></div>
   <div id="cfViewerViewport" class="cfViewerViewport"><div id="cfViewerSurface" class="cfViewerSurface">
     <div id="cfPdfPages" class="cfPdfPages hidden" aria-label="Páginas del documento PDF"></div>
     <iframe id="cfDocumentFrame" class="cfDocumentFrame" title="Vista del documento" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
@@ -2405,7 +2452,7 @@ function calc(total,iva){
 }
 
 function only(id){
-  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage","documentsPage","cfR21AdminPage","cfR21MaterialPage"].forEach(x=>{
+  ["home","formPage","summaryPage","recordsPage","settingsPage","agendaPage","inventoryPage","documentsPage","cfR21AdminPage","cfR21MaterialPage","cfR26MovementsPage"].forEach(x=>{
     $(x).classList.toggle("hidden",x!==id);
   });
   setTimeout(updateScrollIndicator,0);
@@ -3011,7 +3058,7 @@ function renderPendingIncomeList(){
   const arr=pendingIncomeRecords.slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   wrap.innerHTML=arr.length ? (window.cfR25AllIncomesShown?arr:arr.slice(0,8)).map(item=>{
     const benefit=Number(item.beneficio)||0;
-    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}${item.proyecto?' · Proyecto: '+esc(item.proyecto):''}</span>${item.facturaUrl?`<button type="button" class="cfR20SmallBtn" data-cf-doc-url="${esc(item.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver justificante</button>`:''}</div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='parcial'?'🟠 Pago parcial':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><span>Percibido ${euro(item.cobrado)} · Falta ${euro(Math.max(0,(Number(item.importePrevisto)||0)-(Number(item.cobrado)||0)))}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button><button type="button" class="cfR20SmallBtn" data-cf-income-id="${esc(item.id)}" onclick="event.stopPropagation();openPendingIncomeForm(this.dataset.cfIncomeId)">✏️ Editar importes / fecha / justificante</button>${item.proyecto?`<button type="button" class="cfR20SmallBtn" data-cf-project="${esc(item.proyecto)}" onclick="event.stopPropagation();CFR21Materials.openForProject(this.dataset.cfProject)">🧾 Añadir facturas al proyecto</button>`:''}</div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
+    return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}${item.proyecto?' · Proyecto: '+esc(item.proyecto):''}</span>${/^https:\/\/drive\.google\.com\//i.test(String(item.facturaUrl||''))?`<button type="button" class="cfR20SmallBtn" data-cf-doc-url="${esc(item.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver justificante</button>`:''}</div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='parcial'?'🟠 Pago parcial':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><span>Percibido ${euro(item.cobrado)} · Falta ${euro(Math.max(0,(Number(item.importePrevisto)||0)-(Number(item.cobrado)||0)))}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button><button type="button" class="cfR20SmallBtn" data-cf-income-id="${esc(item.id)}" onclick="event.stopPropagation();openPendingIncomeForm(this.dataset.cfIncomeId)">✏️ Editar importes / fecha / justificante</button>${item.proyecto?`<button type="button" class="cfR20SmallBtn" data-cf-project="${esc(item.proyecto)}" onclick="event.stopPropagation();CFR21Materials.openForProject(this.dataset.cfProject)">🧾 Añadir facturas al proyecto</button>`:''}</div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
   }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos independientes registrados.</div>';
 }
 
@@ -3064,6 +3111,7 @@ function openPendingIncomeForm(recordId=''){
         <div class="two"><div class="field"><label>Correo del cliente (para recordatorios)</label><input id="pendingEmail" class="input" type="email" inputmode="email" placeholder="cliente@ejemplo.com"></div>
         <div class="field"><label>WhatsApp del cliente</label><input id="pendingPhone" class="input" type="tel" inputmode="tel" placeholder="600 000 000"></div></div>
         <div class="cfR22ContactActions"><button type="button" class="guideBtn" onclick="CFR22.pickClient('income')">👤 Elegir cliente guardado</button><button type="button" class="guideBtn" onclick="CFR22.pickNativeContact('income')">📱 Contactos del teléfono</button></div>
+        <div id="cfR26IncomeContactStatus" class="msg" role="status" aria-live="polite"></div>
         <div id="cfR22IncomeCountry" class="cfR22CountrySlot"></div>
         <p class="settingsHint">Los recordatorios se abren en WhatsApp o en tu aplicación de correo para que los revises antes de enviarlos. No se mandan automáticamente.</p>
         <div class="calc pendingIncomeCalc">
@@ -3074,12 +3122,19 @@ function openPendingIncomeForm(recordId=''){
       </div>
       <div class="field"><label>Proyecto asociado (opcional)</label><input id="pendingProject" class="input" maxlength="120" placeholder="Proyecto o trabajo relacionado"></div>${editing?`<button type="button" class="guideBtn" onclick="CFR21Materials.openForProject(document.getElementById('pendingProject').value)">🧾 AÑADIR O MODIFICAR FACTURAS DE MATERIAL DEL PROYECTO</button>`:''}
       <div class="field"><label>Factura / justificante del ingreso (opcional)</label><input id="pendingInvoiceFile" class="input" type="file" accept="application/pdf,image/png,image/jpeg"><small class="settingsHint">PDF, JPG o PNG, hasta 5 MB. Se guarda en tu Drive privado y se podrá incluir en el envío al gestor.</small></div>
+      <button type="button" id="cfR26IncomeViewAttachment" class="guideBtn" hidden>👁 VER JUSTIFICANTE ACTUAL</button>
       <button id="pendingIncomeSaveBtn" class="save pendingIncomeButton" type="button" onclick="savePendingIncome()">${editing?'GUARDAR CAMBIOS DEL INGRESO':'GUARDAR INGRESO INDEPENDIENTE'}</button>
       <div id="pendingIncomeMsg" class="msg"></div>
     </div>`;
   const d=new Date();$('pendingDate').value=editing?String(editing.fecha).slice(0,10):agendaDayKey(d.getFullYear(),d.getMonth(),d.getDate());
   if(editing){$('pendingPerson').value=editing.persona||'';$('pendingService').value=editing.servicio||'';$('pendingMaterial').value=String(Number(editing.material)||0);$('pendingCharged').value=String(Number(editing.importePrevisto||editing.cobrado)||0);$('pendingPaymentState').value=editing.estadoCobro==='parcial'?'parcial':editing.estadoCobro==='pagada'?'pagada':'pendiente';$('pendingPaidPart').value=String(Number(editing.cobrado)||0);$('pendingEmail').value=editing.correoCobro||'';$('pendingPhone').value=editing.telefonoCobro||'';$('pendingProject').value=editing.proyecto||'';}
+  const incomeView=$('cfR26IncomeViewAttachment');
+  if(incomeView){const url=String(editing?.facturaUrl||'');const valid=/^https:\/\/drive\.google\.com\//i.test(url);
+    incomeView.hidden=!valid;incomeView.style.display=valid?'':'none';
+    incomeView.onclick=valid?()=>openCFDocumentViewer(url):null;
+  }
   window.CFR22?.mountIncomeCountry?.();
+  $('formBody')?.scrollTo(0,0);
   recalcPendingIncome();
 }
 
@@ -3905,7 +3960,7 @@ function row(r){
         <div class="rdesc">${esc(r.tercero)} - ${esc(r.concepto)}</div>
         <div class="rdate">${dateText(r.fecha)}</div>
         ${!compra&&r.estado!=='BORRADOR'?`<span class="cfR20Bubble ${r.estadoCobro==='pendiente'?'isPending':r.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${r.estadoCobro==='pendiente'?'🟠 Pendiente de cobro':r.estadoCobro==='pagada'?'✓ Pagada':'Cobro sin indicar'}</span>`:''}
-        ${r.facturaUrl ? `<div class="attachment"><button type="button" class="cfDocViewLink" data-cf-doc-url="${esc(r.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver ${compra ? "factura / justificante" : "factura emitida"} dentro de la app</button></div>` : ""}
+        ${/^https:\/\/drive\.google\.com\//i.test(String(r.facturaUrl||'')) ? `<div class="attachment"><button type="button" class="cfDocViewLink" data-cf-doc-url="${esc(r.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver ${compra ? "factura / justificante" : "factura emitida"} dentro de la app</button></div>` : ""}
       </div>
       <div class="ramount">${euro(r.total)}</div>
       <div class="rarrow">›</div>
@@ -3957,7 +4012,7 @@ function openRecordData(r){
   actions.forEach(b=>{b.hidden=!!r.emitida;b.disabled=!!r.emitida;});
   const attach=$('cfR25RecordFile'),view=$('cfR25ViewAttachment');
   if(attach){attach.value='';attach.disabled=!!r.emitida&&!!r.facturaUrl;}
-  if(view){view.hidden=!r.facturaUrl;view.dataset.url=r.facturaUrl||'';}
+  if(view){const valid=/^https:\/\/drive\.google\.com\//i.test(String(r.facturaUrl||''));view.hidden=!valid;view.style.display=valid?'':'none';view.dataset.url=valid?r.facturaUrl:'';}
   const hint=$('cfR25FileHint');if(hint)hint.textContent=r.emitida?(r.facturaUrl?'Esta factura emitida ya tiene un PDF vinculado. No se reemplaza el documento original.':'Puedes subir el PDF original de esta factura. Se añadirá sin modificar sus datos fiscales.'):'Puedes adjuntar el documento ahora o más adelante.';
   const oldAttach=$('cfR25IssuedAttachmentBtn');if(oldAttach)oldAttach.remove();
   if(r.emitida&&!r.facturaUrl){const b=document.createElement('button');b.id='cfR25IssuedAttachmentBtn';b.type='button';b.className='guideBtn';b.textContent='📎 ADJUNTAR PDF A FACTURA EMITIDA';b.onclick=attachIssuedInvoicePDF;attach?.parentElement?.appendChild(b);}
@@ -3976,6 +4031,7 @@ function openRecordData(r){
   for(const id of ['modalTercero','modalConcepto','modalTotal','modalIva'])$(id).disabled=!!r.emitida;
   $("modalMsg").textContent=r.emitida?'Factura emitida. Puedes retirarla de las listas de trabajo. Esta factura ya fue emitida. Puedes retirarla del listado (sin destruir el registro), y recuperarla desde Inicio → Registros → «Mostrar facturas emitidas retiradas». Para anularla fiscalmente, sigue el procedimiento legal aplicable.':'';
   $("recordModal").classList.remove("hidden");
+  $("recordModal").querySelector('.modalCard')?.scrollTo(0,0);
   $("recordModal").setAttribute("aria-hidden","false");
   calcModal();
 }
@@ -4013,10 +4069,10 @@ async function openCFDocumentViewer(link){
  const modal=$('cfDocumentViewer'),status=$('cfDocumentStatus'),frame=$('cfDocumentFrame');
  if(!modal||!frame)return;
  closeCFDocumentViewer();cfDocumentOriginalLink=String(link||'');
- modal.classList.remove('hidden');status.textContent='Cargando archivo dentro de Control Fiscal…';
+ modal.classList.remove('hidden');status.textContent='Cargando documento desde Drive…';const loader=$('cfR26ViewerLoading');if(loader)loader.hidden=false;
  frame.removeAttribute('src');
  const id=cfDocumentDriveId(cfDocumentOriginalLink),account=window.CFGoogleAccount?.active();
- if(!id||!account){status.textContent=id?'Inicia sesión de Google antes de abrir el adjunto.':'Este documento no es un enlace de Drive reconocido. Puedes abrirlo externamente de forma voluntaria.';return;}
+ if(!id||!account){status.textContent=id?'Inicia sesión de Google antes de abrir el adjunto.':'Este documento no es un enlace de Drive reconocido. Puedes abrirlo externamente de forma voluntaria.';if(loader)loader.hidden=true;return;}
  try{
   const owner=account.id,request=token=>fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(id)+'?alt=media',{headers:{Authorization:'Bearer '+token}});
   let blob=window.CFDocBlobCache?.get(owner,id)||null;
@@ -4040,6 +4096,7 @@ async function openCFDocumentViewer(link){
   if(type==='application/pdf'){
     picture?.classList.add('hidden');
     if(!window.CFPdfViewer?.open)throw Error('No se ha cargado el motor PDF.js local. Comprueba la compilación R16.');
+    status.textContent='Dibujando primera página del PDF…';
     await window.CFPdfViewer.open(blob);
   }else{
     $('cfPdfPages')?.classList.add('hidden');
@@ -4048,6 +4105,7 @@ async function openCFDocumentViewer(link){
     status.textContent='Imagen privada · utiliza − / + o Ajustar para cambiar el tamaño.';
   }
  }catch(error){status.textContent='No se pudo mostrar dentro de la app: '+(error?.message||error);}
+ finally{if(loader)loader.hidden=true;}
 }
 let cfDocumentBlob=null,cfDocumentMime='',cfDocumentScale=1;
 function cfDocumentZoom(delta){
@@ -4082,7 +4140,7 @@ async function cfDocumentPrint(){
   if(status)status.textContent='En el menú del iPhone, selecciona Imprimir o tu impresora compatible.';
  }catch(e){if(status)status.textContent='No se pudo abrir la impresión: '+(e.message||e);}
 }
-function closeCFDocumentViewer(){window.CFPdfViewer?.close();const pdfPages=$('cfPdfPages');if(pdfPages){pdfPages.classList.add('hidden');pdfPages.style.width='100%';delete pdfPages.dataset.zoom;}const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');const img=$('cfDocumentImage');if(img){img.removeAttribute('src');img.classList.add('hidden');}if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}cfDocumentBlob=null;cfDocumentMime='';cfDocumentResetZoom();}
+function closeCFDocumentViewer(){const wait=$('cfR26ViewerLoading');if(wait)wait.hidden=true;window.CFPdfViewer?.close();const pdfPages=$('cfPdfPages');if(pdfPages){pdfPages.classList.add('hidden');pdfPages.style.width='100%';delete pdfPages.dataset.zoom;}const modal=$('cfDocumentViewer');if(modal)modal.classList.add('hidden');const frame=$('cfDocumentFrame');if(frame)frame.removeAttribute('src');const img=$('cfDocumentImage');if(img){img.removeAttribute('src');img.classList.add('hidden');}if(cfDocumentObjectUrl){URL.revokeObjectURL(cfDocumentObjectUrl);cfDocumentObjectUrl=null;}cfDocumentBlob=null;cfDocumentMime='';cfDocumentResetZoom();}
 function cfDocumentOpenExternal(){if(!/^https:\/\//i.test(cfDocumentOriginalLink)){showToastMessage('Enlace no admitido','Solo se pueden abrir enlaces HTTPS.');return;}if(!confirm('¿Abrir este documento en el navegador externo?'))return;window.CFBrowser?.open?.({url:cfDocumentOriginalLink}).catch(e=>showToastMessage('No se pudo abrir',e.message||String(e)));}
 
 const NATIVE_WRITE_ACTIONS=new Set([
@@ -5162,7 +5220,7 @@ function updateSummary(){
 function getActiveScrollContainer(){
   const form=$('formPage');
   if(form && !form.classList.contains('hidden')) return $('formBody');
-  const ids=['home','summaryPage','recordsPage','settingsPage','agendaPage','inventoryPage'];
+  const ids=['home','summaryPage','recordsPage','settingsPage','agendaPage','inventoryPage','cfR26MovementsPage'];
   for(const id of ids){
     const sec=$(id);
     if(sec && !sec.classList.contains('hidden')) return sec.querySelector('.page');
@@ -5549,7 +5607,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261028-R25'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261028-R26'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -5850,6 +5908,7 @@ startAccountSystem();
   <p class="settingsHint" id="cfR22PaymentDue">Pendiente: —</p>
   <div class="field"><label>Correo del cliente</label><input id="cfR20PaymentEmail" type="email" class="input" placeholder="cliente@ejemplo.com" autocomplete="email"></div>
   <div class="field"><label>Teléfono / WhatsApp</label><input id="cfR20PaymentPhone" type="tel" class="input" placeholder="600 000 000" autocomplete="tel"></div>
+  <div id="cfR26PaymentContactStatus" class="msg" role="status" aria-live="polite"></div>
   <div id="cfR22PaymentCountry" class="cfR22CountrySlot"></div>
   <div class="cfR22ContactActions"><button type="button" class="guideBtn" onclick="CFR22.pickClient('payment')">👤 Cliente guardado</button><button type="button" class="guideBtn" onclick="CFR22.pickNativeContact('payment')">📱 Contactos del teléfono</button></div>
   <div class="settingsHint">Estas referencias se guardan solo en tu Google Sheets. El estado no modifica el documento fiscal emitido. WhatsApp y Preparar correo abren borradores. Enviar con Gmail sí envía tras tu confirmación y la respuesta de Gmail API.</div>
@@ -6157,7 +6216,31 @@ startAccountSystem();
 .cfR25InvoiceAttachment .guideBtn{margin-top:7px;width:100%}
 @media(max-width:380px){.cfR25IndependentTotals>div{font-size:11px}}
 </style>
+
+<style id="cfR26UX">
+/* iPhone: show edit card from top, no entrance from screen bottom */
+#recordModal{align-items:flex-start!important;justify-content:center!important;overflow-y:auto!important;}
+#recordModal .modalCard{align-self:flex-start;max-height:calc(100dvh - 26px - var(--cf-top-safe,0px) - var(--cf-bottom-safe,0px));overflow-y:auto;scroll-behavior:auto;}
+#cfR25ViewAttachment[hidden],#cfR26IncomeViewAttachment[hidden],#cfR26ViewerLoading[hidden],#cfR26CustomDates[hidden],#cfR26YearMonth[hidden]{display:none!important;}
+#cfR26ViewerLoading{display:flex;align-items:center;gap:10px;flex-direction:column;justify-content:center;position:absolute;z-index:12;inset:80px 10px 84px;background:rgba(12,21,28,.95);color:white;border-radius:14px;padding:22px;text-align:center;}
+#cfDocumentViewer .modalCard{position:relative;}
+#cfR26ViewerLoading small{color:#b3c2ce;font-size:12px}
+.cfR26Spinner{display:block;width:34px;height:34px;border-radius:50%;border:4px solid #435363;border-top-color:#f6ce4d;animation:cfR26Spin .8s linear infinite;}
+@keyframes cfR26Spin{to{transform:rotate(360deg)}}
+.cfR22Dot.isEvent{background:#4c9de9}
+.cfR26SectionLead{margin:12px 0}.cfR26MovementEntry{width:100%;min-height:78px;background:#d5e9fa;color:#162433}
+.cfR26Card{background:#18232c;color:#f4f5f7;border:1px solid #45515d;border-radius:13px;padding:13px;margin-bottom:12px}
+.cfR26Card h3{margin:0 0 9px}.cfR26TypeChecks{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:10px}.cfR26TypeChecks label{display:flex;align-items:center;gap:4px;font-size:12px}
+.cfR26MovementItems{display:grid;gap:8px}.cfR26MovementRow{width:100%;display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:1px solid #b8c2cb;background:#f6f8fa;color:#172631;text-align:left;min-width:0}
+.cfR26MovementRow>span{flex:1;min-width:0}.cfR26MovementRow strong{display:block;font-size:13px}.cfR26MovementRow small{font-size:11px;color:#4f5e68;display:block;overflow-wrap:anywhere}.cfR26MovementRow b{white-space:nowrap;font-size:12px}
+.cfR26Dot{display:block;width:10px;height:10px;border-radius:50%;flex:none}.cfR26Dot.buy{background:#e8b822}.cfR26Dot.invoice{background:#9a65cd}.cfR26Dot.income{background:#3cbe96}.cfR26MovementRow.isUnpaid{border-left:5px solid #f5a23c}
+#cfR26MovementsPage .two{grid-template-columns:repeat(2,minmax(0,1fr));}#cfR26MovementsPage input,#cfR26MovementsPage select{min-width:0;max-width:100%;width:100%;box-sizing:border-box;}
+#cfR26MovementsPage input[type="date"]{-webkit-appearance:none;appearance:none;font-size:16px;}
+.cfR26IncomeCard{background:#d6f6e9;color:#172c24}
+.cfR26AdminLocalToggle{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.5}.cfR26AdminLocalToggle input{width:18px;height:18px;flex:none}
+</style>
 <script src="cf-r22-features.js"></script>
 <script src="cf-r25-features.js"></script>
+<script src="cf-r26-features.js"></script>
 </body>
 </html>
