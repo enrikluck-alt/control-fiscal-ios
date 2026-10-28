@@ -63,13 +63,27 @@ function renderClients(){
 }
 async function pickClient(kind){pickerKind=kind;try{await root.loadClients?.(false);}catch(_){}const modal=ensurePicker();modal.classList.remove('hidden');$('cfR22ContactSearch').value='';renderClients();}
 async function pickNativeContact(kind){
- const picker=root.CFNativeContactPicker;
  const status=$(kind==='income'?'pendingIncomeMsg':'cfR20PaymentStatus');
- if(!picker?.pickContact){if(status){status.className='msg err';status.textContent='El selector de contactos necesita una nueva compilación iOS/Android con el plugin de Contactos.';}return;}
- try{const result=await picker.pickContact();if(!result)return;
- const first=x=>Array.isArray(x)&&x.length?text(x.find(item=>item.pref)?.value||x[0].value):'';
- setContact(kind,{nombre:text(result.displayName||result.name?.formatted||[result.name?.givenName,result.name?.familyName].filter(Boolean).join(' ')),telefono:first(result.phoneNumbers),email:first(result.emails)});
- }catch(e){if(/cancel|0006/i.test(text(e.message||e)))return;if(status){status.className='msg err';status.textContent='No se pudo seleccionar el contacto: '+text(e.message||e);}}
+ const report=(message,failed=false)=>{if(status){status.className='msg'+(failed?' err':'');status.textContent=message;}};
+ if(!root.Capacitor?.isNativePlatform?.()){
+  report('El selector de contactos del teléfono solo funciona en la aplicación iOS/Android. También puedes elegir un cliente guardado.',true);return;
+ }
+ const picker=root.CFNativeContactPicker;
+ if(!picker?.pickContact){report('No se ha cargado el selector nativo de contactos en esta versión. Reinstala la IPA completa.',true);return;}
+ report('Abriendo los contactos del teléfono…');
+ try{
+  const result=await picker.pickContact();
+  if(!result){report('No se seleccionó ningún contacto.');return;}
+  const first=x=>Array.isArray(x)&&x.length?text(x.find(item=>item?.isPrimary||item?.pref)?.value||x[0]?.value):'';
+  const phone=first(result.phoneNumbers);
+  if(!phone){report('El contacto seleccionado no tiene un teléfono disponible. Elige otro.',true);return;}
+  setContact(kind,{nombre:text(result.displayName||result.name?.formatted||[result.name?.givenName,result.name?.familyName].filter(Boolean).join(' ')),telefono:phone,email:first(result.emails)});
+  report('Contacto seleccionado: '+text(result.displayName||phone)+'. Revisa el teléfono antes de enviar.');
+ }catch(e){
+  const message=text(e.message||e);
+  if(/cancel|0006|user canceled/i.test(message)){report('Selección de contacto cancelada.');return;}
+  report('No se pudo abrir Contactos: '+message,true);
+ }
 }
 function refreshPaymentDue(){
  const state=$('cfR20PaymentState')?.value,recordModal=$('cfR20PaymentModal');if(!state||recordModal?.classList.contains('hidden'))return;

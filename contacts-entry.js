@@ -22,10 +22,17 @@ export function normalizePickedContact(result) {
 }
 
 export async function pickOneContact() {
-  const options = Capacitor.getPlatform() === 'android'
-    ? { property: ContactProperty.PhoneNumber }
-    : { fields: ['displayName', 'givenName', 'familyName', 'phoneNumbers', 'emailAddresses'] };
-  const result = await CapacitorContacts.pickContact(options);
+  // En iOS abrimos la ficha nativa completa, sin leer la agenda en segundo plano.
+  // Si el dispositivo solo permite elegir un teléfono, lo intentamos como alternativa.
+  const options = Capacitor.getPlatform() === 'ios'
+    ? { fields: ['displayName','givenName','familyName','phoneNumbers','emailAddresses'] }
+    : { property: ContactProperty.PhoneNumber };
+  let result;
+  try { result = await CapacitorContacts.pickContact(options); }
+  catch (e) {
+    if (Capacitor.getPlatform() !== 'ios' || /cancel/i.test(String(e?.message||e))) throw e;
+    result = await CapacitorContacts.pickContact({ property: ContactProperty.PhoneNumber });
+  }
   return normalizePickedContact(result);
 }
 

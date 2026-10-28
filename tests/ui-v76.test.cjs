@@ -22,7 +22,7 @@ test('la edición mantiene los 11 estilos originales de V76 idénticos',()=>{
  const styles=[...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi)].map(m=>sha(m[1]));
  for(const digest of ref.v76StylesSha256)assert.ok(styles.includes(digest),'Falta estilo original V76 '+digest);
  // Los estilos originales siguen byte-a-byte: R18 añade un bloque aislado para el nuevo visor de documentos y Agenda.
- assert.equal(styles.length,ref.v76StylesSha256.length+15);
+ assert.equal(styles.length,ref.v76StylesSha256.length+16);
  assert.match(html,/<style id="cf-r24-daily-tutorial-dates">/);
  assert.match(html,/<style id="cf-r3-accessibility">/);
  assert.match(html,/<style id="cf-v76-access-security-ui">/);
@@ -66,6 +66,7 @@ test('formularios dinámicos y navegación mantienen el código de diseño V76',
    assert.match(fn,/pendingPaymentState/);assert.match(fn,/pendingCharged/);
    continue; // R20: solo se agregan opciones de cobro al formulario V76.
   }
+  if(name==='openFacturacionPage'){const fn=sourceFunction(name);assert.match(fn,/openInvoiceForm/);assert.match(fn,/openPendingIncomeForm/);assert.match(fn,/cfR25ListBtn/);continue;}
   if(name==='openForm'){
    const fn=sourceFunction(name);
    assert.match(fn,/Distribuidor/);assert.match(fn,/renderAutocomplete/);
@@ -80,11 +81,11 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
   assert.ok(!html.includes(str),'Se ha vuelto a incorporar la interfaz de pruebas: '+str);
  }
  const htmlScripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(x=>x[1]);
- assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js','cf-r18-features.js','cf-r18-languages.js','cf-r20-payments.js','cf-r21-features.js','contacts.bundle.js','cf-r22-features.js']);
+ assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js','cf-r18-features.js','cf-r18-languages.js','cf-r20-payments.js','cf-r21-features.js','contacts.bundle.js','cf-r22-features.js','cf-r25-features.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
- assert.match(html,new RegExp('data-cf-ui-build="UI76-20261027-R24"'));
- assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261027-R24'));
+ assert.match(html,new RegExp('data-cf-ui-build="UI76-20261028-R25"'));
+ assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261028-R25'));
  assert.match(auth,/if\(typeof root\.goHome==='function'\)root\.goHome\(\);/);
  assert.match(auth,/root\.startLocalSecurityForAccount\(fromInteractiveLogin\)/);
  assert.match(auth,/element\('accountGate'\)\?\.classList\.add\('hidden'\)/);

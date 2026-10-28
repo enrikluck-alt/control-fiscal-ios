@@ -7,70 +7,94 @@
  const clean=s=>String(s??'').replace(/[\r\n\t]+/g,' ').trim();
  function pdfDocument(saved){
   if(!root.CFjsPDF)throw Error('No se ha cargado el generador PDF.');
-  const d=new root.CFjsPDF({unit:'mm',format:'a4'}),p=saved.payload||{},client=json(p.cliente),issuer=json(p.emisor),items=json(p.lineas);
+  const d=new root.CFjsPDF({unit:'mm',format:'a4'});
+  const p=saved.payload||{},client=json(p.cliente),issuer=json(p.emisor),items=json(p.lineas);
   if(!Array.isArray(items)||!items.length)throw Error('Los conceptos de la factura están vacíos.');
-  const issued=!!saved.emitida, left=19,right=191;
-  const text=(s,x,y,size=10,bold=false)=>{d.setFont('helvetica',bold?'bold':'normal');d.setFontSize(size);d.text(clean(s),x,y);};
-  const stroke=()=>{d.setDrawColor?.(35,38,42);};
-  const rule=(y)=>{stroke();d.setLineWidth?.(.4);d.line?.(left,y,right,y);};
-  const wrapped=(val,x,y,width,size=9,maxY=230)=>{
+  const issued=!!saved.emitida;
+  // Plantilla A4 del PDF aportado: cabecera blanca, identidad en dos columnas,
+  // productos en tabla sombreada, total inferior destacado y logo del emisor.
+  const L=7,R=203,W=196;
+  const stroke=()=>{d.setDrawColor?.(20,20,20);d.setLineWidth?.(.35);};
+  const text=(value,x,y,size=9,bold=false)=>{d.setFont('helvetica',bold?'bold':'normal');d.setFontSize(size);d.text(clean(value),x,y);};
+  const line=(x1,y1,x2,y2,w=.4)=>{stroke();d.setLineWidth?.(w);d.line?.(x1,y1,x2,y2);};
+  const rect=(x,y,w,h,fill=false)=>{stroke();d.rect(x,y,w,h,fill?'F':'S');};
+  const shade=(x,y,w,h,color=196)=>{d.setFillColor(color,color,color);d.rect(x,y,w,h,'F');};
+  const ellipsis=(value,maxWidth,size=8)=>{
    d.setFont('helvetica','normal');d.setFontSize(size);
-   for(const t of d.splitTextToSize(clean(val),width)){
-    if(y>maxY){d.addPage();y=25;}
-    text(t,x,y,size);y+=size*.38+2.3;
-   }return y;
+   let v=clean(value);if(!d.getTextWidth)return v;
+   while(v.length>1&&d.getTextWidth(v)>maxWidth)v=v.slice(0,-2)+'…';return v;
   };
-  const prefix=issued?'FACTURA':'BORRADOR - NO EMITIDA';
-  // Cabecera blanca como en la factura de ejemplo: imagen izquierda, número derecha.
-  d.setTextColor(20,24,29);text(prefix,148,16,11,true);
-  text('Nº: '+clean(saved.numero||'SIN NUMERO'),148,22,9,true);
-  const date=saved.fecha?new Date(saved.fecha):new Date();
-  text('Fecha: '+(Number.isNaN(date.getTime())?'':date.toLocaleDateString('es-ES')),148,28,9);
-  text(issuer.name||'EMISOR',left,47,10,true);
-  text(clean(p.titulo||p.observaciones||'Factura de servicios'),126,47,9);
-  // Emisor y cliente en tabla de dos columnas.
-  d.setFillColor(221,221,221);d.rect(left,53,172,8,'F');stroke();d.rect(left,53,172,56);d.line?.(105,61,105,109);
-  text('EMISOR',left+2,59,9,true);text('CLIENTE',107,59,9,true);
-  const issuerLines=[issuer.name,'CIF/NIF: '+(issuer.taxId||''),issuer.address,
-   [issuer.postalCode,issuer.city].filter(Boolean).join(' · '),issuer.province,
-   issuer.phone?'Tel.: '+issuer.phone:'',issuer.email,issuer.iban?'IBAN: '+issuer.iban:''].filter(Boolean);
-  const clientLines=[client.nombre,'CIF/NIF: '+(client.cif||''),client.direccion,
-   [client.cp,client.ciudad].filter(Boolean).join(' · '),client.provincia,
-   client.telefono?'Tel.: '+client.telefono:'',client.email].filter(Boolean);
-  issuerLines.slice(0,8).forEach((line,i)=>wrapped(line,left+2,66+i*5.2,79,8,108));
-  clientLines.slice(0,8).forEach((line,i)=>wrapped(line,107,66+i*5.2,80,8,108));
-  // Tabla de conceptos con encabezado gris y espacio variable de filas.
-  let y=119;rule(115);d.setFillColor(195,195,195);d.rect(left,y,172,9,'F');stroke();d.rect(left,y,172,9);
-  text('PRODUCTO / SERVICIO',left+2,y+6,9,true);text('PRECIO',139,y+6,8,true);text('CANT.',163,y+6,8,true);text('TOTAL',180,y+6,8,true);
-  y+=12;
-  let subtotalComputed=0;
-  for(const line of items){
-   const qty=Number(line.cantidad)||0,price=Number(line.precio)||0,total=qty*price;
-   subtotalComputed+=total;
-   const rows=d.splitTextToSize(clean(line.concepto),106);
-   const need=Math.max(9,rows.length*4.5+3);
-   if(y+need>241){d.addPage();y=23;}
-   text(money(price),139,y+5,8);text(String(qty),165,y+5,8);text(money(total),178,y+5,8);
-   let ty=y+5;for(const r of rows){text(r,left+2,ty,8);ty+=4.5;}
-   y+=need;
-   if(items.length>1&&typeof d.line==='function'){d.setDrawColor?.(230,230,230);d.line(left,y,right,y);}
+  function topHeader(){
+    d.setTextColor(19,19,19);
+    text((issued?'FACTURA: ':'BORRADOR - NO EMITIDA: ')+clean(saved.numero||''),151,13,10,true);
+    const date=saved.fecha?new Date(saved.fecha):new Date();
+    text('Fecha: '+(Number.isNaN(date.getTime())?'':date.toLocaleDateString('es-ES')),151,20,9);
+    text(ellipsis(issuer.name||'EMISOR',117,10),L,56,10,true);
+    if(p.referencia||p.titulo){text('Presupuesto / referencia:',131,56,8,true);text(ellipsis(p.referencia||p.titulo,40,8),168,56,8);}
+    shade(L,64,W,7,223);rect(L,64,W,54);line(106,71,106,118);
+    text('EMISOR',L+1,69,9,true);text('Cliente',108,69,9,true);
+    const issuerRows=[issuer.name,issuer.taxId?'CIF/NIF: '+issuer.taxId:'',issuer.address,
+     [issuer.postalCode,issuer.city].filter(Boolean).join('  '),issuer.province,
+     issuer.phone?'Tel.: '+issuer.phone:'',issuer.email,
+     issuer.iban?'Nº cuenta: '+issuer.iban:''].filter(Boolean);
+    const customerRows=[client.nombre,client.cif||'',client.direccion,
+     [client.cp,client.ciudad].filter(Boolean).join('  '),client.provincia,
+     client.telefono?'Tel.: '+client.telefono:'',client.email].filter(Boolean);
+    issuerRows.slice(0,8).forEach((v,i)=>text(ellipsis(v,95,8),L+1,76+i*5.2,8,i===1));
+    customerRows.slice(0,8).forEach((v,i)=>text(ellipsis(v,92,8),108,76+i*5.2,8));
+    line(L,123,R,123,.85);
   }
-  if(y>232){d.addPage();y=45;}
-  rule(Math.max(y+3,240));
-  y=Math.max(y+11,249);
+  function tableHeader(y){
+    shade(L,y,W,16,188);
+    rect(L,y,W,16);
+    text('Producto',L+1,y+6,9,true);
+    text('Precio',143,y+6,9,true);
+    text('cantidad',169,y+6,8,true);
+    text('Total',187,y+6,9,true);
+    line(139,y,139,y+16,.25);line(164,y,164,y+16,.25);line(182,y,182,y+16,.25);
+  }
+  topHeader();
+  let y=130,tableBottom=244,tableTop=130;
+  tableHeader(y);y+=17;
+  const subtotal=items.reduce((v,r)=>v+(Number(r.cantidad)||0)*(Number(r.precio)||0),0);
+  let pageItems=0;
+  for(const row of items){
+    const qty=Number(row.cantidad)||0,price=Number(row.precio)||0,total=qty*price;
+    d.setFont('helvetica','normal');d.setFontSize(8);
+    const desc=d.splitTextToSize(clean(row.concepto),129);
+    const height=Math.max(6.2,desc.length*4.3+1);
+    if(y+height>tableBottom){
+      rect(L,tableTop,W,tableBottom-tableTop);
+      d.addPage();tableBottom=245;tableTop=16;y=16;tableHeader(y);y+=17;pageItems=0;
+    }
+    if(pageItems%2===1)shade(L,y,W,height,244);
+    desc.forEach((part,i)=>text(part,L+1,y+4.6+i*4.3,8));
+    text(money(price),141,y+4.6,8);
+    text(String(qty),171,y+4.6,8);
+    text(money(total),184,y+4.6,8);
+    y+=height;pageItems++;
+  }
+  // Un rectángulo alto y uniforme mantiene el mismo aspecto que el documento original.
+  if(y<=tableBottom){rect(L,tableTop,W,tableBottom-tableTop);}
+  else{line(L,y,R,y,.4);}
   const discount=Number(p.descuento)||0,vatPct=Number(p.ivaPorcentaje)||0;
-  text('Base imponible',left,y,9);text(money(p.base??subtotalComputed),163,y,9,true);y+=7;
-  if(discount){text('Descuento: '+discount+' %',left,y,9);y+=7;}
-  text('IVA ('+vatPct+' %)',left,y,9);text(money(p.iva),163,y,9);y+=8;
-  rule(y-5);text('TOTAL FACTURA',left,y+3,11,true);text(money(p.total),161,y+3,11,true);y+=11;
-  if(y>284){d.addPage();y=34;}
-  text('TOTAL A PAGAR',left,y,11,true);text(money(p.total),161,y,11,true);
-  if(!issued){d.setTextColor(170,25,25);text('BORRADOR SIN EMITIR. NO VALIDO COMO FACTURA FISCAL.',left,285,9,true);}
-  // Etiqueta de copia discreta; el texto y las tablas permanecen vectoriales.
-  d.setTextColor(125,125,125);
-  for(let k=1;k<=d.getNumberOfPages();k++){d.setPage(k);text(issued?'Control Fiscal · Copia de factura':'BORRADOR - NO ES UNA FACTURA EMITIDA',left,293,8);}
+  const base=Number(p.base??subtotal),vat=Number(p.iva)||0,total=Number(p.total)||0;
+  if(y>246){d.addPage();y=27;}else y=252;
+  text('Base Importe',L,y,9);
+  text(money(base),183,y,9);y+=6;
+  text('IVA ('+vatPct+' %)',L,y,9);
+  text(money(vat),183,y,9);y+=6;
+  line(L,y-2,R,y-2,.55);
+  text('TOTAL FACTURA',L,y+2,10,true);text(money(total),179,y+2,10,true);y+=10;
+  text('Descuento:',L,y,8);
+  text(discount+' %',165,y,8);y+=6;
+  line(L,y-3,R,y-3,.9);
+  text('TOTAL A PAGAR',L,y+2,10,true);
+  shade(178,y-2,25,7,222);text(money(total),179,y+2,9,true);
+  if(!issued){d.setTextColor(166,30,30);text('BORRADOR SIN EMITIR. NO ES UNA FACTURA FISCAL.',L,292,8,true);}
   return d;
  }
+
  const logoCache=new Map();
  async function loadInvoiceLogo(){
   try{
@@ -104,7 +128,7 @@
   if(!saved?.numero||!saved.payload)throw Error('No hay datos para generar el PDF.');
   const d=pdfDocument(saved);const image=await loadInvoiceLogo();
   if(image&&typeof d.addImage==='function'){
-   try{const size=d.getImageProperties?.(image),ratio=size?.width&&size?.height?size.width/size.height:1.8;const w=Math.min(76,34*ratio),h=Math.min(34,76/ratio);d.addImage(image,/jpeg|jpg/.test(image.slice(0,32))?'JPEG':'PNG',19,7,w,h);}catch(e){root.console?.warn?.('El PDF se generó sin el logo',e);}
+   try{const size=d.getImageProperties?.(image),ratio=size?.width&&size?.height?size.width/size.height:1.8;const w=Math.min(73,33*ratio),h=Math.min(33,73/ratio);d.setPage?.(1);d.addImage(image,/jpeg|jpg/.test(image.slice(0,32))?'JPEG':'PNG',12,9,w,h);}catch(e){root.console?.warn?.('El PDF se generó sin el logo',e);}
   }
   const prefix=saved.emitida?'FACTURA':'BORRADOR';
   const filename='ControlFiscal_'+prefix+'_'+String(saved.numero).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,55)+'.pdf';

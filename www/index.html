@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261027-R24">
+<html lang="es" data-cf-ui-build="UI76-20261028-R25">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -1789,7 +1789,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <p class="cfChartDescription">Totales con IVA: 12 meses si eliges un año; semanas si eliges un mes. Los borradores no cuentan como facturación emitida.</p>
       <div class="cfChartLegend"><span class="cfChartLegendBuy">■ Compras</span><span class="cfChartLegendSales">■ Facturación</span></div>
       <div id="cfSummaryChart" class="cfSummaryChart" role="img" aria-label="Gráfico de compras y facturación del período"></div>
-      <div id="cfSummaryChartTotal" class="cfChartFoot"></div>
+      <div class="cfR25ChartLegend">🟡 Compras · 🟣 Facturas · 🟠 Material independiente · 🟢 Ingresos independientes cobrados</div><div id="cfSummaryChartTotal" class="cfChartFoot"></div>
     </div>
 
     <div class="sumgrid">
@@ -1802,6 +1802,11 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
     </div>
 
+    <div class="cfR25IndependentTotals" id="cfR25IndependentTotals" aria-label="Ingresos y gastos independientes">
+      <div><span>Ingresos independientes cobrados</span><strong id="cfR25IndependentCollected">0,00 €</strong></div>
+      <div><span>Gastos de material asociados</span><strong id="cfR25IndependentExpenses">0,00 €</strong></div>
+      <div><span>Importe todavía pendiente</span><strong id="cfR25IndependentDue">0,00 €</strong></div>
+    </div>
     <div class="ivapanel">
       <div class="ivarow"><span class="green">↓　IVA Soportado (Compras)</span><strong id="sis">0,00 €</strong></div>
       <div class="ivarow"><span class="red">↑　IVA Repercutido (Facturación)</span><strong id="sir">0,00 €</strong></div>
@@ -2084,7 +2089,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261027-R24</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261028-R25</div>
 
     </div>
   </div>
@@ -2133,7 +2138,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     <div class="recordFilters">
       <button class="rf active" data-filter="all" onclick="setRecordFilter('all')">Todos</button>
       <button class="rf" data-filter="Compra" onclick="setRecordFilter('Compra')">Compras</button>
-      <button class="rf" data-filter="Facturado" onclick="setRecordFilter('Facturado')">Facturación</button>
+      <button class="rf" data-filter="facturas" onclick="setRecordFilter('facturas')">Facturación</button>
     </div>
 
     <div class="field">
@@ -2226,6 +2231,12 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       <div class="box" id="modalTotalBox"><small>Total</small><strong id="modalTotalValue">0,00 €</strong></div>
     </div>
 
+    <div class="field cfR25InvoiceAttachment">
+      <label>📎 Factura o justificante (PDF/JPG/PNG)</label>
+      <input id="cfR25RecordFile" class="input fileInput" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+      <small id="cfR25FileHint" class="settingsHint">Puedes adjuntarlo también después de guardar el registro. Para facturas fiscales emitidas no se modifican los importes ni la numeración.</small>
+      <button id="cfR25ViewAttachment" type="button" class="guideBtn" hidden onclick="openCFDocumentViewer(this.dataset.url)">👁 VER DOCUMENTO ACTUAL</button>
+    </div>
     <div id="modalMsg" class="msg"></div>
 
     <button id="cfR20ManagePayment" type="button" class="guideBtn" onclick="openCFPaymentForCurrent()">🟠 GESTIONAR COBRO / ENVIAR RECORDATORIO</button>
@@ -2961,6 +2972,7 @@ async function saveInvoiceSettings(){
 }
 
 function openFacturacionPage(){
+  window.cfR25AllIncomesShown=false;
   openForm("Facturado");
   const body=$("formBody");
   if(!body) return;
@@ -2977,11 +2989,13 @@ function openFacturacionPage(){
       <span>Introduce la persona, el servicio, el coste del material y lo cobrado. Se calcula el beneficio por separado y no se incorpora al total de facturación con IVA.</span>
     </div>
     <button class="save pendingIncomeButton" type="button" onclick="openPendingIncomeForm()">🟢 REGISTRAR INGRESO INDEPENDIENTE</button>
+    <button type="button" class="guideBtn cfR25ListBtn" onclick="openPendingIncomeListAll()">📗 VER TODOS LOS INGRESOS INDEPENDIENTES</button>
     <div class="pendingIncomeListBox">
       <div class="pendingIncomeListHead"><strong>ÚLTIMOS INGRESOS INDEPENDIENTES</strong><span id="pendingIncomeCount">0</span></div>
       <div id="pendingIncomeList"></div>
     </div>`;
   body.appendChild(wrap);
+  body.classList.add("cfR25CompactBilling");
   loadPendingIncome(false);
 }
 
@@ -2995,7 +3009,7 @@ function renderPendingIncomeList(){
   if(count) count.textContent=String(pendingIncomeRecords.length);
   if(!wrap) return;
   const arr=pendingIncomeRecords.slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-  wrap.innerHTML=arr.length ? arr.slice(0,8).map(item=>{
+  wrap.innerHTML=arr.length ? (window.cfR25AllIncomesShown?arr:arr.slice(0,8)).map(item=>{
     const benefit=Number(item.beneficio)||0;
     return `<div class="pendingIncomeRow"><div><strong>${esc(item.persona)}</strong><span>${esc(item.servicio)} · ${dateText(item.fecha)}${item.proyecto?' · Proyecto: '+esc(item.proyecto):''}</span>${item.facturaUrl?`<button type="button" class="cfR20SmallBtn" data-cf-doc-url="${esc(item.facturaUrl)}" onclick="event.stopPropagation();openCFDocumentViewer(this.dataset.cfDocUrl)">📄 Ver justificante</button>`:''}</div><div class="pendingIncomeNums"><span class="cfR20Bubble ${item.estadoCobro==='pendiente'?'isPending':item.estadoCobro==='pagada'?'isPaid':'isUnknown'}">${item.estadoCobro==='pendiente'?'🟠 Por cobrar':item.estadoCobro==='parcial'?'🟠 Pago parcial':item.estadoCobro==='pagada'?'✓ Pagado':'Cobro sin indicar'}</span><b>${euro(item.importePrevisto||item.cobrado)}</b><span class="${benefit<0?'negativeBenefit':''}">Beneficio real ${euro(benefit)}</span><span>Percibido ${euro(item.cobrado)} · Falta ${euro(Math.max(0,(Number(item.importePrevisto)||0)-(Number(item.cobrado)||0)))}</span><button type="button" class="cfR20SmallBtn" data-cf-pay-key="${esc(item.id)}" onclick="event.stopPropagation();openCFPayment('ingreso', this.dataset.cfPayKey)">💬 Cobro / avisar</button><button type="button" class="cfR20SmallBtn" data-cf-income-id="${esc(item.id)}" onclick="event.stopPropagation();openPendingIncomeForm(this.dataset.cfIncomeId)">✏️ Editar importes / fecha / justificante</button>${item.proyecto?`<button type="button" class="cfR20SmallBtn" data-cf-project="${esc(item.proyecto)}" onclick="event.stopPropagation();CFR21Materials.openForProject(this.dataset.cfProject)">🧾 Añadir facturas al proyecto</button>`:''}</div><button type="button" class="pendingIncomeDelete" onclick="deletePendingIncome('${esc(item.id)}')">×</button></div>`;
   }).join("") : '<div class="pendingIncomeEmpty">No hay ingresos independientes registrados.</div>';
@@ -3027,6 +3041,7 @@ function openPendingIncomeForm(recordId=''){
   const editing=cfPendingEditingId?pendingIncomeRecords.find(x=>String(x.id)===cfPendingEditingId):null;
   only("formPage");
   nav("sale");
+  $("formBody")?.classList.remove("cfR25CompactBilling");
   invoiceConfig=getInvoiceConfig();
   $("formHeader").dataset.tipo="IngresoPendiente";
   $("formHeader").innerHTML=`
@@ -3325,7 +3340,7 @@ async function saveSimpleClient(){
 let invoiceFormDraft=null;
 function captureInvoiceDraft(){
  if($('formHeader')?.dataset.tipo!=='FacturaCompleta'||!$('invoiceLines'))return;
- const ids=['invSavedClient','cfInvoiceClientSearch','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invoiceEmailCopy','invoiceManualNumber'];
+ const ids=['invSavedClient','cfInvoiceClientSearch','invClientName','invClientTaxId','invClientAddress','invClientPostalCode','invClientCity','invClientProvince','invClientPhone','invClientEmail','invoiceIvaPct','invoiceDiscount','invoiceNotes','invReference','invoiceEmailCopy','invoiceManualNumber'];
  const values={};for(const id of ids){const el=$(id);if(el)values[id]=el.type==='checkbox'?el.checked:el.value;}
  invoiceFormDraft={values,lines:Array.from(document.querySelectorAll('#invoiceLines .invoiceLine')).map(row=>({description:row.querySelector('.invoiceDesc')?.value||'',qty:row.querySelector('.invoiceQty')?.value||'1',price:row.querySelector('.invoicePrice')?.value||'0'})),requestId:invoiceRequestId};
 }
@@ -3345,6 +3360,7 @@ function openInvoiceForm(){
   if(!invoiceFormDraft)invoiceRequestId=null;
   only("formPage");
   nav("sale");
+  $("formBody")?.classList.remove("cfR25CompactBilling");
   invoiceConfig=getInvoiceConfig();
   $("formHeader").dataset.tipo="FacturaCompleta";
   $("formHeader").innerHTML=`
@@ -3368,7 +3384,7 @@ function openInvoiceForm(){
         <div class="two" style="margin-bottom:10px">
           <div class="field"><label>Buscar cliente guardado</label>
               <div class="cfClientSearchWrap">
-                <input id="cfInvoiceClientSearch" class="input" placeholder="Escribe parte del nombre: cast..." autocomplete="off" oninput="renderInvoiceClientSuggestions()" onfocus="renderInvoiceClientSuggestions()">
+                <input id="cfInvoiceClientSearch" class="input" placeholder="Escribe el nombre del cliente" autocomplete="off" oninput="renderInvoiceClientSuggestions()" onfocus="renderInvoiceClientSuggestions()">
                 <div id="cfInvoiceClientSuggestions" class="cfAutocompleteMenu"></div>
               </div>
               <select id="invSavedClient" class="select" onchange="loadSavedClient(this.value)" style="margin-top:7px"><option value="">O elegir de la lista completa...</option></select>
@@ -3388,6 +3404,7 @@ function openInvoiceForm(){
       </div>
 
       <div class="invoiceSection">
+        <div class="field"><label>Presupuesto / referencia (opcional)</label><input id="invReference" class="input" maxlength="140" placeholder="Referencia del trabajo, pedido o proyecto"></div>
         <h3>🧾 CONCEPTOS</h3>
         <div class="invoiceHint">Introduce el precio unitario sin IVA. El IVA se calcula al final sobre la base total.</div>
         <div class="invoiceLineHead"><span>Concepto</span><span>Cant.</span><span>Precio</span><span>Total</span><span></span></div>
@@ -3421,6 +3438,7 @@ function openInvoiceForm(){
       <button id="invoiceShareBtn" class="save" type="button" hidden onclick="shareSavedInvoiceDraft()">📲 COMPARTIR PDF POR WHATSAPP / EMAIL</button>
       <button id="invoiceResendBtn" class="save" type="button" hidden onclick="resendSavedInvoiceEmail()">✉️ ENVIAR COPIA AL EMAIL DEL CLIENTE</button>
       <button id="invoiceNewBtn" class="save" type="button" hidden onclick="resetInvoiceForm()">➕ CREAR OTRA FACTURA</button>
+      <button type="button" class="guideBtn cfR25ListBtn" onclick="openRecordsFiltered('facturas')">📋 VER TODAS LAS FACTURAS GUARDADAS</button>
       <button id="cfViewArchivedInvoices" class="guideBtn" type="button" onclick="openArchivedInvoices()">🗂️ VER FACTURAS RETIRADAS / RESTAURAR</button>
       <div id="invoiceMsg" class="msg"></div>
     </div>`;
@@ -3517,6 +3535,7 @@ async function saveInvoice(){
     lineas:JSON.stringify(lineas),
     descuento:+calc.discount.toFixed(2),
     observaciones:$("invoiceNotes")?.value.trim()||"",
+    referencia:$("invReference")?.value.trim()||"",
     emisor:JSON.stringify(invoiceConfig)
   };
   btn.disabled=true; msg.className="msg"; msg.textContent="Guardando borrador de factura…";
@@ -3554,7 +3573,7 @@ function currentInvoicePayload(){
  if(!client.nombre||!client.cif||!client.direccion||!client.cp||!client.ciudad||!client.provincia)throw Error('Completa nombre, CIF/NIF, domicilio, CP, ciudad y provincia del cliente.');
  if(!invoiceConfig.name||!invoiceConfig.taxId||!invoiceConfig.address||!invoiceConfig.postalCode||!invoiceConfig.city||!invoiceConfig.province)throw Error('Configura nombre, NIF/CIF y domicilio completo del emisor en Ajustes.');
  if(!lines.length||lines.some(x=>!x.concepto||x.cantidad<=0||x.precio<0)||calc.total<=0)throw Error('Revisa los conceptos, cantidades y precios de la factura.');
- return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig),estadoCobro:$('invoicePaidNow')?.checked?'pagada':'pendiente',numeroSolicitado:String($('invoiceManualNumber')?.value||'').trim()};
+ return {accion:'emitirFactura',requestId:(invoiceRequestId||=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random())),tercero:client.nombre,concepto:lines.map(x=>x.concepto).join(' · ').slice(0,500),base:+calc.base.toFixed(2),ivaPorcentaje:calc.ivaPct,iva:+calc.iva.toFixed(2),total:+calc.total.toFixed(2),cliente:JSON.stringify(client),lineas:JSON.stringify(lines),descuento:calc.discount,observaciones:$('invoiceNotes')?.value.trim()||'',referencia:$('invReference')?.value.trim()||'',emisor:JSON.stringify(invoiceConfig),estadoCobro:$('invoicePaidNow')?.checked?'pagada':'pendiente',numeroSolicitado:String($('invoiceManualNumber')?.value||'').trim()};
 }
 async function emitInvoice(){
  const msg=$('invoiceMsg'),btn=$('invoiceIssueBtn');if(!btn||btn.disabled)return;
@@ -3636,6 +3655,7 @@ function showInvoiceToast(numero){
 }
 
 function openForm(tipo){
+  $("formBody")?.classList.remove("cfR25CompactBilling");
   only("formPage");
   nav(tipo==="Compra"?"buy":"sale");
 
@@ -3708,6 +3728,7 @@ function openForm(tipo){
         ${c?"GUARDAR COMPRA":"GUARDAR FACTURA"}
       </button>
       <div id="msg" class="msg"></div>
+      <button type="button" class="guideBtn cfR25ListBtn" onclick="openRecordsFiltered('${c?"Compra":"facturas"}')">📋 VER TODAS LAS ${c?"COMPRAS":"FACTURAS"}</button>
     </div>`;
 
   const d=new Date();$('cfR22RecordDate').value=agendaDayKey(d.getFullYear(),d.getMonth(),d.getDate());
@@ -3898,6 +3919,7 @@ function openRecordByIndex(index){
 }
 
 let editingRecord=null;
+window.cfR25CurrentRecord=()=>editingRecord;
 
 function calcModal(){
   if(!editingRecord)return;
@@ -3933,6 +3955,12 @@ function openRecordData(r){
   $("modalTitle").textContent=tipo==="Compra"?"Editar compra":(r.emitida?'Consultar factura emitida':'Editar factura');
   const actions=$('recordModal').querySelectorAll('.modalActions button');
   actions.forEach(b=>{b.hidden=!!r.emitida;b.disabled=!!r.emitida;});
+  const attach=$('cfR25RecordFile'),view=$('cfR25ViewAttachment');
+  if(attach){attach.value='';attach.disabled=!!r.emitida&&!!r.facturaUrl;}
+  if(view){view.hidden=!r.facturaUrl;view.dataset.url=r.facturaUrl||'';}
+  const hint=$('cfR25FileHint');if(hint)hint.textContent=r.emitida?(r.facturaUrl?'Esta factura emitida ya tiene un PDF vinculado. No se reemplaza el documento original.':'Puedes subir el PDF original de esta factura. Se añadirá sin modificar sus datos fiscales.'):'Puedes adjuntar el documento ahora o más adelante.';
+  const oldAttach=$('cfR25IssuedAttachmentBtn');if(oldAttach)oldAttach.remove();
+  if(r.emitida&&!r.facturaUrl){const b=document.createElement('button');b.id='cfR25IssuedAttachmentBtn';b.type='button';b.className='guideBtn';b.textContent='📎 ADJUNTAR PDF A FACTURA EMITIDA';b.onclick=attachIssuedInvoicePDF;attach?.parentElement?.appendChild(b);}
   $("modalThirdLabel").textContent=tipo==="Compra"?"Tienda / Proveedor":"Cliente";
   $("modalAmountLabel").textContent=tipo==="Compra"?"Importe total (IVA incluido)":"Base imponible (sin IVA)";
   $("modalIvaLabel").textContent=tipo==="Compra"?"IVA soportado":"IVA repercutido";
@@ -4096,6 +4124,10 @@ async function saveEditedRecord(){
     // La API de Google Sheets confirma la edición.
     // No hacemos una segunda comprobación por número de fila, porque
     // puede provocar falsos errores aunque Google Sheets ya haya guardado.
+    const file=$('cfR25RecordFile')?.files?.[0];
+    if(file){
+      payload.facturaUrl=await cfR25UploadRecordFile(file);
+    }
     await callAction(payload);
     await syncFromSheets().catch(e=>console.warn("Actualización visual tras editar:",e));
     closeRecordModal();
@@ -4813,7 +4845,7 @@ function renderAll(){
   const a=records.filter(r=>{
     if(r.archivada&&!$('cfShowArchivedIssued')?.checked)return false;
     if(pendingOnly && r.facturaUrl) return false;
-    if(recordFilter!=="all" && r.tipo!==recordFilter) return false;
+    if(recordFilter!=="all" && (recordFilter==="facturas" ? r.tipo==="Compra" : r.tipo!==recordFilter)) return false;
 
     if(period!=="all"){
       const d=new Date(r.fecha);
@@ -5002,7 +5034,7 @@ function renderSummaryChart(){
  const groups=monthly?[
   {label:'1–7',a:1,b:7},{label:'8–14',a:8,b:14},{label:'15–21',a:15,b:21},{label:'22–fin',a:22,b:31}]:
   ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((label,i)=>({label,month:i+1}));
- const vals=groups.map(g=>({name:g.label,buy:0,sales:0}));
+ const vals=groups.map(g=>({name:g.label,buy:0,sales:0,otherExpense:0,otherCollected:0}));
  for(const r of records){
   if(r.estado==='BORRADOR'||r.tipo==='Borrador')continue;
   const date=new Date(r.fecha);if(Number.isNaN(date.getTime())||date.getFullYear()!==yr)continue;
@@ -5012,27 +5044,35 @@ function renderSummaryChart(){
   if(r.tipo==='Compra')vals[n].buy+=Number(r.total)||0;
   else if(['Facturado','Facturación'].includes(r.tipo))vals[n].sales+=Number(r.total)||0;
  }
- const max=Math.max(1,...vals.flatMap(g=>[g.buy,g.sales]));
+ for(const r of pendingIncomeRecords){
+  const date=new Date(r.fecha);if(Number.isNaN(date.getTime())||date.getFullYear()!==yr)continue;
+  if(monthly&&date.getMonth()+1!==mn)continue;
+  const n=monthly?groups.findIndex(g=>date.getDate()>=g.a&&date.getDate()<=g.b):date.getMonth();
+  if(n<0)continue;
+  vals[n].otherExpense+=Number(r.material)||0;
+  vals[n].otherCollected+=Number(r.cobrado)||0;
+ }
+ const max=Math.max(1,...vals.flatMap(g=>[g.buy,g.sales,g.otherExpense,g.otherCollected]));
  parent.replaceChildren();
  for(const g of vals){
   const col=document.createElement('div');col.className='cfChartColumn';
   const bars=document.createElement('div');bars.className='cfChartBars';
-  for(const [cls,value] of [['buy',g.buy],['sales',g.sales]]){
+  for(const [cls,value] of [['buy',g.buy],['sales',g.sales],['otherExpense',g.otherExpense],['otherCollected',g.otherCollected]]){
    const bar=document.createElement('div');bar.className='cfChartBar '+cls;
    bar.style.height=Math.max(value>0?3:0,100*value/max)+'%';
-   bar.title=(cls==='buy'?'Compras: ':'Facturado: ')+euro(value);
+   bar.title=({buy:'Compras: ',sales:'Facturado: ',otherExpense:'Material independiente: ',otherCollected:'Ingresos independientes cobrados: '}[cls]||'')+euro(value);
    bars.appendChild(bar);
   }
   const lbl=document.createElement('small');lbl.textContent=g.name;
   col.append(bars,lbl);parent.appendChild(col);
  }
  const buy=vals.reduce((v,x)=>v+x.buy,0),sales=vals.reduce((v,x)=>v+x.sales,0);
- $('cfSummaryChartTotal').textContent='Compras: '+euro(buy)+' · Facturado: '+euro(sales)+' · Diferencia: '+euro(sales-buy)+' (sin descontar impuestos ni otros costes)';
+ $('cfSummaryChartTotal').textContent='Compras: '+euro(buy)+' · Facturado: '+euro(sales)+' · Material independiente: '+euro(vals.reduce((v,x)=>v+x.otherExpense,0))+' · Ingresos independientes cobrados: '+euro(vals.reduce((v,x)=>v+x.otherCollected,0))+' (estos dos últimos no se mezclan con el IVA).';
 }
 function updateSummary(){
   const period=$("summaryPeriod").value;
   let c=0,f=0,ivs=0,ivr=0,nc=0,nf=0;
-  let pendingCollected=0,pendingMaterial=0,pendingBenefit=0;
+  let pendingCollected=0,pendingMaterial=0,pendingBenefit=0,pendingDue=0;
 
   records.forEach(r=>{
     const d=new Date(r.fecha);
@@ -5074,6 +5114,7 @@ function updateSummary(){
     }
     if(include){
       pendingCollected+=Number(r.cobrado)||0;
+      pendingDue+=Math.max(0,(Number(r.importePrevisto)||0)-(Number(r.cobrado)||0));
       pendingMaterial+=Number(r.material)||0;
       pendingBenefit+=Number(r.beneficio ?? ((Number(r.cobrado)||0)-(Number(r.material)||0)))||0;
     }
@@ -5087,6 +5128,9 @@ function updateSummary(){
   $("sc").textContent=euro(c);
   $("sf").textContent=euro(f);
   if($("spPending"))$("spPending").textContent=euro(pendingCollected);
+  if($('cfR25IndependentCollected'))$('cfR25IndependentCollected').textContent=euro(pendingCollected);
+  if($('cfR25IndependentExpenses'))$('cfR25IndependentExpenses').textContent=euro(pendingMaterial);
+  if($('cfR25IndependentDue'))$('cfR25IndependentDue').textContent=euro(pendingDue);
   if($("spPendingBenefit"))$("spPendingBenefit").textContent="Beneficio: "+euro(pendingBenefit)+" · Material: "+euro(pendingMaterial);
   $("sis").textContent=euro(ivs);
   $("sir").textContent=euro(ivr);
@@ -5505,7 +5549,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261027-R24'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261028-R25'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -6101,6 +6145,19 @@ startAccountSystem();
 <script src="cf-r20-payments.js"></script>
 <script src="cf-r21-features.js"></script>
 <script src="contacts.bundle.js"></script>
+<style id="cf-r25-fixes">
+/* Edición de adjuntos y navegación visible desde cada sección */
+.cfR25CompactBilling .form{padding-bottom:0!important}
+#formBody .invoiceCreateBox{margin:8px 0 14px!important}
+.cfR25ListBtn{width:100%;margin:10px 0 2px;min-height:42px}
+.cfR25IndependentTotals{display:grid;gap:7px;margin:12px 0;background:#111920;border:1px solid #3b4b57;border-radius:12px;padding:12px}
+.cfR25ChartLegend{font-size:10px;margin:6px 0;color:var(--muted);line-height:1.5}.cfR25IndependentTotals>div{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+.cfR25IndependentTotals span{color:#bdc6cc}.cfR25IndependentTotals strong{font-variant-numeric:tabular-nums;white-space:nowrap}
+.cfChartBars .cfChartBar{width:22%;min-width:1px}.cfChartBar.otherExpense{background:#ed8c4b}.cfChartBar.otherCollected{background:#48c9ae}
+.cfR25InvoiceAttachment .guideBtn{margin-top:7px;width:100%}
+@media(max-width:380px){.cfR25IndependentTotals>div{font-size:11px}}
+</style>
 <script src="cf-r22-features.js"></script>
+<script src="cf-r25-features.js"></script>
 </body>
 </html>

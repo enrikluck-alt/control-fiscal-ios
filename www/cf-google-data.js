@@ -191,7 +191,7 @@ async function action(p){
    const numeroFactura='BOR-'+new Date().getFullYear()+'-'+ident('ID').replace(/^ID-/,'').replace(/-/g,'').slice(0,20);
    const doc={id:ident('FAC'),fecha:now(),tipo:'Borrador',estado:'BORRADOR',requestId:key,numeroFactura,
     tercero:p.tercero||'',concepto:p.concepto||'',base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),
-    cliente:parseJSON(p.cliente),lineas:parseJSON(p.lineas,[]),emisor:parseJSON(p.emisor),descuento:num(p.descuento),observaciones:p.observaciones||''};
+    cliente:parseJSON(p.cliente),lineas:parseJSON(p.lineas,[]),emisor:parseJSON(p.emisor),descuento:num(p.descuento),observaciones:p.observaciones||'',referencia:String(p.referencia||'').trim().slice(0,140)};
    await upsert(s,'Facturas',doc);
    return {ok:true,numeroFactura,pdfGenerado:false,borrador:true,facturaEmitida:false};
   })();
@@ -242,7 +242,7 @@ async function action(p){
     numeroAsignado:candidate,sequenceIndex:selectedIndex,
     tercero:p.tercero||validation.client.nombre,concepto:p.concepto||'',
     base:num(p.base),ivaPorcentaje:num(p.ivaPorcentaje),iva:num(p.iva),total:num(p.total),
-    cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||'',estadoCobro:p.estadoCobro==='pagada'?'pagada':'pendiente'};
+    cliente:validation.client,emisor:validation.issuer,lineas:validation.lines,descuento:num(p.descuento),observaciones:p.observaciones||'',referencia:String(p.referencia||'').trim().slice(0,140),estadoCobro:p.estadoCobro==='pagada'?'pagada':'pendiente'};
    const resp=await append(s,ISSUED_TAB,['CF_FACTURA_EMITIDA_1',key,JSON.stringify(doc)]);
    const matched=String(resp.updates?.updatedRange||'').match(/![A-Z]+(\d+)(?::|$)/);
    if(!matched){
@@ -345,6 +345,7 @@ async function action(p){
    const tipo=old.tipo||p.tipo,ivaPorcentaje=num(p.ivaPorcentaje||old.ivaPorcentaje);
    const base=tipo==='Compra'?num(p.total||old.total)/(1+ivaPorcentaje/100):num(p.base||old.base);
    const total=tipo==='Compra'?num(p.total||old.total):base*(1+ivaPorcentaje/100);
+   if(p.facturaUrl&&!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view/.test(String(p.facturaUrl)))throw Error('El adjunto debe estar guardado en Google Drive.');
    const updated={...old,...p,tipo,base:Number(base.toFixed(2)),ivaPorcentaje,iva:Number((total-base).toFixed(2)),total:Number(total.toFixed(2))};
    ['accion','_row','_tab','_key','fila','tab'].forEach(k=>delete updated[k]);
    await revision(s,tab,old._key,updated);return {ok:true};
