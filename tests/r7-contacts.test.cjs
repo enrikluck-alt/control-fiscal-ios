@@ -74,7 +74,7 @@ test('R7: la interfaz contiene directorios independientes, autocompletado y ning
  const compra=html.slice(start,end);
  assert.doesNotMatch(compra,/id="thirdPartyStoreBtn"|id="thirdPartyProviderBtn"/);
  assert.ok(compra.includes('Distribuidor'));
- assert.match(workflow,/UI76-20261028-R26/);
+ assert.match(workflow,/UI76-20261028-R27/);
 });
 test('R7: Face ID no tiene esperas artificiales y sigue bloqueando al volver',()=>{
  const face=html.slice(html.indexOf('async function unlockWithBiometric()'),html.indexOf('function showPinUnlock('));

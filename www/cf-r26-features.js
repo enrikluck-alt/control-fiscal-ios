@@ -45,6 +45,7 @@ function selectedRows(){
 }
 function element(tag,cls,label){const el=root.document.createElement(tag);if(cls)el.className=cls;if(label!==undefined)el.textContent=label;return el;}
 function renderMovements(){
+ updateReminderControls();
  const container=$('cfR26MovementItems'),counter=$('cfR26MovementCount');if(!container)return;
  const rows=selectedRows();container.replaceChildren();
  if(counter)counter.textContent=`${rows.length} movimientos · ${rows.filter(r=>r.kind==='compra').length} compras · ${rows.filter(r=>r.kind==='factura').length} facturas · ${rows.filter(r=>r.kind==='ingreso').length} ingresos independientes`;
@@ -74,13 +75,28 @@ function setupPeriods(){
  names.forEach((name,i)=>{const opt=element('option','',name);opt.value=String(i+1);month.append(opt);});month.value=String(now.getMonth()+1);
 }
 function accountPrefKey(){const account=root.CFGoogleAccount?.active();return account?.id?'cf_r26_reminder_preferences_'+account.id:null;}
+function updateReminderControls(){
+ const invoices=!!$('cfR26TypeFactura')?.checked,incomes=!!$('cfR26TypeIngreso')?.checked;
+ const card=$('cfR26ReminderCard');if(card)card.hidden=!(invoices||incomes);
+ const invoiceLabel=$('cfR26RemindInvoicesWrap');if(invoiceLabel)invoiceLabel.hidden=!invoices;
+ const incomeLabel=$('cfR26RemindIncomesWrap');if(incomeLabel)incomeLabel.hidden=!incomes;
+ reminderFrequencyChanged();
+}
+function reminderFrequencyChanged(){
+ const frequency=$('cfR26ReminderFrequency')?.value;
+ const interval=$('cfR26ReminderIntervalRow'),month=$('cfR26ReminderMonthDayWrap');
+ if(interval)interval.hidden=frequency!=='interval';
+ if(month)month.hidden=frequency!=='monthly';
+}
 function loadReminderPreferences(){const key=accountPrefKey();if(!key)return;try{const v=JSON.parse(root.localStorage.getItem(key)||'{}');
   if(['daily','interval','weekly','monthly'].includes(v.frequency))$('cfR26ReminderFrequency').value=v.frequency;
   if(Number.isInteger(v.day)&&v.day>=1&&v.day<=28)$('cfR26ReminderDay').value=String(v.day);
   if(Number.isInteger(v.interval)&&v.interval>=1&&v.interval<=365)$('cfR26ReminderInterval').value=String(v.interval);
   $('cfR26ReminderEmail').checked=v.email!==false;$('cfR26ReminderWhatsApp').checked=!!v.whatsapp;
   $('cfR26RemindInvoices').checked=v.invoices!==false;$('cfR26RemindIncomes').checked=v.incomes!==false;
- }catch(_){} }
+ }catch(_){}
+ reminderFrequencyChanged();
+}
 function saveReminderPreferences(){
  const status=$('cfR26ReminderStatus'),key=accountPrefKey();if(!key){if(status)status.textContent='Inicia sesión antes de guardar preferencias.';return;}
  const data={frequency:$('cfR26ReminderFrequency').value,day:Math.max(1,Math.min(28,Number($('cfR26ReminderDay').value)||1)),interval:Math.max(1,Math.min(365,Number($('cfR26ReminderInterval').value)||7)),email:$('cfR26ReminderEmail').checked,whatsapp:$('cfR26ReminderWhatsApp').checked,invoices:$('cfR26RemindInvoices').checked,incomes:$('cfR26RemindIncomes').checked};
@@ -134,5 +150,5 @@ if(typeof root.setInterval==='function')root.setInterval(()=>{void pollAdminInbo
 root.addEventListener?.('cf:account-changed',()=>{adminNoticeKey='';seenSuggestions=null;updateAdminNoticeChoice();});
 root.addEventListener?.('cf:firebase-ready',()=>{updateAdminNoticeChoice();void pollAdminInbox();});
 root.document.addEventListener?.('visibilitychange',()=>{if(!root.document.hidden){updateAdminNoticeChoice();void pollAdminInbox();}});
-root.CFR26=Object.freeze({openMovements,periodChanged,renderMovements,saveReminderPreferences,setAdminLocalNotices,pollAdminInbox,day,isWithin,selectedRows});
+root.CFR26=Object.freeze({openMovements,periodChanged,renderMovements,reminderFrequencyChanged,updateReminderControls,saveReminderPreferences,setAdminLocalNotices,pollAdminInbox,day,isWithin,selectedRows});
 })(window);

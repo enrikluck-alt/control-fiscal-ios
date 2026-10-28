@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-cf-ui-build="UI76-20261028-R26">
+<html lang="es" data-cf-ui-build="UI76-20261028-R27">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -2097,7 +2097,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
       </div>
 
 
-<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261028-R26</div>
+<div id="cfV76BuildIdentity" class="settingsHint" style="text-align:center;font-size:10px;padding:10px 0 2px" aria-label="Versión instalada">Control Fiscal V76 · Interfaz original · UI76-20261028-R27</div>
 
     </div>
   </div>
@@ -2132,10 +2132,11 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
   <div class="header"><button class="back" type="button" onclick="goHome()">‹</button><div class="headericon">📚</div><div><h2>MOVIMIENTOS</h2><p>Todos tus registros privados</p></div></div>
   <div class="page">
     <div class="cfR26Card">
-      <div class="cfR26TypeChecks" role="group" aria-label="Categorías de movimientos">
-        <label><input type="checkbox" id="cfR26TypeCompra" checked onchange="CFR26.renderMovements()"> Compras</label>
-        <label><input type="checkbox" id="cfR26TypeFactura" checked onchange="CFR26.renderMovements()"> Facturas</label>
-        <label><input type="checkbox" id="cfR26TypeIngreso" checked onchange="CFR26.renderMovements()"> Ingresos independientes</label>
+      <p class="cfR27FieldTitle">Mostrar movimientos de:</p>
+      <div class="cfR26TypeChecks cfR27CategoryChecks" role="group" aria-label="Categorías de movimientos">
+        <label for="cfR26TypeCompra"><input type="checkbox" id="cfR26TypeCompra" checked onchange="CFR26.renderMovements()"><span>Compras</span></label>
+        <label for="cfR26TypeFactura"><input type="checkbox" id="cfR26TypeFactura" checked onchange="CFR26.renderMovements()"><span>Facturas</span></label>
+        <label for="cfR26TypeIngreso"><input type="checkbox" id="cfR26TypeIngreso" checked onchange="CFR26.renderMovements()"><span>Ingresos independientes</span></label>
       </div>
       <div class="field"><label for="cfR26Period">PERÍODO</label><select class="select" id="cfR26Period" onchange="CFR26.periodChanged()">
         <option value="current-month">Mes actual</option><option value="current-year">Año actual</option><option value="year">Elegir año</option><option value="month">Elegir año y mes</option><option value="custom">Entre dos fechas</option><option value="all">Todos los períodos</option>
@@ -2155,10 +2156,15 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     <div class="cfR26Card" id="cfR26ReminderCard">
       <h3>✉️ Programación de recordatorios de cobro</h3>
       <p class="settingsHint">Guarda cómo quieres preparar los recordatorios. Los envíos automáticos no se activarán hasta conectar un proveedor de correo y WhatsApp Business y autorizar los destinatarios. Mientras tanto, puedes enviar avisos manuales desde cada registro.</p>
-      <div class="two"><div class="field"><label for="cfR26ReminderFrequency">Frecuencia deseada</label><select class="select" id="cfR26ReminderFrequency"><option value="daily">Cada día</option><option value="interval">Cada X días</option><option value="weekly">Cada semana</option><option value="monthly">Un día del mes</option></select></div><div class="field"><label for="cfR26ReminderDay">Día del mes (si corresponde)</label><input class="input" type="number" min="1" max="28" value="1" id="cfR26ReminderDay"></div></div>
-      <div class="field"><label for="cfR26ReminderInterval">Cada cuántos días (si eliges cada X días)</label><input class="input" type="number" min="1" max="365" value="7" id="cfR26ReminderInterval"></div>
-      <div class="cfR26TypeChecks"><label><input type="checkbox" id="cfR26ReminderEmail" checked> Correo</label><label><input type="checkbox" id="cfR26ReminderWhatsApp"> WhatsApp Business</label></div>
-      <div class="cfR26TypeChecks"><label><input type="checkbox" id="cfR26RemindInvoices" checked> Facturas pendientes</label><label><input type="checkbox" id="cfR26RemindIncomes" checked> Ingresos independientes pendientes</label></div>
+      <div class="cfR27FrequencyGrid">
+      <div class="field"><label for="cfR26ReminderFrequency">Frecuencia deseada</label><select class="select" id="cfR26ReminderFrequency" onchange="CFR26.reminderFrequencyChanged()"><option value="daily">Cada día</option><option value="interval">Cada X días</option><option value="weekly">Cada semana</option><option value="monthly">Un día del mes</option></select></div>
+      <div class="field" id="cfR26ReminderIntervalRow" hidden><label for="cfR26ReminderInterval">Repetir cada cuántos días</label><input class="input" inputmode="numeric" type="number" min="1" max="365" step="1" value="7" id="cfR26ReminderInterval"><small class="settingsHint">Por ejemplo, escribe 5 para repetir cada cinco días.</small></div>
+      <div class="field" id="cfR26ReminderMonthDayWrap" hidden><label for="cfR26ReminderDay">Día de cada mes</label><input class="input" type="number" min="1" max="28" step="1" value="1" id="cfR26ReminderDay"></div>
+      </div>
+      <p class="cfR27FieldTitle">Canal de envío (pendiente de configurar el servicio)</p>
+      <div class="cfR26TypeChecks cfR27CheckGroup"><label for="cfR26ReminderEmail"><input type="checkbox" id="cfR26ReminderEmail" checked><span>Correo</span></label><label for="cfR26ReminderWhatsApp"><input type="checkbox" id="cfR26ReminderWhatsApp"><span>WhatsApp Business</span></label></div>
+      <p class="cfR27FieldTitle">Recordar pagos de:</p>
+      <div class="cfR26TypeChecks cfR27CheckGroup"><label for="cfR26RemindInvoices" id="cfR26RemindInvoicesWrap"><input type="checkbox" id="cfR26RemindInvoices" checked><span>Facturas pendientes</span></label><label for="cfR26RemindIncomes" id="cfR26RemindIncomesWrap"><input type="checkbox" id="cfR26RemindIncomes" checked><span>Ingresos independientes pendientes</span></label></div>
       <button type="button" class="guideBtn" onclick="CFR26.saveReminderPreferences()">Guardar preferencias (sin activar envíos)</button><p id="cfR26ReminderStatus" class="settingsHint" role="status"></p>
     </div>
   </div>
@@ -2214,6 +2220,7 @@ document.querySelector("#securityLock .securityBox")?.addEventListener("click", 
     <div class="cfDirectoryActions">
       <button class="save" type="button" id="cfDirectorySaveBtn" onclick="saveContactDirectory()">GUARDAR CAMBIOS</button>
       <button class="resetSettings" type="button" onclick="cancelContactDirectoryEdit()">VOLVER A LA LISTA</button>
+      <button class="resetSettings" type="button" id="cfDirectoryDeleteBtn" onclick="deleteContactDirectory()" hidden>ELIMINAR CONTACTO</button>
     </div>
   </div>
   <div id="cfDirectoryMessage" class="msg" role="status"></div>
@@ -3273,13 +3280,14 @@ function editContactDirectory(index){
     input.value=String(existing[key]||'');input.autocomplete='off';
     wrapper.append(lab,input);host.append(wrapper);
   }
+  $('cfDirectoryDeleteBtn').hidden=!(index>=0);
   $('cfDirectoryListView').classList.add('hidden');$('cfDirectoryEditView').classList.remove('hidden');
   $('cfDirectoryMessage').textContent='';
   $('cfDirectoryField_nombre')?.focus({preventScroll:true});
 }
 function cancelContactDirectoryEdit(){
   $('cfDirectoryEditView')?.classList.add('hidden');$('cfDirectoryListView')?.classList.remove('hidden');
-  cfDirectoryOriginal=null;renderContactDirectory();
+  cfDirectoryOriginal=null;if($('cfDirectoryDeleteBtn'))$('cfDirectoryDeleteBtn').hidden=true;renderContactDirectory();
 }
 async function saveContactDirectory(){
   const fields=Object.fromEntries([...document.querySelectorAll('#cfDirectoryEditor [data-key]')].map(el=>[el.dataset.key,el.value.trim()]));
@@ -3301,6 +3309,35 @@ async function saveContactDirectory(){
     cancelContactDirectoryEdit();
   }catch(e){msg.className='msg err';msg.textContent=e.message||'No se han podido guardar los cambios.';}
   finally{if(btn)btn.disabled=false;}
+}
+async function deleteContactDirectory(){
+  // Se elimina del directorio activo mediante una revisión/ocultación en Sheets.
+  // Los registros de compras, facturas e ingresos ya emitidos nunca se modifican.
+  const original=cfDirectoryOriginal;
+  if(!original)return;
+  const kind=cfDirectoryKind;
+  const name=String(original.nombre||'').trim();
+  if(!name)return;
+  if(!window.confirm(`¿Eliminar «${name}» de Mis ${kind}? Las compras, facturas e ingresos históricos conservarán su nombre y sus importes.`))return;
+  const msg=$('cfDirectoryMessage'),btn=$('cfDirectoryDeleteBtn'),save=$('cfDirectorySaveBtn');
+  if(btn)btn.disabled=true;if(save)save.disabled=true;
+  const accountId=window.CFGoogleAccount?.active?.()?.id;
+  try{
+    if(kind==='clientes'){
+      const response=await callAction({accion:'eliminarCliente',key:original._key||'',cif:original.cif||''});
+      if(accountId!==window.CFGoogleAccount?.active?.()?.id)throw Error('La cuenta ha cambiado. Recarga el listado.');
+      savedClients=Array.isArray(response.clientes)?response.clientes:savedClients.filter(x=>x._key!==original._key);
+      localStorage.setItem('cf_clients',JSON.stringify(savedClients));refreshInvoiceClientSelect();
+    }else{
+      await callAction({accion:'eliminarTercero',categoria:'Distribuidor',nombre:name});
+      if(accountId!==window.CFGoogleAccount?.active?.()?.id)throw Error('La cuenta ha cambiado. Recarga el listado.');
+      await loadSuppliersFromGoogle(false);
+    }
+    cfTapFeedback();cancelContactDirectoryEdit();
+    if(msg){msg.className='msg ok';msg.textContent='Contacto eliminado del directorio. Los movimientos históricos se han conservado.';}
+  }catch(error){
+    if(msg){msg.className='msg err';msg.textContent=error?.message||'No se ha podido eliminar el contacto.';}
+  }finally{if(btn)btn.disabled=false;if(save)save.disabled=false;}
 }
 function renderInvoiceClientSuggestions(){
   const input=$('cfInvoiceClientSearch'),host=$('cfInvoiceClientSuggestions');if(!input||!host)return;
@@ -5607,7 +5644,7 @@ async function sendCFSupport(){
  if(status)status.textContent=(window.CFi18n?.t('Enviando sugerencia a los desarrolladores…')||'Enviando sugerencia a los desarrolladores…');
  try{
   if(!window.CFFeedback?.send)throw Error('No se ha cargado el sistema de sugerencias.');
-  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261028-R26'});
+  const response=await window.CFFeedback.send({kind,message,allowReply:!!$('cfSupportReplyConsent')?.checked,appVersion:'UI76-20261028-R27'});
   if(!response?.id)throw Error('Google Cloud no ha confirmado el envío.');
   if(status)status.textContent='✅ '+(window.CFi18n?.t('Sugerencia enviada a los desarrolladores.')||'Sugerencia enviada a los desarrolladores.');
   if($('cfSupportText'))$('cfSupportText').value='';
@@ -6204,6 +6241,7 @@ startAccountSystem();
 <script src="cf-r20-payments.js"></script>
 <script src="cf-r21-features.js"></script>
 <script src="contacts.bundle.js"></script>
+<script src="cf-r27-contacts-bridge.js"></script>
 <style id="cf-r25-fixes">
 /* Edición de adjuntos y navegación visible desde cada sección */
 .cfR25CompactBilling .form{padding-bottom:0!important}
@@ -6238,6 +6276,22 @@ startAccountSystem();
 #cfR26MovementsPage input[type="date"]{-webkit-appearance:none;appearance:none;font-size:16px;}
 .cfR26IncomeCard{background:#d6f6e9;color:#172c24}
 .cfR26AdminLocalToggle{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.5}.cfR26AdminLocalToggle input{width:18px;height:18px;flex:none}
+</style>
+
+<style id="cfR27UX">
+#cfR26MovementsPage .cfR27FieldTitle{font-size:12px;font-weight:750;color:#e5edf5;margin:10px 0 8px;}
+#cfR26MovementsPage .cfR27CategoryChecks{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 16px;}
+#cfR26MovementsPage .cfR27CheckGroup{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+#cfR26MovementsPage .cfR27FrequencyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end;}
+#cfR26MovementsPage .cfR27FrequencyGrid .field{min-width:0;margin:0 0 10px;}
+#cfR26MovementsPage .cfR26TypeChecks label{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;padding:11px 9px;background:#25333f;color:#f4f5f7;border:1px solid #657788;border-radius:10px;min-height:48px;min-width:0;width:100%;font-size:13px;line-height:1.35;box-sizing:border-box;}
+#cfR26MovementsPage .cfR26TypeChecks label span{min-width:0;overflow-wrap:break-word;}
+#cfR26MovementsPage .cfR26TypeChecks input[type="checkbox"]{appearance:checkbox!important;-webkit-appearance:checkbox!important;display:inline-block!important;position:static!important;opacity:1!important;width:20px!important;min-width:20px!important;max-width:20px!important;height:20px!important;min-height:20px!important;padding:0!important;margin:0!important;flex:0 0 20px!important;accent-color:#ffd95b;}
+#cfR26MovementsPage #cfR26ReminderCard[hidden],#cfR26MovementsPage #cfR26ReminderIntervalRow[hidden],#cfR26MovementsPage #cfR26ReminderMonthDayWrap[hidden],#cfR26MovementsPage #cfR26RemindInvoicesWrap[hidden],#cfR26MovementsPage #cfR26RemindIncomesWrap[hidden]{display:none!important;}
+#cfR26MovementsPage .cfR26Card .field input[type="number"]{width:100%!important;max-width:100%;box-sizing:border-box;min-width:0;}
+@media(max-width:640px){#cfR26MovementsPage .cfR27CategoryChecks{grid-template-columns:1fr;}#cfR26MovementsPage .cfR27CheckGroup{grid-template-columns:1fr;}#cfR26MovementsPage .cfR27FrequencyGrid{grid-template-columns:1fr;}}
+#cfDirectoryDeleteBtn{border:1px solid #b84949;background:#512529;color:#ffe7e7;min-height:44px;}
+#cfDirectoryDeleteBtn[hidden]{display:none!important;}
 </style>
 <script src="cf-r22-features.js"></script>
 <script src="cf-r25-features.js"></script>

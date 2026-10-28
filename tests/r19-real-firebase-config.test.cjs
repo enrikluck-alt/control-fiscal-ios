@@ -24,7 +24,7 @@ test('R19 no añade Firebase Analytics ni credenciales privadas',()=>{
   const contents=read('www/cf-firebase-config.js')+read('www/index.html');
   assert.doesNotMatch(contents,/getAnalytics\s*\(/);
   assert.doesNotMatch(read('www/cf-firebase-config.js'),/private_key|client_secret|refresh_token|BEGIN PRIVATE KEY/);
-  assert.match(read('www/index.html'),/data-cf-ui-build="UI76-20261028-R26"/);
+  assert.match(read('www/index.html'),/data-cf-ui-build="UI76-20261028-R27"/);
 });
 
 test('R19 sugerencia usa este proyecto, Google ID token para Firebase y uid del cliente',async()=>{
@@ -70,6 +70,6 @@ test('R19 compilación verifica el config y etiqueta su propio artefacto',()=>{
   const w=read('.github/workflows/build-ios.yml');
   assert.match(w,/Comprobar configuración pública Firebase/);
   assert.match(w,/projectId:.*control-fiscal-511118/);
-  assert.match(w,/ControlFiscal-R26-Movimientos-Visor-Contactos-IPA/);
-  assert.match(w,/ControlFiscal_R26_Movimientos_Visor_Contactos\.ipa/);
+  assert.match(w,/ControlFiscal-R27-Contactos-Filtros-Directorios-IPA/);
+  assert.match(w,/ControlFiscal_R27_Contactos_Filtros_Directorios\.ipa/);
 });

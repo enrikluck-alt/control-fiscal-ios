@@ -73,7 +73,7 @@ async function pickNativeContact(kind){
   report('El selector de contactos del teléfono solo funciona en la aplicación iOS/Android. También puedes elegir un cliente guardado.',true);return;
  }
  const picker=root.CFNativeContactPicker;
- if(!picker?.pickContact){report('No se ha cargado el selector nativo de contactos en esta versión. Reinstala la IPA completa.',true);return;}
+ if(!picker?.pickContact){report('No se ha inicializado el plugin de Contactos. Comprueba que la nueva compilación incluya cf-r27-contacts-bridge.js y contacts.bundle.js.',true);return;}
  report('Abriendo los contactos del teléfono…');
  try{
   const result=await picker.pickContact();

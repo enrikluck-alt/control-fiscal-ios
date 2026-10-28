@@ -379,7 +379,13 @@ async function action(p){
   await revision(s,'Clientes',original._key,{...original,...c});
   return {ok:true,clientes:await items(s,'Clientes')};
  }
- case 'eliminarCliente':return remove(s,'Clientes',x=>x.cif===p.cif||x.nombre===p.nombre);
+ case 'eliminarCliente':{
+  const clients=await items(s,'Clientes');
+  const old=clients.find(x=>p.key?x._key===String(p.key):Boolean(p.cif)&&String(x.cif||'').toLocaleLowerCase('es')===String(p.cif).toLocaleLowerCase('es'));
+  if(!old)throw Error('No se encontró el cliente en la cuenta actual. Actualiza el listado.');
+  await revision(s,'Clientes',old._key,{},true);
+  return {ok:true,clientes:await items(s,'Clientes')};
+ }
  case 'listarInventario':return {ok:true,items:await items(s,'Inventario')};
  case 'guardarInventario':{
   const x=parseJSON(p.item);if(!x.articulo)throw Error('Indica un artículo.');if(!x.id)x.id=ident('INV');await upsert(s,'Inventario',x);return {ok:true,id:x.id};

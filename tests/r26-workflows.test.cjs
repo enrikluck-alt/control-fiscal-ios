@@ -47,5 +47,5 @@ test('R26: recordatorios solamente guardan preferencias, no envían mensajes',()
  assert.match(src,/NO hay envíos automáticos activos/);
 });
 test('R26: pipeline incluye el modulo de movimientos y la IPA actualizada',()=>{
- assert.match(wf,/cf-r26-features\.js/);assert.match(wf,/UI76-20261028-R26/);assert.match(wf,/ControlFiscal_R26_Movimientos_Visor_Contactos\.ipa/);
+ assert.match(wf,/cf-r26-features\.js/);assert.match(wf,/UI76-20261028-R27/);assert.match(wf,/ControlFiscal_R27_Contactos_Filtros_Directorios\.ipa/);
 });

@@ -58,8 +58,8 @@ test('R10: factura emitida se archiva/restaura sin tocar registros fiscales ni l
 });
 test('R10: interfaz carga Documentos, Ajustes independientes, fotos abiertas y resguardo del tutorial',()=>{
  const h=fs.readFileSync('www/index.html','utf8'),wf=fs.readFileSync('.github/workflows/build-ios.yml','utf8');
- for(const val of ['id="documentsPage"','cfSettingsNavigator','cfSettingsShow','cfArchiveInvoiceBtn','cfShowArchivedIssued','cfInventoryCustomImageUrl','cfUseCustomImageUrl','cfFindInventoryPhotos','CFDocuments.open()','UI76-20261028-R26'])assert.ok(h.includes(val),val);
+ for(const val of ['id="documentsPage"','cfSettingsNavigator','cfSettingsShow','cfArchiveInvoiceBtn','cfShowArchivedIssued','cfInventoryCustomImageUrl','cfUseCustomImageUrl','cfFindInventoryPhotos','CFDocuments.open()','UI76-20261028-R27'])assert.ok(h.includes(val),val);
  assert.match(wf,/cf-documents\.js/);
- assert.match(wf,/ControlFiscal-R26-Movimientos-Visor-Contactos-IPA/);
+ assert.match(wf,/ControlFiscal-R27-Contactos-Filtros-Directorios-IPA/);
  assert.doesNotMatch(h,/cf-google-test-gate|Google Sheets personal/);
 });
