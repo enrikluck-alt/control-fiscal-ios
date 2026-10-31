@@ -84,7 +84,7 @@ test('R27 borrar contacto exige confirmación y nunca borra registros histórico
 test('R27 pipeline obliga a empaquetar puente JS y plugin nativo en iOS',()=>{
  assert.match(workflow,/cf-r27-contacts-bridge\.js/);
  assert.match(workflow,/contacts\.bundle\.js/);
- assert.match(workflow,/UI76-20261028-R27/);
+ assert.match(workflow,/UI76-20261031-R29/);
 });
 function sheetsEnv(){
  const sheets={};

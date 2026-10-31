@@ -139,7 +139,7 @@ test('R17: iOS build includes Firebase bridge, navigation module and changed bui
   assert.match(html,new RegExp(`<script src="${script.replace('.','\\.')}"></script>`));
   assert.ok(w.includes(script));
  }
- assert.match(w,/UI76-20261028-R27/);
+ assert.match(w,/UI76-20261031-R29/);
  assert.match(html,/cfTryOpenPendingAgendaNotification\(\)/);
 });
 

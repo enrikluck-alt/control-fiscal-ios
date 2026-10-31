@@ -1,6 +1,6 @@
 {
   "name": "control-fiscal-v76-google",
-  "version": "1.25.0",
+  "version": "1.29.0",
   "private": true,
   "scripts": {
     "cap:add:ios": "cap add ios",

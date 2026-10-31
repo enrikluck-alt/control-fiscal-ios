@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Importar compras desde el ordenador · Control Fiscal</title>
+<style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#233448;background:#f4f6fa}*{box-sizing:border-box}body{margin:0;line-height:1.5}header{background:#13283d;color:#fff;padding:18px max(20px,calc((100% - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}h1{font-size:1.4rem;margin:0}h2{font-size:1.15rem;margin:0 0 12px}h3{font-size:1rem;margin:0}p{margin:8px 0 14px}main{max-width:1200px;margin:22px auto 75px;padding:0 16px}section{background:#fff;border:1px solid #dce3ec;border-radius:16px;padding:22px;margin-bottom:20px;box-shadow:0 2px 12px #23334a0c}label{display:block;font-weight:600;font-size:.9rem}button,input,select{font:inherit}button{background:#243b57;color:#fff;border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:650}button:hover{background:#375571}button:disabled{opacity:.55;cursor:not-allowed}.primary{background:#ed9e36;color:#1d2630}.primary:hover{background:#ffc56d}a{color:#2470b1}.headerlink{color:#cce6ff;text-decoration:none}button.secondary{background:#e8edf4;color:#243b57}.minor{color:#5d7084;font-size:.87rem}.pill{padding:5px 10px;background:#e7f4ec;color:#22603e;font-size:.8rem;border-radius:30px}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.grow{flex:1}.stack{display:flex;flex-direction:column;gap:12px}.hidden,[hidden]{display:none!important}input:not([type=checkbox]),select{min-height:40px;padding:9px 10px;border:1px solid #bacbd8;border-radius:8px;background:white;color:#233448;width:100%;min-width:0}input:focus,select:focus{outline:2px solid #3b83c8;outline-offset:1px}.bookfield{max-width:680px}.book-picker{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;margin:14px 0}.upload-zone{margin-top:14px;padding:24px 18px;text-align:center;border:2px dashed #9ab1c5;border-radius:14px;background:#f6faff}.upload-zone.dragging{border-color:#ed9e36;background:#fff6ea}.upload-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:12px}.upload-actions label{cursor:pointer}.upload-actions input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.tablewrap{overflow-x:auto;margin:18px -1px 8px;border:1px solid #dce3ed;border-radius:12px}table{border-collapse:collapse;width:100%;min-width:1000px}th,td{border-bottom:1px solid #e2e9f0;text-align:left;padding:10px 8px;vertical-align:middle}th{background:#e9f0f7;white-space:nowrap;font-size:.82rem}td input{font-size:.88rem!important}.state{font-size:.79rem;white-space:nowrap}.state.error{color:#b23636}.state.success{color:#1a7850}.state.pending{color:#806026}.status{background:#f4f7fc;border-left:4px solid #4b8cc4;border-radius:5px;padding:12px 14px;min-height:40px;white-space:pre-wrap;margin:18px 0}.status.error{border-color:#c64d4d;color:#9f2f2f;background:#fff4f4}.status.success{border-color:#38996e;background:#eefbf5}.summary{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap;margin-top:12px}.progress{height:10px;background:#e8eff5;border-radius:8px;overflow:hidden;margin:12px 0}.progress>div{height:100%;background:#29966a;width:0%;transition:width .15s}.danger{color:#a13232}.notice{border-radius:10px;padding:13px 15px;background:#fff5e6;color:#68491a;border:1px solid #efc58e;margin:12px 0}.account{font-size:.84rem;color:#bad3ea}.tagline{color:#c5dcec}.small-icon{font-size:2rem}.right{text-align:right}.nowrap{white-space:nowrap}@media(max-width:650px){section{padding:16px}header{padding:14px 17px}.book-picker{grid-template-columns:1fr}table{min-width:940px}}@media(prefers-reduced-motion:reduce){.progress>div{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🧾 Importar compras desde el ordenador</h1><div class="tagline">Control Fiscal · Mismo Google Drive y Sheets que tu iPhone</div></div>
+  <div><div id="account" class="account" aria-live="polite">Sin conectar</div><a class="headerlink" href="./">Panel de sugerencias</a> <button id="logout" class="secondary hidden" type="button">Salir</button></div>
+</header>
+<main>
+  <section id="auth-section"><h2>1. Conecta tu cuenta</h2><p>Inicia sesión con <strong>la misma cuenta de Google</strong> que utilizas en Control Fiscal. Los datos y justificantes irán a tu Google Drive y Sheets; no se guardan en Firestore.</p><button id="login" class="primary" type="button">Iniciar sesión con Google</button><p class="minor">Se solicitará permiso para consultar tus hojas y subir tus justificantes. La autorización de acceso se mantiene en memoria durante esta sesión del navegador.</p></section>
+  <section id="book-section" class="hidden"><h2>2. Elige tu libro de Control Fiscal</h2><p class="minor">Selecciona el Google Sheets que ya utilizas en tu teléfono. <strong>No crearemos un libro nuevo.</strong></p>
+    <div class="book-picker"><label>Libros encontrados en tu Drive<select id="books"><option value="">Seleccionar libro…</option></select></label><button id="refresh-books" class="secondary" type="button">Buscar libros</button></div>
+    <div class="bookfield"><label for="manual-book">O pega aquí el enlace a tu Google Sheets actual</label><input id="manual-book" type="url" placeholder="https://docs.google.com/spreadsheets/d/…/edit" autocomplete="off"></div>
+    <p><button id="connect-book" class="primary" type="button">Verificar y abrir libro</button></p>
+    <p class="minor" id="current-book"></p>
+  </section>
+  <section id="import-section" class="hidden"><h2>3. Selecciona tus archivos y revisa las compras</h2>
+    <p>Selecciona <strong>muchos PDF, JPG o PNG</strong> a la vez. Si tienes una lista en Excel, guárdala como <strong>CSV UTF-8</strong> con las columnas indicadas en la plantilla y añádela también.</p>
+    <div id="drop-zone" class="upload-zone" tabindex="0" role="region" aria-label="Zona para soltar archivos PDF, JPG, PNG o CSV">
+      <div class="small-icon">📂</div><strong>Arrastra aquí tus facturas y justificantes</strong>
+      <div class="upload-actions">
+        <label class="secondary" style="padding:10px 15px;background:#e4edf5;border-radius:9px">Seleccionar varios archivos<input id="files" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple></label>
+        <label class="secondary" style="padding:10px 15px;background:#e4edf5;border-radius:9px">Elegir carpeta completa<input id="folder" type="file" accept=".pdf,.jpg,.jpeg,.png" webkitdirectory multiple></label>
+        <label class="secondary" style="padding:10px 15px;background:#e4edf5;border-radius:9px">Importar CSV de Excel<input id="csv" type="file" accept=".csv,text/csv"></label>
+        <button id="template" class="secondary" type="button">Descargar plantilla CSV</button>
+      </div>
+    </div>
+    <div class="notice"><strong>Antes de guardar:</strong> revisa la fecha real, el proveedor, el concepto, el total y el IVA de cada compra. No se extraen ni se inventan automáticamente los importes de los PDF. Los adjuntos admitidos son de hasta 5 MB cada uno.</div>
+    <div class="row"><label style="display:flex;align-items:center;gap:8px"><input id="select-all" type="checkbox" checked> Seleccionar pendientes</label><button id="add-manual" type="button" class="secondary">+ Nueva compra sin adjunto</button><button id="clear-pending" type="button" class="secondary">Quitar pendientes</button><span id="queue-count" class="minor grow"></span></div>
+    <div class="row" style="margin-top:14px;padding:12px;border-radius:11px;background:#f0f5fa;align-items:flex-end">
+      <label style="flex:1;min-width:160px">Proveedor común (opcional)<input id="bulk-provider" placeholder="Proveedor"></label>
+      <label style="width:165px">Fecha común (opcional)<input id="bulk-date" type="date"></label>
+      <label style="width:110px">IVA % común<input id="bulk-iva" type="number" min="0" max="100" placeholder="Sin cambiar"></label>
+      <button id="bulk-apply" type="button" class="secondary">Aplicar a seleccionadas</button>
+    </div>
+    <div class="tablewrap"><table><thead><tr><th>Subir</th><th>Archivo</th><th>Fecha</th><th>Proveedor</th><th>Concepto</th><th>Total €</th><th>IVA %</th><th>Estado</th><th></th></tr></thead><tbody id="rows"><tr><td colspan="9">Aún no hay compras seleccionadas.</td></tr></tbody></table></div>
+    <div class="progress" aria-label="Progreso de importación"><div id="bar"></div></div>
+    <div class="summary"><strong id="total-amount">0,00 €</strong><button id="import" type="button" class="primary" disabled>Guardar compras seleccionadas en Google</button></div>
+    <p class="minor">Las compras se añaden al historial existente de tu libro personal. Los PDF se guardan como archivos privados en tu Drive. En el iPhone podrás abrir Compras o Todos los movimientos para consultarlas tras actualizar.</p>
+  </section>
+  <div id="status" class="status" role="status" aria-live="polite">Conecta tu cuenta para comenzar.</div>
+</main>
+<script type="module" src="./importar-compras.js"></script>
+</body>
+</html>

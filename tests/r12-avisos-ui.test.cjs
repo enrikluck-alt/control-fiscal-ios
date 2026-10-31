@@ -62,7 +62,7 @@ test('R12: se incluyen tres WAV válidos en web y main app bundle del workflow',
   assert(workflow.includes("'Payload/ControlFiscal.app/'+f"));
  }
  assert.match(html,/id="cfNotificationSound"/);
- assert.match(workflow,/UI76-20261028-R27/);
+ assert.match(workflow,/UI76-20261031-R29/);
 });
 test('R12: nav claro y categorias en cuadrícula, fotos en tarjetas',()=>{
  assert.match(html,/body\.lightTheme #settingsPage \.cfSettingsNavigator \.cfSettingsNavBtn/);
