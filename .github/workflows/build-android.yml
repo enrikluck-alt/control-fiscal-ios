@@ -1,0 +1,107 @@
+name: Build Android APK de prueba (Control Fiscal)
+
+on:
+  workflow_dispatch:
+    inputs:
+      web_client_id:
+        description: 'ID OAuth 2.0 de tipo Aplicacion web (no el ID Android). Es publico.'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Dependencias
+        run: npm install --no-audit --no-fund
+
+      - name: Configurar ID OAuth WEB para Android
+        shell: bash
+        env:
+          CF_ANDROID_WEB_CLIENT_ID: ${{ inputs.web_client_id }}
+        run: |
+          set -euo pipefail
+          npm run configure:android
+          echo 'OK: cliente OAuth web para Android configurado (valor no mostrado).'
+
+      - name: Pruebas existentes de Control Fiscal
+        run: npm test
+
+      - name: Preparar recursos JavaScript y visor PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:google
+          npm run build:contacts
+          npm run build:pdf
+          test -s www/google-login.bundle.js
+          test -s www/contacts.bundle.js
+          test -s www/vendor/pdf.min.mjs
+          test -s www/vendor/pdf.worker.min.mjs
+
+      - name: Crear plataforma Android y sincronizar plugins
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx cap add android
+          npx cap sync android
+          npm run patch:android
+          npx cap ls
+          test -s android/app/src/main/AndroidManifest.xml
+          test -s android/app/src/main/assets/public/cf-google-auth.js
+          test -s android/app/src/main/assets/public/cf-android-config.js
+          test -s android/app/src/main/assets/public/contacts.bundle.js
+
+      - name: Compilar APK debug
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Huella SHA-1 de la firma de pruebas
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          {
+            echo 'Control Fiscal R30 Android - FIRMA DE PRUEBAS (no es una clave de publicación)'
+            echo 'PAQUETE: com.chispassound.controlfiscal'
+            echo 'IMPORTANTE: el certificado de GitHub puede cambiar entre ejecuciones.'
+            keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android | grep -E 'SHA1:|SHA256:'
+            echo 'En Google Cloud crea una credencial OAuth Android con este paquete y este SHA-1.'
+          } > build/ANDROID_SHA1_PRUEBAS.txt
+          cat build/ANDROID_SHA1_PRUEBAS.txt
+
+      - name: Descargar APK y huella
+        uses: actions/upload-artifact@v4
+        with:
+          name: ControlFiscal-R30-Android-APK-pruebas
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            build/ANDROID_SHA1_PRUEBAS.txt
+          if-no-files-found: error
+          retention-days: 7
