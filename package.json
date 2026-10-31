@@ -1,6 +1,6 @@
 {
   "name": "control-fiscal-v76-google",
-  "version": "1.29.0",
+  "version": "1.30.0",
   "private": true,
   "scripts": {
     "cap:add:ios": "cap add ios",
@@ -8,7 +8,11 @@
     "build:google": "esbuild google-login-entry.js --bundle --platform=browser --format=iife --outfile=www/google-login.bundle.js",
     "test": "node --test tests/*.test.cjs",
     "build:pdf": "node tools/copy-pdfjs.cjs",
-    "build:contacts": "esbuild contacts-entry.js --bundle --platform=browser --format=iife --outfile=www/contacts.bundle.js"
+    "build:contacts": "esbuild contacts-entry.js --bundle --platform=browser --format=iife --outfile=www/contacts.bundle.js",
+    "cap:add:android": "cap add android",
+    "cap:sync:android": "cap sync android",
+    "configure:android": "node tools/configure-android-google.cjs",
+    "patch:android": "node tools/patch-android.cjs"
   },
   "dependencies": {
     "@capacitor/core": "8.5.2",
@@ -25,7 +29,8 @@
     "@capacitor/screen-orientation": "8.0.2",
     "pdfjs-dist": "4.10.38",
     "@capacitor/app-launcher": "8.0.0",
-    "@capgo/capacitor-contacts": "8.1.10"
+    "@capgo/capacitor-contacts": "8.1.10",
+    "@capacitor/android": "8.5.2"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.2",

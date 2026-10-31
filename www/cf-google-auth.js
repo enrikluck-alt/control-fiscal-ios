@@ -50,7 +50,17 @@ async function init(){
  initInFlight=(async()=>{
   const plugin=root.ControlFiscalSocialLogin;
   if(!plugin)throw Error('El módulo nativo de inicio de sesión no está instalado.');
-  await plugin.initialize({google:{iOSClientId:CLIENT_ID,mode:'online'}});
+  const platform = root.Capacitor?.getPlatform?.() || 'ios';
+  if (platform === 'android') {
+    const webClientId=String(root.CFAndroidGoogleConfig?.webClientId||'').trim();
+    if (!/^\d{6,}-[a-z0-9-]+\.apps\.googleusercontent\.com$/.test(webClientId)) {
+      throw Error('Android necesita el ID OAuth de tipo Aplicación web. Configúralo en cf-android-config.js y recompila.');
+    }
+    await plugin.initialize({google:{webClientId,mode:'online'}});
+  } else {
+    // La configuración ya comprobada de iPhone se mantiene intacta.
+    await plugin.initialize({google:{iOSClientId:CLIENT_ID,mode:'online'}});
+  }
   initialized=true;
  })();
  try{await initInFlight;}finally{initInFlight=null;}

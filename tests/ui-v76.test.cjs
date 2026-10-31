@@ -82,7 +82,7 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
   assert.ok(!html.includes(str),'Se ha vuelto a incorporar la interfaz de pruebas: '+str);
  }
  const htmlScripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(x=>x[1]);
- assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js','cf-r18-features.js','cf-r18-languages.js','cf-r20-payments.js','cf-r21-features.js','contacts.bundle.js','cf-r27-contacts-bridge.js','cf-r22-features.js','cf-r25-features.js','cf-r26-features.js']);
+ assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-android-config.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js','cf-r18-features.js','cf-r18-languages.js','cf-r20-payments.js','cf-r21-features.js','contacts.bundle.js','cf-r27-contacts-bridge.js','cf-r22-features.js','cf-r25-features.js','cf-r26-features.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
  assert.match(html,new RegExp('data-cf-ui-build="UI76-20261031-R29"'));
