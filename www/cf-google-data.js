@@ -155,12 +155,17 @@ function validateIncomeBreakdown(record){
  const lines=raw.map(v=>({nombre:String(v.nombre||'').trim().slice(0,160),cantidad:check(v.cantidad,'cantidad'),costeReal:check(v.costeReal,'coste real'),precioCliente:check(v.precioCliente,'precio al cliente')}));
  if(lines.some(v=>!v.nombre||!v.cantidad||v.cantidad>10000))throw Error('Cada material requiere un nombre y una cantidad válida.');
  const labor=check(record.manoObra??0,'mano de obra');
+ const vat=check(record.ivaPorcentaje??0,'IVA');
+ if(vat>30)throw Error('IVA fuera de rango.');
+ if(Number(record.desgloseVersion)===2 && !lines.length && !labor)throw Error('Desglosa los materiales y/o la mano de obra antes de guardar.');
  if(lines.length||labor>0){
   const internal=Math.round(lines.reduce((n,v)=>n+v.cantidad*v.costeReal,0)*100)/100;
-  const sale=Math.round((lines.reduce((n,v)=>n+v.cantidad*v.precioCliente,0)+labor)*100)/100;
-  if(Math.abs(internal-num(record.material))>.011||Math.abs(sale-num(record.importePrevisto))>.011)throw Error('El desglose no coincide con el coste real o el total acordado.');
+  const base=Math.round((lines.reduce((n,v)=>n+v.cantidad*v.precioCliente,0)+labor)*100)/100;
+  const tax=Math.round(base*vat)/100;
+  const sale=Math.round((base+tax)*100)/100;
+  if(Math.abs(internal-num(record.material))>.011||Math.abs(sale-num(record.importePrevisto))>.011)throw Error('El desglose no coincide con el coste interno ni con el total de venta e IVA.');
  }
- return {materialesDetalle:lines,manoObra:labor};
+ return {materialesDetalle:lines,manoObra:labor,ivaPorcentaje:vat};
 }
 function verifyEmissionDoc(p){
  const issuer=parseJSON(p.emisor),client=parseJSON(p.cliente),lines=parseJSON(p.lineas,[]);
@@ -443,7 +448,7 @@ async function action(p){
   x.cobrado=paid;
   x.estadoCobro=x.cobrado<=0?'pendiente':x.cobrado>=x.importePrevisto?'pagada':'parcial';
   x.beneficio=x.cobrado-x.material;
-  Object.assign(x,validateIncomeBreakdown(x));x.excedente=Math.max(0,x.cobrado-x.importePrevisto);
+  Object.assign(x,validateIncomeBreakdown(x));x.excedente=Math.round(Math.max(0,x.cobrado-x.importePrevisto)*100)/100;
   await upsert(s,'Ingresos',x);return {ok:true,id:x.id};
  }
  case 'editarIngresoIndependiente':{
@@ -455,7 +460,7 @@ async function action(p){
   const importePrevisto=Number(fields.importePrevisto),material=Number(fields.material),cobrado=Number(fields.cobrado);
   if(!persona||!servicio||!/^\d{4}-\d{2}-\d{2}$/.test(fecha)||!Number.isFinite(importePrevisto)||importePrevisto<=0||!Number.isFinite(material)||material<0||!Number.isFinite(cobrado)||cobrado<0||cobrado>100000000)throw Error('Comprueba fecha, descripción y pagos.');
   const breakdown=validateIncomeBreakdown(fields);
-  const patch={...record,...breakdown,persona,servicio,fecha,importePrevisto,material,cobrado,excedente:Math.max(0,cobrado-importePrevisto),beneficio:cobrado-material,estadoCobro:cobrado===0?'pendiente':cobrado>=importePrevisto?'pagada':'parcial',correoCobro:String(fields.correoCobro||'').trim().slice(0,180),telefonoCobro:String(fields.telefonoCobro||'').trim().slice(0,35),proyecto:String(fields.proyecto||'').trim().slice(0,120),facturaUrl:String(fields.facturaUrl||record.facturaUrl||'').trim()};
+  const patch={...record,...breakdown,persona,servicio,fecha,importePrevisto,material,cobrado,excedente:Math.round(Math.max(0,cobrado-importePrevisto)*100)/100,beneficio:cobrado-material,estadoCobro:cobrado===0?'pendiente':cobrado>=importePrevisto?'pagada':'parcial',correoCobro:String(fields.correoCobro||'').trim().slice(0,180),telefonoCobro:String(fields.telefonoCobro||'').trim().slice(0,35),proyecto:String(fields.proyecto||'').trim().slice(0,120),facturaUrl:String(fields.facturaUrl||record.facturaUrl||'').trim()};
   await revision(s,tab,record._key,patch);
   await append(s,PAYMENT_TAB,[PAYMENT_MARK,'ingreso:'+originalId,JSON.stringify({estado:patch.estadoCobro,cobrado,correo:patch.correoCobro,telefono:patch.telefonoCobro,fechaCobro:cobrado>0?now():'',actualizado:now()})]);
   return {ok:true,id:originalId};

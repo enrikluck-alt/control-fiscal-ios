@@ -58,5 +58,5 @@ test('R14: sugerencias no revelan al usuario el destinatario en la confirmación
  assert.match(html,/Enviando sugerencia a los desarrolladores/);
  assert.match(html,/¿Enviar '\+kind\.toLowerCase\(\)\+' a los desarrolladores/);
  assert.match(html,/CFFeedback\.send/);
- assert.match(workflow,/ControlFiscal-R31-Presupuestos-Cobros-IPA/);
+ assert.match(workflow,/ControlFiscal-R32-Desglose-Presupuestos-IPA/);
 });

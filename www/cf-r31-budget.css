@@ -20,3 +20,13 @@ body.lightTheme .cfR31MaterialRow{background:#fff;color:#1b2935}
 body.lightTheme .cfR31Budget .invoiceSection{background:#fff;color:#1b2935}
 body.lightTheme .cfR31Totals{background:#eef7fa;color:#17343f}
 @media(max-width:360px){.cfR31MaterialRow{grid-template-columns:1fr}.cfR31MaterialRow .full,.cfR31Remove{grid-column:1}}
+
+/* R32: factura/presupuesto desglosado con totales legibles en ambos temas. */
+.cfR32InvoiceTotals{display:grid;gap:5px;padding:12px;border:1px solid var(--line,#536575);border-radius:12px;background:rgba(106,126,145,.10);margin:10px 0;color:var(--text,#f6f8fa)}
+.cfR32InvoiceTotals>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;min-width:0;overflow-wrap:anywhere}
+.cfR32InvoiceTotals strong{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.cfR32InvoiceTotals .cfR32GrandTotal{border-top:1px solid currentColor;padding-top:8px;font-size:15px;font-weight:800}
+#cfR32LegacyWarning:not([hidden]){border:1px solid #dda32d;border-radius:8px;padding:10px;background:#4b361c;color:#fff0c7;line-height:1.5}
+body.lightTheme .cfR32InvoiceTotals{background:#f0f4f7;color:#192f3b}
+body.lightTheme #cfR32LegacyWarning:not([hidden]){background:#fff4d9;color:#65420c}
+@media(max-width:400px){.cfR32InvoiceTotals{padding:10px}.cfR32InvoiceTotals>div{font-size:12px}}

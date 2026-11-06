@@ -64,7 +64,7 @@ test('formularios dinámicos y navegación mantienen el código de diseño V76',
   if(name==='openAgenda'){const fn=sourceFunction(name);assert.match(fn,/only\("agendaPage"\)/);assert.match(fn,/CFR22Agenda\?\.refresh/);continue;}
   if(name==='openPendingIncomeForm'){
    const fn=sourceFunction(name);
-   assert.match(fn,/pendingPaymentState/);assert.match(fn,/pendingCharged/);
+   assert.match(fn,/pendingPaymentState/);assert.match(fn,/cfR31IncomeMaterials/);assert.doesNotMatch(fn,/id=\"pendingCharged\"/);
    continue; // R20: solo se agregan opciones de cobro al formulario V76.
   }
   if(name==='openFacturacionPage'){const fn=sourceFunction(name);assert.match(fn,/openInvoiceForm/);assert.match(fn,/openPendingIncomeForm/);assert.match(fn,/cfR25ListBtn/);continue;}
@@ -85,8 +85,8 @@ test('no hay rótulos ni scripts de formularios de pruebas V78',()=>{
  assert.deepEqual(htmlScripts,['google-login.bundle.js','cf-android-config.js','cf-google-auth.js','cf-google-data.js','cf-google-upload.js','cf-invoice-numbering.js','cf-invoice-share.js','cf-google-extras.js','cf-postal.js','cf-documents.js','cf-i18n.js','cf-i18n-extended.js','cf-firebase-config.js','cf-firebase-auth.js','cf-feedback-config.js','cf-feedback.js','cf-r14-native.js','cf-navigation.js','cf-pdf-viewer.js','cf-r18-features.js','cf-r18-languages.js','cf-r20-payments.js','cf-r21-features.js','contacts.bundle.js','cf-r27-contacts-bridge.js','cf-r22-features.js','cf-r25-features.js','cf-r26-features.js','cf-r31-budget.js']);
 });
 test('entrada al Inicio original al conectar Google y al cambiar de usuario',()=>{
- assert.match(html,new RegExp('data-cf-ui-build="UI76-20261106-R31"'));
- assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261106-R31'));
+ assert.match(html,new RegExp('data-cf-ui-build="UI76-20261106-R32"'));
+ assert.match(html,new RegExp('id="cfV76BuildIdentity"[^>]*>[^<]*UI76-20261106-R32'));
  assert.match(auth,/if\(typeof root\.goHome==='function'\)root\.goHome\(\);/);
  assert.match(auth,/root\.startLocalSecurityForAccount\(fromInteractiveLogin\)/);
  assert.match(auth,/element\('accountGate'\)\?\.classList\.add\('hidden'\)/);

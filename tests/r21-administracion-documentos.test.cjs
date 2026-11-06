@@ -18,19 +18,22 @@ function sheetHarness(){
  vm.runInNewContext(data,{window:root,URLSearchParams,console});
  return {action:root.CFGoogleData.action,tab,changeId:id=>account.id=id};
 }
-test('R24: el ingreso independiente calcula lo cobrado parcial aunque el selector no se toque',()=>{
+test('R32: ingreso parcial usa exclusivamente el desglose de materiales y mano de obra',()=>{
  const source=html.match(/function recalcPendingIncome\(source='amount'\)\{[\s\S]*?\n\}/)?.[0];assert.ok(source);
  const els=new Map();
- const ids=['pendingMaterial','pendingCharged','pendingPaymentState','pendingPaidPart','pendingMaterialValue','pendingChargedValue','pendingDueValue','pendingBenefitValue'];
+ const ids=['pendingPaymentState','pendingPaidPart','pendingMaterialValue','pendingChargedValue','pendingDueValue','pendingBenefitValue','cfR32SaleMaterials','cfR32BaseValue','cfR32VATValue','cfR32TotalValue'];
  for(const id of ids)els.set(id,{value:'',textContent:'',parentElement:{classList:{toggle(){}}}});
- els.get('pendingMaterial').value='60';els.get('pendingCharged').value='500';els.get('pendingPaymentState').value='pendiente';els.get('pendingPaidPart').value='0';
+ els.get('pendingPaymentState').value='pendiente';els.get('pendingPaidPart').value='0';
  const $=id=>els.get(id),euro=x=>String(Number(x));
- const ctx={$,euro};vm.runInNewContext(source+';globalThis.evalCalc=recalcPendingIncome;',ctx);
+ const window={CFR31Budget:{incomeTotals:()=>({realCost:60,saleMaterials:400,labor:100,base:500,iva:0,total:500,vat:0})}};
+ const ctx={$,euro,window};vm.runInNewContext(source+';globalThis.evalCalc=recalcPendingIncome;',ctx);
  let value=ctx.evalCalc();assert.equal(value.charged,500);assert.equal(value.actuallyCollected,0);assert.equal(value.benefit,-60);
  els.get('pendingPaidPart').value='50';value=ctx.evalCalc('amount');assert.equal(value.actuallyCollected,50);assert.equal(value.state,'parcial');assert.equal(value.benefit,-10);
  assert.equal(els.get('pendingDueValue').textContent,'450');
  els.get('pendingPaymentState').value='pagada';value=ctx.evalCalc('state');assert.equal(value.actuallyCollected,500);assert.equal(value.benefit,440);
+ assert.doesNotMatch(html.match(/function openPendingIncomeForm\(recordId=''\)\{[\s\S]*?\n\}/)?.[0]||'',/id="pendingMaterial"|id="pendingCharged"/);
 });
+
 test('R21: proyecto permite múltiples facturas de distintos proveedores en Drive personal',async()=>{
  const {action,tab,changeId}=sheetHarness();
  const add=(proyecto,proveedor,importe)=>action({accion:'guardarFacturaMaterialProyecto',factura:JSON.stringify({proyecto,proveedor,fecha:'2026-10-27',importe,documentoUrl:'https://drive.google.com/file/d/FILE123/view'})});

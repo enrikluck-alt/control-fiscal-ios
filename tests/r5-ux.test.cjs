@@ -11,7 +11,7 @@ test('R5: evita zoom por foco con campos de 16 px y conserva accesibilidad',()=>
  assert.doesNotMatch(html,/maximum-scale=1|user-scalable=no/);
 });
 test('R5: numeración explicada y guía ampliada con ejemplos visuales',()=>{
- for(const x of ['Cómo construir un número de factura','3:1','Año actual','cfGuideMock','Guía completa','COMPARACIÓN ILUSTRATIVA','UI76-20261106-R31'])assert.ok(html.includes(x),x);
+ for(const x of ['Cómo construir un número de factura','3:1','Año actual','cfGuideMock','Guía completa','COMPARACIÓN ILUSTRATIVA','UI76-20261106-R32'])assert.ok(html.includes(x),x);
  assert.match(html,/id="guideModal"/);
 });
 test('R5: abre portal gubernamental HTTPS y no ignora errores TLS',()=>{
@@ -30,7 +30,7 @@ test('R5: comparador seguro y orden local de ofertas verificadas',()=>{
  assert.match(html,/if\(url&&!\/\^https:/);
 });
 test('R5: IPA de GitHub y marcador comparten versión',()=>{
- for(const t of ['UI76-20261106-R31','ControlFiscal-R31-Presupuestos-Cobros-IPA','build/ControlFiscal_R31_Presupuestos_Cobros.ipa'])assert.ok(w.includes(t),t);
+ for(const t of ['UI76-20261106-R32','ControlFiscal-R32-Desglose-Presupuestos-IPA','build/ControlFiscal_R32_Desglose_Presupuestos.ipa'])assert.ok(w.includes(t),t);
 });
 
 test('R5: restauración con token nativo evita abrir selector Google y abre Inicio con bloqueo',async()=>{

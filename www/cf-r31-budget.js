@@ -42,19 +42,31 @@ function readRows(hostId){return Array.from($(hostId)?.querySelectorAll('.cfR31M
 // Edición de ingresos independientes existentes. No borra un importe antiguo si no hay líneas.
 function addIncomeMaterial(item){const host=$('cfR31IncomeMaterials');if(!host)return;
  materialRow(host,item||{},incomeChanged);incomeChanged();}
-function loadIncomeMaterials(record){const host=$('cfR31IncomeMaterials');if(!host)return;host.replaceChildren();
- const records=Array.isArray(record?.materialesDetalle)?record.materialesDetalle:[];
+function loadIncomeMaterials(record){
+ const host=$('cfR31IncomeMaterials');if(!host)return;host.replaceChildren();
+ let records=Array.isArray(record?.materialesDetalle)?record.materialesDetalle:[];
+ const warning=$('cfR32LegacyWarning');
+ // Conservación explícita de ingresos antiguos: no se deduce un material que nunca fue registrado.
+ const legacy=!!record && !records.length && !(Number(record?.manoObra)>0) && Number(record?.importePrevisto)>0;
+ if(legacy){records=[{nombre:'PENDIENTE DE DESGLOSAR - EDITAR',cantidad:1,costeReal:Number(record.material)||0,precioCliente:Number(record.importePrevisto)||0}];}
+ if(warning){warning.hidden=!legacy;warning.textContent=legacy?'Este ingreso se creó sin desglose. Se muestran sus importes antiguos en una línea provisional: sustituye esa descripción y separa los materiales y mano de obra reales antes de guardar o generar un presupuesto.':'';}
  records.forEach(r=>materialRow(host,r,incomeChanged));
  if($('cfR31IncomeLabor'))$('cfR31IncomeLabor').value=String(Number(record?.manoObra)||0);
+ if($('cfR32IncomeVAT'))$('cfR32IncomeVAT').value=String(Number(record?.ivaPorcentaje)||0);
  incomeChanged();
 }
-function incomeTotals(){const rows=readRows('cfR31IncomeMaterials');const labor=Number($('cfR31IncomeLabor')?.value)||0;
- try{const totals=calc(rows,labor,0);return {...totals,invalid:false};}
- catch(e){return {invalid:true,error:safeError(e),hasBreakdown:rows.length>0||labor>0,lines:rows,labor};}
+function incomeTotals(){
+ const rows=readRows('cfR31IncomeMaterials'),labor=$('cfR31IncomeLabor')?.value||0,vat=$('cfR32IncomeVAT')?.value||0;
+ try{
+  if(rows.some(r=>r.nombre==='PENDIENTE DE DESGLOSAR - EDITAR'))throw Error('Desglosa el ingreso antiguo antes de guardarlo o generar su presupuesto.');
+  const totals=calc(rows,labor,vat);
+  return {...totals,invalid:false};
+ }catch(e){return {invalid:true,error:safeError(e),hasBreakdown:rows.length>0||Number(labor)>0,lines:rows,labor:Number(labor)||0};}
 }
-function incomeChanged(){const summary=$('cfR31IncomeBreakdown'),data=incomeTotals();
- if(summary)summary.textContent=data.invalid?'Revisa el desglose: '+data.error:data.hasBreakdown?`Material facturado: ${eur(data.saleMaterials)} · Mano de obra: ${eur(data.labor)} · Total: ${eur(data.base)} · Coste real privado: ${eur(data.realCost)}`:'Sin desglose detallado. Puedes introducir los importes directamente.';
- if(typeof root.recalcPendingIncome==='function'){try{root.recalcPendingIncome();}catch(e){if(summary)summary.textContent='Revisa el desglose: '+safeError(e);}}
+function incomeChanged(){
+ const summary=$('cfR31IncomeBreakdown'),data=incomeTotals();
+ if(summary)summary.textContent=data.invalid?'Revisa el desglose: '+data.error:data.hasBreakdown?`Venta de materiales: ${eur(data.saleMaterials)} · Mano de obra: ${eur(data.labor)} · IVA (${data.vat}%): ${eur(data.iva)} · Total: ${eur(data.total)} · Coste de materiales privado: ${eur(data.realCost)}`:'Añade materiales y/o mano de obra; el importe se calculará automáticamente.';
+ try{root.recalcPendingIncome?.();}catch(e){if(summary)summary.textContent='Revisa el desglose: '+safeError(e);}
 }
 // Construcción de mensajes a clientes. Nunca incluir el campo costeReal.
 function breakdownText(record,amount,paid){
@@ -67,6 +79,8 @@ function breakdownText(record,amount,paid){
   lines.push('• '+txt(item.nombre)+' — '+qty+' × '+eur(price)+' = '+eur(qty*price));
  }lines.push('Total materiales: '+eur(materials.reduce((n,v)=>n+Number(v.cantidad||0)*Number(v.precioCliente||0),0)));}
  if(labor>0)lines.push('Mano de obra: '+eur(labor));
+ const vat=Number(record?.ivaPorcentaje)||0;
+ if(vat>0){const sums=calc(materials,labor,vat);lines.push('Base imponible: '+eur(sums.base));lines.push('IVA ('+vat+'%): '+eur(sums.iva));}
  lines.push('Total acordado: '+eur(amount));
  lines.push('Ya recibido: '+eur(paid));
  lines.push('Pendiente: '+eur(Math.max(0,amount-paid)));
@@ -151,10 +165,56 @@ async function listSaved(){const host=$('cfR31SavedQuotes');if(!host)return;
  }catch(e){host.textContent='No se pudieron consultar los presupuestos: '+safeError(e);}}
 function newQuote(){quoteId='';fillClient({});const date=new Date();$('cfR31QuoteDate').value=[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
  $('cfR31Reference').value='';$('cfR31QuoteNotes').value='';$('cfR31QuoteMaterials').replaceChildren();$('cfR31QuoteLabor').value='0';$('cfR31QuoteVAT').value='21';quoteSummary();quoteStatus('Nuevo presupuesto sin guardar: nada se enviará a Google hasta pulsar Guardar presupuesto.');}
-function open(){if(typeof root.only!=='function'||typeof root.nav!=='function')throw Error('No se ha cargado la navegación.');
+let quoteIncomeDraft=null;
+function incomeDraft(){
+ const totals=incomeTotals();if(totals.invalid)throw Error(totals.error);
+ if(totals.total<=0)throw Error('Añade materiales y/o mano de obra con precio de venta positivo.');
+ const d={id:txt(root.CFR32IncomeEditingId?.()||''),fecha:txt($('pendingDate')?.value),cliente:{nombre:txt($('pendingPerson')?.value),telefono:txt($('pendingPhone')?.value),email:txt($('pendingEmail')?.value)},servicio:txt($('pendingService')?.value),proyecto:txt($('pendingProject')?.value),materiales:totals.lines,manoObra:totals.labor,ivaPorcentaje:totals.vat,cobrado:txt($('pendingPaidPart')?.value),total:totals.total};
+ if(!d.cliente.nombre)throw Error('Indica el cliente del ingreso antes de generar un presupuesto.');
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(d.fecha))throw Error('Indica la fecha del servicio.');
+ return d;
+}
+function statusIncome(message,error=false){const el=$('pendingIncomeMsg');if(el){el.className='msg '+(error?'err':'ok');el.textContent=message;}}
+async function shareIncomeQuote(){
+ try{
+  const draft=incomeDraft();const issuer=root.getInvoiceConfig?.()||{};
+  if(!issuer.name)throw Error('Configura los datos del emisor en Ajustes → Datos de facturación.');
+  statusIncome('Generando presupuesto PDF en el dispositivo (sin guardarlo)…');
+  const stored=(root.CFR22ClientsSnapshot?.()||[]).find(x=>txt(x.nombre).toLocaleLowerCase()===draft.cliente.nombre.toLocaleLowerCase())||{};
+  const client={...stored,...Object.fromEntries(Object.entries(draft.cliente).filter(([,v])=>txt(v)))};
+  const info={presupuesto:true,numero:'SIN GUARDAR',fecha:draft.fecha,payload:invoiceLikePayload({issuer,client,materials:draft.materiales,labor:draft.manoObra,vatPct:draft.ivaPorcentaje,reference:draft.proyecto||draft.servicio,notes:'Presupuesto comercial. No constituye una factura fiscal.'})};
+  await root.CFInvoiceShare.share(info);
+  statusIncome('Presupuesto PDF generado sin subir el archivo ni registrar un presupuesto en Google.');
+ }catch(e){statusIncome(safeError(e),true);}
+}
+function openFromIncome(){
+ try{
+  const draft=incomeDraft();quoteIncomeDraft=draft;open(true);
+  const saved=(root.CFR22ClientsSnapshot?.()||[]).find(x=>txt(x.nombre).toLocaleLowerCase()===draft.cliente.nombre.toLocaleLowerCase());
+  fillClient({...saved,...Object.fromEntries(Object.entries(draft.cliente).filter(([,v])=>txt(v)))});
+  $('cfR31QuoteDate').value=draft.fecha;
+  $('cfR31Reference').value=draft.proyecto||draft.servicio;
+  $('cfR31QuoteLabor').value=draft.manoObra;
+  $('cfR31QuoteVAT').value=draft.ivaPorcentaje;
+  $('cfR31QuoteMaterials').replaceChildren();draft.materiales.forEach(addQuoteMaterial);
+  quoteSummary();quoteStatus('Presupuesto preparado con el desglose del ingreso. Revisa los datos fiscales del cliente. Nada se guarda hasta pulsar Guardar presupuesto.');
+ }catch(e){statusIncome(safeError(e),true);}
+}
+function returnToIncome(){
+ if(!quoteIncomeDraft){root.openFacturacionPage?.();return;}
+ const draft=quoteIncomeDraft;
+ if(typeof root.openPendingIncomeForm!=='function'){root.openFacturacionPage?.();return;}
+ root.openPendingIncomeForm(draft.id||'');
+ const inputs={pendingPerson:draft.cliente.nombre,pendingDate:draft.fecha,pendingService:draft.servicio,pendingProject:draft.proyecto,pendingEmail:draft.cliente.email,pendingPhone:draft.cliente.telefono,pendingPaidPart:draft.cobrado};
+ Object.entries(inputs).forEach(([id,value])=>{if($(id))$(id).value=value||'';});
+ loadIncomeMaterials({materialesDetalle:draft.materiales,manoObra:draft.manoObra,ivaPorcentaje:draft.ivaPorcentaje});
+ root.recalcPendingIncome?.();
+ quoteIncomeDraft=null;
+}
+function open(fromIncome=false){if(typeof root.only!=='function'||typeof root.nav!=='function')throw Error('No se ha cargado la navegación.');
  root.only('formPage');root.nav('sale');$('formBody')?.classList.remove('cfR25CompactBilling');
  const header=$('formHeader'),body=$('formBody');header.dataset.tipo='Presupuesto';
- header.innerHTML='<button class="back" onclick="openFacturacionPage()">‹</button><div class="headericon">📋</div><div><h2>PRESUPUESTOS</h2><p>Materiales, mano de obra, IVA y PDF</p></div>';
+ header.innerHTML='<button class="back" onclick="'+(fromIncome?'CFR31Budget.returnToIncome()':'openFacturacionPage()')+'">‹</button><div class="headericon">📋</div><div><h2>PRESUPUESTOS</h2><p>Materiales, mano de obra, IVA y PDF</p></div>';
  body.innerHTML=`<div class="cfR31Budget">
   <div class="invoiceSection"><h3>CLIENTE</h3><div class="field"><label>Elegir un cliente guardado</label><select class="select" id="cfR31ClientChoice"></select></div>
    <div class="field"><label>Nombre / empresa</label><input class="input" id="cfR31ClientName" placeholder="Nombre de la persona o empresa"></div>
@@ -190,7 +250,7 @@ function incomeDocument(record){const materials=Array.isArray(record?.materiales
  const client={nombre:txt(record.persona),email:txt(record.correoCobro)};
  return {presupuesto:true,tipoDocumento:'desglose',numero:txt(record.id)||'INGRESO',fecha:record.fecha,
    recibido:round(record.cobrado),pendiente:Math.max(0,round(amount-Number(record.cobrado||0))),
-   payload:invoiceLikePayload({issuer,client,materials:rows,labor:supplemental,vatPct:0,reference:txt(record.proyecto||record.servicio),notes:'Desglose comercial del importe acordado. No es una factura fiscal.'})};
+   payload:invoiceLikePayload({issuer,client,materials:rows,labor:supplemental,vatPct:Number(record?.ivaPorcentaje)||0,reference:txt(record.proyecto||record.servicio),notes:'Desglose comercial del importe acordado. No es una factura fiscal.'})};
 }
 function currentPaymentIncome(){const item=root.CFR20Payments?.current?.();return item?.kind==='ingreso'?item.record:null;}
 async function shareIncomeBreakdown(){const rec=currentPaymentIncome();if(!rec)return;
@@ -200,10 +260,10 @@ async function shareIncomeBreakdown(){const rec=currentPaymentIncome();if(!rec)r
 function installQuoteMenu(){const grid=root.document.querySelector?.('#home .homegrid');if(!grid||root.document.getElementById('cfR31HomeEntry'))return;
  const button=root.document.createElement('button');button.id='cfR31HomeEntry';button.type='button';button.className='home full';
  button.innerHTML='<div class="icon"><span style="font-size:28px">📋</span></div><div class="text"><b>PRESUPUESTOS</b><small>MATERIALES · MANO DE OBRA · IVA · PDF</small></div><div class="chev">›</div>';
- button.onclick=open;
+ button.onclick=()=>open();
  const fact=grid.querySelector('button.home.p');if(fact)fact.insertAdjacentElement('afterend',button);else grid.appendChild(button);
 }
 installQuoteMenu();
 root.addEventListener?.('cf:account-changed',()=>{quoteId='';quoteList=[];quoteBook='';const list=$('cfR31SavedQuotes');if(list)list.replaceChildren();});
-root.CFR31Budget=Object.freeze({calc,incomeTotals,incomeChanged,addIncomeMaterial,loadIncomeMaterials,breakdownText,reminderText,incomeDocument,invoiceLikePayload,open,newQuote,addQuoteMaterial,quoteSummary,shareQuote,saveQuote,listSaved,shareIncomeBreakdown,readRows});
+root.CFR31Budget=Object.freeze({calc,incomeTotals,incomeChanged,addIncomeMaterial,loadIncomeMaterials,breakdownText,reminderText,incomeDocument,invoiceLikePayload,open,newQuote,addQuoteMaterial,quoteSummary,shareQuote,saveQuote,listSaved,shareIncomeBreakdown,shareIncomeQuote,openFromIncome,returnToIncome,readRows});
 })(window);
