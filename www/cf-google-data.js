@@ -148,6 +148,20 @@ function paymentAttach(item,states,kind='factura'){
   fechaCobro:known?.fechaCobro||''};
 }
 
+function validateIncomeBreakdown(record){
+ const raw=record.materialesDetalle??[];
+ if(!Array.isArray(raw)||raw.length>70)throw Error('Máximo 70 materiales por ingreso.');
+ const check=(x,label)=>{const n=Number(x);if(!Number.isFinite(n)||n<0||n>100000000)throw Error('Revisa '+label+'.');return Math.round(n*100)/100;};
+ const lines=raw.map(v=>({nombre:String(v.nombre||'').trim().slice(0,160),cantidad:check(v.cantidad,'cantidad'),costeReal:check(v.costeReal,'coste real'),precioCliente:check(v.precioCliente,'precio al cliente')}));
+ if(lines.some(v=>!v.nombre||!v.cantidad||v.cantidad>10000))throw Error('Cada material requiere un nombre y una cantidad válida.');
+ const labor=check(record.manoObra??0,'mano de obra');
+ if(lines.length||labor>0){
+  const internal=Math.round(lines.reduce((n,v)=>n+v.cantidad*v.costeReal,0)*100)/100;
+  const sale=Math.round((lines.reduce((n,v)=>n+v.cantidad*v.precioCliente,0)+labor)*100)/100;
+  if(Math.abs(internal-num(record.material))>.011||Math.abs(sale-num(record.importePrevisto))>.011)throw Error('El desglose no coincide con el coste real o el total acordado.');
+ }
+ return {materialesDetalle:lines,manoObra:labor};
+}
 function verifyEmissionDoc(p){
  const issuer=parseJSON(p.emisor),client=parseJSON(p.cliente),lines=parseJSON(p.lineas,[]);
  for(const [name,obj] of [['Emisor',issuer],['Cliente',client]]){
@@ -425,10 +439,11 @@ async function action(p){
   x.material=num(x.material);
   if(x.importePrevisto<=0||x.material<0)throw Error('Revisa los importes del ingreso.');
   const paid=num(x.cobrado);
-  if(!Number.isFinite(paid)||paid<0||paid>x.importePrevisto)throw Error('El cobro no puede superar el importe previsto.');
-  x.cobrado=x.estadoCobro==='pagada'?x.importePrevisto:(x.estadoCobro==='parcial'?paid:0);
+  if(!Number.isFinite(paid)||paid<0||paid>100000000)throw Error('El importe cobrado no es válido.');
+  x.cobrado=paid;
   x.estadoCobro=x.cobrado<=0?'pendiente':x.cobrado>=x.importePrevisto?'pagada':'parcial';
   x.beneficio=x.cobrado-x.material;
+  Object.assign(x,validateIncomeBreakdown(x));x.excedente=Math.max(0,x.cobrado-x.importePrevisto);
   await upsert(s,'Ingresos',x);return {ok:true,id:x.id};
  }
  case 'editarIngresoIndependiente':{
@@ -438,8 +453,9 @@ async function action(p){
   if(!record)throw Error('No se encontró el ingreso en la cuenta actual.');
   const persona=String(fields.persona||'').trim().slice(0,150),servicio=String(fields.servicio||'').trim().slice(0,200),fecha=String(fields.fecha||'').slice(0,10);
   const importePrevisto=Number(fields.importePrevisto),material=Number(fields.material),cobrado=Number(fields.cobrado);
-  if(!persona||!servicio||!/^\d{4}-\d{2}-\d{2}$/.test(fecha)||!Number.isFinite(importePrevisto)||importePrevisto<=0||!Number.isFinite(material)||material<0||!Number.isFinite(cobrado)||cobrado<0||cobrado>importePrevisto)throw Error('Comprueba fecha, descripción y pagos; no pueden exceder el total.');
-  const patch={...record,persona,servicio,fecha,importePrevisto,material,cobrado,beneficio:cobrado-material,estadoCobro:cobrado===0?'pendiente':cobrado>=importePrevisto?'pagada':'parcial',correoCobro:String(fields.correoCobro||'').trim().slice(0,180),telefonoCobro:String(fields.telefonoCobro||'').trim().slice(0,35),proyecto:String(fields.proyecto||'').trim().slice(0,120),facturaUrl:String(fields.facturaUrl||record.facturaUrl||'').trim()};
+  if(!persona||!servicio||!/^\d{4}-\d{2}-\d{2}$/.test(fecha)||!Number.isFinite(importePrevisto)||importePrevisto<=0||!Number.isFinite(material)||material<0||!Number.isFinite(cobrado)||cobrado<0||cobrado>100000000)throw Error('Comprueba fecha, descripción y pagos.');
+  const breakdown=validateIncomeBreakdown(fields);
+  const patch={...record,...breakdown,persona,servicio,fecha,importePrevisto,material,cobrado,excedente:Math.max(0,cobrado-importePrevisto),beneficio:cobrado-material,estadoCobro:cobrado===0?'pendiente':cobrado>=importePrevisto?'pagada':'parcial',correoCobro:String(fields.correoCobro||'').trim().slice(0,180),telefonoCobro:String(fields.telefonoCobro||'').trim().slice(0,35),proyecto:String(fields.proyecto||'').trim().slice(0,120),facturaUrl:String(fields.facturaUrl||record.facturaUrl||'').trim()};
   await revision(s,tab,record._key,patch);
   await append(s,PAYMENT_TAB,[PAYMENT_MARK,'ingreso:'+originalId,JSON.stringify({estado:patch.estadoCobro,cobrado,correo:patch.correoCobro,telefono:patch.telefonoCobro,fechaCobro:cobrado>0?now():'',actualizado:now()})]);
   return {ok:true,id:originalId};
@@ -466,16 +482,49 @@ async function action(p){
   const due=kind==='ingreso'?num(record.importePrevisto||record.cobrado):num(record.total);
   if(!(due>0))throw Error('El importe total debe ser positivo.');
   const specified=Number(p.cobradoParcial);
-  const paid=state==='pagada'?due:state==='pendiente'?0:specified;
-  if(!Number.isFinite(paid)||paid<0||paid>due||(state==='parcial'&&(paid<=0||paid>=due)))throw Error('El pago parcial debe ser mayor que cero e inferior al total.');
+  const paid=state==='pagada'?(kind==='ingreso'&&Number.isFinite(specified)&&specified>0?specified:due):state==='pendiente'?0:specified;
+  if(!Number.isFinite(paid)||paid<0||paid>100000000||(kind!=='ingreso'&&paid>due)||(state==='parcial'&&(paid<=0||paid>=due)))throw Error('Comprueba el total recibido. El pago parcial debe ser inferior al importe acordado.');
   if(kind==='ingreso'){
     await revision(s,tab,record._key,{...record,importePrevisto:due,estadoCobro:state,
-      cobrado:paid,beneficio:paid-num(record.material),
+      cobrado:paid,excedente:Math.max(0,paid-due),beneficio:paid-num(record.material),
       correoCobro:email,telefonoCobro:phone});
   }
   await append(s,PAYMENT_TAB,[PAYMENT_MARK,key,JSON.stringify({estado:state,cobrado:paid,correo:email,telefono:phone,
     fechaCobro:paid>0?now():'',actualizado:now()})]);
-  return {ok:true,estadoCobro:state,cobrado:paid,pendiente:Math.max(0,due-paid)};
+  return {ok:true,estadoCobro:state,cobrado:paid,pendiente:Math.max(0,due-paid),excedente:Math.max(0,paid-due)};
+ }
+ case 'listarPresupuestos':{
+  const budgets=await items(s,'CF_Presupuestos');
+  return {ok:true,presupuestos:budgets.sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||'')))};
+ }
+ case 'guardarPresupuesto':{
+  const data=parseJSON(p.presupuesto,null);
+  if(!data||typeof data!=='object')throw Error('El presupuesto está vacío.');
+  const lines=Array.isArray(data.materiales)?data.materiales:[];
+  if(lines.length>70)throw Error('Máximo 70 materiales por presupuesto.');
+  const moneyField=(v,name)=>{const n=Number(v);if(!Number.isFinite(n)||n<0||n>100000000)throw Error('Revisa '+name+'.');return Math.round(n*100)/100;};
+  const cleaned=lines.map(x=>({nombre:String(x.nombre||'').trim().slice(0,160),cantidad:moneyField(x.cantidad,'cantidad'),costeReal:moneyField(x.costeReal,'coste interno'),precioCliente:moneyField(x.precioCliente,'precio al cliente')}));
+  if(cleaned.some(x=>!x.nombre||x.cantidad<=0||x.cantidad>10000))throw Error('Revisa las líneas del material.');
+  const labor=moneyField(data.manoObra,'mano de obra'),vat=moneyField(data.ivaPorcentaje,'IVA');
+  if(vat>30)throw Error('Revisa el porcentaje de IVA.');
+  const base=Math.round((cleaned.reduce((a,b)=>a+b.cantidad*b.precioCliente,0)+labor)*100)/100;
+  if(base<=0)throw Error('Incluye al menos un material o mano de obra con importe.');
+  const calculatedVAT=Math.round(base*vat)/100;
+  const total=Math.round((base+calculatedVAT)*100)/100;
+  const client=data.cliente||{},issuer=data.emisor||{},fecha=String(data.fecha||'').slice(0,10);
+  if(!String(client.nombre||'').trim()||!String(issuer.name||'').trim()||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(fecha))throw Error('Indica cliente, emisor y fecha válidos.');
+  const old=String(data.id||'')?(await items(s,'CF_Presupuestos')).find(x=>String(x.id)===String(data.id)):null;
+  if(data.id&&!old)throw Error('No se encuentra el presupuesto en este libro.');
+  const id=old?.id||ident('PRE'),saved={...old,id,fecha,referencia:String(data.referencia||'').slice(0,140),cliente:client,emisor:issuer,materiales:cleaned,manoObra:labor,ivaPorcentaje:vat,base,total,iva:calculatedVAT,observaciones:String(data.observaciones||'').slice(0,2000),documentoUrl:old?.documentoUrl||'',actualizado:now()};
+  await upsert(s,'CF_Presupuestos',saved);
+  return {ok:true,id,presupuesto:saved};
+ }
+ case 'vincularPDFPresupuesto':{
+  const id=String(p.id||''),url=String(p.url||'');
+  if(!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view/.test(url))throw Error('El PDF debe estar en tu Drive.');
+  const old=(await items(s,'CF_Presupuestos')).find(x=>String(x.id)===id);
+  if(!old)throw Error('El presupuesto no existe en tu libro.');
+  await revision(s,'CF_Presupuestos',old._key,{...old,documentoUrl:url,actualizado:now()});return {ok:true,id};
  }
  case 'eliminarIngresoPendiente':{
   for(const tab of ['Ingresos','Ingresos independientes','Ingresos pendientes']){

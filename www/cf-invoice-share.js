@@ -10,7 +10,7 @@
   const d=new root.CFjsPDF({unit:'mm',format:'a4'});
   const p=saved.payload||{},client=json(p.cliente),issuer=json(p.emisor),items=json(p.lineas);
   if(!Array.isArray(items)||!items.length)throw Error('Los conceptos de la factura están vacíos.');
-  const issued=!!saved.emitida;
+  const issued=!!saved.emitida,quote=!!saved.presupuesto,breakdown=saved.tipoDocumento==='desglose';
   // Plantilla A4 del PDF aportado: cabecera blanca, identidad en dos columnas,
   // productos en tabla sombreada, total inferior destacado y logo del emisor.
   const L=7,R=203,W=196;
@@ -26,11 +26,11 @@
   };
   function topHeader(){
     d.setTextColor(19,19,19);
-    text((issued?'FACTURA: ':'BORRADOR - NO EMITIDA: ')+clean(saved.numero||''),151,13,10,true);
+    text((quote?(breakdown?'DESGLOSE DE COBRO: ':'PRESUPUESTO: '):(issued?'FACTURA: ':'BORRADOR - NO EMITIDA: '))+clean(saved.numero||''),151,13,quote?9:10,true);
     const date=saved.fecha?new Date(saved.fecha):new Date();
     text('Fecha: '+(Number.isNaN(date.getTime())?'':date.toLocaleDateString('es-ES')),151,20,9);
     text(ellipsis(issuer.name||'EMISOR',117,10),L,56,10,true);
-    if(p.referencia||p.titulo){text('Presupuesto / referencia:',131,56,8,true);text(ellipsis(p.referencia||p.titulo,40,8),168,56,8);}
+    if(p.referencia||p.titulo){text(quote?'Referencia:':'Presupuesto / referencia:',131,56,8,true);text(ellipsis(p.referencia||p.titulo,40,8),168,56,8);}
     shade(L,64,W,7,223);rect(L,64,W,54);line(106,71,106,118);
     text('EMISOR',L+1,69,9,true);text('Cliente',108,69,9,true);
     const issuerRows=[issuer.name,issuer.taxId?'CIF/NIF: '+issuer.taxId:'',issuer.address,
@@ -85,13 +85,15 @@
   text('IVA ('+vatPct+' %)',L,y,9);
   text(money(vat),183,y,9);y+=6;
   line(L,y-2,R,y-2,.55);
-  text('TOTAL FACTURA',L,y+2,10,true);text(money(total),179,y+2,10,true);y+=10;
-  text('Descuento:',L,y,8);
-  text(discount+' %',165,y,8);y+=6;
+  text(quote?(breakdown?'TOTAL ACORDADO':'TOTAL PRESUPUESTO'):'TOTAL FACTURA',L,y+2,10,true);text(money(total),179,y+2,10,true);y+=10;
+  text(quote?'Observaciones:':'Descuento:',L,y,8);
+  if(quote){text(ellipsis(p.observaciones||'Presupuesto comercial',140,7),45,y,7);}
+  else text(discount+' %',165,y,8);y+=6;
   line(L,y-3,R,y-3,.9);
-  text('TOTAL A PAGAR',L,y+2,10,true);
+  text(quote?(breakdown?'IMPORTE TOTAL':'TOTAL ESTIMADO'):'TOTAL A PAGAR',L,y+2,10,true);
   shade(178,y-2,25,7,222);text(money(total),179,y+2,9,true);
-  if(!issued){d.setTextColor(166,30,30);text('BORRADOR SIN EMITIR. NO ES UNA FACTURA FISCAL.',L,292,8,true);}
+  if(quote){d.setTextColor(50,67,78);if(breakdown){text('Recibido: '+money(saved.recibido||0)+'    Pendiente: '+money(saved.pendiente||0),L,287,8,true);}text('DOCUMENTO COMERCIAL. NO ES UNA FACTURA FISCAL.',L,293,7,true);}
+  else if(!issued){d.setTextColor(166,30,30);text('BORRADOR SIN EMITIR. NO ES UNA FACTURA FISCAL.',L,292,8,true);}
   return d;
  }
 
@@ -130,7 +132,7 @@
   if(image&&typeof d.addImage==='function'){
    try{const size=d.getImageProperties?.(image),ratio=size?.width&&size?.height?size.width/size.height:1.8;const w=Math.min(73,33*ratio),h=Math.min(33,73/ratio);d.setPage?.(1);d.addImage(image,/jpeg|jpg/.test(image.slice(0,32))?'JPEG':'PNG',12,9,w,h);}catch(e){root.console?.warn?.('El PDF se generó sin el logo',e);}
   }
-  const prefix=saved.emitida?'FACTURA':'BORRADOR';
+  const prefix=saved.presupuesto?'PRESUPUESTO':saved.emitida?'FACTURA':'BORRADOR';
   const filename='ControlFiscal_'+prefix+'_'+String(saved.numero).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,55)+'.pdf';
   const uri=d.output('datauristring');return {filename,base64:uri.slice(uri.indexOf(',')+1),bytes:d.output('arraybuffer')};
  }
@@ -139,7 +141,7 @@
   if(native){
    await root.CFFilesystem.writeFile({path:out.filename,data:out.base64,directory:root.CFDirectory.Cache});
    try{const target=await root.CFFilesystem.getUri({path:out.filename,directory:root.CFDirectory.Cache});
-    await root.CFShare.share({title:saved.emitida?'Factura '+saved.numero:'Borrador Control Fiscal',text:saved.emitida?'Factura '+saved.numero:'Borrador sin emitir.',files:[target.uri]});
+    await root.CFShare.share({title:saved.presupuesto?'Presupuesto '+saved.numero:saved.emitida?'Factura '+saved.numero:'Borrador Control Fiscal',text:saved.presupuesto?'Presupuesto comercial. No es factura.':saved.emitida?'Factura '+saved.numero:'Borrador sin emitir.',files:[target.uri]});
    }finally{try{await root.CFFilesystem.deleteFile({path:out.filename,directory:root.CFDirectory.Cache});}catch(e){root.console?.warn?.('No se pudo limpiar PDF temporal',e);}}
   }else{
    const blob=new Blob([out.bytes],{type:'application/pdf'}),file=new File([blob],out.filename,{type:'application/pdf'});

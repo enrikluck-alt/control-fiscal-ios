@@ -91,7 +91,7 @@
  }
 
  // Recordatorio de cobro: envío inmediato SOLO por petición explícita y confirmada.
- async function sendPaymentReminder({recipient,customer,reference,amount}){
+ async function sendPaymentReminder({recipient,customer,reference,amount,body:customBody,pdfBase64}){
   const s=account();recipient=String(recipient||'').trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)||/[\r\n]/.test(recipient))throw Error('Correo destinatario no válido.');
   const due=Number(amount);
@@ -99,9 +99,20 @@
   const safe=t=>String(t||'').replace(/[\r\n]/g,' ').slice(0,180);
   const subject='Recordatorio de pago · '+safe(reference||'Servicio');
   const body='Hola, '+safe(customer)+'.\n\nTe escribimos para recordarte que tenemos pendiente de recibir el pago de '+due.toLocaleString('es-ES',{style:'currency',currency:'EUR'})+' correspondiente a '+safe(reference)+'.\n\nSi ya has realizado el pago, por favor ignora este aviso e indícanoslo. Muchas gracias.\n';
-  const raw=['MIME-Version: 1.0','To: '+recipient,'From: '+s.email,
+  const mailBody=typeof customBody==='string'&&customBody.length>0&&customBody.length<=12000?customBody:body;
+  const attachment=String(pdfBase64||'');
+  if(attachment&&!/^[A-Za-z0-9+/]+=*$/.test(attachment))throw Error('El PDF del desglose no es válido.');
+  if(attachment.length>8*1024*1024)throw Error('El PDF es demasiado grande.');
+  const boundary='cf_reminder_'+Date.now().toString(36);
+  const lines=attachment?['MIME-Version: 1.0','To: '+recipient,'From: '+s.email,
     'Subject: =?UTF-8?B?'+utf8base64(subject)+'?=',
-    'Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: base64','',utf8base64(body),''].join('\r\n');
+    'Content-Type: multipart/mixed; boundary="'+boundary+'"','','--'+boundary,
+    'Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: base64','',utf8base64(mailBody),'--'+boundary,
+    'Content-Type: application/pdf; name="Desglose.pdf"','Content-Disposition: attachment; filename="Desglose.pdf"',
+    'Content-Transfer-Encoding: base64','',attachment.match(/.{1,76}/g).join('\r\n'),'--'+boundary+'--','']:
+    ['MIME-Version: 1.0','To: '+recipient,'From: '+s.email,'Subject: =?UTF-8?B?'+utf8base64(subject)+'?=',
+     'Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: base64','',utf8base64(mailBody),''];
+  const raw=lines.join('\r\n');
   const out=await request(s,'https://gmail.googleapis.com/gmail/v1/users/me/messages/send','POST',{raw:base64url(raw)});
   if(!out.id)throw Error('Gmail no ha confirmado el envío del recordatorio.');
   return {id:out.id};

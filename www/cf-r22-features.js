@@ -93,9 +93,13 @@ function refreshPaymentDue(){
  const state=$('cfR20PaymentState')?.value,recordModal=$('cfR20PaymentModal');if(!state||recordModal?.classList.contains('hidden'))return;
  const summary=$('cfR20PaymentSummary')?.textContent||'';const amountMatch=summary.match(/([\d.]+,\d{2})\s*€/);let total=amountMatch?Number(amountMatch[1].replace(/\./g,'').replace(',','.')):0;
  // La cifra visible es informativa; el servidor vuelve a validar el importe contra Sheets.
- const wrap=$('cfR22PaymentPartWrap');if(wrap)wrap.hidden=state!=='parcial';
- const paid=state==='pagada'?total:state==='parcial'?Number($('cfR22PaidAmount')?.value)||0:0;
- if($('cfR22PaymentDue'))$('cfR22PaymentDue').textContent='Acordado: '+money(total)+' · Recibido: '+money(paid)+' · Pendiente: '+money(Math.max(0,total-paid));
+ const isIncome=recordModal?.dataset?.cfIncome==='true';
+ if(isIncome)total=Number(recordModal.dataset.cfDue)||total;
+ const wrap=$('cfR22PaymentPartWrap');if(wrap)wrap.hidden=!isIncome&&state!=='parcial';
+ const raw=Math.max(0,Number($('cfR22PaidAmount')?.value)||0);
+ const paid=state==='pagada'?(isIncome&&raw>0?raw:total):state==='parcial'?raw:0;
+ const extra=Math.max(0,paid-total);
+ if($('cfR22PaymentDue'))$('cfR22PaymentDue').textContent='Acordado: '+money(total)+' · Recibido: '+money(paid)+' · Pendiente: '+money(Math.max(0,total-paid))+(extra?' · Excedente: '+money(extra):'');
 }
 root.document.addEventListener('change',event=>{if(event.target?.id==='cfR20PaymentState')refreshPaymentDue();});
 root.document.addEventListener('input',event=>{if(event.target?.id==='cfR22PaidAmount')refreshPaymentDue();});
